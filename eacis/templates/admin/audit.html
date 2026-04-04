@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="stagger-children">
+  <div class="page-content bg-grey-50">
+    <header style="display:flex; justify-content:space-between; align-items:flex-end; gap:var(--sp-4); margin-bottom:var(--sp-6);">
+      <div>
+        <h1 class="type-display-md">System Audit Logs</h1>
+        <p class="type-body-sm text-muted mt-1">Monitor administrative actions, security events, and change history.</p>
+      </div>
+      <div style="display:flex; gap:var(--sp-3); align-items:center; flex-wrap:wrap;">
+        <span class="badge badge--success">Immutable trail</span>
+        <button class="btn btn--secondary btn--sm">Export CSV</button>
+      </div>
+    </header>
+
+    <div class="kpi-grid mb-6">
+      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Actions Today</div><div class="type-display-md mt-2">128</div></div></div>
+      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Security Events</div><div class="type-display-md mt-2">12</div></div></div>
+      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Admin Changes</div><div class="type-display-md mt-2">34</div></div></div>
+      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Reveal Actions</div><div class="type-display-md mt-2">7</div></div></div>
+    </div>
+
+    <div class="glass-card mb-6" style="padding: var(--sp-4); display: grid; grid-template-columns: 1fr 200px 200px; gap: var(--sp-4); align-items: end;">
+      <div class="form-group mb-0">
+        <label class="form-label">Search Logs</label>
+        <input type="text" class="form-input" placeholder="Search by actor, target, or reference..." style="height:38px;">
+      </div>
+      <div class="form-group mb-0">
+        <label class="form-label">Action Type</label>
+        <select class="form-input" style="height:38px;">
+          <option>All Actions</option>
+          <option>CREATED</option>
+          <option>UPDATED</option>
+          <option>DELETED</option>
+          <option>SECURITY</option>
+        </select>
+      </div>
+      <button class="btn btn--primary btn--full" style="height:38px;">Apply Filters</button>
+    </div>
+
+    <div class="glass-card p-0" style="overflow:hidden; border-color:var(--border-medium);">
+      <table class="data-table" style="width: 100%; border-collapse: collapse;">
+        <thead style="background: var(--grey-50); border-bottom: 1px solid var(--border-subtle);">
+          <tr>
+            <th class="type-label--sm" style="text-align: left; padding: var(--sp-4) var(--sp-6);">TIMESTAMP</th>
+            <th class="type-label--sm" style="text-align: left; padding: var(--sp-4);">ACTOR</th>
+            <th class="type-label--sm" style="text-align: left; padding: var(--sp-4);">ACTION</th>
+            <th class="type-label--sm" style="text-align: left; padding: var(--sp-4);">TARGET</th>
+            <th class="type-label--sm" style="text-align: right; padding: var(--sp-4) var(--sp-6);">DETAILS</th>
+          </tr>
+        </thead>
+        <tbody class="stagger-children">
+          <!-- Row 1 -->
+          <tr style="border-bottom: 1px solid var(--border-subtle);">
+            <td style="padding: var(--sp-4) var(--sp-6);">
+              <div class="type-body-sm fw-bold">Apr 02, 01:42:05</div>
+              <div class="type-body-xs text-muted">192.168.1.45</div>
+            </td>
+            <td style="padding: var(--sp-4);">
+              <div style="display: flex; align-items: center; gap: var(--sp-3);">
+                <div style="width: 28px; height: 28px; background: var(--brand-primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800;">AD</div>
+                <div>
+                  <div class="type-body-sm fw-semibold">Admin Ivan</div>
+                  <div class="type-body-xs text-muted">Superadmin</div>
+                </div>
+              </div>
+            </td>
+            <td style="padding: var(--sp-4);">
+              <span class="badge badge--info" style="font-size: 10px; font-weight: 800; padding: 2px 8px;">UPDATED</span>
+            </td>
+            <td style="padding: var(--sp-4);">
+              <div class="type-ref">PRD-CORE-RTX40</div>
+              <div class="type-body-xs text-muted">Product Price</div>
+            </td>
+            <td style="padding: var(--sp-4) var(--sp-6); text-align: right;">
+              <code style="background: var(--surface-sunken); padding: 4px 8px; border-radius: 4px; font-size: 11px;">
+                <span style="color: var(--color-danger);">-24,500</span> 
+                <span style="color: var(--color-success);">+22,000</span>
+              </code>
+            </td>
+          </tr>
+
+          <!-- Row 2 -->
+          <tr style="border-bottom: 1px solid var(--border-subtle);">
+            <td style="padding: var(--sp-4) var(--sp-6);">
+              <div class="type-body-sm fw-bold">Apr 02, 01:30:12</div>
+              <div class="type-body-xs text-muted">System (Cron)</div>
+            </td>
+            <td style="padding: var(--sp-4);">
+              <div style="display: flex; align-items: center; gap: var(--sp-3);">
+                <div style="width: 28px; height: 28px; background: var(--grey-800); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800;">SYS</div>
+                <div>
+                  <div class="type-body-sm fw-semibold">ACIS Automated</div>
+                </div>
+              </div>
+            </td>
+            <td style="padding: var(--sp-4);">
+              <span class="badge badge--success" style="font-size: 10px; font-weight: 800; padding: 2px 8px;">SECURITY</span>
+            </td>
+            <td style="padding: var(--sp-4);">
+              <div class="type-ref">USR-INV-0012</div>
+              <div class="type-body-xs text-muted">Inertial Login</div>
+            </td>
+            <td style="padding: var(--sp-4) var(--sp-6); text-align: right;">
+              <span class="type-body-xs text-muted">Auto-logout triggered (Idle)</span>
+            </td>
+          </tr>
+
+          <!-- Row 3 -->
+          <tr style="border-bottom: 1px solid var(--border-subtle);">
+            <td style="padding: var(--sp-4) var(--sp-6);">
+              <div class="type-body-sm fw-bold">Apr 02, 00:55:40</div>
+              <div class="type-body-xs text-muted">192.168.1.102</div>
+            </td>
+            <td style="padding: var(--sp-4);">
+              <div style="display: flex; align-items: center; gap: var(--sp-3);">
+                <div style="width: 28px; height: 28px; background: var(--color-warning); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800;">SL</div>
+                <div>
+                  <div class="type-body-sm fw-semibold">Seller Lucas</div>
+                  <div class="type-body-xs text-muted">Electronics Vendor</div>
+                </div>
+              </div>
+            </td>
+            <td style="padding: var(--sp-4);">
+              <span class="badge badge--primary" style="font-size: 10px; font-weight: 800; padding: 2px 8px;">CREATED</span>
+            </td>
+            <td style="padding: var(--sp-4);">
+              <div class="type-ref">VOU-NEW-2026</div>
+              <div class="type-body-xs text-muted">New Voucher</div>
+            </td>
+            <td style="padding: var(--sp-4) var(--sp-6); text-align: right;">
+              <span class="type-body-xs text-muted">Discount 15% (EACIS26)</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div style="padding: var(--sp-4) var(--sp-6); display: flex; justify-content: space-between; align-items: center; background: var(--grey-0);">
+        <span class="type-body-xs text-muted">Showing 3 of 1,245 log entries</span>
+        <div style="display: flex; gap: var(--sp-2);">
+          <button class="btn btn--ghost btn--xs" disabled>Previous</button>
+          <button class="btn btn--ghost btn--xs">Next Page</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

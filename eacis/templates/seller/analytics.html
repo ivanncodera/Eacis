@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% block title %}Analytics — Seller Portal{% endblock %}
+{% block content %}
+<div class="stagger-children">
+  <div class="page-content bg-grey-50 seller-shell">
+    <div class="seller-header reveal">
+      <div class="seller-header__head">
+        <div class="seller-header__meta">
+          <span class="badge seller-header__chip seller-header__chip--danger">Reporting</span>
+          <span class="type-label" style="color:var(--grey-500);">Sales Analytics</span>
+        </div>
+        <h1 class="type-display-md">Analytics &amp; Insights</h1>
+        <p class="type-body-sm text-muted mt-1">Review sales mix, product velocity, and export-ready performance signals.</p>
+      </div>
+      <div class="seller-header__actions">
+        <button class="btn btn--secondary btn--sm">Print Analytics</button>
+        <button class="btn btn--primary btn--sm">Download CSV</button>
+      </div>
+    </div>
+
+    <div class="analytics-layout">
+      <div class="analytics-hero reveal" data-delay="80">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:var(--sp-4);">
+          <div>
+            <h3 class="type-h4">Sales by Category</h3>
+            <p class="type-body-sm text-muted mt-1">A quick view of where sales concentration is strongest.</p>
+          </div>
+          <span class="badge badge--warning">Beta</span>
+        </div>
+
+        <div class="analytics-donut">
+          <div style="position: relative; width: 180px; height: 180px;">
+            <svg viewBox="0 0 40 40" style="width: 100%; height: 100%; transform: rotate(-90deg);">
+              <circle cx="20" cy="20" r="16" fill="transparent" stroke="var(--brand-primary)" stroke-width="6" stroke-dasharray="45 55" />
+              <circle cx="20" cy="20" r="16" fill="transparent" stroke="#5AC8FA" stroke-width="6" stroke-dasharray="30 70" stroke-dashoffset="-45" />
+              <circle cx="20" cy="20" r="16" fill="transparent" stroke="#FF9500" stroke-width="6" stroke-dasharray="15 85" stroke-dashoffset="-75" />
+              <circle cx="20" cy="20" r="16" fill="transparent" stroke="var(--grey-200)" stroke-width="6" stroke-dasharray="10 90" stroke-dashoffset="-90" />
+            </svg>
+            <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
+              <div class="type-display-xs" style="margin-bottom:-4px;">45%</div>
+              <div class="type-body-2xs text-muted">Kitchen</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="analytics-legend">
+          <div class="analytics-legend__item"><span style="width:8px;height:8px;border-radius:2px;background:var(--brand-primary);"></span><span class="type-body-2xs text-muted">Kitchen (45%)</span></div>
+          <div class="analytics-legend__item"><span style="width:8px;height:8px;border-radius:2px;background:#5AC8FA;"></span><span class="type-body-2xs text-muted">Cooling (30%)</span></div>
+          <div class="analytics-legend__item"><span style="width:8px;height:8px;border-radius:2px;background:#FF9500;"></span><span class="type-body-2xs text-muted">Laundry (15%)</span></div>
+          <div class="analytics-legend__item"><span style="width:8px;height:8px;border-radius:2px;background:var(--grey-200);"></span><span class="type-body-2xs text-muted">Others (10%)</span></div>
+        </div>
+
+        <div class="analytics-surface" style="padding:var(--sp-4); display:flex; gap:var(--sp-4); justify-content:space-between;">
+          <div>
+            <div class="type-label">Revenue Pulse</div>
+            <div class="type-price mt-1">PHP 2.41M</div>
+          </div>
+          <div style="text-align:right;">
+            <div class="type-label">Top Trend</div>
+            <div class="type-body-sm fw-semibold text-success mt-1">Smart cooling up 22%</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="analytics-table reveal" data-delay="120">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:var(--sp-4); margin-bottom:var(--sp-4);">
+          <div>
+            <h3 class="type-h4">Top Performing Products</h3>
+            <p class="type-body-sm text-muted mt-1">Products ranked by revenue and sell-through velocity.</p>
+          </div>
+          <span class="badge badge--success">Live</span>
+        </div>
+        <div class="table-wrapper" style="border:none; box-shadow:none;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Units Sold</th>
+                <th>Revenue</th>
+                <th>Velocity</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="fw-bold">2-Door Refrigerator</td>
+                <td>42</td>
+                <td>PHP 756,000</td>
+                <td class="text-success fw-bold">+22%</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Smart Inverter AC</td>
+                <td>38</td>
+                <td>PHP 912,000</td>
+                <td class="text-success fw-bold">+18%</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Front Load Washer</td>
+                <td>29</td>
+                <td>PHP 638,000</td>
+                <td class="text-muted">Stable</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Induction Cooktop</td>
+                <td>24</td>
+                <td>PHP 108,000</td>
+                <td class="text-danger fw-bold">-4%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

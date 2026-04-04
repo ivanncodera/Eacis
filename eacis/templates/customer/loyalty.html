@@ -1,0 +1,230 @@
+{% extends 'base.html' %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/customer.css') }}">
+{% endblock %}
+
+{% block title %}Vouchers & Points — E-ACIS{% endblock %}
+
+{% block content %}
+<div class="main-content">
+  <div class="stagger-children" style="min-width: 0;">
+    <main style="flex: 1; min-width: 0;">
+      <header class="stagger-item" style="display: flex; justify-content: space-between; align-items: flex-end; gap: var(--sp-4); flex-wrap: wrap; margin-bottom: var(--sp-8);">
+        <div>
+          <div class="chip chip--active mb-4" style="width: fit-content;">Rewards Center</div>
+          <h1 class="type-display-sm">Vouchers & Rewards</h1>
+          <p class="type-body-sm text-muted" style="max-width: 680px;">Track your points, redeem vouchers, and review rewards history using the same premium experience as the rest of the customer area.</p>
+        </div>
+        <div style="display: flex; gap: var(--sp-3); flex-wrap: wrap;">
+          <button class="btn btn--secondary">Redeem Points</button>
+          <button class="btn btn--primary">View Eligible Offers</button>
+        </div>
+      </header>
+
+      <section class="glass-card stagger-item page-enter" style="margin-bottom: var(--sp-8); overflow: hidden; border: 1px solid var(--border-subtle); background: linear-gradient(135deg, var(--brand-primary), var(--brand-primary-dark)); color: white;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: var(--sp-6); flex-wrap: wrap;">
+          <div style="display: flex; flex-direction: column; gap: var(--sp-3); max-width: 640px;">
+            <div class="type-label" style="color: rgba(255, 255, 255, 0.72); letter-spacing: 0.08em;">CURRENT BALANCE</div>
+            <div class="type-display-lg" style="color: white; line-height: 1;">1,250 <span style="font-size: var(--text-base); font-weight: 600; opacity: 0.85;">points</span></div>
+            <p class="type-body-sm" style="color: rgba(255, 255, 255, 0.9); max-width: 44rem;">Equivalent to approximately PHP 125.00 in checkout value. Your balance is active and ready to use on eligible orders.</p>
+          </div>
+
+          <div style="display: grid; gap: var(--sp-3); text-align: right;">
+            <div class="type-label" style="color: rgba(255, 255, 255, 0.72); letter-spacing: 0.08em;">NEXT MILESTONE</div>
+            <div class="type-body-sm fw-semibold" style="color: white;">250 points to Silver Plus</div>
+            <button class="btn btn--secondary" style="background: white; border-color: white; color: var(--brand-primary); font-weight: 700;">Redeem Points</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="dashboard-metrics stagger-item" style="margin-bottom: var(--sp-10);">
+        <article class="kpi-card kpi-card--blue">
+          <div class="kpi-card__icon-wrap"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
+          <div class="kpi-card__label">Points Balance</div>
+          <div class="kpi-card__value">1,250</div>
+          <div class="kpi-card__delta kpi-card__delta--up">+ 150 this month</div>
+        </article>
+
+        <article class="kpi-card kpi-card--green">
+          <div class="kpi-card__icon-wrap"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M20 12V7H4v5m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-3m-9 0H4"></path><path d="M9 12a3 3 0 100-6 3 3 0 000 6z"></path></svg></div>
+          <div class="kpi-card__label">Vouchers Available</div>
+          <div class="kpi-card__value">3</div>
+          <div class="kpi-card__delta kpi-card__delta--flat">1 already claimed</div>
+        </article>
+
+        <article class="kpi-card kpi-card--orange">
+          <div class="kpi-card__icon-wrap"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M12 8v4l3 3"></path><circle cx="12" cy="12" r="9"></circle></svg></div>
+          <div class="kpi-card__label">Expiring Soon</div>
+          <div class="kpi-card__value">1</div>
+          <div class="kpi-card__delta kpi-card__delta--flat">Use within 3 days</div>
+        </article>
+      </section>
+
+      <section style="margin-bottom: var(--sp-10);">
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: var(--sp-4); flex-wrap: wrap; margin-bottom: var(--sp-5);">
+          <div>
+            <h2 class="type-h4" style="margin-bottom: 4px;">Available Vouchers</h2>
+            <p class="type-body-sm text-muted">Claim rewards before they expire or are used at checkout.</p>
+          </div>
+          <div class="pill-group" style="width: fit-content;">
+            <button class="pill pill--active">All</button>
+            <button class="pill">Unused</button>
+            <button class="pill">Expiring</button>
+            <button class="pill">Claimed</button>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--sp-4);">
+          <article class="voucher-card stagger-item page-enter">
+            <div class="voucher-card__amount">
+              <div class="type-h4" style="color: var(--brand-primary); line-height: 1;">15%</div>
+              <div class="type-label" style="font-size: 10px;">OFF</div>
+            </div>
+            <div class="voucher-card__content">
+              <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: var(--sp-3); margin-bottom: 2px;">
+                <h3 class="type-body fw-semibold">Flash Sale Discount</h3>
+                <span class="chip chip--active" style="height: 24px; padding: 0 var(--sp-3);">New</span>
+              </div>
+              <p class="type-body-sm text-muted" style="margin-bottom: var(--sp-3);">Valid for all kitchen appliances and home essentials.</p>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3);">
+                <span class="type-label--sm" style="color: var(--color-danger);">Expires in 3 days</span>
+                <button class="type-body-sm fw-bold text-primary" style="background: none; border: none; cursor: pointer; padding: 0;">Claim</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="voucher-card stagger-item page-enter">
+            <div class="voucher-card__amount">
+              <div class="type-h4" style="color: var(--color-success); line-height: 1;">FREE</div>
+              <div class="type-label" style="font-size: 10px;">DELIVERY</div>
+            </div>
+            <div class="voucher-card__content">
+              <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: var(--sp-3); margin-bottom: 2px;">
+                <h3 class="type-body fw-semibold">Welcome Gift</h3>
+                <span class="type-label--sm" style="color: var(--color-success);">Claimed</span>
+              </div>
+              <p class="type-body-sm text-muted" style="margin-bottom: var(--sp-3);">No minimum spend required on your first eligible order.</p>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3);">
+                <span class="type-label--sm">Used on order #EACIS-8995</span>
+                <span class="text-muted type-body-sm">Redeemed</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="voucher-card stagger-item page-enter">
+            <div class="voucher-card__amount">
+              <div class="type-h4" style="color: var(--brand-primary); line-height: 1;">₱500</div>
+              <div class="type-label" style="font-size: 10px;">OFF</div>
+            </div>
+            <div class="voucher-card__content">
+              <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: var(--sp-3); margin-bottom: 2px;">
+                <h3 class="type-body fw-semibold">Loyalty Rewards</h3>
+                <span class="chip" style="height: 24px; padding: 0 var(--sp-3);">Popular</span>
+              </div>
+              <p class="type-body-sm text-muted" style="margin-bottom: var(--sp-3);">Minimum spend of ₱5,000 applies at checkout.</p>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3);">
+                <span class="type-label--sm">Valid for 30 days</span>
+                <button class="type-body-sm fw-bold text-primary" style="background: none; border: none; cursor: pointer; padding: 0;" onclick="Toast.info('Voucher claimed!', 'Check your checkout options.')">Claim</button>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="glass-card stagger-item page-enter" style="padding: 0; overflow: hidden; border: 1px solid var(--border-subtle);">
+        <div style="padding: var(--sp-5); border-bottom: 1px solid var(--border-default); display: flex; justify-content: space-between; align-items: center; gap: var(--sp-3); flex-wrap: wrap; background: var(--grey-50);">
+          <div>
+            <h2 class="type-h4" style="margin-bottom: 4px;">Points History</h2>
+            <p class="type-body-sm text-muted">Every points adjustment linked to a completed customer action.</p>
+          </div>
+          <span class="chip" style="height: 24px; padding: 0 var(--sp-3);">Last 90 days</span>
+        </div>
+        <div class="table-wrapper" style="border: none; border-radius: 0;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Description</th>
+                <th>Date</th>
+                <th style="text-align: right;">Points</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="type-body fw-semibold">Account Anniversary Bonus</div>
+                  <div class="type-body-sm text-muted">Promotional reward</div>
+                </td>
+                <td class="text-muted type-body-sm">Oct 24, 2023</td>
+                <td style="text-align: right; font-weight: 600; color: var(--color-success);">+ 500</td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="type-body fw-semibold">Order Completed #EACIS-8995</div>
+                  <div class="type-body-sm text-muted">Purchase reward</div>
+                </td>
+                <td class="text-muted type-body-sm">Sep 12, 2023</td>
+                <td style="text-align: right; font-weight: 600; color: var(--color-success);">+ 750</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<style>
+  .main-content .type-h4,
+  .main-content .type-display-sm {
+    letter-spacing: -0.02em;
+  }
+
+  .chip {
+    height: 32px;
+    padding: 0 var(--sp-4);
+    border-radius: var(--radius-pill);
+    border: 1.5px solid var(--border-medium);
+    background: var(--grey-0);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-semibold);
+    font-family: var(--font-sans);
+    color: var(--grey-600);
+    cursor: pointer;
+    transition: all var(--dur-fast) var(--ease-out);
+    white-space: nowrap;
+  }
+
+  .chip:hover {
+    border-color: var(--brand-primary);
+    color: var(--brand-primary);
+    background: var(--brand-primary-subtle);
+  }
+
+  .chip--active {
+    background: var(--brand-primary);
+    border-color: var(--brand-primary);
+    color: white;
+    box-shadow: var(--shadow-primary);
+  }
+
+  .voucher-card {
+    min-height: 156px;
+  }
+
+  @media (max-width: 768px) {
+    .voucher-card {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .voucher-card__amount {
+      width: 100%;
+      border-right: 0;
+      border-bottom: 1px dashed var(--border-default);
+      padding-right: 0;
+      padding-bottom: var(--sp-4);
+    }
+  }
+</style>
+{% endblock %}

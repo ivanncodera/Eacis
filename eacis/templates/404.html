@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Page Not Found - E-ACIS{% endblock %}
+{% block content %}
+<main style="min-height: 80vh; display: flex; align-items: center; justify-content: center; padding: var(--sp-10);">
+  <div class="glass-card reveal" style="text-align: center; max-width: 500px; padding: var(--sp-12) var(--sp-8);">
+    <div style="width: 80px; height: 80px; background: var(--surface-sunken); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--sp-6); color: var(--grey-400);">
+      <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+    </div>
+    <h1 class="type-display-md mb-2" style="color: var(--grey-900);">404</h1>
+    <h2 class="type-h4 mb-4" style="color: var(--grey-600);">Looks like this room is empty.</h2>
+    <p class="type-body-sm mb-8" style="color: var(--grey-500);">The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.</p>
+    <a href="/" class="btn btn--primary btn--lg">Return Home</a>
+  </div>
+</main>
+{% endblock %}

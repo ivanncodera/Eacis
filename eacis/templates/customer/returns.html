@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/customer.css') }}">
+{% endblock %}
+
+{% block title %}Returns & Refunds — E-ACIS{% endblock %}
+
+{% block content %}
+<div class="main-content">
+  <div class="stagger-children">
+    
+
+    <!-- Main Content Area -->
+    <main style="flex: 1; min-width: 0;">
+      <header style="margin-bottom: var(--sp-8); display: flex; justify-content: space-between; align-items: flex-end;">
+         <div>
+           <h1 class="type-display-sm">Returns & Refunds</h1>
+           <p class="type-body-sm text-muted">Manage your return requests and track your refund progress.</p>
+         </div>
+         <button class="btn btn--primary btn--sm" id="new-return-trigger">Start New Return</button>
+      </header>
+
+      <!-- Active Refund Tracking -->
+      <section class="glass-card stagger-item page-enter" style="margin-bottom: var(--sp-8);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--sp-6);">
+          <div>
+            <div class="type-label--sm" style="color: var(--brand-primary); margin-bottom: 4px;">ACTIVE REQUEST: #RET-2023-01</div>
+            <h3 class="type-h4">Smart 2-Door Refrigerator</h3>
+            <span class="type-body-sm text-muted">Claiming: Item Defective</span>
+          </div>
+          <span class="badge badge--dot badge--pending">Reviewing Request</span>
+        </div>
+
+        <!-- Stepper Component -->
+        <div class="status-track">
+          <div class="status-step complete">
+            <div class="status-dot">✓</div>
+            <span class="type-label" style="font-size: 10px;">Submitted</span>
+          </div>
+          <div class="status-step active">
+            <div class="status-dot">2</div>
+            <span class="type-label" style="font-size: 10px;">Reviewing</span>
+          </div>
+          <div class="status-step">
+            <div class="status-dot">3</div>
+            <span class="type-label" style="font-size: 10px;">Pick-up</span>
+          </div>
+          <div class="status-step">
+            <div class="status-dot">4</div>
+            <span class="type-label" style="font-size: 10px;">Refund</span>
+          </div>
+        </div>
+
+        <div style="background: var(--surface-sunken); border-radius: 8px; padding: var(--sp-4); margin-top: var(--sp-6); display: flex; gap: var(--sp-3); align-items: center;">
+          <div style="color: var(--color-warning);">
+             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          </div>
+          <p class="type-body-sm">Our team is currently reviewing your photos. Expect an update within <strong>24-48 hours</strong>.</p>
+        </div>
+      </section>
+
+      <!-- Return Request Form (Hidden by default) -->
+      <section id="return-form-section" class="glass-card stagger-item page-enter" style="display: none; margin-bottom: var(--sp-8); border: 2px solid var(--brand-primary-light);">
+         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--sp-6);">
+            <h3 class="type-h4">New Return Request</h3>
+            <button class="btn btn--sm btn--ghost" id="close-form">Cancel</button>
+         </div>
+         <form class="form-stack">
+            <div class="form-group">
+               <label class="form-label">Select Order</label>
+               <select class="form-select">
+                  <option>EACIS-9002 (Purchased Oct 24)</option>
+                  <option>EACIS-9001 (Purchased Oct 12)</option>
+               </select>
+            </div>
+            <div class="form-group">
+               <label class="form-label">Reason for Return</label>
+               <select class="form-select">
+                  <option>Defective / Does not work</option>
+                  <option>Damaged during shipping</option>
+                  <option>Incorrect item received</option>
+                  <option>Changed my mind</option>
+               </select>
+            </div>
+            <div class="form-group">
+               <label class="form-label">Describe the issue</label>
+               <textarea class="form-textarea" placeholder="Please explain what happened. Be as detailed as possible."></textarea>
+            </div>
+            <div class="form-group">
+               <label class="form-label">Upload Proof (Photos/Video)</label>
+               <div style="border: 2px dashed var(--border-medium); border-radius: var(--radius-lg); padding: var(--sp-8); text-align: center; color: var(--grey-400); cursor: pointer;"
+                    onmouseover="this.style.borderColor='var(--brand-primary)'"
+                    onmouseout="this.style.borderColor='var(--border-medium)'">
+                 <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-bottom: 8px;"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                 <div class="type-body-sm">Click or Drag & Drop items here to upload</div>
+               </div>
+            </div>
+            <button type="button" class="btn btn--primary btn--full" onclick="Toast.success('Request Filed','Keep your phone active for verification.')">Submit Request</button>
+         </form>
+      </section>
+
+      <!-- History Table -->
+      <section class="glass-card" style="padding: 0; overflow: hidden;">
+        <div style="padding: var(--sp-5); border-bottom: 1px solid var(--border-default);">
+          <h3 class="type-h4">Past Return History</h3>
+        </div>
+        <div class="table-wrapper" style="border: none; border-radius: 0;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Item</th>
+                <th>Status</th>
+                <th style="text-align: right;">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="type-body-sm fw-medium">#RET-2023-00</td>
+                <td>Portable Fan Pro</td>
+                <td><span class="badge badge--dot badge--success">Resolved</span></td>
+                <td style="text-align: right; font-weight: 600;">PHP 1,200</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+  document.getElementById('new-return-trigger').addEventListener('click', () => {
+     document.getElementById('return-form-section').style.display = 'block';
+     window.scrollTo({ top: 300, behavior: 'smooth' });
+  });
+  document.getElementById('close-form').addEventListener('click', () => {
+     document.getElementById('return-form-section').style.display = 'none';
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Seller {{ seller_id }} — Admin Portal{% endblock %}
+{% block content %}
+<div class="stagger-children">
+  <div class="page-content bg-grey-50">
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; gap:var(--sp-4); margin-bottom:var(--sp-6);">
+      <div>
+        <h1 class="type-display-md">Seller {{ seller_id }}</h1>
+        <p class="type-body-sm text-muted mt-1">Inspect seller health, compliance, and catalog access.</p>
+      </div>
+      <div style="display:flex; gap:var(--sp-3); flex-wrap:wrap;">
+        <span class="badge badge--success">Verified</span>
+        <button class="btn btn--secondary btn--sm">Suspend</button>
+      </div>
+    </div>
+    <div class="kpi-grid mb-6">
+      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Products</div><div class="type-display-md mt-2">142</div></div></div>
+      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Orders</div><div class="type-display-md mt-2">8</div></div></div>
+      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Refunds</div><div class="type-display-md mt-2">2</div></div></div>
+      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Payout</div><div class="type-display-md mt-2">PHP 45K</div></div></div>
+    </div>
+    <div class="glass-card p-6">
+      <h3 class="type-h4 mb-4">Compliance Notes</h3>
+      <p class="type-body-sm text-muted">Seller profile, PII masking, and financial actions are available in the admin control surface.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

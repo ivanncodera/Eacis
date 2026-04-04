@@ -1,0 +1,121 @@
+/* Utilities for spacing, layout and small helpers used across templates */
+
+/* Display helpers */
+.block { display: block; }
+.inline-block { display: inline-block; }
+.inline-flex { display: inline-flex; }
+
+/* Visibility */
+.hidden { display: none !important; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+/* Spacing helpers */
+.m-0 { margin: 0; }
+.mt-1 { margin-top: var(--sp-1); }
+.mt-2 { margin-top: var(--sp-2); }
+.mt-3 { margin-top: var(--sp-3); }
+.mt-4 { margin-top: var(--sp-4); }
+.mt-6 { margin-top: var(--sp-6); }
+.mt-8 { margin-top: var(--sp-8); }
+.mt-10 { margin-top: var(--sp-10); }
+.mt-12 { margin-top: var(--sp-12); }
+.mt-24 { margin-top: var(--sp-24); }
+
+.mb-0 { margin-bottom: 0; }
+.mb-1 { margin-bottom: var(--sp-1); }
+.mb-2 { margin-bottom: var(--sp-2); }
+.mb-3 { margin-bottom: var(--sp-3); }
+.mb-4 { margin-bottom: var(--sp-4); }
+.mb-6 { margin-bottom: var(--sp-6); }
+.mb-8 { margin-bottom: var(--sp-8); }
+.mb-10 { margin-bottom: var(--sp-10); }
+.mb-12 { margin-bottom: var(--sp-12); }
+
+.ml-2 { margin-left: var(--sp-2); }
+.mr-2 { margin-right: var(--sp-2); }
+
+.p-0 { padding: 0; }
+.p-2 { padding: var(--sp-2); }
+.p-3 { padding: var(--sp-3); }
+.p-4 { padding: var(--sp-4); }
+.p-6 { padding: var(--sp-6); }
+.p-8 { padding: var(--sp-8); }
+.pt-3 { padding-top: var(--sp-3); }
+.pt-24 { padding-top: var(--sp-24); }
+.pb-2 { padding-bottom: var(--sp-2); }
+.pb-4 { padding-bottom: var(--sp-4); }
+
+/* Flex helpers */
+.flex { display: flex; }
+.flex-center { display:flex; align-items:center; justify-content:center; }
+.flex-column { display:flex; flex-direction:column; }
+.flex-wrap { flex-wrap: wrap; }
+.items-start { align-items: flex-start; }
+.items-center { align-items: center; }
+.items-end { align-items: flex-end; }
+.justify-start { justify-content: flex-start; }
+.justify-center { justify-content: center; }
+.justify-end { justify-content: flex-end; }
+.justify-between { justify-content: space-between; }
+
+/* Gap helpers */
+.gap-1 { gap: var(--sp-1); }
+.gap-2 { gap: var(--sp-2); }
+.gap-3 { gap: var(--sp-3); }
+.gap-4 { gap: var(--sp-4); }
+.gap-6 { gap: var(--sp-6); }
+.gap-8 { gap: var(--sp-8); }
+.gap-10 { gap: var(--sp-10); }
+.gap-12 { gap: var(--sp-12); }
+
+/* Grid helpers */
+.grid { display: grid; }
+.grid-2 { display:grid; gap: var(--sp-4); grid-template-columns: 1fr; }
+@media (min-width: 640px) { .grid-2 { grid-template-columns: repeat(2, 1fr); } }
+
+.grid-3 { display:grid; gap: var(--sp-4); grid-template-columns: 1fr; }
+@media (min-width: 640px) { .grid-3 { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1024px) { .grid-3 { grid-template-columns: repeat(3, 1fr); } }
+
+.grid-4 { display:grid; gap: var(--sp-4); grid-template-columns: 1fr; }
+@media (min-width: 640px) { .grid-4 { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 900px) { .grid-4 { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 1200px) { .grid-4 { grid-template-columns: repeat(4, 1fr); } }
+
+/* Width/height helpers */
+.w-full { width: 100%; }
+.w-fit { width: fit-content; }
+.min-h-60vh { min-height: 60vh; }
+.max-w-540 { max-width: 540px; width: 100%; }
+.max-w-800 { max-width: 800px; width: 100%; }
+
+/* Hero/card helpers */
+.card-hero { width:100%; display:block; }
+.img-hero { width:100%; height:auto; border-radius: var(--radius-2xl); box-shadow: var(--shadow-2xl); object-fit:cover; }
+
+/* Typography helpers */
+.lead-copy { font-size: var(--text-lg); color: var(--grey-600); max-width: 640px; }
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+/* Pills */
+.pill-group { display:flex; flex-wrap:wrap; gap:8px; }
+.pill { cursor:pointer; }
+
+/* Utility center container */
+.page-center { display:flex; align-items:center; justify-content:center; padding: var(--sp-8) 0; min-height: calc(100vh - var(--topbar-height) - var(--sp-12)); }
+.card--narrow { max-width: 560px; width: 100%; margin: 0 auto; padding: var(--sp-8); }
+
+/* Center form content and keep text readable on narrow screens */
+.glass-card .text-center { text-align: center; }
+
+/* Responsive visibility */
+.hide-on-desktop { display: none !important; }
+@media (max-width: 767px) {
+	.hide-on-mobile { display: none !important; }
+	.hide-on-desktop { display: initial !important; }
+}
+
+/* Ensure images do not overflow */
+img { max-width:100%; height:auto; }

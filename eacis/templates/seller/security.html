@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}Security — Seller Portal{% endblock %}
+{% block content %}
+<div class="stagger-children">
+  <div class="page-content bg-grey-50 seller-shell">
+    <div class="seller-header">
+      <div class="seller-header__head">
+        <h1 class="type-display-md">Security</h1>
+        <p class="type-body-sm text-muted mt-1">Manage your password and access controls.</p>
+      </div>
+      <div class="seller-header__actions">
+        <span class="badge badge--warning">Idle timeout 10m</span>
+        <button class="btn btn--primary btn--sm">Save Changes</button>
+      </div>
+    </div>
+
+    <div class="seller-grid-12">
+      <div class="form-stack">
+        <div class="glass-card p-6">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:var(--sp-4); margin-bottom:var(--sp-4);">
+            <div>
+              <h3 class="type-h4">Change Password</h3>
+              <p class="type-body-sm text-muted mt-1">Keep the account protected with a strong password.</p>
+            </div>
+            <span class="badge badge--success">2FA recommended</span>
+          </div>
+          <div class="form-group mb-4">
+            <label class="form-label">Current Password</label>
+            <input type="password" class="form-input" placeholder="Enter current password">
+          </div>
+          <div class="form-group mb-4">
+            <label class="form-label">New Password</label>
+            <input type="password" class="form-input" placeholder="At least 8 characters">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Confirm New Password</label>
+            <input type="password" class="form-input" placeholder="Re-enter new password">
+          </div>
+        </div>
+
+        <div class="glass-card p-6">
+          <h3 class="type-h4 mb-4">Session Settings</h3>
+          <label class="seller-checkline" style="margin-bottom:var(--sp-4);">
+            <input type="checkbox" checked>
+            <span class="fw-semibold">Remember this device for 30 days</span>
+          </label>
+          <label class="seller-checkline" style="margin-bottom:var(--sp-4);">
+            <input type="checkbox" checked>
+            <span class="fw-semibold">Send login alerts by email</span>
+          </label>
+          <label class="seller-checkline">
+            <input type="checkbox">
+            <span class="fw-semibold">Enable two-factor authentication (mock)</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-stack">
+        <div class="glass-card p-6">
+          <h3 class="type-h4 mb-4">Recent Sign-Ins</h3>
+          <div class="store-pulse">
+            <div class="pulse-item"><div style="flex:1;"><div class="type-body-sm fw-bold">Chrome on Windows</div><div class="type-body-xs text-muted">Makati City • 2 hours ago</div></div><div class="type-body-xs text-success">Current</div></div>
+            <div class="pulse-item"><div style="flex:1;"><div class="type-body-sm fw-bold">Chrome on Android</div><div class="type-body-xs text-muted">Quezon City • Yesterday</div></div><div class="type-body-xs text-muted">Trusted</div></div>
+            <div class="pulse-item"><div style="flex:1;"><div class="type-body-sm fw-bold">Firefox on Mac</div><div class="type-body-xs text-muted">Taguig • 3 days ago</div></div><div class="type-body-xs text-muted">Trusted</div></div>
+          </div>
+        </div>
+
+        <div class="glass-card p-6">
+          <h3 class="type-h4 mb-4">Recovery Notes</h3>
+          <p class="type-body-sm text-muted">Use a strong password and keep the seller account phone number updated to avoid lockouts after failed login attempts.</p>
+          <div class="glass-card mt-4 seller-sunken" style="padding:var(--sp-4);">
+            <div class="type-body-xs text-muted">Account lock policy</div>
+            <div class="type-body-sm fw-semibold">5 failed attempts -> 10 minute lockout</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

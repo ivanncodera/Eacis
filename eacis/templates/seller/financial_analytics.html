@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+{% block title %}Financial Analytics — Seller Portal{% endblock %}
+{% block content %}
+<div class="stagger-children">
+  <div class="page-content bg-grey-50 seller-shell">
+    <div class="seller-header" style="align-items:flex-start; margin-bottom:var(--sp-8);">
+      <div class="seller-header__head">
+        <div class="seller-header__meta">
+          <span class="badge seller-header__chip seller-header__chip--success">Financial</span>
+          <span class="type-label" style="color:var(--grey-500);">Margin & Settlement</span>
+        </div>
+        <h1 class="type-display-md" style="color:var(--grey-900); margin:0;">Financial Analytics</h1>
+        <p class="type-body-sm mt-2" style="color:var(--grey-600);">Margin breakdown, settlement dashboard, and cash flow visibility.</p>
+      </div>
+      <button class="btn btn--secondary btn--sm">Export Ledger</button>
+    </div>
+
+    <div class="reveal" data-delay="60ms" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:var(--sp-4); margin-bottom:var(--sp-8);">
+      <div class="glass-card p-4" style="background:linear-gradient(180deg, #00875A10 0%, transparent 40%);">
+        <div class="type-body-xs" style="color:var(--grey-500); font-weight:600;">GROSS SALES (MTD)</div>
+        <div class="type-display-md mt-2" style="color:#00875A; margin:0;">PHP 1.84M</div>
+        <div class="type-body-xs mt-2" style="color:var(--color-success); font-weight:600;">↑ 8.2% vs last month</div>
+      </div>
+      <div class="glass-card p-4" style="background:linear-gradient(180deg, #0052CC10 0%, transparent 40%);">
+        <div class="type-body-xs" style="color:var(--grey-500); font-weight:600;">NET MARGIN</div>
+        <div class="type-display-md mt-2" style="color:#0052CC; margin:0;">22.4%</div>
+        <div class="type-body-xs mt-2" style="color:var(--grey-600);">Healthy band</div>
+      </div>
+      <div class="glass-card p-4" style="background:linear-gradient(180deg, #FF8B0010 0%, transparent 40%);">
+        <div class="type-body-xs" style="color:var(--grey-500); font-weight:600;">PENDING SETTLEMENT</div>
+        <div class="type-display-md mt-2" style="color:#FF8B00; margin:0;">PHP 214.5k</div>
+        <div class="type-body-xs mt-2" style="color:var(--grey-600);">3 batches in queue</div>
+      </div>
+      <div class="glass-card p-4" style="background:linear-gradient(180deg, #DE350B10 0%, transparent 40%);">
+        <div class="type-body-xs" style="color:var(--grey-500); font-weight:600;">REFUND EXPOSURE</div>
+        <div class="type-display-md mt-2" style="color:#DE350B; margin:0;">PHP 39.8k</div>
+        <div class="type-body-xs mt-2" style="color:var(--grey-600);">2.1% of gross</div>
+      </div>
+    </div>
+
+    <div class="reveal" data-delay="100ms" style="display:grid; grid-template-columns:1fr 1.4fr; gap:var(--sp-6); margin-bottom:var(--sp-8);">
+      <div class="glass-card p-6" style="background:linear-gradient(180deg, #00875A10 0%, transparent 40%);">
+        <h3 class="type-h4" style="margin:0 0 var(--sp-4) 0;">Margin by Category</h3>
+        <div style="display:flex; flex-direction:column; gap:var(--sp-3);">
+          <div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:var(--sp-2);">
+              <span class="type-body-sm fw-semibold">Kitchen</span>
+              <span class="type-body-sm fw-semibold" style="color:#00875A;">24.2%</span>
+            </div>
+            <div style="height:8px; background:var(--grey-100); border-radius:4px; overflow:hidden;">
+              <div style="width:85%; height:100%; background:#00875A; border-radius:4px;"></div>
+            </div>
+          </div>
+          <div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:var(--sp-2);">
+              <span class="type-body-sm fw-semibold">Air Quality</span>
+              <span class="type-body-sm fw-semibold" style="color:#0052CC;">21.8%</span>
+            </div>
+            <div style="height:8px; background:var(--grey-100); border-radius:4px; overflow:hidden;">
+              <div style="width:76%; height:100%; background:#0052CC; border-radius:4px;"></div>
+            </div>
+          </div>
+          <div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:var(--sp-2);">
+              <span class="type-body-sm fw-semibold">Laundry</span>
+              <span class="type-body-sm fw-semibold" style="color:#FF8B00;">19.4%</span>
+            </div>
+            <div style="height:8px; background:var(--grey-100); border-radius:4px; overflow:hidden;">
+              <div style="width:68%; height:100%; background:#FF8B00; border-radius:4px;"></div>
+            </div>
+          </div>
+          <div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:var(--sp-2);">
+              <span class="type-body-sm fw-semibold">Comfort</span>
+              <span class="type-body-sm fw-semibold" style="color:#DE350B;">16.5%</span>
+            </div>
+            <div style="height:8px; background:var(--grey-100); border-radius:4px; overflow:hidden;">
+              <div style="width:58%; height:100%; background:#DE350B; border-radius:4px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card p-6" style="background:linear-gradient(180deg, #FF8B0010 0%, transparent 40%);">
+        <h3 class="type-h4" style="margin:0 0 var(--sp-4) 0;">Settlement Calendar</h3>
+        <div style="display:grid; grid-template-columns:repeat(5, 1fr); gap:var(--sp-3);">
+          <div style="padding:var(--sp-3); background:var(--grey-0); border-radius:var(--radius-md); border:1px solid #00875A50; text-align:center;">
+            <div class="type-label" style="color:var(--grey-500); margin-bottom:var(--sp-2);">SET-APR-01</div>
+            <div class="type-body-sm fw-semibold" style="color:var(--grey-900);">PHP 387.8k</div>
+            <span class="badge badge--success mt-2" style="font-size:11px;">Ready</span>
+          </div>
+          <div style="padding:var(--sp-3); background:var(--grey-0); border-radius:var(--radius-md); border:1px solid #FF8B0050; text-align:center;">
+            <div class="type-label" style="color:var(--grey-500); margin-bottom:var(--sp-2);">SET-APR-02</div>
+            <div class="type-body-sm fw-semibold" style="color:var(--grey-900);">PHP 286.3k</div>
+            <span class="badge badge--warning mt-2" style="font-size:11px;">Review</span>
+          </div>
+          <div style="padding:var(--sp-3); background:var(--grey-0); border-radius:var(--radius-md); border:1px solid #DE350B50; text-align:center;">
+            <div class="type-label" style="color:var(--grey-500); margin-bottom:var(--sp-2);">SET-APR-03</div>
+            <div class="type-body-sm fw-semibold" style="color:var(--grey-900);">PHP 182.6k</div>
+            <span class="badge badge--danger mt-2" style="font-size:11px;">On Hold</span>
+          </div>
+          <div style="padding:var(--sp-3); background:linear-gradient(180deg, #0052CC10 0%, transparent 40%); border-radius:var(--radius-md); border:1px dashed #0052CC50; text-align:center;">
+            <div class="type-label" style="color:var(--grey-500); margin-bottom:var(--sp-2);">SET-APR-04</div>
+            <div class="type-body-sm fw-semibold" style="color:var(--grey-900);">~PHP 245k</div>
+            <span class="badge badge--info mt-2" style="font-size:11px;">Pending</span>
+          </div>
+          <div style="padding:var(--sp-3); background:var(--grey-50); border-radius:var(--radius-md); border:1px dashed #9CA3AF; text-align:center;">
+            <div class="type-label" style="color:var(--grey-400); margin-bottom:var(--sp-2);">SET-APR-05</div>
+            <div class="type-body-sm" style="color:var(--grey-400);">TBD</div>
+            <span class="badge" style="background:var(--grey-100); color:var(--grey-500); font-size:11px; margin-top:var(--sp-2);">Future</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="reveal" data-delay="140ms">
+      <div class="glass-card p-6">
+        <h3 class="type-h4" style="margin:0 0 var(--sp-4) 0;">Financial Health Checks</h3>
+        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:var(--sp-4);">
+          <div style="padding:var(--sp-4); background:linear-gradient(180deg, #00875A10 0%, transparent 40%); border-radius:var(--radius-md); border:1px solid #00875A30;">
+            <div style="font-size:18px; margin-bottom:var(--sp-2);">✓</div>
+            <div class="type-body-sm fw-semibold">Reconcile COD</div>
+            <div class="type-body-xs text-muted mt-2">Before releasing settlement batches.</div>
+          </div>
+          <div style="padding:var(--sp-4); background:linear-gradient(180deg, #FF8B0010 0%, transparent 40%); border-radius:var(--radius-md); border:1px solid #FF8B0030;">
+            <div style="font-size:18px; margin-bottom:var(--sp-2);">✓</div>
+            <div class="type-body-sm fw-semibold">Review Margins</div>
+            <div class="type-body-xs text-muted mt-2">Catch SKU drops from voucher stacking.</div>
+          </div>
+          <div style="padding:var(--sp-4); background:linear-gradient(180deg, #DE350B10 0%, transparent 40%); border-radius:var(--radius-md); border:1px solid #DE350B30;">
+            <div style="font-size:18px; margin-bottom:var(--sp-2);">✓</div>
+            <div class="type-body-sm fw-semibold">Dispute Queue</div>
+            <div class="type-body-xs text-muted mt-2">Prioritize 5+ days old to avoid delays.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

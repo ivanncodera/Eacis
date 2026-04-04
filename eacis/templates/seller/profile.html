@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% block title %}Business Profile — Seller Portal{% endblock %}
+{% block content %}
+<div class="stagger-children">
+  <div class="page-content bg-grey-50 seller-shell">
+    <div class="seller-header">
+      <div class="seller-header__head">
+        <h1 class="type-display-md">Business Profile</h1>
+        <p class="type-body-sm text-muted mt-1">Update your store identity, contact channels, and fulfillment details.</p>
+      </div>
+      <div class="seller-header__actions">
+        <span class="badge badge--success">Verified store</span>
+        <button class="btn btn--primary btn--sm">Save Profile</button>
+      </div>
+    </div>
+
+    <div class="seller-grid-16">
+      <div class="form-stack">
+        <div class="glass-card p-6">
+          <div style="display:flex; align-items:center; gap:var(--sp-4); margin-bottom:var(--sp-5);">
+            <div style="width:56px; height:56px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:var(--brand-primary-subtle); color:var(--brand-primary); font-weight:700; font-size:var(--text-xl);">S</div>
+            <div>
+              <h3 class="type-h4">Store Identity</h3>
+              <p class="type-body-sm text-muted mt-1">What shoppers and admins see across the seller portal.</p>
+            </div>
+          </div>
+          <div class="form-group mb-4">
+            <label class="form-label">Store Name</label>
+            <input class="form-input" value="SLR01 Store">
+          </div>
+          <div class="form-group mb-4">
+            <label class="form-label">Business Name</label>
+            <input class="form-input" value="SLR01 Home Appliances Trading">
+          </div>
+          <div class="form-group mb-4">
+            <label class="form-label">Store Bio</label>
+            <textarea class="form-textarea" style="min-height:120px;">Premium home appliances with flexible installment options and same-day dispatch for selected Metro Manila orders.</textarea>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-4);">
+            <div class="form-group">
+              <label class="form-label">Business Email</label>
+              <input class="form-input" value="seller@slr01store.ph">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Support Phone</label>
+              <input class="form-input" value="+63 917 555 4421">
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-card p-6">
+          <h3 class="type-h4 mb-4">Fulfillment Defaults</h3>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-4);">
+            <div class="form-group">
+              <label class="form-label">Default Handling Time</label>
+              <select class="form-select">
+                <option>Same day</option>
+                <option>1-2 days</option>
+                <option>3-5 days</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Default Courier</label>
+              <select class="form-select">
+                <option>J&T Express</option>
+                <option>LBC</option>
+                <option>Ninja Van</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group mt-4">
+            <label style="display:flex; align-items:center; gap:var(--sp-2);">
+              <input type="checkbox" checked style="width:16px; height:16px; margin:0;">
+              <span class="fw-semibold">Auto-accept low-risk orders</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-stack">
+        <div class="glass-card p-6">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--sp-4);">
+            <h3 class="type-h4">Store Snapshot</h3>
+            <span class="badge badge--success">Live</span>
+          </div>
+          <div class="table-wrapper" style="border:none; box-shadow:none;">
+            <table class="data-table">
+              <tbody>
+                <tr><td class="fw-semibold">Seller ID</td><td style="text-align:right;">SLR01</td></tr>
+                <tr><td class="fw-semibold">Status</td><td style="text-align:right;"><span class="badge badge--success">Verified</span></td></tr>
+                <tr><td class="fw-semibold">Products</td><td style="text-align:right;">142</td></tr>
+                <tr><td class="fw-semibold">Orders Today</td><td style="text-align:right;">8</td></tr>
+                <tr><td class="fw-semibold">Payout Balance</td><td style="text-align:right;">PHP 45,280</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="glass-card p-6">
+          <h3 class="type-h4 mb-4">Masked Contact View</h3>
+          <p class="type-body-sm text-muted mb-2">Public-facing details are masked by default.</p>
+          <div class="glass-card seller-sunken" style="padding:var(--sp-4);">
+            <div class="type-body-sm"><strong>Email:</strong> se***@slr01store.ph</div>
+            <div class="type-body-sm mt-2"><strong>Phone:</strong> +63 917 *** 4421</div>
+          </div>
+          <div class="type-body-xs text-muted mt-4">Use the mission-aligned masked display for customer-visible seller data.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

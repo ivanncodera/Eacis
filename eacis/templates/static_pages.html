@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block content %}
+<main id="main">
+  <!-- Header Section with Pattern -->
+  <section style="position:relative; background: linear-gradient(135deg, var(--brand-primary-subtle) 0%, var(--surface-sunken) 100%); padding: var(--sp-20) 0 var(--sp-16); overflow: hidden;">
+    <div style="position:absolute; top:0; left:0; right:0; bottom:0; opacity:0.1; background-image: radial-gradient(var(--brand-primary) 0.5px, transparent 0.5px); background-size: 24px 24px;"></div>
+    <div class="container" style="max-width: 1000px; position:relative; z-index:1;">
+      <div class="type-label-sm mb-4 reveal" style="color: var(--brand-primary); letter-spacing: 0.1em; font-weight: 800;">INSTITUTIONAL</div>
+      <h1 class="type-display-md mb-2 reveal">{{ title }}</h1>
+      <div style="width: 80px; height: 4px; background: var(--brand-primary); border-radius: var(--radius-pill);"></div>
+    </div>
+  </section>
+
+  <!-- Content Section with Sidebar -->
+  <section style="padding: var(--sp-12) 0 var(--sp-20); background: var(--surface-default);">
+    <div class="container" style="max-width: 1000px; display: grid; grid-template-columns: 240px 1fr; gap: var(--sp-12);">
+      
+      <!-- Sticky Sidebar (Desktop) -->
+      <aside class="hide-on-mobile" style="position: sticky; top: 100px; align-self: start;">
+        <nav style="display: flex; flex-direction: column; gap: var(--sp-4);">
+          <div class="type-label-xs" style="color: var(--grey-400); margin-bottom: var(--sp-2);">SECTIONS</div>
+          <a href="#" class="type-link-sm fw-bold active" style="color: var(--brand-primary);">1. Overview</a>
+          <a href="#" class="type-link-sm fw-medium" style="color: var(--grey-500);">2. Core Principles</a>
+          <a href="#" class="type-link-sm fw-medium" style="color: var(--grey-500);">3. Compliance</a>
+          <a href="#" class="type-link-sm fw-medium" style="color: var(--grey-500);">4. Contact Info</a>
+        </nav>
+      </aside>
+
+      <!-- Main Text -->
+      <article class="stagger-children">
+        <div class="glass-card" style="background: white; border-color: var(--border-medium); padding: var(--sp-12); box-shadow: var(--shadow-sm);">
+          <p class="type-body-lg mb-12" style="color: var(--grey-600); line-height: 1.8;">
+            This is a placeholder for the <strong>{{ title }}</strong> of the E-ACISS platform. In a production environment, this page would contain the full legal, contact, or biographical text as required by law and business operations.
+          </p>
+
+          <h2 class="type-h3 mb-6" style="border-bottom: 2px solid var(--surface-sunken); padding-bottom: var(--sp-2);">Core Principles</h2>
+          <p class="type-body-md mb-6" style="color: var(--grey-700); line-height: 1.8;">
+            At E-ACIS, we prioritize transparency, security, and user performance. Whether you are a customer browsing for the latest smart devices or a seller managing a multi-brand inventory, our platform is designed to facilitate high-trust commerce.
+          </p>
+
+          <div style="background: var(--surface-sunken); border-radius: var(--radius-lg); padding: var(--sp-8); margin: var(--sp-10) 0;">
+            <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: var(--sp-4);">
+              <li style="display: flex; gap: var(--sp-4);">
+                <span style="color: var(--brand-primary); font-weight: 800;">01</span>
+                <div>
+                  <strong class="type-body-md" style="display: block; margin-bottom: 2px; color: var(--grey-900);">Utility-First Design</strong>
+                  <span class="type-body-sm" style="color: var(--grey-500);">We focus on speed and clarity in every navigation path.</span>
+                </div>
+              </li>
+              <li style="display: flex; gap: var(--sp-4);">
+                <span style="color: var(--brand-primary); font-weight: 800;">02</span>
+                <div>
+                  <strong class="type-body-md" style="display: block; margin-bottom: 2px; color: var(--grey-900);">Secure Transactions</strong>
+                  <span class="type-body-sm" style="color: var(--grey-500);">Integrated with multi-tier portal guards and PayMongo processing.</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <div style="padding-top: var(--sp-12); margin-top: var(--sp-12); border-top: 1px solid var(--border-subtle); color: var(--grey-400);">
+            <p class="type-body-xs">
+              Last Updated: April 02, 2026<br>
+              Document Reference: ACIS-{{ title[:3].upper() }}-2026
+            </p>
+          </div>
+        </div>
+
+        <div style="margin-top: var(--sp-12); display: flex; align-items: center; justify-content: center; gap: var(--sp-6);">
+          <a href="/" class="btn btn--secondary">Back to Home</a>
+          <button class="btn btn--ghost btn--sm" onclick="window.scrollTo({top:0, behavior:'smooth'})">Scroll to Top</button>
+        </div>
+      </article>
+
+    </div>
+  </section>
+</main>
+{% endblock %}

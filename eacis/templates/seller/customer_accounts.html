@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% block title %}Customer Accounts — Seller Portal{% endblock %}
+{% block content %}
+<div class="stagger-children">
+  <div class="page-content bg-grey-50 seller-shell">
+    <div class="seller-header" style="align-items:flex-start; margin-bottom:var(--sp-8);">
+      <div class="seller-header__head">
+        <div class="seller-header__meta">
+          <span class="badge seller-header__chip seller-header__chip--info">CRM</span>
+          <span class="type-label" style="color:var(--grey-500);">Account Management</span>
+        </div>
+        <h1 class="type-display-md" style="color:var(--grey-900); margin:0;">Customer Accounts</h1>
+        <p class="type-body-sm mt-2" style="color:var(--grey-600);">Segment by tier, LTV, and account health for targeted engagement.</p>
+      </div>
+      <button class="btn btn--secondary btn--sm">Export Segment</button>
+    </div>
+
+    <div class="reveal" data-delay="60ms" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:var(--sp-4); margin-bottom:var(--sp-8);">
+      <div class="glass-card p-4" style=" background:linear-gradient(180deg, #FF6B3510 0%, transparent 40%);">
+        <div class="type-body-xs" style="color:var(--grey-500); font-weight:600;">TOTAL ACCOUNTS</div>
+        <div class="type-display-md mt-2" style="color:#FF6B35; margin:0;">1,248</div>
+        <div class="type-body-xs mt-2" style="color:var(--grey-600);">Last 90 days active</div>
+      </div>
+      <div class="glass-card p-4" style=" background:linear-gradient(180deg, #00875A10 0%, transparent 40%);">
+        <div class="type-body-xs" style="color:var(--grey-500); font-weight:600;">VIP TIER</div>
+        <div class="type-display-md mt-2" style="color:#00875A; margin:0;">86</div>
+        <div class="type-body-xs mt-2" style="color:var(--grey-600);">High-value segment</div>
+      </div>
+      <div class="glass-card p-4" style=" background:linear-gradient(180deg, #0052CC10 0%, transparent 40%);">
+        <div class="type-body-xs" style="color:var(--grey-500); font-weight:600;">AT-RISK</div>
+        <div class="type-display-md mt-2" style="color:#DE350B; margin:0;">21</div>
+        <div class="type-body-xs mt-2" style="color:#DE350B; font-weight:600;">60+ days inactive</div>
+      </div>
+      <div class="glass-card p-4" style=" background:linear-gradient(180deg, #FF8B0010 0%, transparent 40%);">
+        <div class="type-body-xs" style="color:var(--grey-500); font-weight:600;">AVG LIFETIME VALUE</div>
+        <div class="type-display-md mt-2" style="color:#FF8B00; margin:0;">PHP 14.2k</div>
+        <div class="type-body-xs mt-2" style="color:var(--grey-600);">Rolling 12 months</div>
+      </div>
+    </div>
+
+    <div class="reveal" data-delay="100ms" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:var(--sp-6); margin-bottom:var(--sp-8);">
+      <div class="glass-card p-6" style="background:linear-gradient(180deg, #00875A12 0%, transparent 40%); border-top:3px solid #00875A;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--sp-4);">
+          <h3 class="type-h4" style="margin:0;">VIP Buyers</h3>
+          <span class="badge badge--success">Loyalty</span>
+        </div>
+        <div class="type-display-lg" style="color:#00875A; margin-bottom:var(--sp-4);">86</div>
+        <div style="padding:var(--sp-4); background:var(--grey-0); border-radius:var(--radius-md); margin-bottom:var(--sp-3);">
+          <div class="type-body-xs text-muted">Avg Orders</div>
+          <div class="type-body-sm fw-semibold">12.4 per year</div>
+        </div>
+        <div style="padding:var(--sp-4); background:var(--grey-0); border-radius:var(--radius-md);">
+          <div class="type-body-xs text-muted">Avg LTV</div>
+          <div class="type-body-sm fw-semibold">PHP 92,400</div>
+        </div>
+      </div>
+
+      <div class="glass-card p-6" style="background:linear-gradient(180deg, #0052CC12 0%, transparent 40%); border-top:3px solid #0052CC;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--sp-4);">
+          <h3 class="type-h4" style="margin:0;">Standard</h3>
+          <span class="badge badge--info">Active</span>
+        </div>
+        <div class="type-display-lg" style="color:#0052CC; margin-bottom:var(--sp-4);">1,141</div>
+        <div style="padding:var(--sp-4); background:var(--grey-0); border-radius:var(--radius-md); margin-bottom:var(--sp-3);">
+          <div class="type-body-xs text-muted">Avg Orders</div>
+          <div class="type-body-sm fw-semibold">2.8 per year</div>
+        </div>
+        <div style="padding:var(--sp-4); background:var(--grey-0); border-radius:var(--radius-md);">
+          <div class="type-body-xs text-muted">Avg LTV</div>
+          <div class="type-body-sm fw-semibold">PHP 8,400</div>
+        </div>
+      </div>
+
+      <div class="glass-card p-6" style="background:linear-gradient(180deg, #FF8B0012 0%, transparent 40%); border-top:3px solid #FF8B00;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--sp-4);">
+          <h3 class="type-h4" style="margin:0;">New Buyers</h3>
+          <span class="badge badge--warning">Monitor</span>
+        </div>
+        <div class="type-display-lg" style="color:#FF8B00; margin-bottom:var(--sp-4);">21</div>
+        <div style="padding:var(--sp-4); background:var(--grey-0); border-radius:var(--radius-md); margin-bottom:var(--sp-3);">
+          <div class="type-body-xs text-muted">First Purchase</div>
+          <div class="type-body-sm fw-semibold">Last 30 days</div>
+        </div>
+        <div style="padding:var(--sp-4); background:var(--grey-0); border-radius:var(--radius-md);">
+          <div class="type-body-xs text-muted">Repeat Rate</div>
+          <div class="type-body-sm fw-semibold">14.3%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="reveal" data-delay="140ms">
+      <div class="glass-card p-6">
+        <h3 class="type-h4" style="margin:0 0 var(--sp-5) 0;">Account Health Ranking</h3>
+        <div class="table-wrapper" style="border:none; box-shadow:none;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Customer</th>
+                <th>Tier</th>
+                <th style="text-align:right;">LTV</th>
+                <th style="text-align:center;">Last Order</th>
+                <th style="text-align:center;">Risk</th>
+                <th style="text-align:center;">Health</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="fw-semibold">Maria Santos</span></td>
+                <td><span class="badge badge--success">VIP</span></td>
+                <td style="text-align:right;" class="fw-semibold">PHP 92,400</td>
+                <td style="text-align:center;">Apr 02</td>
+                <td style="text-align:center;"><span class="badge badge--success">Low</span></td>
+                <td style="text-align:center;"><span class="badge badge--success">Excellent</span></td>
+              </tr>
+              <tr>
+                <td><span class="fw-semibold">John Reyes</span></td>
+                <td><span class="badge badge--info">Standard</span></td>
+                <td style="text-align:right;" class="fw-semibold">PHP 18,300</td>
+                <td style="text-align:center;">Mar 18</td>
+                <td style="text-align:center;"><span class="badge badge--warning">Medium</span></td>
+                <td style="text-align:center;"><span class="badge badge--warning">Watch</span></td>
+              </tr>
+              <tr>
+                <td><span class="fw-semibold">C. Bautista</span></td>
+                <td><span class="badge badge--muted">New</span></td>
+                <td style="text-align:right;" class="fw-semibold">PHP 6,800</td>
+                <td style="text-align:center;">Apr 01</td>
+                <td style="text-align:center;"><span class="badge badge--success">Low</span></td>
+                <td style="text-align:center;"><span class="badge badge--success">Healthy</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,385 @@
+{% extends 'base.html' %}
+{% block title %}Shop Appliances — E-ACIS{% endblock %}
+{% block content %}
+<div class="main-content">
+  <div class="stagger-children">
+
+  <!-- Shop Header -->
+  <div style="background:var(--grey-0);border-bottom:1px solid var(--border-subtle);padding-top:calc(var(--topbar-height) + var(--sp-6));padding-bottom:var(--sp-4);">
+    <div class="container">
+      {% if view_mode == 'discovery' %}
+      <!-- Premium Discovery Hero -->
+      <section class="glass-card--hero mb-12">
+        <div class="hero__image-box">
+          <img src="/static/assets/products/gas-range-with-oven-4-burners.webp" alt="Premium Cooking Collection">
+        </div>
+        <div class="hero__content-box">
+          <div class="chip chip--active mb-4">Curated Collection 2026</div>
+          <h1 class="type-display-lg mb-4" style="color:var(--grey-900);">The Heart of Your Modern Home</h1>
+          <p class="type-body-lg mb-10" style="color:var(--grey-600); max-width:440px; line-height:1.6;">Precision engineered appliances designed for those who value both form and function. Discover the art of premium living.</p>
+          <div style="display:flex; gap:var(--sp-4);">
+            <a href="/shop" class="btn btn--primary btn--lg">Explore Full Catalog</a>
+            <a href="#trending" class="btn btn--secondary btn--lg">Trending Now</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Value Props / Trust Bar -->
+      <section class="value-prop-bar mb-12 stagger-item">
+        <div class="value-prop-item">
+          <div class="value-prop-item__icon">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
+          </div>
+          <div class="value-prop-item__text">
+            <div class="value-prop-item__title">Expert Fulfillment</div>
+            <div class="value-prop-item__desc">Safe, specialized handling</div>
+          </div>
+        </div>
+        <div class="value-prop-item">
+          <div class="value-prop-item__icon">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+          </div>
+          <div class="value-prop-item__text">
+            <div class="value-prop-item__title">Extended Warranty</div>
+            <div class="value-prop-item__desc">2-Year Platinum coverage</div>
+          </div>
+        </div>
+        <div class="value-prop-item">
+          <div class="value-prop-item__icon">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          </div>
+          <div class="value-prop-item__text">
+            <div class="value-prop-item__title">0% Installments</div>
+            <div class="value-prop-item__desc">Up to 24 months available</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Discovery Category Navigator -->
+      <h3 class="type-label mb-6 stagger-item" style="letter-spacing:0.08em; color:var(--grey-400);">Discover by Collection</h3>
+      <section class="discovery-category-grid mb-12 stagger-item">
+        <div class="category-card" data-cat="Kitchen & Cooking">
+          <div class="category-card__icon">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M4 10h16m-8-3V4M7 7V4m10 3V4M5 20h14a2 2 0 002-2V10H3v8a2 2 0 002 2z"></path></svg>
+          </div>
+          <div class="category-card__label">Kitchen</div>
+        </div>
+        <div class="category-card" data-cat="Laundry & Cleaning">
+          <div class="category-card__icon">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 21a9 9 0 100-18 9 9 0 000 18z"></path><path d="M9 12a3 3 0 106 0 3 3 0 00-6 0z"></path></svg>
+          </div>
+          <div class="category-card__label">Laundry</div>
+        </div>
+        <div class="category-card" data-cat="Cooling & Air Quality">
+          <div class="category-card__icon">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+          </div>
+          <div class="category-card__label">Cooling</div>
+        </div>
+        <div class="category-card" data-cat="Home Entertainment">
+          <div class="category-card__icon">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M7 4h10a2 2 0 012 2v1h-14V6a2 2 0 012-2zM4 9h16v8h-16V9zM7 20h10"></path></svg>
+          </div>
+          <div class="category-card__label">Entertainment</div>
+        </div>
+        <div class="category-card" data-cat="Gadgets">
+          <div class="category-card__icon">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+          </div>
+          <div class="category-card__label">Gadgets</div>
+        </div>
+      </section>
+
+      <h3 id="trending" class="type-display-sm mb-6 stagger-item" style="font-weight:var(--weight-extrabold);">Trending Now</h3>
+      {% endif %}
+
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:var(--sp-4);">
+        <div>
+          <h1 class="type-display-md">{% if view_mode == 'discovery' %}Discovery Hub{% else %}Shop Catalog{% endif %}</h1>
+          <p class="type-body-sm" style="color:var(--grey-400);margin-top:4px;">
+            {% if view_mode == 'discovery' %}
+              Hand-picked appliance trends and premium selections.
+            {% else %}
+              Search and filter our complete catalog of 500+ appliances.
+            {% endif %}
+          </p>
+        </div>
+        <!-- Category chips -->
+        <div style="display:flex;gap:var(--sp-2);flex-wrap:wrap;" id="category-chips">
+          <button class="chip chip--active" data-cat="">All</button>
+          <button class="chip" data-cat="Kitchen &amp; Cooking">Kitchen &amp; Cooking</button>
+          <button class="chip" data-cat="Cooling &amp; Air Quality">Cooling &amp; Air Quality</button>
+          <button class="chip" data-cat="Laundry &amp; Cleaning">Laundry &amp; Cleaning</button>
+          <button class="chip" data-cat="Personal Care">Personal Care</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container" style="padding-top:var(--sp-8);padding-bottom:var(--sp-16);">
+    <div style="display:flex;gap:var(--sp-6);align-items:flex-start;">
+
+      <!-- Filter Sidebar (Hidden in Discovery Mode) -->
+      {% if view_mode == 'catalog' %}
+      <aside id="filter-panel" style="width:240px;flex-shrink:0;position:sticky;top:calc(var(--topbar-height)+var(--sp-4));">
+        <div class="glass-card--strong" style="background:var(--grey-0);border:1px solid var(--border-default);border-radius:var(--radius-lg);padding:var(--sp-5);box-shadow:var(--shadow-xs);">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-4);">
+            <h2 style="font-size:var(--text-sm);font-weight:var(--weight-bold);color:var(--grey-700);letter-spacing:0.04em;text-transform:uppercase;">Filters</h2>
+            <button id="clear-filters" class="btn btn--xs btn--ghost" style="height:24px;border-radius:var(--radius-sm);">Clear</button>
+          </div>
+
+          <!-- Price Range -->
+          <div style="margin-bottom:var(--sp-5);">
+            <div class="type-label" style="margin-bottom:var(--sp-3);">Price Range</div>
+            <div style="display:flex;gap:var(--sp-2);">
+              <input id="price-min" type="number" placeholder="Min" class="form-input" style="height:36px;font-size:var(--text-sm);" min="0">
+              <input id="price-max" type="number" placeholder="Max" class="form-input" style="height:36px;font-size:var(--text-sm);" min="0">
+            </div>
+          </div>
+
+          <!-- Rating -->
+          <div style="margin-bottom:var(--sp-5);">
+            <div class="type-label" style="margin-bottom:var(--sp-3);">Min. Rating</div>
+            <div style="display:flex;flex-direction:column;gap:var(--sp-2);">
+              {% for val, label in [('0','Any rating'),('4','4★ & up'),('3','3★ & up')] %}
+              <label style="display:flex;align-items:center;gap:var(--sp-2);cursor:pointer;">
+                <input type="radio" name="rating-filter" value="{{ val }}" {% if loop.first %}checked{% endif %} style="accent-color:var(--brand-primary);width:16px;height:16px;">
+                <span class="type-body-sm">{{ label }}</span>
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- Stock -->
+          <div style="margin-bottom:var(--sp-5);">
+            <div class="type-label" style="margin-bottom:var(--sp-3);">Availability</div>
+            <label style="display:flex;align-items:center;gap:var(--sp-2);cursor:pointer;">
+              <input id="instock-filter" type="checkbox" style="accent-color:var(--brand-primary);width:16px;height:16px;">
+              <span class="type-body-sm">In Stock Only</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:var(--sp-2);cursor:pointer;margin-top:var(--sp-2);">
+              <input id="installment-filter" type="checkbox" style="accent-color:var(--brand-primary);width:16px;height:16px;">
+              <span class="type-body-sm">0% Installment</span>
+            </label>
+          </div>
+
+          <button id="apply-filters" class="btn btn--primary btn--full" style="margin-top:var(--sp-2);">Apply Filters</button>
+        </div>
+      </aside>
+      {% endif %}
+
+      <!-- Products Area -->
+      <section id="shop-root" data-view-mode="{{ view_mode }}" style="flex:1;min-width:0;">
+        <!-- Toolbar -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-5);gap:var(--sp-3);flex-wrap:wrap;">
+          <div class="type-body-sm" style="color:var(--grey-500);">
+            <strong id="products-count" style="color:var(--grey-800);font-weight:var(--weight-semibold);">0</strong> products found
+          </div>
+          <div style="display:flex;align-items:center;gap:var(--sp-2);">
+            <label for="sort-select" class="type-body-sm" style="color:var(--grey-500);white-space:nowrap;">Sort by</label>
+            <select id="sort-select" class="form-select" style="height:36px;width:auto;font-size:var(--text-sm);">
+              <option value="relevance">Relevance</option>
+              <option value="price-asc">Price: Low → High</option>
+              <option value="price-desc">Price: High → Low</option>
+              <option value="rating">Best Rated</option>
+              <option value="newest">Newest</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Grid -->
+        <div id="products-grid" class="product-grid stagger-children"></div>
+
+        <!-- Empty state -->
+        <div id="empty-state" class="empty-state" style="display:none;">
+          <div class="empty-state__icon">
+            <svg width="56" height="56" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11" stroke-width="1.5"/></svg>
+          </div>
+          <div class="empty-state__title">No products found</div>
+          <div class="empty-state__message">Try adjusting your filters or search for a different item.</div>
+          <button id="reset-btn" class="btn btn--primary">Clear Filters</button>
+        </div>
+
+        <!-- Pagination -->
+        <div id="pagination-wrap" class="pagination" style="margin-top:var(--sp-10);justify-content:center;">
+          <button id="page-prev" class="pagination__btn" disabled>
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <div id="page-indicator" class="type-body-sm" style="padding:0 var(--sp-4);color:var(--grey-500);">Page 1 of 1</div>
+          <button id="page-next" class="pagination__btn">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Mobile Bottom Nav -->
+  <nav class="bottom-nav" aria-label="Mobile navigation">
+    <a href="/shop" class="bottom-nav__item active" aria-label="Shop">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
+      Shop
+    </a>
+    <a href="/customer/orders" class="bottom-nav__item" aria-label="Orders">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      Orders
+    </a>
+    <a href="/customer/profile" class="bottom-nav__item" aria-label="Profile">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profile
+    </a>
+  </nav>
+</div>
+
+<style>
+.chip {
+  height: 32px;
+  padding: 0 var(--sp-4);
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--border-medium);
+  background: var(--grey-0);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  font-family: var(--font-sans);
+  color: var(--grey-600);
+  cursor: pointer;
+  transition: all var(--dur-fast) var(--ease-out);
+  white-space: nowrap;
+}
+.chip:hover {
+  border-color: var(--brand-primary);
+  color: var(--brand-primary);
+  background: var(--brand-primary-subtle);
+}
+.chip--active {
+  background: var(--brand-primary);
+  border-color: var(--brand-primary);
+  color: white;
+  box-shadow: var(--shadow-primary);
+}
+</style>
+
+<script src="/static/js/data/products.js"></script>
+<script src="/static/js/components/productGrid.js"></script>
+<script>
+(function(){
+  const PAGE_SIZE = 12;
+  let all = (window.PRODUCTS || []).slice();
+  let filtered = all.slice();
+  let page = 1;
+
+  function getFilters() {
+    return {
+      category: document.querySelector('.chip--active')?.dataset.cat || '',
+      priceMin: parseFloat(document.getElementById('price-min').value) || 0,
+      priceMax: parseFloat(document.getElementById('price-max').value) || Infinity,
+      rating:   parseFloat(document.querySelector('input[name="rating-filter"]:checked')?.value) || 0,
+      inStock:  document.getElementById('instock-filter').checked,
+      install:  document.getElementById('installment-filter').checked,
+    };
+  }
+
+  function applyFilters() {
+    const f = getFilters();
+    filtered = all.filter(p => {
+      const category = document.querySelector('#category-chips .chip--active')?.dataset.cat || '';
+      if (category && p.category !== category) return false;
+      if (p.price < f.priceMin || p.price > f.priceMax) return false;
+      if (f.rating && (p.rating || 0) < f.rating) return false;
+      if (f.inStock && p.stock <= 0) return false;
+      if (f.install && p.price <= 10000) return false;
+      return true;
+    });
+
+    const sort = document.getElementById('sort-select') ? document.getElementById('sort-select').value : 'rating';
+    if (sort === 'price-asc')  filtered.sort((a,b) => a.price - b.price);
+    else if (sort === 'price-desc') filtered.sort((a,b) => b.price - a.price);
+    else if (sort === 'rating')     filtered.sort((a,b) => (b.rating||0) - (a.rating||0));
+
+    page = 1;
+    render();
+  }
+
+  function render() {
+    const total = filtered.length;
+    const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+    const slice = filtered.slice((page-1)*PAGE_SIZE, page*PAGE_SIZE);
+
+    document.getElementById('products-count').textContent = total;
+    document.getElementById('page-indicator').textContent = `Page ${page} of ${pages}`;
+    document.getElementById('page-prev').disabled = page <= 1;
+    document.getElementById('page-next').disabled = page >= pages;
+    const grid = document.getElementById('products-grid');
+    const empty = document.getElementById('empty-state');
+    const pager = document.getElementById('pagination-wrap');
+
+    if (slice.length === 0) {
+      grid.style.display  = 'none';
+      empty.style.display = 'flex';
+      pager.style.display = 'none';
+    } else {
+      grid.style.display  = '';
+      empty.style.display = 'none';
+      pager.style.display = total > PAGE_SIZE ? 'flex' : 'none';
+      renderProducts('#products-grid', slice);
+    }
+  }
+
+  // Category Navigator & Hero Section
+  document.querySelectorAll('.category-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const cat = card.dataset.cat;
+      const chip = document.querySelector(`#category-chips .chip[data-cat="${cat}"]`);
+      if (chip) chip.click();
+      window.scrollTo({ top: document.getElementById('shop-root').offsetTop - 100, behavior: 'smooth' });
+    });
+  });
+
+  // Initialization logic based on View Mode
+  const shopRoot = document.getElementById('shop-root');
+  const viewMode = shopRoot?.dataset.viewMode || 'catalog';
+
+  if (viewMode === 'discovery') {
+    // Curated sort for Discovery Hub
+    all.sort((a,b) => (b.rating || 0) - (a.rating || 0));
+    filtered = all.slice();
+  }
+
+  // Initial render
+  render();
+
+  // Category chips
+  document.querySelectorAll('#category-chips .chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('#category-chips .chip').forEach(c => c.classList.remove('chip--active'));
+      chip.classList.add('chip--active');
+      applyFilters();
+    });
+  });
+
+  document.getElementById('apply-filters').addEventListener('click', applyFilters);
+  document.getElementById('sort-select').addEventListener('change', applyFilters);
+  document.getElementById('page-prev').addEventListener('click', () => { page--; render(); window.scrollTo({top:0,behavior:'smooth'}); });
+  document.getElementById('page-next').addEventListener('click', () => { page++; render(); window.scrollTo({top:0,behavior:'smooth'}); });
+
+  function clearAll() {
+    document.getElementById('price-min').value = '';
+    document.getElementById('price-max').value = '';
+    document.querySelector('input[name="rating-filter"][value="0"]').checked = true;
+    document.getElementById('instock-filter').checked = false;
+    document.getElementById('installment-filter').checked = false;
+    document.getElementById('sort-select').value = 'relevance';
+    document.querySelectorAll('#category-chips .chip').forEach(c => c.classList.remove('chip--active'));
+    document.querySelector('#category-chips .chip[data-cat=""]').classList.add('chip--active');
+    applyFilters();
+  }
+
+  document.getElementById('clear-filters').addEventListener('click', clearAll);
+  document.getElementById('reset-btn').addEventListener('click', clearAll);
+
+  applyFilters();
+})();
+</script>
+  </div>
+</div>
+{% endblock %}

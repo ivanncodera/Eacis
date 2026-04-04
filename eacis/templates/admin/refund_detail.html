@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Refund {{ ref }} — Admin Portal{% endblock %}
+{% block content %}
+<div class="stagger-children">
+  <div class="page-content bg-grey-50">
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; gap:var(--sp-4); margin-bottom:var(--sp-6);">
+      <div>
+        <a href="/admin/refunds" class="btn btn--ghost btn--sm mb-2">← Back to Refund Queue</a>
+        <h1 class="type-display-md">Refund {{ ref }}</h1>
+        <p class="type-body-sm text-muted mt-1">View evidence, payment references, and resolution history.</p>
+      </div>
+      <div style="display:flex; gap:var(--sp-3); flex-wrap:wrap;">
+        <span class="badge badge--warning">Awaiting review</span>
+        <span class="badge badge--info">View only</span>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns: 1.3fr 1fr; gap:var(--sp-6); align-items:start;">
+      <div class="glass-card p-6">
+        <h3 class="type-h4 mb-4">Evidence</h3>
+        <div class="glass-card" style="background:var(--surface-sunken); padding:var(--sp-4);">
+          <div class="type-body-sm text-muted">Customer claim: seller unresponsive after refund request.</div>
+        </div>
+      </div>
+      <div class="glass-card p-6">
+        <h3 class="type-h4 mb-4">Resolution</h3>
+        <div class="glass-card" style="background:var(--surface-sunken); padding:var(--sp-4);">
+          <div class="type-body-sm"><strong>Latest Decision:</strong> Pending operations team action.</div>
+          <div class="type-body-xs text-muted mt-2">Admin portal is restricted to oversight only for refund and return approvals.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,34 @@
+# Environment variables
+.env
+.env.local
+
+# Database
+*.db
+eacis_dev.db
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+
+# Flask
+instance/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Static files
+node_modules/

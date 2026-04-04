@@ -1,0 +1,4 @@
+id,email,password_hash,role,full_name,phone,is_active,created_at,loyalty_points,seller_code
+1,customer@eacis.ph,scrypt:32768:8:1$ctq2zNSBw6TeFDmE$d9ab88f15d2274f2d47af9d9d77bbae3da388795f8e2b49f4eb8f2a52dca690c244c484f9e64a187b86f65e28c0b3c870e0266d87c1606c8a9911d38e9c195b8,customer,Juan dela Cruz,,1,2026-03-30 09:33:56,240,
+2,seller@eacis.ph,scrypt:32768:8:1$xYmpmkec3f4L56Bp$a5e2a690c3cf4844d038acc9a9b7280248a433f0e564cc2e8a1a8cdd9c731c9e35ff2a33a54f3a9cda2758601f86ad931a8749585075e59ed5b861ce8abb5af7,seller,Maria Santos,,1,2026-03-30 09:33:56,0,SLR01
+3,admin@eacis.ph,scrypt:32768:8:1$hJxR5frlOXdUbIMx$a471ffb0dfd5442872895e675de01a6979574a2a739262fb3cdb679b1e4422e2d3c5d2fc3e31d5340891f6dadadb1500f395ef686b19193be672621c8bebef95,admin,Admin User,,1,2026-03-30 09:33:56,0,

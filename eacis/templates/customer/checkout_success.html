@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container" style="max-width: 800px; padding: var(--sp-20) var(--sp-6); text-align: center;">
+  <div class="reveal">
+    <!-- Success Icon -->
+    <div style="width: 80px; height: 80px; background: var(--color-success-subtle); color: var(--color-success); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--sp-8);">
+      <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+    </div>
+
+    <h1 class="type-display-md mb-2">Order Confirmed!</h1>
+    <p class="type-body-lg" style="color: var(--grey-500); margin-bottom: var(--sp-12);">Thank you for your purchase. Your order is being processed and will be shipped soon.</p>
+
+    <!-- Order Summary Card -->
+    <div class="glass-card stagger-children" style="text-align: left; background: var(--grey-0); border-color: var(--border-medium); box-shadow: var(--shadow-md);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--sp-8);">
+        <div>
+          <span class="type-label-xs" style="color: var(--grey-400); letter-spacing: 0.05em;">ORDER REFERENCE</span>
+          <div class="type-ref" style="font-size: var(--text-xl); color: var(--brand-primary); margin-top: 2px;">ORD-20260402-4912</div>
+        </div>
+        <div style="text-align: right;">
+          <span class="type-label-xs" style="color: var(--grey-400); letter-spacing: 0.05em;">EST. DELIVERY</span>
+          <div class="type-body-base fw-bold" style="margin-top: 2px;">Apr 05 – Apr 08, 2026</div>
+        </div>
+      </div>
+
+      <!-- Progressive Success Indicator -->
+      <div style="margin-bottom: var(--sp-10);">
+        <div class="type-label-xs mb-4" style="color: var(--grey-400);">NEXT STEPS</div>
+        <div style="display: flex; align-items: center; gap: 4px;">
+          <div style="flex: 1; height: 6px; background: var(--color-success); border-radius: var(--radius-pill);"></div>
+          <div style="flex: 1; height: 6px; background: var(--color-success-subtle); border-radius: var(--radius-pill); position: relative; overflow: hidden;">
+             <div style="position: absolute; top: 0; left: 0; width: 30%; height: 100%; background: var(--color-success); opacity: 0.5;"></div>
+          </div>
+          <div style="flex: 1; height: 6px; background: var(--grey-100); border-radius: var(--radius-pill);"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-top: var(--sp-2);">
+          <span class="type-body-xs fw-bold text-success">Confirmed</span>
+          <span class="type-body-xs fw-medium" style="color: var(--grey-400);">Processing</span>
+          <span class="type-body-xs fw-medium" style="color: var(--grey-400);">Shipped</span>
+        </div>
+      </div>
+
+      <!-- Points Badge -->
+      <div style="padding: var(--sp-5); background: linear-gradient(135deg, var(--brand-primary-subtle) 0%, rgba(0,122,255,0.05) 100%); border-radius: var(--radius-lg); border: 1.5px solid rgba(0,122,255,0.12); display: flex; align-items: center; gap: var(--sp-5);">
+        <div style="width: 48px; height: 48px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--brand-primary); font-weight: 800; font-size: var(--text-sm); box-shadow: var(--shadow-sm);">+180</div>
+        <div style="flex: 1;">
+          <div class="type-body-base fw-bold" style="color: var(--brand-primary-dark); margin-bottom: 2px;">E-ACIS Points Gained!</div>
+          <div class="type-body-sm" style="color: var(--brand-primary); opacity: 0.8;">You've earned 180 points. Use them to redeem vouchers on your next build!</div>
+        </div>
+        <a href="/customer/loyalty" class="type-link-sm fw-bold" style="color: var(--brand-primary);">Wallet ›</a>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div style="margin-top: var(--sp-12); display: flex; flex-direction: column; align-items: center; gap: var(--sp-4);">
+      <div style="display: flex; gap: var(--sp-4); width: 100%; justify-content: center;">
+        <a href="/customer/orders" class="btn btn--secondary btn--lg" style="min-width: 200px;">View My Orders</a>
+        <a href="/shop" class="btn btn--primary btn--lg" style="min-width: 200px;">Continue Shopping</a>
+      </div>
+      <button class="btn btn--ghost btn--sm" onclick="window.print()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right: 6px;"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2m-12 0h12v4H6v-4z"/></svg>
+        Print Order Receipt
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Clear cart on success
+    if (window.CartManager) window.CartManager.clear();
+});
+</script>
+{% endblock %}

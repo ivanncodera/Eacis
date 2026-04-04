@@ -1,0 +1,71 @@
+/* Utility helpers for accessibility and small layout fixes */
+
+.sr-only {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+
+.u-gap-left-8 {
+  margin-left: 8px !important;
+}
+
+/* small reset for select appearance used across app */
+.select-reset {
+  padding: 6px 8px;
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  background: white;
+  color: var(--grey-900);
+  font-size: var(--text-sm);
+}
+
+/* Layout helpers */
+.pt-24 { padding-top: 96px !important; }
+.w-240 { width: 240px !important; }
+.mt-24 { margin-top: 24px !important; }
+.align-center { align-self: center !important; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+
+/* Small input style used in filters */
+.input-sm { width: 100%; padding: 6px; border: 1px solid var(--border-default); border-radius: 6px; }
+
+/* Layout utilities added for landing and common templates */
+.flex { display: flex !important; }
+.flex-center { display: flex !important; align-items: center !important; justify-content: center !important; }
+.items-center { align-items: center !important; }
+.justify-center { justify-content: center !important; }
+.gap-12 { gap: 12px !important; }
+.mt-3 { margin-top: 12px !important; }
+.mt-2 { margin-top: 8px !important; }
+.pt-24 { padding-top: 96px !important; }
+.min-h-60vh { min-height: 60vh !important; }
+.card-hero { width: 80% !important; height: 320px !important; border-radius: 16px !important; background: linear-gradient(180deg, #f8fafc, #eef2f7) !important; display:flex !important; align-items:center !important; justify-content:center !important; box-shadow: var(--shadow-lg) !important; }
+.img-hero { max-width: 80% !important; max-height: 80% !important; object-fit: contain !important; }
+.pill-group { display: flex !important; gap: 12px !important; overflow: auto !important; padding-bottom: 8px !important; }
+.grid-3 { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 16px !important; }
+/* Additional helpers for seller dashboard layouts */
+.gap-16 { gap: 16px !important; }
+.gap-8 { gap: 8px !important; }
+.flex-1 { flex: 1 1 0% !important; }
+.min-w-220 { min-width: 220px !important; }
+.min-w-480 { min-width: 480px !important; }
+.grid-2-1 { display: grid !important; grid-template-columns: 2fr 1fr !important; gap: 16px !important; }
+.mt-5 { margin-top: 20px !important; }
+.mb-3 { margin-bottom: 12px !important; }
+.max-w-980 { max-width: 980px !important; margin: 0 auto !important; }
+.w-full { width: 100% !important; }
+.justify-between { justify-content: space-between !important; }
+.flex-col { display: flex !important; flex-direction: column !important; }
+.justify-end { justify-content: flex-end !important; }
+.p-3 { padding: 12px !important; }
+.min-h-96 { min-height: 96px !important; }
+.flex-wrap { flex-wrap: wrap !important; }
+.mt-4 { margin-top: 16px !important; }
+.m-0 { margin: 0 !important; }
+.min-h-80vh { min-height: 80vh !important; }
+.w-520 { width: 520px !important; }
+.pt-16 { padding-top: 64px !important; }
+.max-w-560 { max-width: 560px !important; }
+.min-w-320 { min-width: 320px !important; }

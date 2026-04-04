@@ -1,0 +1,23 @@
+id,product_ref,seller_id,name,category,description,price,compare_price,stock,low_stock_threshold,warranty_months,installment_enabled,is_active,weight_kg,image_url,specs,created_at
+1,PRD-SLR01-0001,2,Two-Door Refrigerator (10 cu. ft.),Kitchen & Cooking,,18000.00,,12,5,12,1,1,,assets/products/2-door-refrigirator.webp,,2026-03-30 09:33:56
+2,PRD-SLR01-0002,2,Single Door Refrigerator (6 cu. ft.),Kitchen & Cooking,,8500.00,,20,5,12,1,1,,assets/products/single-door-ref.webp,,2026-03-30 09:33:56
+3,PRD-SLR01-0003,2,Inverter Chest Freezer,Kitchen & Cooking,,11000.00,,8,5,12,1,1,,assets/products/inverted-chest-freezer.webp,,2026-03-30 09:33:56
+4,PRD-SLR01-0004,2,Gas Range with Oven (4 Burners),Kitchen & Cooking,,14500.00,,6,5,12,1,1,,assets/products/gas-range-with-oven-4-burners.webp,,2026-03-30 09:33:56
+5,PRD-SLR01-0005,2,Induction Cooker (Double Zone),Kitchen & Cooking,,4500.00,,30,5,6,0,1,,assets/products/induction-cooker-double.png,,2026-03-30 09:33:56
+6,PRD-SLR01-0006,2,Single Burner Induction Cooker,Kitchen & Cooking,,1800.00,,50,5,0,0,1,,assets/products/single-burner-induction-cooker.webp,,2026-03-30 09:33:56
+7,PRD-SLR01-0007,2,Microwave Oven (20L),Kitchen & Cooking,,3200.00,,25,5,0,0,1,,assets/products/microwave-oven.jfif,,2026-03-30 09:33:56
+8,PRD-SLR01-0008,2,Air Fryer (5L),Kitchen & Cooking,,2800.00,,40,5,0,0,1,,assets/products/air-fryer.jfif,,2026-03-30 09:33:56
+9,PRD-SLR01-0009,2,Electric Oven/Rotisserie (35L),Kitchen & Cooking,,4000.00,,10,5,0,0,1,,assets/products/electric-oven-rotisserie.webp,,2026-03-30 09:33:56
+10,PRD-SLR01-0010,2,Rice Cooker (1.8L),Kitchen & Cooking,,1500.00,,60,5,0,0,1,,assets/products/rice-cooker.jpg,,2026-03-30 09:33:56
+11,PRD-SLR01-0011,2,Electric Kettle (1.7L),Kitchen & Cooking,,800.00,,80,5,0,0,1,,assets/products/electric-kettle.webp,,2026-03-30 09:33:56
+12,PRD-SLR01-0012,2,Stand Mixer,Kitchen & Cooking,,4500.00,,15,5,0,0,1,,assets/products/stand-mixer.jfif,,2026-03-30 09:33:56
+13,PRD-SLR01-0013,2,Electric Food Processor,Kitchen & Cooking,,2200.00,,20,5,0,0,1,,assets/products/electric-food-processor.jfif,,2026-03-30 09:33:56
+14,PRD-SLR01-0014,2,Blender (1.5L),Kitchen & Cooking,,1600.00,,25,5,0,0,1,,assets/products/blender.jfif,,2026-03-30 09:33:56
+15,PRD-SLR01-0015,2,Coffee Maker (Drip type),Kitchen & Cooking,,1200.00,,30,5,0,0,1,,assets/products/coffee-maker.jfif,,2026-03-30 09:33:56
+16,PRD-SLR01-0016,2,Espresso Machine (Home Entry-level),Kitchen & Cooking,,6500.00,,8,5,0,0,1,,assets/products/espresso-machine.jfif,,2026-03-30 09:33:56
+17,PRD-SLR01-0017,2,Bread Toaster (2-Slice),Kitchen & Cooking,,900.00,,40,5,0,0,1,,assets/products/bread-toaster.jfif,,2026-03-30 09:33:56
+18,PRD-SLR01-0018,2,Sandwich Maker/Waffle Iron,Kitchen & Cooking,,1100.00,,35,5,0,0,1,,assets/products/sandwich-maker.jfif,,2026-03-30 09:33:56
+19,PRD-SLR01-0019,2,Juice Extractor,Kitchen & Cooking,,2500.00,,20,5,0,0,1,,assets/products/juice-extractor.jfif,,2026-03-30 09:33:56
+20,PRD-SLR01-0020,2,Slow Cooker (3.5L),Kitchen & Cooking,,1800.00,,22,5,0,0,1,,assets/products/slow-cooker.jfif,,2026-03-30 09:33:56
+21,PRD-SLR01-0021,2,Dishwasher (Countertop),Kitchen & Cooking,,12000.00,,6,5,0,0,1,,assets/products/dishwasher-countertop.jfif,,2026-03-30 09:33:56
+22,PRD-SLR01-0022,2,Water Dispenser (Top Load),Kitchen & Cooking,,3500.00,,18,5,0,0,1,,assets/products/water-dispenser.webp,,2026-03-30 09:33:56

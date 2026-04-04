@@ -1,0 +1,207 @@
+/* ── KPI GRID ── */
+.dashboard-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--sp-6);
+  margin-bottom: var(--sp-10);
+}
+
+.kpi-card {
+  position: relative;
+  background: var(--glass-ultra);
+  backdrop-filter: var(--glass-blur-lg);
+  -webkit-backdrop-filter: var(--glass-blur-lg);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: var(--sp-6);
+  overflow: hidden;
+  transition: all var(--dur-base) var(--ease-spring);
+  display: flex;
+  flex-direction: column;
+}
+
+.kpi-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--brand-primary-light);
+}
+
+.kpi-card__icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--sp-4);
+  transition: transform var(--dur-base) var(--ease-spring);
+}
+
+.kpi-card:hover .kpi-card__icon-wrap {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.kpi-card--blue .kpi-card__icon-wrap { background: var(--brand-primary-subtle); color: var(--brand-primary); }
+.kpi-card--orange .kpi-card__icon-wrap { background: #FFF4E5; color: #FF9500; }
+.kpi-card--green .kpi-card__icon-wrap { background: #EBF7EE; color: #34C759; }
+
+.kpi-card__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--grey-500);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.kpi-card__value {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--grey-900);
+  margin-bottom: 8px;
+}
+
+.kpi-card__delta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+  width: fit-content;
+}
+
+.kpi-card__delta--up { background: #EBF7EE; color: #34C759; }
+.kpi-card__delta--flat { background: var(--grey-50); color: var(--grey-500); }
+
+/* ── COUPOUN CARDS ── */
+.voucher-card {
+  background: var(--grey-0);
+  border: 1.5px dashed var(--border-medium);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-5);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-5);
+  position: relative;
+  transition: all var(--dur-fast);
+  overflow: hidden;
+}
+
+.voucher-card:hover {
+  border-color: var(--brand-primary);
+  box-shadow: var(--shadow-md);
+}
+
+/* Coupon punch-hole effect */
+.voucher-card::before,
+.voucher-card::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: var(--surface-page);
+  border-radius: 50%;
+  left: 31%; /* Adjust based on content divider */
+  z-index: 2;
+}
+
+.voucher-card::before { top: -10px; }
+.voucher-card::after { bottom: -10px; }
+
+.voucher-card__amount {
+  width: 30%;
+  border-right: 1px dashed var(--border-default);
+  padding-right: var(--sp-4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.voucher-card__content {
+  flex: 1;
+  padding-left: var(--sp-2);
+}
+
+/* ── REFUND STATUS STEPPER ── */
+.status-track {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  margin: var(--sp-10) 0;
+}
+
+.status-track::before {
+  content: '';
+  position: absolute;
+  top: 15px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--grey-150);
+  z-index: 1;
+}
+
+.status-step {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-2);
+  width: 80px;
+}
+
+.status-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--grey-100);
+  border: 2px solid var(--grey-200);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: var(--grey-400);
+  transition: all var(--dur-base);
+}
+
+.status-step.complete .status-dot {
+  background: var(--color-success);
+  border-color: var(--color-success);
+  color: white;
+}
+
+.status-step.active .status-dot {
+  background: var(--brand-primary);
+  border-color: var(--brand-primary);
+  color: white;
+  box-shadow: 0 0 0 4px var(--brand-primary-subtle);
+}
+
+/* ── INSTALLMENT BILLING ── */
+.installment-box {
+  background: var(--brand-primary-subtle);
+  border: 1px solid var(--brand-primary-light);
+  border-radius: var(--radius-md);
+  padding: var(--sp-4);
+  margin-top: var(--sp-4);
+}
+
+.installment-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.installment-table td {
+  padding: var(--sp-2) 0;
+  font-size: var(--text-sm);
+}
+
+.installment-table tr:not(:last-child) {
+  border-bottom: 1px solid rgba(0, 122, 255, 0.1);
+}

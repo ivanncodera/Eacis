@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% block title %}Customer Inquiries — Seller Portal{% endblock %}
+{% block content %}
+<div class="stagger-children">
+  <div class="page-content bg-grey-50 seller-shell">
+    <div class="seller-header" style="align-items:flex-start; margin-bottom:var(--sp-8);">
+      <div class="seller-header__head">
+        <div class="seller-header__meta">
+          <span class="badge seller-header__chip seller-header__chip--info">CRM</span>
+          <span class="type-label" style="color:var(--grey-500);">Support Hub</span>
+        </div>
+        <h1 class="type-display-md" style="color:var(--grey-900); margin:0;">Customer Inquiries</h1>
+        <p class="type-body-sm mt-2" style="color:var(--grey-600);">Ticket queue prioritized by urgency and SLA status.</p>
+      </div>
+      <button class="btn btn--secondary btn--sm">Priority Filter</button>
+    </div>
+
+    <div class="reveal" data-delay="60ms" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:var(--sp-4); margin-bottom:var(--sp-8);">
+      <div class="glass-card p-4" style="background:linear-gradient(180deg, #FF8B0010 0%, transparent 40%);">
+        <div class="type-body-xs" style="color:var(--grey-500); font-weight:600;">OPEN</div>
+        <div class="type-display-md mt-2" style="color:#FF8B00; margin:0;">6</div>
+        <div class="type-body-xs mt-2" style="color:var(--grey-600);">Awaiting first response</div>
+      </div>
+      <div class="glass-card p-4" style="background:linear-gradient(180deg, #0052CC10 0%, transparent 40%);">
+        <div class="type-body-xs" style="color:var(--grey-500); font-weight:600;">IN PROGRESS</div>
+        <div class="type-display-md mt-2" style="color:#0052CC; margin:0;">8</div>
+        <div class="type-body-xs mt-2" style="color:var(--grey-600);">Response in progress</div>
+      </div>
+      <div class="glass-card p-4" style="background:linear-gradient(180deg, #00875A10 0%, transparent 40%);">
+        <div class="type-body-xs" style="color:var(--grey-500); font-weight:600;">RESOLVED</div>
+        <div class="type-display-md mt-2" style="color:#00875A; margin:0;">4</div>
+        <div class="type-body-xs mt-2" style="color:var(--grey-600);">Closed today</div>
+      </div>
+    </div>
+
+    <div class="reveal" data-delay="100ms" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--sp-6); margin-bottom:var(--sp-8);">
+      <div class="glass-card p-6" style="background:linear-gradient(180deg, #FF8B0010 0%, transparent 40%);">
+        <h3 class="type-h4" style="color:var(--grey-900); margin:0 0 var(--sp-4) 0;">🔴 Open Tickets</h3>
+        <div class="type-body-xs" style="color:var(--grey-600); margin-bottom:var(--sp-4);">Awaiting initial response</div>
+        <div style="display:flex; flex-direction:column; gap:var(--sp-3);">
+          <div style="padding:var(--sp-3); background:var(--grey-0); border-radius:var(--radius-md); border-left:3px solid #FF8B00;">
+            <div class="type-body-sm fw-semibold">INQ-1044 - L. Gonzales</div>
+            <div class="type-body-xs text-muted">Warranty claim - 45 mins ago</div>
+            <span class="badge badge--danger mt-2">Past SLA</span>
+          </div>
+          <div style="padding:var(--sp-3); background:var(--grey-0); border-radius:var(--radius-md); border-left:3px solid #FF8B00;">
+            <div class="type-body-sm fw-semibold">INQ-1039 - M. Perez</div>
+            <div class="type-body-xs text-muted">Installment terms - 27 mins ago</div>
+            <span class="badge badge--warning mt-2">Approaching SLA</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card p-6" style="background:linear-gradient(180deg, #0052CC10 0%, transparent 40%);">
+        <h3 class="type-h4" style="color:var(--grey-900); margin:0 0 var(--sp-4) 0;">🟡 In Progress</h3>
+        <div class="type-body-xs" style="color:var(--grey-600); margin-bottom:var(--sp-4);">Response being composed</div>
+        <div style="display:flex; flex-direction:column; gap:var(--sp-3);">
+          <div style="padding:var(--sp-3); background:var(--grey-0); border-radius:var(--radius-md); border-left:3px solid #0052CC;">
+            <div class="type-body-sm fw-semibold">INQ-1043 - A. Cruz</div>
+            <div class="type-body-xs text-muted">Delivery delay - Ops Team</div>
+            <span class="badge badge--info mt-2">Within SLA</span>
+          </div>
+          <div style="padding:var(--sp-3); background:var(--grey-0); border-radius:var(--radius-md); border-left:3px solid #0052CC;">
+            <div class="type-body-sm fw-semibold">INQ-1040 - J. Lim</div>
+            <div class="type-body-xs text-muted">Product question - Sales Team</div>
+            <span class="badge badge--info mt-2">Within SLA</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card p-6" style="background:linear-gradient(180deg, #00875A10 0%, transparent 40%);">
+        <h3 class="type-h4" style="color:var(--grey-900); margin:0 0 var(--sp-4) 0;">✅ Resolved</h3>
+        <div class="type-body-xs" style="color:var(--grey-600); margin-bottom:var(--sp-4);">Closed in last 24 hours</div>
+        <div style="display:flex; flex-direction:column; gap:var(--sp-3);">
+          <div style="padding:var(--sp-3); background:var(--grey-0); border-radius:var(--radius-md); border-left:3px solid #00875A;">
+            <div class="type-body-sm fw-semibold" style="opacity:0.7;">INQ-1042</div>
+            <div class="type-body-xs text-muted">Damage claim - 2 hours ago</div>
+            <span class="badge badge--success mt-2">Closed</span>
+          </div>
+          <div style="padding:var(--sp-3); background:var(--grey-0); border-radius:var(--radius-md); border-left:3px solid #00875A;">
+            <div class="type-body-sm fw-semibold" style="opacity:0.7;">INQ-1041</div>
+            <div class="type-body-xs text-muted">Pricing inquiry - 5 hours ago</div>
+            <span class="badge badge--success mt-2">Closed</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="reveal" data-delay="140ms">
+      <div class="glass-card p-6">
+        <h3 class="type-h4" style="margin:0 0 var(--sp-4) 0;">Support SLA Meter</h3>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:var(--sp-4);">
+          <div>
+            <div class="type-body-xs" style="color:var(--grey-500); margin-bottom:var(--sp-2);">Avg First Reply</div>
+            <div class="type-display-sm" style="color:#0052CC; margin-bottom:var(--sp-1);">12 mins</div>
+            <div class="type-body-xs text-muted">Target: 15 mins</div>
+          </div>
+          <div>
+            <div class="type-body-xs" style="color:var(--grey-500); margin-bottom:var(--sp-2);">Resolution Time</div>
+            <div class="type-display-sm" style="color:#0052CC; margin-bottom:var(--sp-1);">4.2 hrs</div>
+            <div class="type-body-xs text-muted">Target: 24 hrs</div>
+          </div>
+          <div>
+            <div class="type-body-xs" style="color:var(--grey-500); margin-bottom:var(--sp-2);">Today Resolved</div>
+            <div class="type-display-sm" style="color:#00875A; margin-bottom:var(--sp-1);">25</div>
+            <div class="type-body-xs" style="color:var(--color-success); font-weight:600;">+5 vs yesterday</div>
+          </div>
+          <div>
+            <div class="type-body-xs" style="color:var(--grey-500); margin-bottom:var(--sp-2);">Satisfaction</div>
+            <div class="type-display-sm" style="color:#FF8B00; margin-bottom:var(--sp-1);">4.8 / 5.0</div>
+            <div class="type-body-xs text-muted">Post-ticket survey</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

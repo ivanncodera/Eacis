@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard — Seller Portal{% endblock %}
+{% block content %}
+<div class="stagger-children">
+  <div class="page-content bg-grey-50 seller-shell">
+    <div class="seller-header reveal">
+      <div class="seller-header__head">
+        <div class="seller-header__meta">
+          <span class="badge seller-header__chip seller-header__chip--primary">Overview</span>
+          <span class="type-label" style="color:var(--grey-500);">Seller Command Center</span>
+        </div>
+        <h1 class="type-display-md" style="margin:0;">Seller Dashboard</h1>
+        <p class="type-body-sm text-muted mt-1">Central hub for sales, inventory, CRM, fulfillment, and finance workflows.</p>
+      </div>
+      <div class="seller-header__actions">
+        <a href="/seller/products/new" class="btn btn--primary btn--sm">Add Product</a>
+        <a href="/seller/orders" class="btn btn--secondary btn--sm">View Orders</a>
+      </div>
+    </div>
+
+    <div class="reveal" data-delay="60" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:var(--sp-4); margin-bottom:var(--sp-8);">
+      <div class="glass-card p-4" style="background:linear-gradient(180deg, #00875A10 0%, transparent 40%);">
+        <div class="type-body-xs" style="color:var(--grey-500); font-weight:600;">TODAY'S REVENUE</div>
+        <div class="type-display-md mt-2 kpi-val" data-format="currency" data-value="45200">0</div>
+        <div class="type-body-xs mt-2" style="color:var(--color-success); font-weight:600;">+12.5% vs yesterday</div>
+      </div>
+      <div class="glass-card p-4" style="background:linear-gradient(180deg, #0052CC10 0%, transparent 40%);">
+        <div class="type-body-xs" style="color:var(--grey-500); font-weight:600;">PENDING ORDERS</div>
+        <div class="type-display-md mt-2 kpi-val" data-format="number" data-value="18">0</div>
+        <div class="type-body-xs mt-2" style="color:var(--grey-600);">3 urgent</div>
+      </div>
+      <div class="glass-card p-4" style="background:linear-gradient(180deg, #FF8B0010 0%, transparent 40%);">
+        <div class="type-body-xs" style="color:var(--grey-500); font-weight:600;">ACTIVE PRODUCTS</div>
+        <div class="type-display-md mt-2 kpi-val" data-format="number" data-value="142">0</div>
+        <div class="type-body-xs mt-2" style="color:#FF8B00; font-weight:600;">5 low stock</div>
+      </div>
+      <div class="glass-card p-4" style="background:linear-gradient(180deg, #00875A10 0%, transparent 40%);">
+        <div class="type-body-xs" style="color:var(--grey-500); font-weight:600;">CUSTOMER RATING</div>
+        <div class="type-display-md mt-2 kpi-val" data-format="number" data-value="4.9">0</div>
+        <div class="type-body-xs mt-2" style="color:var(--color-success); font-weight:600;">Platinum seller</div>
+      </div>
+    </div>
+
+    <div class="glass-card p-6 mb-6 reveal" data-delay="100">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:var(--sp-4); margin-bottom:var(--sp-4);">
+        <div>
+          <h3 class="type-h4" style="margin:0;">Module Hub</h3>
+          <p class="type-body-sm text-muted mt-1">Jump into the area of the seller system you need right now.</p>
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:var(--sp-4);">
+        <a href="/seller/products" class="glass-card glass-card--interactive" style="padding:var(--sp-5); text-decoration:none;">
+          <div class="type-label">Catalog</div>
+          <div class="type-h4 mt-2" style="color:var(--grey-900);">Products</div>
+          <div class="type-body-sm text-muted mt-2">Add, update, and manage listings with images, pricing, and warranty details.</div>
+        </a>
+        <a href="/seller/orders" class="glass-card glass-card--interactive" style="padding:var(--sp-5); text-decoration:none;">
+          <div class="type-label">Sales</div>
+          <div class="type-h4 mt-2" style="color:var(--grey-900);">Orders &amp; Returns</div>
+          <div class="type-body-sm text-muted mt-2">Track orders, deliveries, installment payments, and refund workflows.</div>
+        </a>
+        <a href="/seller/crm-analytics" class="glass-card glass-card--interactive" style="padding:var(--sp-5); text-decoration:none;">
+          <div class="type-label">CRM</div>
+          <div class="type-h4 mt-2" style="color:var(--grey-900);">Customer Relations</div>
+          <div class="type-body-sm text-muted mt-2">Handle inquiries, customer accounts, vouchers, and CRM analytics.</div>
+        </a>
+        <a href="/seller/inventory-analytics" class="glass-card glass-card--interactive" style="padding:var(--sp-5); text-decoration:none;">
+          <div class="type-label">Inventory</div>
+          <div class="type-h4 mt-2" style="color:var(--grey-900);">Stock &amp; Delivery</div>
+          <div class="type-body-sm text-muted mt-2">Review stock health, delivery services, and inventory performance.</div>
+        </a>
+        <a href="/seller/financial-analytics" class="glass-card glass-card--interactive" style="padding:var(--sp-5); text-decoration:none;">
+          <div class="type-label">Finance</div>
+          <div class="type-h4 mt-2" style="color:var(--grey-900);">Financial Analytics</div>
+          <div class="type-body-sm text-muted mt-2">Track settlement, margin, and refund exposure across the store.</div>
+        </a>
+        <a href="/seller/payouts" class="glass-card glass-card--interactive" style="padding:var(--sp-5); text-decoration:none;">
+          <div class="type-label">Settings</div>
+          <div class="type-h4 mt-2" style="color:var(--grey-900);">Payouts &amp; Profile</div>
+          <div class="type-body-sm text-muted mt-2">Manage settlements, business profile, and security controls.</div>
+        </a>
+      </div>
+    </div>
+
+    <div class="seller-grid-2">
+      <div class="glass-card p-6 reveal" data-delay="140" style="display:flex; flex-direction:column; overflow:visible;">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:var(--sp-4); margin-bottom:var(--sp-4);">
+          <div>
+            <h3 class="type-h4" style="margin:0;">Revenue Overview</h3>
+            <div class="type-body-xs text-muted mt-1">Weekly performance tracking</div>
+          </div>
+          <div style="display:flex; gap:var(--sp-2);">
+            <button class="btn btn--white btn--xs">Orders</button>
+            <button class="btn btn--primary btn--xs">Revenue</button>
+          </div>
+        </div>
+
+        <div style="flex:1; position:relative; min-height:240px;">
+          <svg viewBox="0 0 400 150" style="width:100%; height:100%; overflow:visible;" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="area-gradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="var(--brand-primary)" stop-opacity="0.28" />
+                <stop offset="100%" stop-color="var(--brand-primary)" stop-opacity="0" />
+              </linearGradient>
+            </defs>
+            <g stroke="var(--grey-100)" stroke-width="1" stroke-dasharray="4,4">
+              <line x1="0" y1="25" x2="400" y2="25" />
+              <line x1="0" y1="75" x2="400" y2="75" />
+              <line x1="0" y1="125" x2="400" y2="125" />
+            </g>
+            <path d="M 0,130 C 40,120 80,140 120,90 C 160,40 200,80 240,60 C 280,30 320,50 360,20 C 380,5 400,10 400,10 L 400,150 L 0,150 Z" fill="url(#area-gradient)" class="chart-area" />
+            <path d="M 0,130 C 40,120 80,140 120,90 C 160,40 200,80 240,60 C 280,30 320,50 360,20 C 380,5 400,10 400,10" fill="none" stroke="var(--brand-primary)" stroke-width="3.5" stroke-linecap="round" class="chart-glow" />
+            <circle cx="360" cy="20" r="5" fill="var(--brand-primary)" stroke="white" stroke-width="2" />
+          </svg>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; margin-top:var(--sp-6); color:var(--grey-400); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em;">
+          <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+        </div>
+
+        <div class="glass-card mt-5" style="padding:var(--sp-4); background:linear-gradient(180deg, #0052CC10 0%, transparent 40%); box-shadow:none;">
+          <div style="display:flex; justify-content:space-between; gap:var(--sp-4);">
+            <div>
+              <div class="type-body-xs text-muted">Weekly forecast</div>
+              <div class="type-h4 mt-1">PHP 321k projected</div>
+            </div>
+            <div style="text-align:right;">
+              <div class="type-body-xs text-muted">Conversion</div>
+              <div class="type-h4 mt-1" style="color:#00875A;">8.4%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card p-6 reveal" data-delay="180">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:var(--sp-4); margin-bottom:var(--sp-6);">
+          <div style="display:flex; align-items:center; gap:var(--sp-3);">
+            <div class="pulse-dot pulse-dot--active"></div>
+            <h3 class="type-h4" style="margin:0;">Store Pulse</h3>
+          </div>
+          <span class="badge badge--success">Live</span>
+        </div>
+
+        <div class="store-pulse">
+          <div class="pulse-item">
+            <div class="pulse-avatar">JD</div>
+            <div style="flex:1;">
+              <div class="type-body-sm fw-bold">Juan Dela Cruz</div>
+              <div class="type-body-xs text-muted">Purchased Smart Fridge</div>
+            </div>
+            <div class="type-body-xs text-primary">Just now</div>
+          </div>
+          <div class="pulse-item" style="border-left:2px solid var(--color-warning); padding-left:var(--sp-4); border-radius:0;">
+            <div style="flex:1;">
+              <div class="type-body-sm fw-bold text-warning">Inventory Alert</div>
+              <div class="type-body-xs text-muted">Smart Oven is low on stock (2 left)</div>
+            </div>
+          </div>
+          <div class="pulse-item">
+            <div class="pulse-avatar">MP</div>
+            <div style="flex:1;">
+              <div class="type-body-sm fw-bold">Maria P.</div>
+              <div class="type-body-xs text-muted">Cancelled Order #9210</div>
+            </div>
+            <div class="type-body-xs text-muted">15m ago</div>
+          </div>
+          <div class="pulse-item">
+            <div class="pulse-avatar" style="background:var(--brand-primary-subtle); color:var(--brand-primary);">HQ</div>
+            <div style="flex:1;">
+              <div class="type-body-sm fw-bold">E-ACIS Support</div>
+              <div class="type-body-xs text-muted">Monthly report is ready</div>
+            </div>
+            <div class="type-body-xs text-muted">1h ago</div>
+          </div>
+        </div>
+
+        <div class="glass-card mt-5" style="padding:var(--sp-4); background:linear-gradient(180deg, #FF8B0010 0%, transparent 40%); box-shadow:none;">
+          <div class="type-body-xs text-muted">Operational note</div>
+          <div class="type-body-sm fw-semibold mt-1">3 urgent orders need review before the 4 PM cutoff.</div>
+        </div>
+
+        <button class="btn btn--ghost btn--full mt-6">View all activity</button>
+      </div>
+    </div>
+
+    <div class="glass-card p-6 mt-6 reveal" data-delay="220">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:var(--sp-4); margin-bottom:var(--sp-4);">
+        <div>
+          <h3 class="type-h4" style="margin:0;">Recent Orders</h3>
+          <p class="type-body-sm text-muted mt-1">Latest order activity with fulfillment status.</p>
+        </div>
+        <a href="/seller/orders" class="type-body-sm fw-semibold text-primary">Open order queue</a>
+      </div>
+      <div class="table-wrapper" style="border:none; box-shadow:none;">
+        <table class="data-table" style="width:100%;">
+          <tbody>
+            <tr>
+              <td>
+                <div class="fw-semibold">#EACIS-9221</div>
+                <div class="type-body-xs text-muted">2 mins ago</div>
+              </td>
+              <td style="text-align:right;">
+                <div>PHP 12,400</div>
+                <span class="badge badge--dot badge--pending">Pending</span>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="fw-semibold">#EACIS-9220</div>
+                <div class="type-body-xs text-muted">1 hour ago</div>
+              </td>
+              <td style="text-align:right;">
+                <div>PHP 4,200</div>
+                <span class="badge badge--dot badge--shipped">Shipped</span>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="fw-semibold">#EACIS-9219</div>
+                <div class="type-body-xs text-muted">3 hours ago</div>
+              </td>
+              <td style="text-align:right;">
+                <div>PHP 45,000</div>
+                <span class="badge badge--dot badge--pending">Pending</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.kpi-val').forEach(el => {
+    const to = parseFloat(el.dataset.value);
+    if (el.dataset.format === 'percent') {
+      el.textContent = to + '%';
+    } else {
+      animateValue(el, 0, to, 1500);
+    }
+  });
+});
+</script>
+{% endblock %}

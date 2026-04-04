@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+{% block title %}Sign in — E-ACIS{% endblock %}
+{% block content %}
+<div class="page-center">
+  <div class="glass-card card--narrow">
+    <div class="text-center">
+      <h1 class="type-display-lg">Sign in to E-ACIS</h1>
+      <p class="type-body-lg form-helper" style="margin-top:var(--sp-3);">Access your account to manage orders, carts, and settings.</p>
+    </div>
+
+    <div class="pill-group" role="tablist" aria-label="Portal role" style="justify-content:center;margin-top:var(--sp-4);">
+      <button type="button" class="pill pill--active" data-portal="customer" role="tab" aria-selected="true" tabindex="0">Customer</button>
+      <button type="button" class="pill" data-portal="seller" role="tab" aria-selected="false" tabindex="0">Seller & Admin</button>
+    </div>
+
+    <form id="login-form" method="post" action="/auth/login" class="form-stack" novalidate aria-describedby="login-error">
+      <input type="hidden" name="next" value="{{ request.args.get('next','') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="portal" id="login-portal" value="customer">
+
+      {% if error %}
+      <div id="login-error" role="alert" aria-live="polite" class="form-error">{{ error }}</div>
+      {% else %}
+      <div id="login-error" role="alert" aria-live="polite" class="sr-only" hidden></div>
+      {% endif %}
+
+      <div class="form-group">
+        <label for="email" class="form-label">Email <span class="optional">(work or personal)</span></label>
+        <div class="form-input-group">
+          <span class="form-input-group__icon" aria-hidden="true">@</span>
+          <input id="email" name="email" type="email" placeholder="you@example.com" autocomplete="email" required class="form-input" aria-describedby="email-hint" />
+        </div>
+        <div id="email-hint" class="form-helper">We'll never share your email.</div>
+      </div>
+
+      <div class="form-group">
+        <label for="password" class="form-label">Password <span class="optional">(min 6 characters)</span></label>
+        <div class="form-input-group" style="position:relative;">
+          <input id="password" name="password" type="password" placeholder="••••••••" autocomplete="current-password" required class="form-input" aria-describedby="password-hint" />
+          <button type="button" id="password-toggle" aria-label="Show password" aria-pressed="false" class="password-toggle" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;padding:5px;cursor:pointer;color:var(--grey-400);transition:color var(--dur-fast);">
+            <svg class="icon icon-eye" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+          </button>
+        </div>
+        <div id="password-hint" class="form-helper">Tip: use a strong password you can remember.</div>
+      </div>
+
+      <div class="form-group" style="display:flex;align-items:center;gap:12px;">
+        <label class="form-label" for="remember" style="display:inline-flex;align-items:center;gap:8px;font-weight:var(--weight-regular);">
+          <input id="remember" type="checkbox" name="remember" style="width:18px;height:18px;" />
+          <span class="type-body-sm">Remember me</span>
+        </label>
+        <a href="#" class="type-body-sm" style="margin-left:auto;">Forgot password?</a>
+      </div>
+
+      <div style="margin-top:var(--sp-3);">
+        <button id="signin-btn" class="btn btn--primary btn--full" type="submit" disabled aria-disabled="true">
+          <span class="btn__label">Sign In</span>
+        </button>
+      </div>
+
+      <div class="form-footer form-footer--spaced" style="margin-top:var(--sp-4);display:flex;justify-content:center;gap:var(--sp-4);">
+        <a href="/auth/register" class="type-body-sm">Create an account</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+    <script>
+    // mark page as auth to reduce chrome clutter
+    document.body.classList.add('auth-page');
+    (function(){
+      // Elements are present because script is placed after the form
+      const form = document.getElementById('login-form');
+      const email = document.getElementById('email');
+      const pwd = document.getElementById('password');
+      const btn = document.getElementById('signin-btn');
+      const emailHint = document.getElementById('email-hint');
+      const pwdHint = document.getElementById('password-hint');
+      const toggle = document.getElementById('password-toggle');
+      const err = document.getElementById('login-error');
+
+      function validEmail(v){ return /\S+@\S+\.\S+/.test(v); }
+
+      function updateHelper(el, ok){
+        if(!el) return;
+        el.style.display = ok ? 'none' : 'block';
+      }
+
+      function setSubmitState(enabled){
+        btn.disabled = !enabled;
+        btn.setAttribute('aria-disabled', String(!enabled));
+      }
+
+      function validate(){
+        const eok = validEmail(email.value.trim());
+        const pok = pwd.value.length >= 6;
+        updateHelper(emailHint, eok);
+        updateHelper(pwdHint, pok);
+        setSubmitState(eok && pok && !isLocked);
+      }
+
+      let isLocked = false;
+      let lockTimer = null;
+
+      // Password toggle: compute current state and flip
+      toggle.addEventListener('click', ()=>{
+        const isVisible = pwd.type === 'text';
+        pwd.type = isVisible ? 'password' : 'text';
+        toggle.setAttribute('aria-pressed', String(!isVisible));
+        toggle.setAttribute('title', !isVisible ? 'Hide password' : 'Show password');
+        
+        // Update SVG icon
+        const svg = toggle.querySelector('svg');
+        if (isVisible) {
+          // Switch to Eye icon (now hidden)
+          svg.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+        } else {
+          // Switch to Eye-Off icon (now visible)
+          svg.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+        }
+      });
+
+      email.addEventListener('input', validate);
+      pwd.addEventListener('input', validate);
+
+      function startLockCountdown(text){
+        const m = text && text.match(/(\d+)\s*seconds/);
+        if(!m) return;
+        let secs = parseInt(m[1],10);
+        isLocked = true; setSubmitState(false);
+        if(lockTimer) clearInterval(lockTimer);
+        lockTimer = setInterval(()=>{
+          if(secs <= 0){
+            clearInterval(lockTimer); lockTimer = null; isLocked = false; if(err){ err.hidden = true; }
+            validate(); return;
+          }
+          if(err){ err.hidden = false; err.textContent = `Account temporarily locked. Try again in ${secs} seconds.`; }
+          secs -= 1;
+        }, 1000);
+      }
+
+      // Initialize immediately (script placed after DOM), no DOMContentLoaded listener
+      if(err && err.textContent && /locked/i.test(err.textContent)){
+        startLockCountdown(err.textContent);
+      }
+      // If server returned an error, surface it and move focus for screen readers
+      if(err && err.textContent && err.textContent.trim().length){
+        try{ err.hidden = false; err.setAttribute('tabindex','-1'); err.focus(); }catch(e){}
+      }
+      validate();
+
+      // pill role toggles (keyboard accessible)
+      const pills = Array.from(document.querySelectorAll('.pill-group .pill'));
+      const portalInput = document.getElementById('login-portal');
+      pills.forEach((p,i)=>{
+        p.addEventListener('click', ()=>{
+          pills.forEach(x=>{ x.classList.remove('pill--active'); x.setAttribute('aria-selected','false'); });
+          p.classList.add('pill--active'); p.setAttribute('aria-selected','true');
+          if(portalInput) portalInput.value = p.dataset.portal;
+        });
+        p.addEventListener('keydown', (e)=>{
+          if(e.key === 'ArrowRight' || e.key === 'ArrowDown'){
+            e.preventDefault(); pills[(i+1)%pills.length].focus();
+          }
+          if(e.key === 'ArrowLeft' || e.key === 'ArrowUp'){
+            e.preventDefault(); pills[(i-1+pills.length)%pills.length].focus();
+          }
+        });
+      });
+
+      // Progressive enhancement: intercept submission to show loading state and disable inputs
+      form.addEventListener('submit', (e)=>{
+        // show inline loading affordance and mark busy for accessibility
+        btn.classList.add('btn--loading');
+        btn.setAttribute('aria-busy','true');
+        // disable the submit button to avoid double submits, but keep inputs enabled
+        // so they are serialized into the POST request body.
+        btn.disabled = true;
+      });
+    })();
+  </script>
+{% endblock %}

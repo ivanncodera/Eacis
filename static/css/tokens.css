@@ -1,0 +1,214 @@
+/* ============================================
+   E-ACIS DESIGN TOKENS v1.0
+   Single source of truth for all portals
+   ============================================ */
+
+:root {
+
+  /* ── BRAND ───────────────────────────────── */
+  --brand-primary:          #005BB5;
+  --brand-primary-dark:     #004E9E;
+  --brand-primary-darker:   #003A7A;
+  --brand-primary-light:    #3395FF;
+  --brand-primary-subtle:   rgba(0, 122, 255, 0.08);
+  --brand-primary-subtle-2: rgba(0, 122, 255, 0.14);
+  --brand-primary-glow:     rgba(0, 122, 255, 0.28);
+
+  /* ── GREY SCALE (12 steps) ───────────────── */
+  --grey-0:    #FFFFFF;
+  --grey-25:   #FAFAFA;
+  --grey-50:   #F7F8FA;
+  --grey-100:  #F0F2F5;
+  --grey-150:  #E8EAED;
+  --grey-200:  #DDE1E7;
+  --grey-300:  #C1C7D0;
+  --grey-400:  #97A0AF;
+  --grey-500:  #6B778C;
+  --grey-600:  #505F79;
+  --grey-700:  #344563;
+  --grey-800:  #172B4D;
+  --grey-900:  #091E42;
+  --grey-950:  #030E21;
+
+  /* ── SEMANTIC ────────────────────────────── */
+  --color-success:         #00875A;
+  --color-success-light:   #00C48C;
+  --color-success-subtle:  rgba(0, 135, 90, 0.08);
+  --color-success-border:  rgba(0, 135, 90, 0.20);
+
+  --color-danger:          #DE350B;
+  --color-danger-light:    #FF5630;
+  --color-danger-subtle:   rgba(222, 53, 11, 0.08);
+  --color-danger-border:   rgba(222, 53, 11, 0.20);
+
+  --color-warning:         #FF8B00;
+  --color-warning-light:   #FFAB00;
+  --color-warning-subtle:  rgba(255, 139, 0, 0.08);
+  --color-warning-border:  rgba(255, 139, 0, 0.20);
+
+  --color-info:            #0052CC;
+  --color-info-light:      #0065FF;
+  --color-info-subtle:     rgba(0, 82, 204, 0.08);
+  --color-info-border:     rgba(0, 82, 204, 0.20);
+
+  /* ── SURFACES ────────────────────────────── */
+  --surface-page:          #F7F8FA;
+  --surface-card:          #FFFFFF;
+  --surface-overlay:       rgba(9, 30, 66, 0.54);
+  --surface-sunken:        #F4F5F7;
+  --surface-raised:        #FFFFFF;
+
+  /* ── GLASS ───────────────────────────────── */
+  --glass-subtle:          rgba(255, 255, 255, 0.52);
+  --glass-medium:          rgba(255, 255, 255, 0.72);
+  --glass-strong:          rgba(255, 255, 255, 0.88);
+  --glass-ultra:           rgba(255, 255, 255, 0.96);
+  --glass-border:          rgba(255, 255, 255, 0.40);
+  --glass-border-strong:   rgba(255, 255, 255, 0.65);
+  --glass-blur-sm:         blur(8px);
+  --glass-blur-md:         blur(16px);
+  --glass-blur-lg:         blur(24px);
+  --glass-blur-xl:         blur(40px);
+
+  /* ── BORDERS ─────────────────────────────── */
+  --border-subtle:         rgba(9, 30, 66, 0.04);
+  --border-default:        rgba(9, 30, 66, 0.08);
+  --border-medium:         rgba(9, 30, 66, 0.14);
+  --border-strong:         rgba(9, 30, 66, 0.22);
+  --border-focus:          var(--brand-primary);
+  --border-danger:         var(--color-danger);
+
+  /* ── SHADOWS (elevation system) ──────────── */
+  --shadow-xs:   0 1px 1px rgba(9,30,66,0.08);
+  --shadow-sm:   0 1px 3px rgba(9,30,66,0.12), 0 0 1px rgba(9,30,66,0.08);
+  --shadow-md:   0 3px 8px rgba(9,30,66,0.12), 0 0 1px rgba(9,30,66,0.08);
+  --shadow-lg:   0 8px 24px rgba(9,30,66,0.12), 0 0 1px rgba(9,30,66,0.08);
+  --shadow-xl:   0 16px 40px rgba(9,30,66,0.14), 0 0 1px rgba(9,30,66,0.08);
+  --shadow-2xl:  0 24px 64px rgba(9,30,66,0.16), 0 0 1px rgba(9,30,66,0.08);
+  --shadow-primary:    0 4px 16px rgba(0,122,255,0.24);
+  --shadow-primary-lg: 0 8px 32px rgba(0,122,255,0.32);
+  --shadow-danger:     0 4px 16px rgba(222,53,11,0.24);
+  --shadow-success:    0 4px 16px rgba(0,135,90,0.24);
+
+  /* ── TYPOGRAPHY ──────────────────────────── */
+  --font-sans:   'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono:   'JetBrains Mono', 'Fira Code', monospace;
+  --font-display:'Inter', sans-serif;
+
+  /* Size scale */
+  --text-2xs:  10px;
+  --text-xs:   11px;
+  --text-sm:   13px;
+  --text-base: 15px;
+  --text-md:   16px;
+  --text-lg:   18px;
+  --text-xl:   20px;
+  --text-2xl:  24px;
+  --text-3xl:  30px;
+  --text-4xl:  36px;
+  --text-5xl:  48px;
+  --text-6xl:  60px;
+
+  /* Weight */
+  --weight-light:    300;
+  --weight-regular:  400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
+  --weight-extrabold:800;
+
+  /* Line height */
+  --leading-none:    1.0;
+  --leading-tight:   1.15;
+  --leading-snug:    1.3;
+  --leading-normal:  1.5;
+  --leading-relaxed: 1.65;
+  --leading-loose:   1.8;
+
+  /* Letter spacing */
+  --tracking-tighter: -0.04em;
+  --tracking-tight:   -0.02em;
+  --tracking-normal:   0em;
+  --tracking-wide:     0.04em;
+  --tracking-wider:    0.08em;
+  --tracking-widest:   0.12em;
+
+  /* ── SPACING (8pt grid) ──────────────────── */
+  --sp-0:  0px;
+  --sp-1:  4px;
+  --sp-2:  8px;
+  --sp-3:  12px;
+  --sp-4:  16px;
+  --sp-5:  20px;
+  --sp-6:  24px;
+  --sp-7:  28px;
+  --sp-8:  32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+  --sp-14: 56px;
+  --sp-16: 64px;
+  --sp-20: 80px;
+  --sp-24: 96px;
+  --sp-32: 128px;
+
+  /* ── BORDER RADIUS ───────────────────────── */
+  --radius-xs:   3px;
+  --radius-sm:   6px;
+  --radius-md:   10px;
+  --radius-lg:   16px;
+  --radius-xl:   20px;
+  --radius-2xl:  28px;
+  --radius-3xl:  40px;
+  --radius-pill: 9999px;
+
+  /* ── TRANSITIONS ─────────────────────────── */
+  --ease-linear:    linear;
+  --ease-in:        cubic-bezier(0.4, 0, 1, 1);
+  --ease-out:       cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out:    cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring:    cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-bounce:    cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  --ease-smooth:    cubic-bezier(0.16, 1, 0.3, 1);
+
+  --dur-instant:  80ms;
+  --dur-fast:     120ms;
+  --dur-base:     200ms;
+  --dur-slow:     320ms;
+  --dur-slower:   480ms;
+  --dur-slowest:  640ms;
+
+  /* ── Z-INDEX SCALE ───────────────────────── */
+  --z-deep:     -10;
+  --z-base:       0;
+  --z-raised:    10;
+  --z-floating:  20;
+  --z-dropdown: 100;
+  --z-sticky:   200;
+  --z-fixed:    250;
+  --z-overlay:  300;
+  --z-modal:    400;
+  --z-popover:  450;
+  --z-toast:    500;
+  --z-progress: 600;
+  --z-max:     9999;
+
+  /* ── LAYOUT ──────────────────────────────── */
+  --topbar-height:    60px;
+  --sidebar-width:   240px;
+  --sidebar-collapsed: 64px;
+  --content-max:    1320px;
+  --content-wide:   1600px;
+  --content-narrow:  720px;
+
+  /* ── COMPONENT SIZES ─────────────────────── */
+  --input-height-sm:  32px;
+  --input-height-md:  40px;
+  --input-height-lg:  48px;
+  --btn-height-xs:    28px;
+  --btn-height-sm:    32px;
+  --btn-height-md:    40px;
+  --btn-height-lg:    48px;
+  --btn-height-xl:    56px;
+}
+
+/* End of tokens file */

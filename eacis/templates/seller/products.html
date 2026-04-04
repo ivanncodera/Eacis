@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+{% block title %}Products — Seller Portal{% endblock %}
+{% block content %}
+<div class="stagger-children">
+   <div class="page-content bg-grey-50 seller-shell">
+     <div class="seller-header reveal">
+        <div class="seller-header__head">
+           <div class="seller-header__meta">
+             <span class="badge seller-header__chip seller-header__chip--danger">Seller Module</span>
+             <span class="type-label" style="color:var(--grey-500);">Product Catalog</span>
+           </div>
+           <h1 class="type-display-md">Catalog Command Center</h1>
+           <p class="type-body-sm text-muted mt-1">Add, update, and retire appliance listings while tracking stock, warranty, and installment eligibility.</p>
+        </div>
+        <div class="seller-header__actions">
+          <a href="/seller/products/new" class="btn btn--primary" id="create-product">
+             <svg class="icon mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+             Add Product
+          </a>
+        </div>
+     </div>
+
+     <div class="catalog-layout">
+        <div class="catalog-hero reveal" data-delay="80">
+           <div class="catalog-meter">
+              <div class="catalog-meter__item">
+                 <div class="type-label">Active Listings</div>
+                 <div class="type-price mt-2">142</div>
+                 <div class="type-body-xs text-success mt-1">12 added this week</div>
+              </div>
+              <div class="catalog-meter__item">
+                 <div class="type-label">Low Stock</div>
+                 <div class="type-price mt-2">18</div>
+                 <div class="type-body-xs text-warning mt-1">Needs restock</div>
+              </div>
+              <div class="catalog-meter__item">
+                 <div class="type-label">Installment Ready</div>
+                 <div class="type-price mt-2">96</div>
+                 <div class="type-body-xs text-muted mt-1">Eligible products</div>
+              </div>
+           </div>
+
+           <div class="table-wrapper mt-6">
+              <div class="table-toolbar p-4 bg-grey-25 border-b">
+                 <div class="form-input-group" style="width:320px;">
+                    <span class="form-input-group__icon">
+                       <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    </span>
+                    <input type="text" class="form-input" id="seller-search" placeholder="Search by name or ref..." />
+                 </div>
+                 <div style="display:flex; gap:var(--sp-3);">
+                    <select class="form-select" style="min-width:140px;">
+                       <option>All Status</option>
+                       <option>Active</option>
+                       <option>Out of Stock</option>
+                       <option>Draft</option>
+                    </select>
+                 </div>
+              </div>
+              <table class="data-table">
+                 <thead>
+                    <tr>
+                       <th></th>
+                       <th>Product</th>
+                       <th>Category</th>
+                       <th>Price</th>
+                       <th>Stock</th>
+                       <th>Warranty</th>
+                       <th>Installment</th>
+                       <th>Status</th>
+                       <th style="text-align:right;">Actions</th>
+                    </tr>
+                 </thead>
+                 <tbody id="seller-products-tbody">
+                    <tr>
+                       <td><input type="checkbox" aria-label="Select REF-A9X20"></td>
+                       <td>
+                          <div style="display:flex; gap:var(--sp-3); align-items:center;">
+                             <div style="width:40px; height:40px; background:var(--grey-50); border-radius:var(--radius-sm);"><img src="/static/assets/products/2-door-refrigirator.webp" style="width:100%;height:100%;object-fit:cover;"/></div>
+                             <div>
+                                <div class="fw-semibold">Smart 2-Door Refrigerator</div>
+                                <div class="type-body-xs text-muted">REF-A9X20</div>
+                             </div>
+                          </div>
+                       </td>
+                       <td>Cooling & Air Quality</td>
+                       <td>PHP 24,500</td>
+                       <td>45</td>
+                       <td>12m</td>
+                       <td>Yes</td>
+                       <td><span class="badge badge--success">Active</span></td>
+                       <td style="text-align:right;">
+                          <button class="btn btn--secondary btn--sm edit" data-ref="REF-A9X20">Edit</button>
+                          <button class="btn btn--ghost btn--sm duplicate" data-ref="REF-A9X20">Duplicate</button>
+                       </td>
+                    </tr>
+                    <tr>
+                       <td><input type="checkbox" aria-label="Select BLN-500W"></td>
+                       <td>
+                          <div style="display:flex; gap:var(--sp-3); align-items:center;">
+                             <div style="width:40px; height:40px; background:var(--grey-50); border-radius:var(--radius-sm);"></div>
+                             <div>
+                                <div class="fw-semibold">Pro Blender 500W</div>
+                                <div class="type-body-xs text-muted">BLN-500W</div>
+                             </div>
+                          </div>
+                       </td>
+                       <td>Kitchen & Cooking</td>
+                       <td>PHP 3,200</td>
+                       <td class="text-danger fw-semibold">0</td>
+                       <td>6m</td>
+                       <td>No</td>
+                       <td><span class="badge badge--danger">Out of Stock</span></td>
+                       <td style="text-align:right;">
+                          <button class="btn btn--secondary btn--sm edit" data-ref="BLN-500W">Edit</button>
+                          <button class="btn btn--ghost btn--sm duplicate" data-ref="BLN-500W">Duplicate</button>
+                       </td>
+                    </tr>
+                 </tbody>
+              </table>
+              <div class="table-footer">
+                 <div class="table-footer__info">Showing 1-10 of 24 products</div>
+                 <div class="pagination">
+                    <button class="pagination__btn" disabled>&lt;</button>
+                    <button class="pagination__btn active">1</button>
+                    <button class="pagination__btn">2</button>
+                    <button class="pagination__btn">3</button>
+                    <button class="pagination__btn">&gt;</button>
+                 </div>
+              </div>
+           </div>
+        </div>
+
+        <div class="catalog-side">
+           <div class="glass-card reveal" data-delay="120">
+              <h3 class="type-h4">Catalog Health</h3>
+              <p class="type-body-sm text-muted mt-1">What needs attention right now.</p>
+              <div class="ops-list mt-4">
+                <div class="ops-list-item">
+                  <div class="type-body-sm fw-semibold">8 products missing warranty details</div>
+                  <div class="type-body-xs text-muted mt-1">These listings should be updated before publishing.</div>
+                </div>
+                <div class="ops-list-item">
+                  <div class="type-body-sm fw-semibold">5 images need replacement</div>
+                  <div class="type-body-xs text-muted mt-1">Low-resolution thumbnails reduce conversion.</div>
+                </div>
+                <div class="ops-list-item">
+                  <div class="type-body-sm fw-semibold">11 products qualify for installment</div>
+                  <div class="type-body-xs text-muted mt-1">Promote these first in campaigns.</div>
+                </div>
+              </div>
+           </div>
+
+           <div class="glass-card reveal" data-delay="160">
+              <h3 class="type-h4">Quick Filters</h3>
+              <div style="display:flex; flex-direction:column; gap:var(--sp-2); margin-top:var(--sp-4);">
+                <button class="btn btn--secondary btn--sm btn--full">Near out of stock</button>
+                <button class="btn btn--secondary btn--sm btn--full">Installment eligible</button>
+                <button class="btn btn--secondary btn--sm btn--full">Missing warranty</button>
+                <button class="btn btn--secondary btn--sm btn--full">Needs image update</button>
+              </div>
+           </div>
+        </div>
+     </div>
+   </div>
+</div>
+<script src="/static/js/seller/products.js"></script>
+{% endblock %}

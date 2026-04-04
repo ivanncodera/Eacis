@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% block title %}Order Detail — E-ACIS{% endblock %}
+{% block content %}
+<div class="container" style="padding-top: calc(var(--topbar-height) + var(--sp-10)); border-bottom: var(--sp-10) solid transparent;">
+  <div style="margin-bottom: var(--sp-6); display:flex; align-items:center; gap: var(--sp-4);">
+     <a href="/customer/orders" class="btn btn--ghost btn--sm">← Back to Orders</a>
+     <h1 class="type-display-md">Order EACIS-9002</h1>
+     <span class="badge badge--dot badge--pending">Processing</span>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 320px; gap: var(--sp-8); align-items: start;">
+     
+     <div class="form-stack">
+        <div class="glass-card p-6">
+           <h3 class="type-h4" style="margin-bottom: var(--sp-4);">Items Summary</h3>
+           
+           <div class="table-wrapper">
+              <table class="data-table">
+                 <thead>
+                    <tr>
+                       <th>Product</th>
+                       <th>Qty</th>
+                       <th style="text-align:right;">Subtotal</th>
+                    </tr>
+                 </thead>
+                 <tbody>
+                    <tr>
+                       <td>
+                          <div style="display: flex; gap: var(--sp-3); align-items: center;">
+                             <div style="width: 48px; height: 48px; background:var(--grey-50); border-radius: var(--radius-sm);"><img src="/static/assets/products/2-door-refrigirator.webp" style="width:100%;height:100%;object-fit:contain;" /></div>
+                             <div>
+                                <div class="fw-semibold">Smart 2-Door Refrigerator</div>
+                                <div class="type-body-sm text-muted">REF-A9X20</div>
+                             </div>
+                          </div>
+                       </td>
+                       <td>1</td>
+                       <td style="text-align:right;" class="fw-semibold">PHP 24,500.00</td>
+                    </tr>
+                 </tbody>
+              </table>
+           </div>
+
+           <div style="display:flex; justify-content:space-between; margin-top: var(--sp-6);">
+              <span class="type-body">Shipping</span><span class="fw-semibold">Free</span>
+           </div>
+           <hr style="border:none; border-top: 1px solid var(--border-default); margin: var(--sp-4) 0;" />
+           <div style="display:flex; justify-content:space-between;">
+              <span class="type-h4">Total Paid</span><span class="type-price-sm">PHP 24,500.00</span>
+           </div>
+        </div>
+
+        <div class="glass-card p-6 mt-6">
+           <h3 class="type-h4" style="margin-bottom: var(--sp-4);">Timeline</h3>
+           <div style="display: flex; gap: var(--sp-3);">
+              <div style="width: 12px; height: 12px; background: var(--brand-primary); border-radius: 50%; margin-top: 6px;"></div>
+              <div>
+                 <div class="fw-semibold">Order Placed</div>
+                 <div class="type-body-sm text-muted">Just now</div>
+              </div>
+           </div>
+        </div>
+
+     </div>
+
+     <aside class="glass-card p-6">
+        <h3 class="type-h4" style="margin-bottom: var(--sp-4);">Customer Details</h3>
+        <p class="type-body-sm"><strong class="type-body">Name:</strong> Juan Dela Cruz</p>
+        <p class="type-body-sm"><strong class="type-body">Email:</strong> juan@example.com</p>
+        <hr style="border:none; border-top: 1px solid var(--border-subtle); margin: var(--sp-3) 0;" />
+        <h3 class="type-h4" style="margin-bottom: var(--sp-4); margin-top: var(--sp-4);">Shipping Address</h3>
+        <p class="type-body-sm text-muted" style="line-height: var(--leading-relaxed);">
+           123 Main Street<br>Barangay San Isidro<br>Makati City, Metro Manila 1200<br>Philippines
+        </p>
+
+        <div class="mt-6">
+           <a href="/customer/returns" class="btn btn--secondary btn--full">Request Return</a>
+        </div>
+     </aside>
+
+  </div>
+</div>
+{% endblock %}

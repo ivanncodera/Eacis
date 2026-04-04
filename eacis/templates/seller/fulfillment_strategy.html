@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}Fulfillment Strategy{% endblock %}
+
+{% block content %}
+<div class="page-content bg-grey-50 seller-shell">
+  <div class="seller-header" style="align-items:flex-start; margin-bottom:var(--sp-8);">
+    <div class="seller-header__head">
+      <div class="seller-header__meta">
+        <span class="badge seller-header__chip seller-header__chip--primary">Operations</span>
+        <span class="type-label" style="color:var(--grey-500);">Warehouse Dispatch</span>
+      </div>
+      <h1 class="type-display-md" style="color:var(--grey-900); margin:0;">Fulfillment Strategy</h1>
+      <p class="type-body-sm mt-2" style="color:var(--grey-600);">Warehouse inventory allocation, stock levels, and automated dispatch.</p>
+    </div>
+    <button class="btn btn--secondary btn--sm">Configure Warehouse</button>
+  </div>
+
+  <div class="reveal" data-delay="60ms" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:var(--sp-4); margin-bottom:var(--sp-8);">
+    <div class="glass-card p-4" style="background:linear-gradient(180deg, #FF8B0010 0%, transparent 40%);">
+      <div class="type-body-xs" style="color:var(--grey-500); font-weight:600;">INVENTORY VALUE</div>
+      <div class="type-display-md mt-2" style="color:#FF8B00; margin:0;">₱847.3K</div>
+      <div class="type-body-xs mt-2" style="color:var(--grey-600);">Current stock</div>
+    </div>
+    <div class="glass-card p-4" style="background:linear-gradient(180deg, #00875A10 0%, transparent 40%);">
+      <div class="type-body-xs" style="color:var(--grey-500); font-weight:600;">FULFILLMENT RATE</div>
+      <div class="type-display-md mt-2" style="color:#00875A; margin:0;">98.5%</div>
+      <div class="type-body-xs mt-2" style="color:var(--color-success); font-weight:600;">Ready to ship</div>
+    </div>
+    <div class="glass-card p-4" style="background:linear-gradient(180deg, #0052CC10 0%, transparent 40%);">
+      <div class="type-body-xs" style="color:var(--grey-500); font-weight:600;">STOCK TURNOVER</div>
+      <div class="type-display-md mt-2" style="color:#0052CC; margin:0;">4.2x</div>
+      <div class="type-body-xs mt-2" style="color:var(--grey-600);">Monthly rotations</div>
+    </div>
+    <div class="glass-card p-4" style="background:linear-gradient(180deg, #974F0C10 0%, transparent 40%);">
+      <div class="type-body-xs" style="color:var(--grey-500); font-weight:600;">DWELL TIME</div>
+      <div class="type-display-md mt-2" style="color:#974F0C; margin:0;">7.1 days</div>
+      <div class="type-body-xs mt-2" style="color:var(--grey-600);">Average in stock</div>
+    </div>
+  </div>
+
+  <div class="reveal" data-delay="100ms" style="display:grid; grid-template-columns:1fr; gap:var(--sp-6); margin-bottom:var(--sp-8);">
+    <div class="glass-card p-6" style="background:linear-gradient(180deg, #FF8B0010 0%, transparent 40%);">
+      <h3 class="type-h4" style="margin:0 0 var(--sp-4) 0;">Warehouse Operations</h3>
+      <div style="display:flex; flex-direction:column; gap:var(--sp-5);">
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--sp-2);">
+            <div class="type-h5 fw-semibold">Main Warehouse (Metro Manila)</div>
+            <span class="badge badge--success">Optimal</span>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:var(--sp-3); margin-top:var(--sp-3); padding-bottom:var(--sp-4);">
+            <div><div class="type-body-xs text-muted">Total SKUs</div><div class="type-body-sm fw-semibold">142</div></div>
+            <div><div class="type-body-xs text-muted">Stock Level</div><div class="type-body-sm fw-semibold">28,450 units</div></div>
+            <div><div class="type-body-xs text-muted">Reorder Point</div><div class="type-body-sm fw-semibold">5,000</div></div>
+            <div><div class="type-body-xs text-muted">Lead Time</div><div class="type-body-sm fw-semibold">1-2 days</div></div>
+          </div>
+        </div>
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--sp-2);">
+            <div class="type-h5 fw-semibold">Regional Hub (Visayas)</div>
+            <span class="badge badge--warning">Monitor</span>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:var(--sp-3); margin-top:var(--sp-3); padding-bottom:var(--sp-4);">
+            <div><div class="type-body-xs text-muted">Total SKUs</div><div class="type-body-sm fw-semibold">84</div></div>
+            <div><div class="type-body-xs text-muted">Stock Level</div><div class="type-body-sm fw-semibold">12,340 units</div></div>
+            <div><div class="type-body-xs text-muted">Reorder Point</div><div class="type-body-sm fw-semibold">3,000</div></div>
+            <div><div class="type-body-xs text-muted">Lead Time</div><div class="type-body-sm fw-semibold">3-4 days</div></div>
+          </div>
+        </div>
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--sp-2);">
+            <div class="type-h5 fw-semibold">Sub-Hub (Mindanao)</div>
+            <span class="badge badge--default">Stable</span>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:var(--sp-3); margin-top:var(--sp-3);">
+            <div><div class="type-body-xs text-muted">Total SKUs</div><div class="type-body-sm fw-semibold">56</div></div>
+            <div><div class="type-body-xs text-muted">Stock Level</div><div class="type-body-sm fw-semibold">7,800 units</div></div>
+            <div><div class="type-body-xs text-muted">Reorder Point</div><div class="type-body-sm fw-semibold">2,500</div></div>
+            <div><div class="type-body-xs text-muted">Lead Time</div><div class="type-body-sm fw-semibold">5-7 days</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="reveal" data-delay="140ms">
+    <div class="glass-card p-6">
+      <h3 class="type-h4" style="margin:0 0 var(--sp-4) 0;">Fulfillment Automation</h3>
+      <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:var(--sp-4);">
+        <div style="padding:var(--sp-4); background:linear-gradient(180deg, #00875A10 0%, transparent 40%); border-radius:var(--radius-md); border:1px solid #00875A30;">
+          <div style="font-size:18px; margin-bottom:var(--sp-2);">🤖</div>
+          <div class="type-body-sm fw-semibold">Auto-Pick</div>
+          <div class="type-body-xs text-muted mt-2">Trigger picks when items reach reorder point.</div>
+        </div>
+        <div style="padding:var(--sp-4); background:linear-gradient(180deg, #FF8B0010 0%, transparent 40%); border-radius:var(--radius-md); border:1px solid #FF8B0030;">
+          <div style="font-size:18px; margin-bottom:var(--sp-2);">📍</div>
+          <div class="type-body-sm fw-semibold">Cross-Dock</div>
+          <div class="type-body-xs text-muted mt-2">Route fast-movers to nearest regional hub.</div>
+        </div>
+        <div style="padding:var(--sp-4); background:linear-gradient(180deg, #0052CC10 0%, transparent 40%); border-radius:var(--radius-md); border:1px solid #0052CC30;">
+          <div style="font-size:18px; margin-bottom:var(--sp-2);">✓</div>
+          <div class="type-body-sm fw-semibold">Cycle Count</div>
+          <div class="type-body-xs text-muted mt-2">Monthly audits for 99.5% accuracy.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

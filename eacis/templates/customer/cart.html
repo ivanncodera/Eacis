@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}Cart — E-ACIS{% endblock %}
+{% block content %}
+<div class="main-content">
+  <div class="stagger-children">
+  <header style="margin-bottom: var(--sp-8);">
+    <h1 class="type-display-lg">Your Cart</h1>
+  </header>
+  
+  <div style="display: grid; grid-template-columns: 1fr 340px; gap: var(--sp-8); align-items: start;">
+    
+    <!-- Cart Items Area -->
+    <div class="glass-card">
+       <div id="cart-items" style="display: flex; flex-direction: column; gap: var(--sp-4);">
+         <!-- Mock Item -->
+         <div style="display: flex; gap: var(--sp-4); padding-bottom: var(--sp-4); border-bottom: 1px solid var(--border-subtle);">
+            <div style="width: 100px; height: 100px; background: var(--grey-50); border-radius: var(--radius-md); overflow: hidden;">
+               <img src="/static/assets/products/2-door-refrigirator.webp" style="width:100%; height:100%; object-fit:contain;" />
+            </div>
+            <div style="flex: 1;">
+               <h3 class="type-h4" style="margin-bottom: var(--sp-1);">Smart 2-Door Refrigerator</h3>
+               <div class="type-ref" style="margin-bottom: var(--sp-2);">REF-A9X20</div>
+               <div class="type-price-sm">PHP 24,500.00</div>
+            </div>
+            <div class="form-group" style="width: 80px;">
+               <label class="sr-only">Quantity</label>
+               <input type="number" value="1" min="1" class="form-input" style="height: var(--input-height-sm);">
+            </div>
+            <div>
+               <button class="btn btn-ghost" style="padding: 0 var(--sp-2); color: var(--color-danger);"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg></button>
+            </div>
+         </div>
+       </div>
+
+       <div id="cart-empty" class="empty-state sr-only" style="padding: var(--sp-12) 0; text-align: center;">
+         <h3 class="type-h3" style="color: var(--grey-400);">Your cart is empty.</h3>
+       </div>
+    </div>
+
+    <!-- Summary Area -->
+    <aside class="glass-card glass-card--strong" style="position: sticky; top: calc(var(--topbar-height) + var(--sp-6));">
+       <h3 class="type-h3" style="margin-bottom: var(--sp-6);">Order Summary</h3>
+       
+       <div style="display:flex; justify-content:space-between; margin-bottom: var(--sp-3);">
+          <span class="type-body-sm text-muted">Subtotal</span>
+          <span class="type-body-sm fw-semibold" id="cart-subtotal">PHP 24,500.00</span>
+       </div>
+       <div style="display:flex; justify-content:space-between; margin-bottom: var(--sp-3);">
+          <span class="type-body-sm text-muted">Shipping</span>
+          <span class="type-body-sm fw-semibold text-success">Free</span>
+       </div>
+       
+       <hr style="border:none; border-top: 1px solid var(--border-default); margin: var(--sp-4) 0;" />
+       
+       <div style="display:flex; justify-content:space-between; margin-bottom: var(--sp-6);">
+          <span class="type-h4">Total</span>
+          <span class="type-price-sm">PHP 24,500.00</span>
+       </div>
+
+       <div class="form-stack">
+          <a id="checkout-link" href="/checkout" class="btn btn--primary btn--full">Proceed to Checkout</a>
+          <a href="/shop" class="btn btn--ghost btn--full">Continue Shopping</a>
+       </div>
+    </aside>
+
+  </div>
+</div>
+{% endblock %}

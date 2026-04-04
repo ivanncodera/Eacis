@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block title %}{{ page_title or 'Returns & MRM' }} — Seller Portal{% endblock %}
+{% block content %}
+<div class="stagger-children">
+    <div class="page-content bg-grey-50 seller-shell">
+       <div class="seller-header" style="align-items:flex-start; margin-bottom:var(--sp-8);">
+                  <div class="seller-header__head">
+                      <div class="seller-header__meta">
+                         <span class="badge seller-header__chip seller-header__chip--danger">Sales</span>
+                 <span class=\"type-label\" style=\"color:var(--grey-500);\">{{ page_title or 'Returns & Merchant RMA' }}</span>
+               </div>
+                      <h1 class="type-display-md" style="color:var(--grey-900); margin:0;">{{ page_title or 'Returns & Merchant RMA' }}</h1>
+                      {% if page_subtitle %}<p class="type-body-sm mt-2" style="color:var(--grey-600);">{{ page_subtitle }}</p>{% endif %}
+            </div>
+     </div>
+
+     <div class="table-wrapper">
+        <table class="data-table">
+           <thead>
+              <tr>
+                 <th>RMA ID</th>
+                 <th>Date Requested</th>
+                 <th>Order ID</th>
+                 <th>Reason</th>
+                 <th>Status</th>
+                 <th style="text-align:right;">Actions</th>
+              </tr>
+           </thead>
+           <tbody>
+              <tr>
+                 <td><div class="fw-semibold text-primary">RMA-0014</div></td>
+                 <td>
+                    <div>Today, 11:00 AM</div>
+                 </td>
+                 <td><a href="/seller/orders/EACIS-9005">#EACIS-9005</a></td>
+                 <td>Item Defective</td>
+                 <td><span class="badge badge--warning">Pending Review</span></td>
+                 <td style="text-align:right;">
+                    <button class="btn btn--secondary btn--sm" onclick="ModalManager.open(document.getElementById('rma-modal'))">Review</button>
+                 </td>
+              </tr>
+           </tbody>
+        </table>
+     </div>
+   </div>
+</div>
+
+<!-- Modal for RMA Review -->
+<div class="modal-overlay" style="display:none;">
+    <div class="modal modal--md" id="rma-modal">
+        <div class="modal__header">
+            <div class="modal__title-group">
+                <div class="modal__title">Review RMA-0014</div>
+                <div class="modal__subtitle">Order #EACIS-9005</div>
+            </div>
+            <button type="button" class="modal__close" aria-label="Close">✕</button>
+        </div>
+        <div class="modal__body">
+            <p><strong>Reason for return:</strong> Item Defective</p>
+            <p class="mt-2 text-muted">Customer states that the unit does not power on after following the manual.</p>
+            <div class="mt-4 form-group">
+               <label class="form-label">Seller Response</label>
+               <textarea class="form-textarea" placeholder="Add notes for the customer..."></textarea>
+            </div>
+        </div>
+        <div class="modal__footer">
+            <button class="btn btn--danger" onclick="Toast.info('RMA Updated', 'Request Denied'); ModalManager.close(this.closest('.modal'))">Deny</button>
+            <button class="btn btn--primary" onclick="Toast.success('RMA Updated', 'Return Approved'); ModalManager.close(this.closest('.modal'))">Approve Return</button>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Refunds Queue — Admin Portal{% endblock %}
+{% block content %}
+<div class="stagger-children">
+   <div class="page-content bg-grey-50">
+       <div style="display:flex; justify-content:space-between; align-items:flex-end; gap:var(--sp-4); margin-bottom:var(--sp-6);">
+            <div>
+               <h1 class="type-display-md">Refund & Return Oversight</h1>
+               <p class="type-body-sm text-muted mt-1">View refund and return escalations for compliance oversight only.</p>
+            </div>
+            <div style="display:flex; gap:var(--sp-3); flex-wrap:wrap; align-items:center;">
+               <span class="badge badge--pending">5 pending</span>
+               <button class="btn btn--secondary btn--sm">Export CSV</button>
+            </div>
+     </div>
+
+       <div class="kpi-grid mb-6">
+          <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Awaiting Review</div><div class="type-display-md mt-2">5</div></div></div>
+          <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Approved</div><div class="type-display-md mt-2">14</div></div></div>
+          <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Denied</div><div class="type-display-md mt-2">2</div></div></div>
+          <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Total Exposure</div><div class="type-display-md mt-2">PHP 87K</div></div></div>
+       </div>
+
+       <div class="glass-card p-6">
+       <div class="table-wrapper" style="border:none; box-shadow:none;">
+        <table class="data-table">
+           <thead>
+              <tr>
+                 <th>Case ID</th>
+                 <th>Date Escalated</th>
+                 <th>Order ID</th>
+                 <th>Seller</th>
+                 <th>Reason</th>
+                 <th>Amount</th>
+                 <th style="text-align:right;">Details</th>
+              </tr>
+           </thead>
+           <tbody>
+              <tr>
+                 <td><div class="fw-semibold text-danger">REF-0482</div></td>
+                 <td>Today, 02:15 PM</td>
+                 <td>#EACIS-8991</td>
+                 <td>TechWorks PH</td>
+                 <td>Seller Unresponsive</td>
+                 <td class="fw-semibold">PHP 5,200</td>
+                 <td style="text-align:right;"><a class="btn btn--secondary btn--sm" href="/admin/refunds/REF-0482">View</a></td>
+              </tr>
+           </tbody>
+        </table>
+     </div>
+     </div>
+   </div>
+</div>
+{% endblock %}

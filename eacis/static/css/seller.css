@@ -1,0 +1,401 @@
+/* Seller-specific styles (starter) */
+.seller-summary { display:flex; gap:12px; }
+.seller-actions { display:flex; gap:8px; }
+
+/* ────── SELLER SIDEBAR ENHANCEMENTS ────── */
+.sidebar--seller .sidebar__logout {
+  color: var(--color-danger) !important;
+  background: linear-gradient(90deg, rgba(222, 53, 11, 0.05) 0%, transparent 100%);
+  border-left: 3px solid var(--color-danger) !important;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0 !important;
+  margin: var(--sp-4) 0 var(--sp-3) 0;
+  padding-left: var(--sp-3) !important;
+  transition: all var(--dur-fast) var(--ease-out));
+}
+
+.sidebar--seller .sidebar__logout:hover {
+  background: linear-gradient(90deg, rgba(222, 53, 11, 0.1) 0%, transparent 100%);
+  color: var(--color-danger) !important;
+  transform: translateX(2px);
+}
+
+.sidebar--seller .sidebar__logout::before {
+  background: var(--color-danger) !important;
+}
+
+/* Seller sidebar icon colors */
+.sidebar--seller .sidebar__section + .sidebar__item:first-of-type svg {
+  color: #7C3AED;
+}
+
+/* Smooth transitions for sidebar items */
+.sidebar--seller .sidebar__item svg {
+  transition: all var(--dur-fast) var(--ease-out));
+}
+
+.sidebar--seller .sidebar__item.active svg,
+.sidebar--seller .sidebar__item:hover svg {
+  filter: drop-shadow(0 0 4px rgba(124, 58, 237, 0.3));
+}
+
+/* Admin sidebar logout styling */
+.sidebar--admin .sidebar__logout {
+  color: var(--color-danger) !important;
+  background: linear-gradient(90deg, rgba(222, 53, 11, 0.04) 0%, transparent 100%);
+  border-left: 3px solid var(--color-danger) !important;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0 !important;
+  margin: var(--sp-4) 0 var(--sp-3) 0;
+  padding-left: var(--sp-3) !important;
+  transition: all var(--dur-fast) var(--ease-out));
+}
+
+.sidebar--admin .sidebar__logout:hover {
+  background: linear-gradient(90deg, rgba(222, 53, 11, 0.08) 0%, transparent 100%);
+  color: var(--color-danger) !important;
+  transform: translateX(2px);
+}
+
+.sidebar--admin .sidebar__logout::before {
+  background: var(--color-danger) !important;
+}
+
+/* Seller sidebar account styling */
+.sidebar--seller .sidebar__account {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.08) 0%, rgba(167, 139, 250, 0.04) 100%);
+  border: 1px solid rgba(124, 58, 237, 0.15);
+}
+
+.sidebar--seller .sidebar__account:hover {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.12) 0%, rgba(167, 139, 250, 0.06) 100%);
+  border-color: rgba(124, 58, 237, 0.25);
+}
+
+/* Admin sidebar account styling */
+.sidebar--admin .sidebar__account {
+  background: linear-gradient(135deg, rgba(9, 30, 66, 0.05) 0%, rgba(75, 85, 99, 0.02) 100%);
+  border: 1px solid rgba(9, 30, 66, 0.1);
+}
+
+.sidebar--admin .sidebar__account:hover {
+  background: linear-gradient(135deg, rgba(9, 30, 66, 0.08) 0%, rgba(75, 85, 99, 0.03) 100%);
+  border-color: rgba(9, 30, 66, 0.15);
+}
+
+/* Sidebar account info text styling */
+.sidebar__account-info .type-body-sm {
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.sidebar__account-info .type-label-xs {
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+/* make data table denser for seller views */
+.data-table tbody tr td { padding:10px 8px; }
+
+/* muted/inactive row */
+.muted { opacity:0.45; }
+
+/* image drop dragover state */
+#image-drop.dragover { outline: 2px dashed var(--primary); background: rgba(0,122,255,0.03); }
+
+.btn-sm { padding:6px 8px; font-size:13px; }
+
+/* Reusable shell for seller ops pages */
+.ops-page {
+	--ops-accent: var(--brand-primary);
+	--ops-accent-soft: var(--brand-primary-subtle);
+	--ops-accent-soft-border: var(--brand-primary-subtle-2);
+	--ops-accent-wash: rgba(0, 122, 255, 0.06);
+}
+
+.ops-page-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: var(--sp-4);
+	flex-wrap: wrap;
+	margin-bottom: var(--sp-8);
+	padding-bottom: var(--sp-6);
+	padding-left: var(--sp-1);
+	border-bottom: 3px solid var(--ops-accent);
+}
+
+.ops-page-heading { flex: 1; }
+
+.ops-page-meta {
+	display: flex;
+	align-items: center;
+	gap: var(--sp-3);
+	margin-bottom: var(--sp-3);
+}
+
+.ops-page-icon {
+	width: 48px;
+	height: 48px;
+	border-radius: var(--radius-lg);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 24px;
+	background: var(--ops-accent-soft);
+}
+
+.ops-page-tag {
+	background: var(--ops-accent-soft);
+	color: var(--ops-accent);
+	border: 1px solid var(--ops-accent-soft-border);
+	font-weight: 600;
+}
+
+.ops-page-title {
+	color: var(--grey-900);
+	margin: 0;
+}
+
+.ops-page-subtitle {
+	color: var(--grey-600);
+	margin-top: var(--sp-3);
+	max-width: 600px;
+}
+
+.ops-page-action {
+	white-space: nowrap;
+	margin-top: var(--sp-2);
+}
+
+.ops-kpi-card {
+	border-left: 0;
+	box-shadow: var(--shadow-sm);
+	background: var(--grey-0);
+	background-image: linear-gradient(180deg, var(--ops-accent-soft) 0%, transparent 32%);
+}
+
+.ops-layout-grid {
+	display: grid;
+	grid-template-columns: 2fr 1fr;
+	gap: var(--sp-6);
+	align-items: start;
+}
+
+.ops-main-card {
+	border-top: 0;
+	box-shadow: var(--shadow-sm);
+	background-image: linear-gradient(180deg, var(--ops-accent-soft) 0%, transparent 24%);
+}
+
+.ops-aside-card {
+	border-top: 0;
+	background: linear-gradient(135deg, var(--grey-0) 0%, var(--ops-accent-wash) 100%);
+	box-shadow: var(--shadow-sm);
+}
+
+.ops-list {
+	display: flex;
+	flex-direction: column;
+	gap: var(--sp-4);
+	margin-top: var(--sp-5);
+}
+
+.ops-list-item {
+	padding: var(--sp-3);
+	background: var(--grey-0);
+	border-left: 0;
+	border-radius: var(--radius-sm);
+	box-shadow: inset 0 0 0 1px var(--border-subtle);
+}
+
+@media (max-width: 1024px) {
+	.ops-layout-grid { grid-template-columns: 1fr; }
+}
+
+/* Shared seller shell/header patterns for new pages */
+.seller-shell {
+	background: var(--surface-page);
+}
+
+.seller-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-end;
+	gap: var(--sp-4);
+	flex-wrap: wrap;
+	margin-bottom: var(--sp-6);
+	padding-bottom: var(--sp-6);
+	border-bottom: 2px solid var(--border-subtle);
+}
+
+.seller-header__head {
+	flex: 1;
+	min-width: 260px;
+}
+
+.seller-header__actions {
+	display: flex;
+	align-items: center;
+	gap: var(--sp-3);
+	flex-wrap: wrap;
+}
+
+.seller-header__meta {
+	display: flex;
+	align-items: center;
+	gap: var(--sp-2);
+	margin-bottom: var(--sp-2);
+	flex-wrap: wrap;
+}
+
+.seller-header__chip {
+	font-weight: 600;
+}
+
+.seller-header__chip--danger {
+	background: var(--color-danger-subtle);
+	color: var(--color-danger);
+	border: 1px solid var(--color-danger-border);
+}
+
+.seller-grid-2 {
+	display: grid;
+	grid-template-columns: 2fr 1fr;
+	gap: var(--sp-6);
+	align-items: start;
+}
+
+.seller-grid-16 {
+	display: grid;
+	grid-template-columns: 1.6fr 1fr;
+	gap: var(--sp-6);
+	align-items: start;
+}
+
+.seller-grid-12 {
+	display: grid;
+	grid-template-columns: 1.2fr 1fr;
+	gap: var(--sp-6);
+	align-items: start;
+}
+
+.seller-section-card {
+	background: var(--surface-card);
+	border: 1px solid var(--border-default);
+	box-shadow: var(--shadow-sm);
+}
+
+.seller-sunken {
+	background: var(--surface-sunken);
+	border: 1px solid var(--border-default);
+}
+
+.seller-checkline {
+	display: flex;
+	align-items: center;
+	gap: var(--sp-2);
+}
+
+.seller-checkline input {
+	width: 16px;
+	height: 16px;
+	margin: 0;
+}
+
+/* Module-specific seller layouts */
+.catalog-layout,
+.voucher-layout,
+.order-layout,
+.product-form-layout {
+	display: grid;
+	gap: var(--sp-6);
+}
+
+.catalog-layout {
+	grid-template-columns: 1.6fr 1fr;
+}
+
+.product-form-layout {
+	grid-template-columns: 1.8fr 1fr;
+}
+
+.order-layout {
+	grid-template-columns: 1.5fr 1fr;
+}
+
+.voucher-layout {
+	grid-template-columns: 1.4fr 1fr;
+}
+
+.catalog-hero,
+.voucher-hero,
+.order-hero,
+.product-form-hero {
+	background: var(--grey-0);
+	border: 1px solid var(--border-default);
+	border-radius: var(--radius-xl);
+	box-shadow: var(--shadow-sm);
+	padding: var(--sp-6);
+}
+
+.catalog-side,
+.voucher-side,
+.order-side,
+.product-form-side {
+	display: flex;
+	flex-direction: column;
+	gap: var(--sp-6);
+}
+
+.catalog-meter {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: var(--sp-3);
+}
+
+.catalog-meter__item,
+.voucher-chip,
+.order-chip {
+	background: var(--grey-0);
+	border: 1px solid var(--border-default);
+	border-radius: var(--radius-lg);
+	padding: var(--sp-4);
+}
+
+.order-timeline {
+	display: flex;
+	flex-direction: column;
+	gap: var(--sp-4);
+	position: relative;
+}
+
+.order-timeline__item {
+	padding-left: var(--sp-4);
+	border-left: 2px solid var(--brand-primary-subtle-2);
+}
+
+.voucher-lab {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: var(--sp-4);
+}
+
+@media (max-width: 1024px) {
+	.catalog-layout,
+	.product-form-layout,
+	.order-layout,
+	.voucher-layout,
+	.voucher-lab {
+		grid-template-columns: 1fr;
+	}
+	.catalog-meter {
+		grid-template-columns: 1fr;
+	}
+}
+
+@media (max-width: 1024px) {
+	.seller-grid-2,
+	.seller-grid-16,
+	.seller-grid-12 {
+		grid-template-columns: 1fr;
+	}
+}

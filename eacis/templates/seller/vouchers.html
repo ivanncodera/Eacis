@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% block title %}Seller Vouchers — Seller Portal{% endblock %}
+{% block content %}
+<div class="stagger-children">
+  <div class="page-content bg-grey-50 seller-shell">
+    <div class="seller-header reveal">
+      <div class="seller-header__head">
+        <div class="seller-header__meta">
+          <span class="badge seller-header__chip seller-header__chip--danger">CRM Module</span>
+          <span class="type-label" style="color:var(--grey-500);">Voucher Lab</span>
+        </div>
+        <h1 class="type-display-md">Vouchers</h1>
+        <p class="type-body-sm text-muted mt-1">Create store promotions and track voucher performance.</p>
+      </div>
+      <div class="seller-header__actions">
+        <span class="badge badge--success">Promo engine active</span>
+        <button class="btn btn--primary btn--sm" id="create-voucher">Create Voucher</button>
+      </div>
+    </div>
+
+    <div class="voucher-layout">
+      <div class="voucher-hero reveal" data-delay="80">
+        <div class="kpi-grid mb-6" style="grid-template-columns: repeat(4, minmax(0, 1fr));">
+          <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Active Vouchers</div><div class="type-display-md mt-2">4</div></div></div>
+          <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Redemptions Today</div><div class="type-display-md mt-2">21</div></div></div>
+          <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Total Discount</div><div class="type-display-md mt-2">PHP 8,140</div></div></div>
+          <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Expiring Soon</div><div class="type-display-md mt-2">2</div></div></div>
+        </div>
+
+        <div class="table-wrapper" style="border:none; box-shadow:none;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--sp-4);">
+            <div>
+              <h3 class="type-h4">Active Promotions</h3>
+              <p class="type-body-sm text-muted mt-1">Voucher performance at a glance with current usage and expiry.</p>
+            </div>
+            <span class="badge badge--pending">2 expiring soon</span>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr><th>Code</th><th>Type</th><th>Usage</th><th>Ends</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="fw-semibold">SAVE10</td><td>10% off selected appliances</td><td>34 / 100</td><td>Apr 10, 2026</td><td><span class="badge badge--success">Active</span></td></tr>
+              <tr><td class="fw-semibold">FANFREE</td><td>Free shipping</td><td>17 / 50</td><td>Apr 4, 2026</td><td><span class="badge badge--warning">Expiring</span></td></tr>
+              <tr><td class="fw-semibold">INSTALL5</td><td>PHP 500 off installment orders</td><td>8 / 25</td><td>Apr 18, 2026</td><td><span class="badge badge--success">Active</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="voucher-side">
+        <div class="glass-card p-6 reveal" data-delay="120">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--sp-4);">
+            <h3 class="type-h4">Promo Composer</h3>
+            <span class="badge badge--success">Draft</span>
+          </div>
+          <div class="voucher-lab">
+            <div class="form-group">
+              <label class="form-label">Voucher Code</label>
+              <input class="form-input" value="APRIL20">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Discount Type</label>
+              <select class="form-select"><option>Percentage</option><option>Fixed Amount</option><option>Free Shipping</option></select>
+            </div>
+          </div>
+          <div class="form-group mb-4">
+            <label class="form-label">Value</label>
+            <input class="form-input" value="20">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Minimum Spend</label>
+            <input class="form-input" value="5000">
+          </div>
+          <button class="btn btn--secondary btn--full mt-4">Save Draft</button>
+          <div class="type-body-xs text-muted mt-3">Use concise codes and set expiry windows to keep seller promos clean.</div>
+        </div>
+
+        <div class="glass-card p-6 reveal" data-delay="180">
+          <h3 class="type-h4">Campaign Notes</h3>
+          <div class="ops-list mt-4">
+            <div class="ops-list-item">
+              <div class="type-body-sm fw-semibold">Best used for clearance and bundle pushes</div>
+              <div class="type-body-xs text-muted mt-1">Promote slow movers without degrading margin.</div>
+            </div>
+            <div class="ops-list-item">
+              <div class="type-body-sm fw-semibold">Keep finance approvals visible</div>
+              <div class="type-body-xs text-muted mt-1">Avoid discount stacking on already thin categories.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  document.getElementById('create-voucher')?.addEventListener('click', () => {
+    Toast.info('Voucher builder', 'Voucher creation UI can be expanded into a dedicated form next.');
+  });
+</script>
+{% endblock %}

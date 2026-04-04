@@ -1,0 +1,295 @@
+{% extends 'base.html' %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/customer.css') }}">
+{% endblock %}
+
+{% block title %}Complete Your Order — E-ACIS{% endblock %}
+
+{% block content %}
+<div class="main-content">
+  <div class="stagger-children">
+  <header style="margin-bottom: var(--sp-10);">
+    <div style="display: flex; align-items: center; gap: var(--sp-3); margin-bottom: var(--sp-2);">
+      <a href="/cart" class="text-muted" style="display: flex; align-items: center; gap: 4px; font-size: var(--text-sm); text-decoration: none;">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"></path></svg>
+        Return to Cart
+      </a>
+    </div>
+    <h1 class="type-display-md">Checkout</h1>
+    <p class="type-body-sm text-muted">Complete your purchase securely. Fast delivery nationwide.</p>
+  </header>
+
+  <div style="display: grid; grid-template-columns: 1fr 400px; gap: var(--sp-10); align-items: start;">
+    
+    <!-- Checkout Flow -->
+    <div class="form-stack" style="gap: var(--sp-8);">
+      
+      <!-- Step 1: Shipping -->
+      <section class="glass-card stagger-item page-enter">
+        <div style="display: flex; align-items: center; gap: var(--sp-3); margin-bottom: var(--sp-6);">
+          <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--brand-primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px;">1</div>
+          <h2 class="type-h3" style="line-height: 1;">Shipping Details</h2>
+        </div>
+        
+        <div class="form-stack">
+          <div class="form-group">
+             <label class="form-label">Full Recipient Name</label>
+             <input type="text" class="form-input" placeholder="e.g. Juan Dela Cruz" value="{{ current_user.full_name }}">
+          </div>
+          <div class="form-group">
+             <label class="form-label">Complete Delivery Address</label>
+             <textarea class="form-textarea" style="height: 80px;" placeholder="House No., Street Name, Barangay, Municipality/City...">123 Makisig St., Brgy. San Antonio, Makati City, Metro Manila</textarea>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-4);">
+             <div class="form-group">
+               <label class="form-label">Postal / ZIP Code</label>
+               <input type="text" class="form-input" value="1203">
+             </div>
+             <div class="form-group">
+               <label class="form-label">Primary Mobile Number</label>
+               <div class="form-input-group">
+                 <span class="form-input-group__icon">+63</span>
+                 <input type="text" class="form-input" value="9171234567">
+               </div>
+             </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 2: Payment -->
+      <section class="glass-card stagger-item page-enter">
+        <div style="display: flex; align-items: center; gap: var(--sp-3); margin-bottom: var(--sp-6);">
+          <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--brand-primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px;">2</div>
+          <h2 class="type-h3" style="line-height: 1;">Payment Method</h2>
+        </div>
+        
+        <div style="display:flex; flex-direction:column; gap: var(--sp-3);">
+          <!-- Payment Options -->
+          <label class="payment-option checked">
+             <input type="radio" name="payment" value="credit" checked>
+             <div class="payment-option__info">
+                <strong>Credit / Debit Card</strong>
+                <span class="text-muted type-body-sm">Visa, Mastercard, JCB</span>
+             </div>
+             <div style="display: flex; gap: 4px;">
+               <img src="https://img.icons8.com/color/48/visa.png" width="24"/>
+               <img src="https://img.icons8.com/color/48/mastercard.png" width="24"/>
+             </div>
+          </label>
+
+          <label class="payment-option" id="installment-trigger">
+             <input type="radio" name="payment" value="installment">
+             <div class="payment-option__info">
+                <strong>0% Interest Installment</strong>
+                <span class="text-primary type-body-sm fw-bold">Up to 24 Months available</span>
+             </div>
+             <img src="https://img.icons8.com/ios-filled/50/time-machine.png" width="24" style="opacity: 0.5;"/>
+          </label>
+
+          <!-- Hidden Installment Box -->
+          <div id="installment-details" class="installment-box" style="display: none; margin-top: -8px; border-top: none; border-top-left-radius: 0; border-top-right-radius: 0;">
+            <p class="type-label" style="font-size: 11px; color: var(--brand-primary); margin-bottom: var(--sp-3);">SELECT PLAN FOR PHP 24,500.00</p>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-3);">
+              <label class="plan-card">
+                <input type="radio" name="plan" value="6" checked>
+                <div class="plan-card__inner">
+                  <div class="fw-bold">6 Mo</div>
+                  <div class="type-body-sm text-primary">₱4,083/mo</div>
+                </div>
+              </label>
+              <label class="plan-card">
+                <input type="radio" name="plan" value="12">
+                <div class="plan-card__inner">
+                  <div class="fw-bold">12 Mo</div>
+                  <div class="type-body-sm text-primary">₱2,041/mo</div>
+                </div>
+              </label>
+              <label class="plan-card">
+                <input type="radio" name="plan" value="24">
+                <div class="plan-card__inner">
+                  <div class="fw-bold">24 Mo</div>
+                  <div class="type-body-sm text-primary">₱1,020/mo</div>
+                </div>
+              </label>
+            </div>
+            <div class="type-body-sm text-muted" style="margin-top: var(--sp-3); font-size: 11px;">* Includes ₱100 processing fee. No interest for Metrobank/BDO cards.</div>
+          </div>
+
+          <label class="payment-option">
+             <input type="radio" name="payment" value="wallet">
+             <div class="payment-option__info">
+                <strong>E-Wallet</strong>
+                <span class="text-muted type-body-sm">GCash, Maya, ShopeePay</span>
+             </div>
+             <div style="display: flex; gap: 4px; align-items: center;">
+                <span class="badge badge--dot badge--success" style="font-size: 10px;">PROMO</span>
+             </div>
+          </label>
+
+          <label class="payment-option">
+             <input type="radio" name="payment" value="cod">
+             <div class="payment-option__info">
+                <strong>Cash on Delivery (COD)</strong>
+                <span class="text-muted type-body-sm">Pay upon receipt in cash</span>
+             </div>
+          </label>
+        </div>
+
+        <div style="margin-top:var(--sp-8); border-top: 1px solid var(--border-subtle); padding-top: var(--sp-6);">
+           <button class="btn btn--primary btn--lg" id="btn-place-order" style="min-width: 240px; border-radius: var(--radius-pill); box-shadow: var(--shadow-primary);">
+             Place Secure Order
+             <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-left: 8px;"><path d="M5 13l4 4L19 7"></path></svg>
+           </button>
+        </div>
+      </section>
+    </div>
+
+    <!-- Order Summary Sticky -->
+    <aside class="glass-card glass-card--strong stagger-item page-enter" style="position: sticky; top: calc(var(--topbar-height) + var(--sp-8)); border: 1.5px solid var(--border-default); background: var(--grey-0);">
+       <h3 class="type-h4" style="margin-bottom: var(--sp-4);">Review Summary</h3>
+       
+       <div id="summary-items" style="display: flex; flex-direction: column; gap: var(--sp-3); margin-bottom: var(--sp-6);">
+          <div style="display: flex; gap: var(--sp-3); align-items: center;">
+            <div style="width: 48px; height: 48px; background: var(--grey-50); border-radius: 6px; overflow: hidden; border: 1px solid var(--border-subtle);">
+              <img src="/static/assets/products/2-door-refrigirator.webp" style="width:100%; height:100%; object-fit: contain;">
+            </div>
+            <div style="flex: 1; min-width: 0;">
+              <div class="type-body-sm fw-semibold" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Smart 2-Door Refrigerator</div>
+              <div class="type-body-sm text-muted">Qty: 1</div>
+            </div>
+            <div class="type-body-sm fw-bold">₱24,500</div>
+          </div>
+       </div>
+
+       <!-- Voucher Input -->
+       <div class="form-group" style="margin-bottom: var(--sp-6);">
+          <div class="form-input-group">
+            <input type="text" class="form-input" style="height: 38px; border-top-right-radius: 0; border-bottom-right-radius: 0;" placeholder="Promo Code">
+            <button class="btn btn--secondary" style="height: 38px; border-top-left-radius: 0; border-bottom-left-radius: 0;">Apply</button>
+          </div>
+       </div>
+
+       <div style="display:flex; flex-direction:column; gap: var(--sp-3);">
+          <div style="display:flex; justify-content:space-between;" class="type-body-sm">
+            <span class="text-muted">Subtotal</span>
+            <span class="fw-medium">PHP 24,500.00</span>
+          </div>
+          <div style="display:flex; justify-content:space-between;" class="type-body-sm">
+            <span class="text-muted">Shipping</span>
+            <span class="text-success fw-bold">FREE</span>
+          </div>
+          <div style="display:flex; justify-content:space-between;" class="type-body-sm">
+            <span class="text-muted">Tax (12% VAT)</span>
+            <span class="fw-medium">Included</span>
+          </div>
+       </div>
+       
+       <hr style="border:none; border-top: 1px dashed var(--border-default); margin: var(--sp-6) 0;" />
+       
+       <div style="display:flex; justify-content:space-between; align-items: flex-end; margin-bottom: var(--sp-4);">
+          <span class="type-h4" style="margin: 0; line-height: 1;">Total</span>
+          <span class="type-price" style="color: var(--brand-primary); line-height: 1;">PHP 24,500.00</span>
+       </div>
+       
+       <div id="billing-subtitle" class="type-body-sm text-primary" style="display: none; text-align: right; font-weight: 500;">
+         Billed Monthly: <strong>₱2,041.00</strong>
+       </div>
+
+       <p class="type-body-sm text-muted" style="margin-top:var(--sp-6); font-size: 11px;">By placing an order, you agree to our <a href="#" class="text-primary">E-ACIS Buyer Protection</a> and Terms of Use.</p>
+    </aside>
+
+  </div>
+</div>
+
+<style>
+/* Checkout specific styles */
+.payment-option {
+  display: flex !important;
+  align-items: center !important;
+  gap: var(--sp-4) !important;
+  padding: var(--sp-4) !important;
+  border: 1.5px solid var(--border-default) !important;
+  border-radius: var(--radius-lg) !important;
+  background: var(--grey-0) !important;
+  cursor: pointer !important;
+  transition: all var(--dur-fast);
+}
+.payment-option:hover {
+  border-color: var(--brand-primary-light) !important;
+}
+.payment-option.checked {
+  border-color: var(--brand-primary) !important;
+  background: var(--brand-primary-subtle) !important;
+  box-shadow: var(--shadow-sm);
+}
+.payment-option input[type="radio"] {
+  accent-color: var(--brand-primary);
+  width: 18px;
+  height: 18px;
+}
+.payment-option__info {
+  flex: 1;
+}
+.payment-option__info strong {
+  display: block;
+  font-size: var(--text-base);
+  margin-bottom: 2px;
+}
+
+/* Plan card internal grid */
+.plan-card {
+  cursor: pointer;
+}
+.plan-card input {
+  display: none;
+}
+.plan-card__inner {
+  padding: var(--sp-3);
+  background: var(--grey-0);
+  border: 1.5px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  text-align: center;
+  transition: all 0.2s;
+}
+.plan-card input:checked + .plan-card__inner {
+  border-color: var(--brand-primary);
+  background: var(--grey-0);
+  box-shadow: inset 0 0 0 1px var(--brand-primary);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const options = document.querySelectorAll('input[name="payment"]');
+  const details = document.getElementById('installment-details');
+  const subtitle = document.getElementById('billing-subtitle');
+
+  options.forEach(opt => {
+    opt.addEventListener('change', (e) => {
+      // Manage visuals
+      document.querySelectorAll('.payment-option').forEach(p => p.classList.remove('checked'));
+      e.target.closest('.payment-option').classList.add('checked');
+
+      // Installment logic
+      if(e.target.value === 'installment') {
+        details.style.display = 'block';
+        subtitle.style.display = 'block';
+      } else {
+        details.style.display = 'none';
+        subtitle.style.display = 'none';
+      }
+    });
+  });
+
+  document.getElementById('btn-place-order').addEventListener('click', (e) => {
+     const btn = e.target.closest('button');
+     btn.classList.add('btn--loading');
+     setTimeout(() => {
+       if (window.CartManager) window.CartManager.clear();
+       window.location.href = '/customer/checkout/success';
+     }, 2000);
+  });
+});
+</script>
+{% endblock %}

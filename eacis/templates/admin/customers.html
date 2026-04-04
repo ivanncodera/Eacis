@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Customers — Admin Portal{% endblock %}
+{% block content %}
+<div class="stagger-children">
+  <div class="page-content bg-grey-50">
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; gap:var(--sp-4); margin-bottom:var(--sp-6);">
+      <div>
+        <h1 class="type-display-md">Customers</h1>
+        <p class="type-body-sm text-muted mt-1">Read-only customer directory with masked contact data by default.</p>
+      </div>
+      <button class="btn btn--secondary btn--sm">Export CSV</button>
+    </div>
+    <div class="glass-card p-6">
+      <div class="table-wrapper" style="border:none; box-shadow:none;">
+        <table class="data-table">
+          <thead><tr><th>Name</th><th>Email</th><th>Orders</th><th>Status</th><th style="text-align:right;">Balance</th></tr></thead>
+          <tbody>
+            <tr><td class="fw-semibold">Juan Dela Cruz</td><td>ju***@example.com</td><td>12</td><td><span class="badge badge--success">Active</span></td><td style="text-align:right;">PHP 0</td></tr>
+            <tr><td class="fw-semibold">Maria Santos</td><td>ma***@example.com</td><td>4</td><td><span class="badge badge--success">Active</span></td><td style="text-align:right;">PHP 0</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

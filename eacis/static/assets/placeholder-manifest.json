@@ -1,0 +1,32 @@
+{
+  "placeholders": [
+    { "name": "product-default", "type": "gradient", "colors": ["#f3f6fb","#e8f0ff"] },
+    { "name": "product-alt", "type": "gradient", "colors": ["#fff7ed","#fff4e6"] }
+  ],
+  "generated": true,
+  "notes": "Use CSS gradient backgrounds as image fallbacks. No binary assets included." 
+}
+{
+  "PRD-SLR01-0001": "2-door-refrigirator.webp",
+  "PRD-SLR01-0002": "single-door-ref.webp",
+  "PRD-SLR01-0003": "inverted-chest-freezer.webp",
+  "PRD-SLR01-0004": "gas-range-with-oven-4-burners.webp",
+  "PRD-SLR01-0005": "induction-cooker-double.png",
+  "PRD-SLR01-0006": "single-burner-induction-cooker.webp",
+  "PRD-SLR01-0007": "microwave-oven.jfif",
+  "PRD-SLR01-0008": "air-fryer.jfif",
+  "PRD-SLR01-0009": "electric-oven-rotisserie.webp",
+  "PRD-SLR01-0010": "rice-cooker.jpg",
+  "PRD-SLR01-0011": "electric-kettle.webp",
+  "PRD-SLR01-0012": "stand-mixer.jfif",
+  "PRD-SLR01-0013": "electric-food-processor.jfif",
+  "PRD-SLR01-0014": "blender.jfif",
+  "PRD-SLR01-0015": "coffee-maker.jfif",
+  "PRD-SLR01-0016": "espresso-machine.jfif",
+  "PRD-SLR01-0017": "bread-toaster.jfif",
+  "PRD-SLR01-0018": "sandwich-maker.jfif",
+  "PRD-SLR01-0019": "juice-extractor.jfif",
+  "PRD-SLR01-0020": "slow-cooker.jfif",
+  "PRD-SLR01-0021": "dishwasher-countertop.jfif",
+  "PRD-SLR01-0022": "water-dispenser.webp"
+}

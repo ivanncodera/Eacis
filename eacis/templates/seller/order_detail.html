@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% block title %}Order Details — Seller Portal{% endblock %}
+{% block content %}
+<div class="stagger-children">
+   <div class="page-content bg-grey-50 seller-shell">
+     <div class="seller-header reveal">
+        <div class="seller-header__head">
+           <a href="/seller/orders" class="btn btn--ghost btn--sm mb-2">← Back to Orders</a>
+           <div class="seller-header__meta mt-2">
+              <span class="badge seller-header__chip seller-header__chip--danger">Sales Module</span>
+              <span class="type-label" style="color:var(--grey-500);">Fulfillment Detail</span>
+           </div>
+           <div style="display:flex; align-items:center; gap:var(--sp-3);">
+              <h1 class="type-display-md">Order #EACIS-9221</h1>
+              <span class="badge badge--dot badge--pending">Pending</span>
+           </div>
+           <div class="type-body-sm text-muted mt-1">Placed on Oct 24, 2023 at 10:42 AM</div>
+        </div>
+        <div class="seller-header__actions">
+           <button class="btn btn--secondary">Print Packing Slip</button>
+           <button class="btn btn--primary" onclick="Toast.info('Status Updated','Order marked as Processing')">Mark as Processing</button>
+        </div>
+     </div>
+
+     <div class="order-layout">
+        <div class="form-stack">
+           <div class="glass-card p-6 order-hero reveal" data-delay="80">
+              <h3 class="type-h4 mb-4">Items to Fulfill</h3>
+              <table class="data-table">
+                 <thead>
+                    <tr>
+                       <th>Item</th>
+                       <th>Price</th>
+                       <th>Qty</th>
+                       <th style="text-align:right;">Total</th>
+                    </tr>
+                 </thead>
+                 <tbody>
+                    <tr>
+                       <td>
+                          <div style="display:flex; gap:var(--sp-3); align-items:center;">
+                             <div style="width:40px; height:40px; background:var(--grey-50); border-radius:var(--radius-sm);"><img src="/static/assets/products/2-door-refrigirator.webp" style="width:100%;height:100%;object-fit:cover;"/></div>
+                             <div>
+                                <div class="fw-semibold">Smart 2-Door Refrigerator</div>
+                                <div class="type-body-xs text-muted">REF-A9X20</div>
+                             </div>
+                          </div>
+                       </td>
+                       <td>PHP 24,500</td>
+                       <td>1</td>
+                       <td style="text-align:right;" class="fw-semibold">PHP 24,500</td>
+                    </tr>
+                 </tbody>
+              </table>
+           </div>
+
+           <div class="glass-card p-6 order-hero reveal" data-delay="140">
+              <h3 class="type-h4 mb-4">Fulfillment Timeline</h3>
+              <div class="order-timeline">
+                 <div class="order-timeline__item">
+                    <div class="type-body-sm fw-semibold">Pending</div>
+                    <div class="type-body-xs text-muted">Order confirmed and waiting for pick-and-pack.</div>
+                 </div>
+                 <div class="order-timeline__item">
+                    <div class="type-body-sm fw-semibold">Pick & Pack</div>
+                    <div class="type-body-xs text-muted">Assign warehouse staff and prepare packing slip.</div>
+                 </div>
+                 <div class="order-timeline__item">
+                    <div class="type-body-sm fw-semibold">Dispatch</div>
+                    <div class="type-body-xs text-muted">Hand over to courier and notify customer.</div>
+                 </div>
+              </div>
+           </div>
+        </div>
+
+        <div class="order-side">
+           <div class="glass-card p-6 order-hero reveal" data-delay="110">
+              <h3 class="type-h4 mb-4">Customer Details</h3>
+              <p class="type-body-sm mb-2"><strong class="type-body">Juan Dela Cruz</strong></p>
+              <p class="type-body-sm text-muted mb-1">ju***@example.com</p>
+              <p class="type-body-sm text-muted mb-4">+63 917 *** 4567</p>
+
+              <h3 class="type-h4 mb-3 mt-4">Shipping Address</h3>
+              <p class="type-body-sm text-muted" style="line-height:1.5;">
+                 Barangay San Isidro, Makati City<br>Metro Manila, Philippines
+              </p>
+           </div>
+
+           <div class="glass-card p-6 reveal" data-delay="180">
+              <h3 class="type-h4 mb-4">Action Queue</h3>
+              <div style="display:flex; flex-direction:column; gap:var(--sp-3);">
+                <button class="btn btn--secondary btn--sm btn--full">Print packing slip</button>
+                <button class="btn btn--secondary btn--sm btn--full">Reserve courier pickup</button>
+                <button class="btn btn--secondary btn--sm btn--full">Message customer</button>
+              </div>
+           </div>
+        </div>
+     </div>
+   </div>
+</div>
+{% endblock %}

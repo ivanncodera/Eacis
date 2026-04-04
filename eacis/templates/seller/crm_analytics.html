@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% block title %}CRM Analytics — Seller Portal{% endblock %}
+{% block content %}
+<div class="stagger-children">
+  <div class="page-content bg-grey-50 seller-shell">
+    <div class="seller-header" style="align-items:flex-start; margin-bottom:var(--sp-8);">
+      <div class="seller-header__head">
+        <div class="seller-header__meta">
+          <span class="badge seller-header__chip seller-header__chip--info">CRM</span>
+          <span class="type-label" style="color:var(--grey-500);">Behavioral Analytics</span>
+        </div>
+        <h1 class="type-display-md" style="color:var(--grey-900); margin:0;">Retention & Engagement</h1>
+        <p class="type-body-sm mt-2" style="color:var(--grey-600);">Cohort analysis, repeat purchase patterns, and churn risk signals.</p>
+      </div>
+      <button class="btn btn--secondary btn--sm">Download Report</button>
+    </div>
+
+    <div class="reveal" data-delay="60ms" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:var(--sp-4); margin-bottom:var(--sp-8);">
+      <div class="glass-card p-4" style=" background:linear-gradient(180deg, #0052CC10 0%, transparent 40%);">
+        <div class="type-body-xs" style="color:var(--grey-500); font-weight:600;">90-DAY RETENTION</div>
+        <div class="type-display-md mt-2" style="color:#0052CC; margin:0;">71%</div>
+        <div class="type-body-xs mt-2" style="color:var(--color-success); font-weight:600;">+3.4% trend</div>
+      </div>
+      <div class="glass-card p-4" style="background:linear-gradient(180deg, #FF8B0010 0%, transparent 40%);">
+        <div class="type-body-xs" style="color:var(--grey-500); font-weight:600;">REPEAT RATE</div>
+        <div class="type-display-md mt-2" style="color:#FF8B00; margin:0;">43%</div>
+        <div class="type-body-xs mt-2" style="color:var(--grey-600);">Appliance avg</div>
+      </div>
+      <div class="glass-card p-4" style="background:linear-gradient(180deg, #00875A10 0%, transparent 40%);">
+        <div class="type-body-xs" style="color:var(--grey-500); font-weight:600;">INQUIRY-TO-SALE</div>
+        <div class="type-display-md mt-2" style="color:#00875A; margin:0;">18%</div>
+        <div class="type-body-xs mt-2" style="color:var(--grey-600);">Conversion rate</div>
+      </div>
+      <div class="glass-card p-4" style="background:linear-gradient(180deg, #DE350B10 0%, transparent 40%);">
+        <div class="type-body-xs" style="color:var(--grey-500); font-weight:600;">CHURN RISK</div>
+        <div class="type-display-md mt-2" style="color:#DE350B; margin:0;">9.6%</div>
+        <div class="type-body-xs mt-2" style="color:#DE350B; font-weight:600;">Needs action</div>
+      </div>
+    </div>
+
+    <div class="reveal" data-delay="100ms" style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-6); margin-bottom:var(--sp-8);">
+      <div class="glass-card p-6">
+        <h3 class="type-h4" style="margin:0 0 var(--sp-4) 0;">Engagement Funnel</h3>
+        <div style="display:flex; flex-direction:column; gap:var(--sp-3);">
+          <div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:var(--sp-2);">
+              <span class="type-body-sm fw-semibold">Visitors</span>
+              <span class="type-body-sm fw-semibold">8,420</span>
+            </div>
+            <div style="height:8px; background:var(--grey-100); border-radius:4px; overflow:hidden;">
+              <div style="width:100%; height:100%; background:#0052CC; border-radius:4px;"></div>
+            </div>
+          </div>
+          <div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:var(--sp-2);">
+              <span class="type-body-sm fw-semibold">Browse Products</span>
+              <span class="type-body-sm fw-semibold">4,210 (50%)</span>
+            </div>
+            <div style="height:8px; background:var(--grey-100); border-radius:4px; overflow:hidden;">
+              <div style="width:50%; height:100%; background:#0052CC; border-radius:4px;"></div>
+            </div>
+          </div>
+          <div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:var(--sp-2);">
+              <span class="type-body-sm fw-semibold">Add to Cart</span>
+              <span class="type-body-sm fw-semibold">1,053 (25%)</span>
+            </div>
+            <div style="height:8px; background:var(--grey-100); border-radius:4px; overflow:hidden;">
+              <div style="width:25%; height:100%; background:#FF8B00; border-radius:4px;"></div>
+            </div>
+          </div>
+          <div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:var(--sp-2);">
+              <span class="type-body-sm fw-semibold">Checkout</span>
+              <span class="type-body-sm fw-semibold">316 (7.5%)</span>
+            </div>
+            <div style="height:8px; background:var(--grey-100); border-radius:4px; overflow:hidden;">
+              <div style="width:7.5%; height:100%; background:#00875A; border-radius:4px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card p-6">
+        <h3 class="type-h4" style="margin:0 0 var(--sp-4) 0;">Cohort Segments</h3>
+        <div style="display:flex; flex-direction:column; gap:var(--sp-3);">
+          <div style="padding:var(--sp-3); background:var(--grey-0); border-radius:var(--radius-md); border-left:3px solid #00875A;">
+            <div class="type-body-sm fw-semibold">VIP Repeat Buyers</div>
+            <div class="type-body-xs text-muted mt-1">86 accounts · PHP 644k revenue · 5m SLA</div>
+            <div class="type-body-xs mt-2" style="color:#00875A; font-weight:600;">41% conversion ↑</div>
+          </div>
+          <div style="padding:var(--sp-3); background:var(--grey-0); border-radius:var(--radius-md); border-left:3px solid #FF8B00;">
+            <div class="type-body-sm fw-semibold">Installment Families</div>
+            <div class="type-body-xs text-muted mt-1">142 accounts · PHP 388k revenue · 11m SLA</div>
+            <div class="type-body-xs mt-2" style="color:var(--grey-600);">24% conversion —</div>
+          </div>
+          <div style="padding:var(--sp-3); background:var(--grey-0); border-radius:var(--radius-md); border-left:3px solid #DE350B;">
+            <div class="type-body-sm fw-semibold">Dormant Buyers</div>
+            <div class="type-body-xs text-muted mt-1">119 accounts · PHP 71k revenue · 17m SLA</div>
+            <div class="type-body-xs mt-2" style="color:#DE350B; font-weight:600;">8% conversion ↓</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="reveal" data-delay="140ms">
+      <div class="glass-card p-6">
+        <h3 class="type-h4" style="margin:0 0 var(--sp-4) 0;">Recommended Actions</h3>
+        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:var(--sp-4);">
+          <div style="padding:var(--sp-4); background:linear-gradient(180deg, #00875A10 0%, transparent 40%); border-radius:var(--radius-md); border:1px solid #00875A30;">
+            <div style="font-size:18px; margin-bottom:var(--sp-2);">🎁</div>
+            <div class="type-body-sm fw-semibold">VIP Retention</div>
+            <div class="type-body-xs text-muted mt-2">Monthly exclusive drops for top cohort.</div>
+          </div>
+          <div style="padding:var(--sp-4); background:linear-gradient(180deg, #FF8B0010 0%, transparent 40%); border-radius:var(--radius-md); border:1px solid #FF8B0030;">
+            <div style="font-size:18px; margin-bottom:var(--sp-2);">💳</div>
+            <div class="type-body-sm fw-semibold">Grow Installment</div>
+            <div class="type-body-xs text-muted mt-2">Cross-sell flexible plans to repeat buyers.</div>
+          </div>
+          <div style="padding:var(--sp-4); background:linear-gradient(180deg, #DE350B10 0%, transparent 40%); border-radius:var(--radius-md); border:1px solid #DE350B30;">
+            <div style="font-size:18px; margin-bottom:var(--sp-2);">🔄</div>
+            <div class="type-body-sm fw-semibold">Win Back Dormant</div>
+            <div class="type-body-xs text-muted mt-2">Limited-time vouchers for inactive 60+ days.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

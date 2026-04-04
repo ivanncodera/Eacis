@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block title %}{{ page_title or 'Orders' }} — Seller Portal{% endblock %}
+{% block content %}
+<div class="stagger-children">
+    <div class="page-content bg-grey-50 seller-shell">
+       <div class="seller-header" style="align-items:flex-start; margin-bottom:var(--sp-8);">
+                  <div class="seller-header__head">
+                      <div class="seller-header__meta">
+                         <span class="badge seller-header__chip seller-header__chip--danger">Sales</span>
+                 <span class="type-label" style="color:var(--grey-500);">{{ page_title or 'Orders' }}</span>
+               </div>
+               <h1 class="type-display-md" style="color:var(--grey-900); margin:0;">{{ page_title or 'Orders' }}</h1>
+               {% if page_subtitle %}<p class="type-body-sm mt-2" style="color:var(--grey-600);">{{ page_subtitle }}</p>{% endif %}
+            </div>
+                  <button class="btn btn--secondary btn--sm">{{ export_label or 'Export CSV' }}</button>
+     </div>
+
+     <div class="table-wrapper">
+        <div class="table-toolbar">
+           <div class="form-input-group" style="width:320px;">
+              <span class="form-input-group__icon">🔍</span>
+              <input type="text" class="form-input" placeholder="Search order ID or customer..." />
+           </div>
+           <select class="form-select" style="min-width:140px;">
+              <option>Status: All</option>
+              <option>Pending</option>
+              <option>Processing</option>
+              <option>Shipped</option>
+              <option>Delivered</option>
+           </select>
+        </div>
+        <table class="data-table">
+           <thead>
+              <tr>
+                 <th>Order ID</th>
+                 <th>Date</th>
+                 <th>Customer</th>
+                 <th>Total</th>
+                 <th>Status</th>
+                 <th style="text-align:right;">Actions</th>
+              </tr>
+           </thead>
+           <tbody>
+              <tr>
+                 <td><a href="/seller/orders/EACIS-9221" class="fw-semibold text-primary">#EACIS-9221</a></td>
+                 <td>
+                    <div>Today, 10:42 AM</div>
+                    <div class="type-body-xs text-muted">2 mins ago</div>
+                 </td>
+                 <td>Juan Dela Cruz</td>
+                 <td class="fw-semibold">PHP 12,400</td>
+                 <td><span class="badge badge--dot badge--pending">Pending</span></td>
+                 <td style="text-align:right;">
+                    <a href="/seller/orders/EACIS-9221" class="btn btn--secondary btn--sm">Manage</a>
+                 </td>
+              </tr>
+              <tr>
+                 <td><a href="/seller/orders/EACIS-9220" class="fw-semibold text-primary">#EACIS-9220</a></td>
+                 <td>
+                    <div>Today, 09:30 AM</div>
+                    <div class="type-body-xs text-muted">1 hour ago</div>
+                 </td>
+                 <td>Maria Santos</td>
+                 <td class="fw-semibold">PHP 4,200</td>
+                 <td><span class="badge badge--dot badge--shipped">Shipped</span></td>
+                 <td style="text-align:right;">
+                    <a href="/seller/orders/EACIS-9220" class="btn btn--secondary btn--sm">Manage</a>
+                 </td>
+              </tr>
+           </tbody>
+        </table>
+        <div class="table-footer">
+           <div class="table-footer__info">Showing 1-10 of 42 orders</div>
+           <div class="pagination">
+              <button class="pagination__btn" disabled>&lt;</button>
+              <button class="pagination__btn active">1</button>
+              <button class="pagination__btn">2</button>
+              <button class="pagination__btn">&gt;</button>
+           </div>
+        </div>
+     </div>
+   </div>
+</div>
+{% endblock %}

@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+{% block title %}{% if ref %}Edit Product — Seller Portal{% else %}Add Product — Seller Portal{% endif %}{% endblock %}
+{% block content %}
+<div id="seller-product-context" data-product-ref="{{ ref or '' }}" hidden></div>
+<div class="stagger-children">
+   <div class="page-content bg-grey-50 seller-shell">
+     <div class="seller-header reveal">
+        <div class="seller-header__head">
+           <div class="seller-header__meta">
+             <span class="badge seller-header__chip seller-header__chip--danger">Seller Module</span>
+             <span class="type-label" style="color:var(--grey-500);">Product Builder</span>
+           </div>
+           <h1 class="type-display-md">{% if ref %}Edit Product{% else %}Add New Product{% endif %}</h1>
+           <p class="type-body-sm text-muted mt-1">{% if ref %}Update product details, pricing, and inventory.{% else %}Create a new listing with media, stock controls, and warranty settings.{% endif %}</p>
+        </div>
+        <div class="seller-header__actions">
+           <a href="/seller/products" class="btn btn--ghost btn--sm">Back to Catalog</a>
+           <button type="button" class="btn btn--secondary" id="cancel-btn">Cancel</button>
+           <button type="submit" form="product-form" class="btn btn--primary">Save Product</button>
+        </div>
+     </div>
+
+     <form id="product-form">
+       <div class="product-form-layout">
+        <div class="form-stack">
+           <div class="glass-card p-6 product-form-hero reveal" data-delay="60">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:var(--sp-4); margin-bottom:var(--sp-4);">
+                 <div>
+                   <h3 class="type-h4">Product Identity</h3>
+                   <p class="type-body-sm text-muted mt-1">Core details customers will see in the storefront.</p>
+                 </div>
+                 <div class="type-body-xs text-muted" style="text-align:right;">
+                   Product Ref
+                   <div class="fw-semibold" id="prd-ref-display">{{ ref or 'Auto-generated on save' }}</div>
+                 </div>
+              </div>
+              <div class="form-group mb-4">
+                 <label class="form-label">Product Reference</label>
+                 <input id="prd-ref" type="text" class="form-input" readonly>
+              </div>
+              <div class="form-group mb-4">
+                 <label class="form-label">Product Name <span class="required">*</span></label>
+                 <input id="prd-name" type="text" class="form-input" placeholder="e.g. Smart 2-Door Refrigerator" required>
+              </div>
+              <div class="form-group mb-4">
+                 <label class="form-label">Description <span class="required">*</span></label>
+                 <textarea class="form-textarea" placeholder="Detailed product description..." style="min-height:160px;" required></textarea>
+                 <div class="form-helper">Highlight key features, warranty, and installation details.</div>
+              </div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-4);">
+                 <div class="form-group">
+                    <label class="form-label">Category <span class="required">*</span></label>
+                    <select id="prd-category" class="form-select" required>
+                       <option value="">Select...</option>
+                       <option>Kitchen & Cooking</option>
+                       <option>Cooling & Air Quality</option>
+                       <option>Laundry & Cleaning</option>
+                       <option>Home Entertainment</option>
+                    </select>
+                 </div>
+                 <div class="form-group">
+                    <label class="form-label">Brand <span class="optional">(Optional)</span></label>
+                    <input type="text" class="form-input" placeholder="e.g. Samsung">
+                 </div>
+              </div>
+           </div>
+
+           <div class="glass-card p-6 product-form-hero reveal" data-delay="120">
+              <h3 class="type-h4 mb-4">Product Images</h3>
+              <div id="image-drop" style="border: 2px dashed var(--border-medium); border-radius: var(--radius-md); padding: var(--sp-12); text-align:center; background:var(--grey-0);">
+                 <svg class="icon text-muted mb-3" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                 <div class="fw-semibold">Drop images here or click to upload.</div>
+                 <div class="type-body-sm text-muted mt-1">First image becomes the cover image.</div>
+                 <div class="mt-4" style="display:flex; justify-content:center; gap:var(--sp-3); flex-wrap:wrap;">
+                   <button type="button" class="btn btn--secondary btn--sm" id="image-upload-btn">Choose Files</button>
+                 </div>
+                 <input id="image-input" type="file" accept="image/*" multiple hidden>
+              </div>
+              <div id="image-previews" class="mt-4" style="display:flex; gap:var(--sp-3); flex-wrap:wrap;"></div>
+           </div>
+        </div>
+
+        <div class="product-form-side">
+           <div class="glass-card p-6 reveal" data-delay="100">
+              <h3 class="type-h4 mb-4">Pricing Studio</h3>
+              <div class="form-group mb-4">
+                 <label class="form-label">Base Price <span class="required">*</span></label>
+                 <div class="form-input-group">
+                    <span class="form-input-group__icon">₱</span>
+                    <input id="prd-price" type="number" class="form-input" placeholder="0.00" min="0" step="0.01" required>
+                 </div>
+              </div>
+              <div class="form-group">
+                 <label class="form-label">Compare at Price</label>
+                 <div class="form-input-group">
+                    <span class="form-input-group__icon">₱</span>
+                    <input type="number" class="form-input" placeholder="0.00" min="0" step="0.01">
+                 </div>
+              </div>
+              <hr class="mt-4 mb-4" />
+              <div class="form-group">
+                 <label class="seller-checkline">
+                    <input type="checkbox" checked>
+                    <span class="fw-semibold">Eligible for 0% Installment</span>
+                 </label>
+              </div>
+           </div>
+
+           <div class="glass-card p-6 reveal" data-delay="160">
+              <h3 class="type-h4 mb-4">Inventory Controls</h3>
+              <div class="form-group mb-4">
+                 <label class="form-label">SKU / Reference Code <span class="required">*</span></label>
+                 <input id="prd-ref-legacy" type="text" class="form-input" placeholder="e.g. EACIS-1002">
+                 <div class="form-helper">This mirrors the visible product reference for merchant use.</div>
+              </div>
+              <div class="form-group">
+                 <label class="form-label">Stock Quantity</label>
+                 <input id="prd-stock" type="number" class="form-input" value="0" min="0">
+              </div>
+              <div class="form-group mt-4">
+                 <label class="form-label">Warranty (months)</label>
+                 <input id="prd-warranty" type="number" class="form-input" value="12" min="0">
+              </div>
+           </div>
+
+           <div class="glass-card p-6 reveal" data-delay="220">
+              <h3 class="type-h4 mb-4">Live Preview</h3>
+              <div class="seller-sunken" style="padding:var(--sp-4); border-radius:var(--radius-lg);">
+                 <div class="type-label">Listing Snapshot</div>
+                 <div class="type-h4 mt-2" style="color:var(--grey-900);">{{ ref or 'New Product' }}</div>
+                 <div class="type-body-sm text-muted mt-2">Your title, price, and eligibility flags will appear here while editing.</div>
+              </div>
+           </div>
+        </div>
+
+       </div>
+     </form>
+   </div>
+</div>
+<script src="/static/js/seller/product_form.js"></script>
+{% endblock %}
