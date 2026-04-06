@@ -1,5 +1,37 @@
 function formatPHP(n){ return 'PHP\u00A0' + Number(n).toLocaleString('en-PH', {minimumFractionDigits:2}); }
 
+function getCsrfToken(){
+  if (window.EACIS && window.EACIS.csrfToken) return window.EACIS.csrfToken;
+  const meta = document.querySelector('meta[name="csrf-token"]');
+  if (meta && meta.content) return meta.content;
+  return '';
+}
+
+async function addProductToCart(ref, qty){
+  const token = getCsrfToken();
+  const body = new URLSearchParams();
+  body.set('csrf_token', token);
+  body.set('action', 'add');
+  body.set('product_ref', ref);
+  body.set('qty', String(Math.max(parseInt(qty || 1, 10), 1)));
+
+  const response = await fetch('/cart', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+      'X-Requested-With': 'XMLHttpRequest'
+    },
+    credentials: 'same-origin',
+    body: body.toString()
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to add to cart');
+  }
+
+  return true;
+}
+
 window.renderProducts = function(sel, list){
   const root = document.querySelector(sel);
   if(!root) return;
@@ -114,8 +146,13 @@ window.renderProducts = function(sel, list){
 
         const addBtn = content.querySelector('[data-add-ref]');
         if(addBtn){
-          addBtn.addEventListener('click', () => {
-            try{ if(window.eacis && window.eacis.addToCart) window.eacis.addToCart(p.ref, 1); }catch(e){}
+          addBtn.addEventListener('click', async () => {
+            try {
+              await addProductToCart(p.ref, 1);
+            } catch (e) {
+              if(window.Toast) Toast.error('Could not add to cart', 'Please try again.');
+              return;
+            }
             const cartIcon = document.querySelector('.topbar__icon-btn .cart-icon') || document.querySelector('.topbar__icon-btn svg');
             if(window.EACIS && window.EACIS.flyToCart) window.EACIS.flyToCart(img, cartIcon);
             if(window.ModalManager) ModalManager.close(content);
@@ -135,12 +172,17 @@ window.renderProducts = function(sel, list){
       const btn = document.createElement('button');
       btn.className = 'product-card__action-btn auth-action';
 
-      if(session && session.is_authenticated && session.user_role === 'customer'){
+      if(session && session.isAuthenticated && session.userRole === 'customer'){
         btn.setAttribute('aria-label', 'Add to Cart');
         btn.innerHTML = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>';
-        btn.addEventListener('click', (ev) => {
+        btn.addEventListener('click', async (ev) => {
           ev.stopPropagation();
-          if(window.CartManager) window.CartManager.add(p.ref);
+          try {
+            await addProductToCart(p.ref, 1);
+          } catch (e) {
+            if(window.Toast) Toast.error('Could not add to cart', 'Please try again.');
+            return;
+          }
           const cartIcon = document.querySelector('.cart-icon svg');
           if(window.EACIS && window.EACIS.flyToCart) window.EACIS.flyToCart(img, cartIcon);
           if(window.Toast) Toast.success('Product added', p.name);

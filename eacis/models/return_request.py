@@ -16,6 +16,8 @@ class ReturnRequest(db.Model):
     rrt_ref = db.Column(db.String(30), unique=True)
     order_id = db.Column(db.Integer, db.ForeignKey('orders.id'))
     customer_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    order = db.relationship('Order')
+    customer = db.relationship('User')
     reason = db.Column(db.String(255))
     description = db.Column(db.Text)
     evidence_urls = db.Column(db.JSON)

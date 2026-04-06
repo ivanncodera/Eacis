@@ -277,7 +277,7 @@ img {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--sp-6) var(--sp-4);
+  padding: var(--space-block-gap) var(--page-gutter);
   background:
     radial-gradient(ellipse 70% 50% at 30% 20%, rgba(0,122,255,0.06) 0%, transparent 60%),
     radial-gradient(ellipse 50% 40% at 80% 80%, rgba(90,200,250,0.05) 0%, transparent 50%),
@@ -292,14 +292,14 @@ img {
   border: 1px solid var(--border-default);
   border-radius: var(--radius-2xl);
   box-shadow: var(--shadow-lg);
-  padding: var(--sp-10) var(--sp-8);
+  padding: var(--space-page-gap) var(--space-section-gap);
 }
 
 .form-stack {
   display: flex;
   flex-direction: column;
   gap: 0;
-  margin-top: var(--sp-6);
+  margin-top: var(--space-block-gap);
 }
 
 /* ── PILL GROUP (tab switcher) ── */
@@ -313,7 +313,7 @@ img {
 
 .pill {
   flex: 1;
-  height: 36px;
+  height: var(--control-size-md);
   border: none;
   border-radius: var(--radius-pill);
   background: transparent;
@@ -324,7 +324,7 @@ img {
   cursor: pointer;
   transition: all var(--dur-base) var(--ease-out);
   white-space: nowrap;
-  padding: 0 var(--sp-4);
+  padding: 0 var(--space-item-gap);
 }
 
 .pill:hover {

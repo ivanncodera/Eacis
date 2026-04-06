@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>E-ACIS</title>
   <link rel="stylesheet" href="/static/css/tokens.css">
   <link rel="stylesheet" href="/static/css/base.css">
@@ -355,6 +356,19 @@
   <button class="sidebar-backdrop" id="sidebar-backdrop" aria-label="Close sidebar" tabindex="-1"></button>
   {% endif %}
   <main id="main" class="main-content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div style="padding: var(--sp-4) var(--sp-6);">
+        {% for category, message in messages %}
+          {% set tone = 'badge--success' if category == 'success' else ('badge--warning' if category in ['warning','pending'] else 'badge--danger') %}
+          <div class="glass-card" style="padding: var(--sp-4); margin-bottom: var(--sp-3); display:flex; align-items:center; gap:var(--sp-3);">
+            <span class="badge {{ tone }}">{{ category|capitalize }}</span>
+            <span class="type-body-sm">{{ message }}</span>
+          </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    {% endwith %}
     <!-- Main Content Output -->
     {% block content %}{% endblock %}
   </main>
@@ -399,8 +413,86 @@
     window.EACIS = {
       isAuthenticated: document.body.dataset.isAuthenticated === 'true',
       userRole: document.body.dataset.userRole,
-      userId: document.body.dataset.userId
+      userId: document.body.dataset.userId,
+      csrfToken: "{{ csrf_token() }}"
     };
+
+    (function(){
+      function formatPHP(amount){
+        return 'PHP ' + Number(amount || 0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      }
+
+      function renderMiniCart(summary){
+        const itemsWrap = document.getElementById('mini-cart-items');
+        const subtotalEl = document.getElementById('mini-cart-subtotal');
+        const countEls = document.querySelectorAll('.topbar__cart-badge, .bottom-nav__badge');
+        if (!itemsWrap) return;
+
+        const items = (summary && Array.isArray(summary.items)) ? summary.items : [];
+        const count = Number(summary && summary.count || 0);
+        const subtotal = Number(summary && summary.subtotal || 0);
+
+        countEls.forEach(el => { el.textContent = String(count); });
+        if (subtotalEl) subtotalEl.textContent = formatPHP(subtotal);
+
+        if (!items.length) {
+          itemsWrap.innerHTML = `
+            <div style="padding: var(--sp-12) 0; text-align: center; color: var(--grey-400);">
+              <div class="type-body-sm">Your cart is empty</div>
+            </div>
+          `;
+          return;
+        }
+
+        itemsWrap.innerHTML = items.map(item => {
+          const safeName = String(item.name || 'Product');
+          const safeImage = String(item.image_url || '/static/assets/products/refrigerator.webp');
+          const qty = Number(item.qty || 1);
+          const unit = Number(item.unit_price || 0);
+          const line = Number(item.line_total || 0);
+          return `
+            <div class="mini-cart-item">
+              <img src="${safeImage}" alt="${safeName}" />
+              <div class="mini-cart-info" style="min-width:0;">
+                <span class="mini-cart-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${safeName}</span>
+                <span class="mini-cart-meta">${qty} x ${formatPHP(unit)}</span>
+              </div>
+              <div class="mini-cart-price">${formatPHP(line)}</div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      async function refreshMiniCart(){
+        if (!(window.EACIS && window.EACIS.isAuthenticated && window.EACIS.userRole === 'customer')) return;
+        try {
+          const response = await fetch('/api/cart/summary', {
+            method: 'GET',
+            credentials: 'same-origin',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+          });
+          if (!response.ok) return;
+          const data = await response.json();
+          renderMiniCart(data || {});
+        } catch (err) {
+          // Keep existing UI if request fails.
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', function(){
+        refreshMiniCart();
+
+        const cartToggle = document.querySelector('.cart-dropdown [data-dropdown-toggle]');
+        if (cartToggle) {
+          cartToggle.addEventListener('click', function(){
+            setTimeout(refreshMiniCart, 0);
+          });
+        }
+
+        window.EACIS = window.EACIS || {};
+        window.EACIS.refreshMiniCart = refreshMiniCart;
+      });
+    })();
   </script>
 
   <script src="/static/js/data/products.js"></script>

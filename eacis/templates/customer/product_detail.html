@@ -96,6 +96,13 @@
                 <span class="btn__label">Add to Cart</span>
               </button>
               <button id="pd-buy" class="btn btn--ghost btn--lg btn--full" style="margin-top:var(--sp-2);">Buy Now · Pay on Delivery</button>
+              <form id="pd-cart-form" method="post" action="/cart" style="display:none;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="action" value="add">
+                <input type="hidden" name="product_ref" id="pd-form-product-ref" value="{{ ref }}">
+                <input type="hidden" name="qty" id="pd-form-qty" value="1">
+                <input type="hidden" name="next" id="pd-form-next" value="">
+              </form>
             {% else %}
               <a href="/auth/login?next={{ request.path }}" class="btn btn--primary btn--lg btn--full">
                 <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="margin-right:8px;"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -365,13 +372,20 @@
     const qty = parseInt(qtyInput.value) || 1;
     if (window.Toast) Toast.success('Added to cart', `${qty}× ${p.name} added to your cart.`);
     document.getElementById('pd-add').classList.add('btn--loading');
-    setTimeout(() => document.getElementById('pd-add').classList.remove('btn--loading'), 800);
+    document.getElementById('pd-form-qty').value = String(qty);
+    document.getElementById('pd-form-next').value = '/cart';
+    setTimeout(() => {
+      document.getElementById('pd-add').classList.remove('btn--loading');
+      document.getElementById('pd-cart-form').submit();
+    }, 250);
   });
 
   // Buy now
   document.getElementById('pd-buy').addEventListener('click', () => {
     if (window.Toast) Toast.info('Redirecting', 'Taking you to checkout…');
-    setTimeout(() => window.location.href = '/customer/checkout', 600);
+    document.getElementById('pd-form-qty').value = String(parseInt(qtyInput.value) || 1);
+    document.getElementById('pd-form-next').value = '/checkout';
+    setTimeout(() => document.getElementById('pd-cart-form').submit(), 250);
   });
 
   // Apply review bar widths (Fixes CSS lint issues with Jinja2 in style tags)

@@ -10,7 +10,7 @@
              <span class="type-label" style="color:var(--grey-500);">Product Catalog</span>
            </div>
            <h1 class="type-display-md">Catalog Command Center</h1>
-           <p class="type-body-sm text-muted mt-1">Add, update, and retire appliance listings while tracking stock, warranty, and installment eligibility.</p>
+           <p class="type-body-sm text-muted mt-1">Add, update, and retire your listings while tracking stock and installment eligibility.</p>
         </div>
         <div class="seller-header__actions">
           <a href="/seller/products/new" class="btn btn--primary" id="create-product">
@@ -25,42 +25,44 @@
            <div class="catalog-meter">
               <div class="catalog-meter__item">
                  <div class="type-label">Active Listings</div>
-                 <div class="type-price mt-2">142</div>
-                 <div class="type-body-xs text-success mt-1">12 added this week</div>
+                 <div class="type-price mt-2">{{ stats.active }}</div>
+                 <div class="type-body-xs text-success mt-1">Live products in storefront</div>
               </div>
               <div class="catalog-meter__item">
                  <div class="type-label">Low Stock</div>
-                 <div class="type-price mt-2">18</div>
+                 <div class="type-price mt-2">{{ stats.low_stock }}</div>
                  <div class="type-body-xs text-warning mt-1">Needs restock</div>
               </div>
               <div class="catalog-meter__item">
                  <div class="type-label">Installment Ready</div>
-                 <div class="type-price mt-2">96</div>
+                 <div class="type-price mt-2">{{ stats.installment_enabled }}</div>
                  <div class="type-body-xs text-muted mt-1">Eligible products</div>
               </div>
            </div>
 
            <div class="table-wrapper mt-6">
               <div class="table-toolbar p-4 bg-grey-25 border-b">
-                 <div class="form-input-group" style="width:320px;">
-                    <span class="form-input-group__icon">
-                       <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    </span>
-                    <input type="text" class="form-input" id="seller-search" placeholder="Search by name or ref..." />
-                 </div>
-                 <div style="display:flex; gap:var(--sp-3);">
-                    <select class="form-select" style="min-width:140px;">
-                       <option>All Status</option>
-                       <option>Active</option>
-                       <option>Out of Stock</option>
-                       <option>Draft</option>
-                    </select>
-                 </div>
+                 <form method="get" action="/seller/products" style="display:flex; gap:var(--sp-3); width:100%; flex-wrap:wrap; align-items:end;">
+                   <div class="form-input-group" style="width:320px;">
+                      <span class="form-input-group__icon">
+                         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                      </span>
+                      <input type="text" class="form-input" id="seller-search" name="q" value="{{ filters.q }}" placeholder="Search by name or ref..." />
+                   </div>
+                   <div style="display:flex; gap:var(--sp-3);">
+                      <select class="form-select" name="status" style="min-width:170px;">
+                         <option value="all" {% if filters.status == 'all' %}selected{% endif %}>Status: All</option>
+                         <option value="active" {% if filters.status == 'active' %}selected{% endif %}>Active</option>
+                         <option value="inactive" {% if filters.status == 'inactive' %}selected{% endif %}>Inactive</option>
+                         <option value="low_stock" {% if filters.status == 'low_stock' %}selected{% endif %}>Low Stock</option>
+                      </select>
+                   </div>
+                   <button class="btn btn--secondary btn--sm" type="submit">Apply</button>
+                 </form>
               </div>
               <table class="data-table">
                  <thead>
                     <tr>
-                       <th></th>
                        <th>Product</th>
                        <th>Category</th>
                        <th>Price</th>
@@ -72,61 +74,45 @@
                     </tr>
                  </thead>
                  <tbody id="seller-products-tbody">
-                    <tr>
-                       <td><input type="checkbox" aria-label="Select REF-A9X20"></td>
-                       <td>
-                          <div style="display:flex; gap:var(--sp-3); align-items:center;">
-                             <div style="width:40px; height:40px; background:var(--grey-50); border-radius:var(--radius-sm);"><img src="/static/assets/products/2-door-refrigirator.webp" style="width:100%;height:100%;object-fit:cover;"/></div>
-                             <div>
-                                <div class="fw-semibold">Smart 2-Door Refrigerator</div>
-                                <div class="type-body-xs text-muted">REF-A9X20</div>
-                             </div>
-                          </div>
-                       </td>
-                       <td>Cooling & Air Quality</td>
-                       <td>PHP 24,500</td>
-                       <td>45</td>
-                       <td>12m</td>
-                       <td>Yes</td>
-                       <td><span class="badge badge--success">Active</span></td>
-                       <td style="text-align:right;">
-                          <button class="btn btn--secondary btn--sm edit" data-ref="REF-A9X20">Edit</button>
-                          <button class="btn btn--ghost btn--sm duplicate" data-ref="REF-A9X20">Duplicate</button>
-                       </td>
-                    </tr>
-                    <tr>
-                       <td><input type="checkbox" aria-label="Select BLN-500W"></td>
-                       <td>
-                          <div style="display:flex; gap:var(--sp-3); align-items:center;">
-                             <div style="width:40px; height:40px; background:var(--grey-50); border-radius:var(--radius-sm);"></div>
-                             <div>
-                                <div class="fw-semibold">Pro Blender 500W</div>
-                                <div class="type-body-xs text-muted">BLN-500W</div>
-                             </div>
-                          </div>
-                       </td>
-                       <td>Kitchen & Cooking</td>
-                       <td>PHP 3,200</td>
-                       <td class="text-danger fw-semibold">0</td>
-                       <td>6m</td>
-                       <td>No</td>
-                       <td><span class="badge badge--danger">Out of Stock</span></td>
-                       <td style="text-align:right;">
-                          <button class="btn btn--secondary btn--sm edit" data-ref="BLN-500W">Edit</button>
-                          <button class="btn btn--ghost btn--sm duplicate" data-ref="BLN-500W">Duplicate</button>
-                       </td>
-                    </tr>
+                   {% for product in products %}
+                   <tr>
+                     <td>
+                        <div>
+                           <div class="fw-semibold">{{ product.name }}</div>
+                           <div class="type-body-xs text-muted">{{ product.product_ref }}</div>
+                        </div>
+                     </td>
+                     <td>{{ product.category or '-' }}</td>
+                     <td>PHP {{ '%.2f'|format(product.price|float) }}</td>
+                     <td class="{{ 'text-danger fw-semibold' if product.stock <= product.low_stock_threshold else '' }}">{{ product.stock }}</td>
+                     <td>{{ product.warranty_months }}m</td>
+                     <td>{{ 'Yes' if product.installment_enabled else 'No' }}</td>
+                     <td>
+                       {% if not product.is_active %}
+                       <span class="badge badge--danger">Inactive</span>
+                       {% elif product.stock <= product.low_stock_threshold %}
+                       <span class="badge badge--warning">Low Stock</span>
+                       {% else %}
+                       <span class="badge badge--success">Active</span>
+                       {% endif %}
+                     </td>
+                     <td style="text-align:right; display:flex; gap:var(--sp-2); justify-content:flex-end;">
+                        <a href="/seller/products/{{ product.product_ref }}/edit" class="btn btn--secondary btn--sm">Edit</a>
+                        <form method="post" action="/seller/products/{{ product.product_ref }}/delete" onsubmit="return confirm('Delete {{ product.product_ref }}?');">
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                          <button class="btn btn--ghost btn--sm" type="submit">Delete</button>
+                        </form>
+                     </td>
+                   </tr>
+                   {% else %}
+                   <tr>
+                     <td colspan="8" class="text-muted" style="text-align:center; padding:var(--sp-6);">No products found for your current filters.</td>
+                   </tr>
+                   {% endfor %}
                  </tbody>
               </table>
               <div class="table-footer">
-                 <div class="table-footer__info">Showing 1-10 of 24 products</div>
-                 <div class="pagination">
-                    <button class="pagination__btn" disabled>&lt;</button>
-                    <button class="pagination__btn active">1</button>
-                    <button class="pagination__btn">2</button>
-                    <button class="pagination__btn">3</button>
-                    <button class="pagination__btn">&gt;</button>
-                 </div>
+                 <div class="table-footer__info">Showing {{ products|length }} of {{ stats.total }} products</div>
               </div>
            </div>
         </div>
@@ -137,15 +123,15 @@
               <p class="type-body-sm text-muted mt-1">What needs attention right now.</p>
               <div class="ops-list mt-4">
                 <div class="ops-list-item">
-                  <div class="type-body-sm fw-semibold">8 products missing warranty details</div>
-                  <div class="type-body-xs text-muted mt-1">These listings should be updated before publishing.</div>
+                           <div class="type-body-sm fw-semibold">{{ stats.low_stock }} products near low stock</div>
+                           <div class="type-body-xs text-muted mt-1">Restock these listings to avoid missed orders.</div>
                 </div>
                 <div class="ops-list-item">
-                  <div class="type-body-sm fw-semibold">5 images need replacement</div>
-                  <div class="type-body-xs text-muted mt-1">Low-resolution thumbnails reduce conversion.</div>
+                           <div class="type-body-sm fw-semibold">{{ stats.active }} active storefront listings</div>
+                           <div class="type-body-xs text-muted mt-1">These are currently visible to customers.</div>
                 </div>
                 <div class="ops-list-item">
-                  <div class="type-body-sm fw-semibold">11 products qualify for installment</div>
+                           <div class="type-body-sm fw-semibold">{{ stats.installment_enabled }} products qualify for installment</div>
                   <div class="type-body-xs text-muted mt-1">Promote these first in campaigns.</div>
                 </div>
               </div>
@@ -154,15 +140,14 @@
            <div class="glass-card reveal" data-delay="160">
               <h3 class="type-h4">Quick Filters</h3>
               <div style="display:flex; flex-direction:column; gap:var(--sp-2); margin-top:var(--sp-4);">
-                <button class="btn btn--secondary btn--sm btn--full">Near out of stock</button>
-                <button class="btn btn--secondary btn--sm btn--full">Installment eligible</button>
-                <button class="btn btn--secondary btn--sm btn--full">Missing warranty</button>
-                <button class="btn btn--secondary btn--sm btn--full">Needs image update</button>
+                        <a class="btn btn--secondary btn--sm btn--full" href="/seller/products?status=low_stock">Near out of stock</a>
+                        <a class="btn btn--secondary btn--sm btn--full" href="/seller/products?status=active">Active listings</a>
+                        <a class="btn btn--secondary btn--sm btn--full" href="/seller/products?status=inactive">Inactive listings</a>
+                        <a class="btn btn--secondary btn--sm btn--full" href="/seller/products">Reset filters</a>
               </div>
            </div>
         </div>
      </div>
    </div>
 </div>
-<script src="/static/js/seller/products.js"></script>
 {% endblock %}

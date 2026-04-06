@@ -6,17 +6,87 @@
     <div style="display:flex; justify-content:space-between; align-items:flex-end; gap:var(--sp-4); margin-bottom:var(--sp-6);">
       <div>
         <h1 class="type-display-md">Products</h1>
-        <p class="type-body-sm text-muted mt-1">View the global catalog and inspect seller-owned inventory by ref.</p>
+        <p class="type-body-sm text-muted mt-1">View the global catalog, filter results, and manage status, price, and stock.</p>
       </div>
-      <button class="btn btn--secondary btn--sm">Export CSV</button>
+      <a class="btn btn--secondary btn--sm" href="/admin/products/export?q={{ filters.q }}&status={{ filters.status }}">Export CSV</a>
     </div>
+
+    <div class="kpi-grid mb-6">
+      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Total Products</div><div class="type-display-md mt-2">{{ stats.total }}</div></div></div>
+      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Active Products</div><div class="type-display-md mt-2">{{ stats.active }}</div></div></div>
+      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Low Stock</div><div class="type-display-md mt-2">{{ stats.low_stock }}</div></div></div>
+    </div>
+
+    <div class="glass-card p-6 mb-6">
+      <form method="get" action="/admin/products" class="form-stack">
+        <div style="display:grid; grid-template-columns:2fr 1fr auto; gap:var(--sp-4); align-items:end;">
+          <div class="form-group">
+            <label class="form-label" for="q">Search by ref, name, category</label>
+            <input class="form-input" id="q" name="q" value="{{ filters.q }}" placeholder="Search products">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="status">Status</label>
+            <select class="form-select" id="status" name="status">
+              <option value="all" {% if filters.status == 'all' %}selected{% endif %}>All</option>
+              <option value="active" {% if filters.status == 'active' %}selected{% endif %}>Active</option>
+              <option value="inactive" {% if filters.status == 'inactive' %}selected{% endif %}>Inactive</option>
+              <option value="low_stock" {% if filters.status == 'low_stock' %}selected{% endif %}>Low Stock</option>
+            </select>
+          </div>
+          <button class="btn btn--secondary btn--sm" type="submit">Apply</button>
+        </div>
+      </form>
+    </div>
+
     <div class="glass-card p-6">
       <div class="table-wrapper" style="border:none; box-shadow:none;">
         <table class="data-table">
-          <thead><tr><th>Ref</th><th>Name</th><th>Seller</th><th>Status</th><th style="text-align:right;">Price</th></tr></thead>
+          <thead><tr><th>Ref</th><th>Name</th><th>Seller</th><th>Status</th><th>Stock</th><th>Price</th><th>Actions</th></tr></thead>
           <tbody>
-            <tr><td class="fw-semibold">PRD-SLR01-0001</td><td>Two-Door Refrigerator</td><td>SLR01 Store</td><td><span class="badge badge--success">Active</span></td><td style="text-align:right;">PHP 18,000</td></tr>
-            <tr><td class="fw-semibold">PRD-SLR02-0044</td><td>Air Purifier Max</td><td>SLR02 Store</td><td><span class="badge badge--warning">Low stock</span></td><td style="text-align:right;">PHP 9,800</td></tr>
+            {% for product in products %}
+            <tr>
+              <td class="fw-semibold">{{ product.product_ref }}</td>
+              <td>{{ product.name }}</td>
+              <td>{{ product.seller.full_name if product.seller else ('Seller #' ~ product.seller_id) }}</td>
+              <td>
+                {% if product.is_active %}
+                  {% if product.stock <= product.low_stock_threshold %}
+                  <span class="badge badge--warning">Low Stock</span>
+                  {% else %}
+                  <span class="badge badge--success">Active</span>
+                  {% endif %}
+                {% else %}
+                <span class="badge badge--danger">Inactive</span>
+                {% endif %}
+              </td>
+              <td>{{ product.stock }}</td>
+              <td>PHP {{ '%.2f'|format(product.price|float) }}</td>
+              <td>
+                <form method="post" action="/admin/products?q={{ filters.q }}&status={{ filters.status }}" style="display:flex; gap:var(--sp-2); flex-wrap:wrap; align-items:center;">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <input type="hidden" name="action" value="update">
+                  <input type="hidden" name="product_id" value="{{ product.id }}">
+                  <input class="form-input" type="number" name="stock" value="{{ product.stock }}" min="0" style="width:86px;">
+                  <input class="form-input" type="number" name="price" value="{{ product.price|float }}" min="0" step="0.01" style="width:110px;">
+                  <select class="form-select" name="is_active" style="width:116px;">
+                    <option value="1" {% if product.is_active %}selected{% endif %}>Active</option>
+                    <option value="0" {% if not product.is_active %}selected{% endif %}>Inactive</option>
+                  </select>
+                  <button class="btn btn--ghost btn--xs" type="submit">Save</button>
+                </form>
+                <form method="post" action="/admin/products?q={{ filters.q }}&status={{ filters.status }}" style="margin-top:var(--sp-2);" onsubmit="return confirm('Delete {{ product.product_ref }}? This action cannot be undone.');">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <input type="hidden" name="action" value="delete">
+                  <input type="hidden" name="product_id" value="{{ product.id }}">
+                  <button class="btn btn--danger btn--xs" type="submit">Delete</button>
+                </form>
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="7" class="text-muted" style="text-align:center; padding:var(--sp-6);">No products found for the selected filters.</td>
+            </tr>
+            {% endfor %}
           </tbody>
         </table>
       </div>

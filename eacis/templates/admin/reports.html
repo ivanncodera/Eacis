@@ -10,15 +10,15 @@
       </div>
       <div style="display:flex; gap:var(--sp-3); align-items:center; flex-wrap:wrap;">
         <span class="badge badge--success">Monthly snapshot ready</span>
-        <button class="btn btn--secondary btn--sm">Export Bundle</button>
+        <a class="btn btn--secondary btn--sm" href="/admin/reports/export">Export CSV</a>
       </div>
     </div>
 
     <div class="kpi-grid mb-6">
-      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Daily Sales</div><div class="type-display-md mt-2">PHP 148K</div></div></div>
-      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Weekly Sales</div><div class="type-display-md mt-2">PHP 910K</div></div></div>
-      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Monthly Sales</div><div class="type-display-md mt-2">PHP 2.4M</div></div></div>
-      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Open Complaints</div><div class="type-display-md mt-2">23</div></div></div>
+      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Daily Sales</div><div class="type-display-md mt-2">PHP {{ '%.2f'|format(sales.daily) }}</div></div></div>
+      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Weekly Sales</div><div class="type-display-md mt-2">PHP {{ '%.2f'|format(sales.weekly) }}</div></div></div>
+      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Monthly Sales</div><div class="type-display-md mt-2">PHP {{ '%.2f'|format(sales.monthly) }}</div></div></div>
+      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Open Complaints</div><div class="type-display-md mt-2">{{ open_returns }}</div></div></div>
     </div>
 
     <div class="glass-card p-6">
@@ -27,9 +27,18 @@
         <table class="data-table">
           <thead><tr><th>Category</th><th>Last 24h</th><th>Last 7d</th><th style="text-align:right;">Status</th></tr></thead>
           <tbody>
-            <tr><td class="fw-semibold">Late Delivery</td><td>8</td><td>31</td><td style="text-align:right;"><span class="badge badge--warning">Elevated</span></td></tr>
-            <tr><td class="fw-semibold">Damaged Item</td><td>3</td><td>11</td><td style="text-align:right;"><span class="badge badge--success">Stable</span></td></tr>
-            <tr><td class="fw-semibold">Wrong Item</td><td>2</td><td>9</td><td style="text-align:right;"><span class="badge badge--success">Stable</span></td></tr>
+            {% for item in complaints %}
+            <tr>
+              <td class="fw-semibold">{{ item.category }}</td>
+              <td>{{ item.last_24h }}</td>
+              <td>{{ item.last_7d }}</td>
+              <td style="text-align:right;"><span class="badge {{ 'badge--warning' if item.status == 'Elevated' else 'badge--success' }}">{{ item.status }}</span></td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="4" class="text-muted" style="text-align:center; padding:var(--sp-6);">No complaint trends available yet.</td>
+            </tr>
+            {% endfor %}
           </tbody>
         </table>
       </div>

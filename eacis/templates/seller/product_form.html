@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 {% block title %}{% if ref %}Edit Product — Seller Portal{% else %}Add Product — Seller Portal{% endif %}{% endblock %}
 {% block content %}
-<div id="seller-product-context" data-product-ref="{{ ref or '' }}" hidden></div>
 <div class="stagger-children">
    <div class="page-content bg-grey-50 seller-shell">
      <div class="seller-header reveal">
@@ -15,12 +14,13 @@
         </div>
         <div class="seller-header__actions">
            <a href="/seller/products" class="btn btn--ghost btn--sm">Back to Catalog</a>
-           <button type="button" class="btn btn--secondary" id="cancel-btn">Cancel</button>
+           <a href="/seller/products" class="btn btn--secondary">Cancel</a>
            <button type="submit" form="product-form" class="btn btn--primary">Save Product</button>
         </div>
      </div>
 
-     <form id="product-form">
+     <form id="product-form" method="post" action="{% if ref %}/seller/products/{{ ref }}/edit{% else %}/seller/products/new{% endif %}">
+       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
        <div class="product-form-layout">
         <div class="form-stack">
            <div class="glass-card p-6 product-form-hero reveal" data-delay="60">
@@ -36,26 +36,26 @@
               </div>
               <div class="form-group mb-4">
                  <label class="form-label">Product Reference</label>
-                 <input id="prd-ref" type="text" class="form-input" readonly>
+                 <input id="prd-ref" type="text" class="form-input" readonly value="{{ ref or 'Will be auto-generated' }}">
               </div>
               <div class="form-group mb-4">
                  <label class="form-label">Product Name <span class="required">*</span></label>
-                 <input id="prd-name" type="text" class="form-input" placeholder="e.g. Smart 2-Door Refrigerator" required>
+                 <input id="prd-name" name="name" type="text" class="form-input" placeholder="e.g. Smart 2-Door Refrigerator" required value="{{ product.name if product else '' }}">
               </div>
               <div class="form-group mb-4">
                  <label class="form-label">Description <span class="required">*</span></label>
-                 <textarea class="form-textarea" placeholder="Detailed product description..." style="min-height:160px;" required></textarea>
+                 <textarea class="form-textarea" name="description" placeholder="Detailed product description..." style="min-height:160px;" required>{{ product.description if product else '' }}</textarea>
                  <div class="form-helper">Highlight key features, warranty, and installation details.</div>
               </div>
               <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-4);">
                  <div class="form-group">
                     <label class="form-label">Category <span class="required">*</span></label>
-                    <select id="prd-category" class="form-select" required>
-                       <option value="">Select...</option>
-                       <option>Kitchen & Cooking</option>
-                       <option>Cooling & Air Quality</option>
-                       <option>Laundry & Cleaning</option>
-                       <option>Home Entertainment</option>
+                    <select id="prd-category" name="category" class="form-select" required>
+                       <option value="" {% if not product or not product.category %}selected{% endif %}>Select...</option>
+                       <option value="Kitchen & Cooking" {% if product and product.category == 'Kitchen & Cooking' %}selected{% endif %}>Kitchen & Cooking</option>
+                       <option value="Cooling & Air Quality" {% if product and product.category == 'Cooling & Air Quality' %}selected{% endif %}>Cooling & Air Quality</option>
+                       <option value="Laundry & Cleaning" {% if product and product.category == 'Laundry & Cleaning' %}selected{% endif %}>Laundry & Cleaning</option>
+                       <option value="Home Entertainment" {% if product and product.category == 'Home Entertainment' %}selected{% endif %}>Home Entertainment</option>
                     </select>
                  </div>
                  <div class="form-group">
@@ -67,16 +67,7 @@
 
            <div class="glass-card p-6 product-form-hero reveal" data-delay="120">
               <h3 class="type-h4 mb-4">Product Images</h3>
-              <div id="image-drop" style="border: 2px dashed var(--border-medium); border-radius: var(--radius-md); padding: var(--sp-12); text-align:center; background:var(--grey-0);">
-                 <svg class="icon text-muted mb-3" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                 <div class="fw-semibold">Drop images here or click to upload.</div>
-                 <div class="type-body-sm text-muted mt-1">First image becomes the cover image.</div>
-                 <div class="mt-4" style="display:flex; justify-content:center; gap:var(--sp-3); flex-wrap:wrap;">
-                   <button type="button" class="btn btn--secondary btn--sm" id="image-upload-btn">Choose Files</button>
-                 </div>
-                 <input id="image-input" type="file" accept="image/*" multiple hidden>
-              </div>
-              <div id="image-previews" class="mt-4" style="display:flex; gap:var(--sp-3); flex-wrap:wrap;"></div>
+              <div class="type-body-sm text-muted">Image upload can be added later. For now, product information and inventory are fully functional.</div>
            </div>
         </div>
 
@@ -87,7 +78,7 @@
                  <label class="form-label">Base Price <span class="required">*</span></label>
                  <div class="form-input-group">
                     <span class="form-input-group__icon">₱</span>
-                    <input id="prd-price" type="number" class="form-input" placeholder="0.00" min="0" step="0.01" required>
+                    <input id="prd-price" name="price" type="number" class="form-input" placeholder="0.00" min="0" step="0.01" required value="{{ product.price if product else '' }}">
                  </div>
               </div>
               <div class="form-group">
@@ -100,9 +91,16 @@
               <hr class="mt-4 mb-4" />
               <div class="form-group">
                  <label class="seller-checkline">
-                    <input type="checkbox" checked>
+                    <input type="checkbox" name="installment_enabled" {% if product and product.installment_enabled %}checked{% endif %}>
                     <span class="fw-semibold">Eligible for 0% Installment</span>
                  </label>
+              </div>
+              <div class="form-group mt-4">
+                 <label class="form-label">Listing Status</label>
+                 <select class="form-select" name="is_active">
+                    <option value="1" {% if not product or product.is_active %}selected{% endif %}>Active</option>
+                    <option value="0" {% if product and not product.is_active %}selected{% endif %}>Inactive</option>
+                 </select>
               </div>
            </div>
 
@@ -115,11 +113,11 @@
               </div>
               <div class="form-group">
                  <label class="form-label">Stock Quantity</label>
-                 <input id="prd-stock" type="number" class="form-input" value="0" min="0">
+                 <input id="prd-stock" name="stock" type="number" class="form-input" value="{{ product.stock if product else 0 }}" min="0">
               </div>
               <div class="form-group mt-4">
                  <label class="form-label">Warranty (months)</label>
-                 <input id="prd-warranty" type="number" class="form-input" value="12" min="0">
+                 <input id="prd-warranty" name="warranty_months" type="number" class="form-input" value="{{ product.warranty_months if product else 12 }}" min="0">
               </div>
            </div>
 
@@ -127,9 +125,15 @@
               <h3 class="type-h4 mb-4">Live Preview</h3>
               <div class="seller-sunken" style="padding:var(--sp-4); border-radius:var(--radius-lg);">
                  <div class="type-label">Listing Snapshot</div>
-                 <div class="type-h4 mt-2" style="color:var(--grey-900);">{{ ref or 'New Product' }}</div>
+                 <div class="type-h4 mt-2" style="color:var(--grey-900);">{{ product.name if product and product.name else (ref or 'New Product') }}</div>
                  <div class="type-body-sm text-muted mt-2">Your title, price, and eligibility flags will appear here while editing.</div>
               </div>
+              {% if ref %}
+              <form method="post" action="/seller/products/{{ ref }}/delete" class="mt-4" onsubmit="return confirm('Delete {{ ref }}? This action cannot be undone.');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="btn btn--danger btn--sm btn--full" type="submit">Delete Product</button>
+              </form>
+              {% endif %}
            </div>
         </div>
 
@@ -137,5 +141,4 @@
      </form>
    </div>
 </div>
-<script src="/static/js/seller/product_form.js"></script>
 {% endblock %}

@@ -12,23 +12,26 @@
                <h1 class="type-display-md" style="color:var(--grey-900); margin:0;">{{ page_title or 'Orders' }}</h1>
                {% if page_subtitle %}<p class="type-body-sm mt-2" style="color:var(--grey-600);">{{ page_subtitle }}</p>{% endif %}
             </div>
-                  <button class="btn btn--secondary btn--sm">{{ export_label or 'Export CSV' }}</button>
+                     <button class="btn btn--secondary btn--sm">{{ export_label or 'Export CSV' }}</button>
      </div>
 
      <div class="table-wrapper">
-        <div class="table-toolbar">
-           <div class="form-input-group" style="width:320px;">
-              <span class="form-input-group__icon">🔍</span>
-              <input type="text" class="form-input" placeholder="Search order ID or customer..." />
-           </div>
-           <select class="form-select" style="min-width:140px;">
-              <option>Status: All</option>
-              <option>Pending</option>
-              <option>Processing</option>
-              <option>Shipped</option>
-              <option>Delivered</option>
-           </select>
-        </div>
+           <form class="table-toolbar" method="get" action="/seller/orders" style="display:flex; gap:var(--sp-3); flex-wrap:wrap; align-items:end;">
+              <div class="form-input-group" style="width:320px;">
+                 <span class="form-input-group__icon">🔍</span>
+                 <input type="text" class="form-input" name="q" value="{{ filters.q if filters else '' }}" placeholder="Search order ID or customer..." />
+              </div>
+              <select class="form-select" name="status" style="min-width:170px;">
+                 <option value="all" {% if not filters or filters.status == 'all' %}selected{% endif %}>Status: All</option>
+                 <option value="pending" {% if filters and filters.status == 'pending' %}selected{% endif %}>Pending</option>
+                 <option value="paid" {% if filters and filters.status == 'paid' %}selected{% endif %}>Paid</option>
+                 <option value="packed" {% if filters and filters.status == 'packed' %}selected{% endif %}>Packed</option>
+                 <option value="shipped" {% if filters and filters.status == 'shipped' %}selected{% endif %}>Shipped</option>
+                 <option value="delivered" {% if filters and filters.status == 'delivered' %}selected{% endif %}>Delivered</option>
+                 <option value="cancelled" {% if filters and filters.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+              </select>
+              <button class="btn btn--secondary btn--sm" type="submit">Apply</button>
+           </form>
         <table class="data-table">
            <thead>
               <tr>
@@ -41,42 +44,30 @@
               </tr>
            </thead>
            <tbody>
-              <tr>
-                 <td><a href="/seller/orders/EACIS-9221" class="fw-semibold text-primary">#EACIS-9221</a></td>
-                 <td>
-                    <div>Today, 10:42 AM</div>
-                    <div class="type-body-xs text-muted">2 mins ago</div>
-                 </td>
-                 <td>Juan Dela Cruz</td>
-                 <td class="fw-semibold">PHP 12,400</td>
-                 <td><span class="badge badge--dot badge--pending">Pending</span></td>
-                 <td style="text-align:right;">
-                    <a href="/seller/orders/EACIS-9221" class="btn btn--secondary btn--sm">Manage</a>
-                 </td>
-              </tr>
-              <tr>
-                 <td><a href="/seller/orders/EACIS-9220" class="fw-semibold text-primary">#EACIS-9220</a></td>
-                 <td>
-                    <div>Today, 09:30 AM</div>
-                    <div class="type-body-xs text-muted">1 hour ago</div>
-                 </td>
-                 <td>Maria Santos</td>
-                 <td class="fw-semibold">PHP 4,200</td>
-                 <td><span class="badge badge--dot badge--shipped">Shipped</span></td>
-                 <td style="text-align:right;">
-                    <a href="/seller/orders/EACIS-9220" class="btn btn--secondary btn--sm">Manage</a>
-                 </td>
-              </tr>
+                 {% for order in orders %}
+                 <tr>
+                    <td><a href="/seller/orders/{{ order.order_ref }}" class="fw-semibold text-primary">#{{ order.order_ref }}</a></td>
+                    <td>
+                       <div>{{ order.created_at.strftime('%b %d, %Y %I:%M %p') if order.created_at else '-' }}</div>
+                    </td>
+                    <td>{{ order.customer.full_name if order.customer else 'Unknown Customer' }}</td>
+                    <td class="fw-semibold">PHP {{ '%.2f'|format(order.total|float) }}</td>
+                    <td>
+                       <span class="badge badge--dot badge--{{ 'success' if order.status == 'delivered' else ('warning' if order.status in ['pending','paid','packed'] else 'danger') }}">{{ order.status|capitalize }}</span>
+                    </td>
+                    <td style="text-align:right;">
+                       <a href="/seller/orders/{{ order.order_ref }}" class="btn btn--secondary btn--sm">Manage</a>
+                    </td>
+                 </tr>
+                 {% else %}
+                 <tr>
+                    <td colspan="6" class="text-muted" style="text-align:center; padding:var(--sp-6);">No orders found for the selected filters.</td>
+                 </tr>
+                 {% endfor %}
            </tbody>
         </table>
         <div class="table-footer">
-           <div class="table-footer__info">Showing 1-10 of 42 orders</div>
-           <div class="pagination">
-              <button class="pagination__btn" disabled>&lt;</button>
-              <button class="pagination__btn active">1</button>
-              <button class="pagination__btn">2</button>
-              <button class="pagination__btn">&gt;</button>
-           </div>
+              <div class="table-footer__info">Showing {{ orders|length }} of {{ stats.total if stats else orders|length }} orders</div>
         </div>
      </div>
    </div>

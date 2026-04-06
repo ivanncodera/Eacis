@@ -151,6 +151,16 @@
   --sp-24: 96px;
   --sp-32: 128px;
 
+  /* ── SEMANTIC SPACING ───────────────────── */
+  --space-micro:           var(--sp-1);   /* 4 */
+  --space-tight:           var(--sp-2);   /* 8 */
+  --space-control-gap:     var(--sp-3);   /* 12 */
+  --space-item-gap:        var(--sp-4);   /* 16 */
+  --space-block-gap:       var(--sp-6);   /* 24 */
+  --space-section-gap:     var(--sp-8);   /* 32 */
+  --space-page-gap:        var(--sp-12);  /* 48 */
+  --space-page-gap-lg:     var(--sp-16);  /* 64 */
+
   /* ── BORDER RADIUS ───────────────────────── */
   --radius-xs:   3px;
   --radius-sm:   6px;
@@ -200,6 +210,12 @@
   --content-wide:   1600px;
   --content-narrow:  720px;
 
+  --page-gutter:    var(--sp-4);
+  --page-gutter-md: var(--sp-6);
+  --page-gutter-lg: var(--sp-8);
+  --page-content-pad: var(--sp-6);
+  --page-content-pad-lg: var(--sp-8);
+
   /* ── COMPONENT SIZES ─────────────────────── */
   --input-height-sm:  32px;
   --input-height-md:  40px;
@@ -209,4 +225,16 @@
   --btn-height-md:    40px;
   --btn-height-lg:    48px;
   --btn-height-xl:    56px;
+
+  --control-size-sm:  var(--input-height-sm);
+  --control-size-md:  var(--input-height-md);
+  --control-size-lg:  var(--input-height-lg);
+
+  --card-padding-sm:  var(--sp-4);
+  --card-padding-md:  var(--sp-6);
+  --card-padding-lg:  var(--sp-8);
+
+  --form-row-gap:     var(--space-block-gap);
+  --table-cell-pad-x: var(--sp-4);
+  --table-cell-pad-y: var(--sp-3);
 }

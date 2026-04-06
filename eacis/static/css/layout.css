@@ -948,7 +948,7 @@ body.sidebar-collapsed .sidebar__item {
 .page-content, .content-area {
     margin-left: var(--sidebar-width);
     margin-top: calc(var(--topbar-height) + 3px);
-    padding: var(--sp-6);
+  padding: var(--page-content-pad);
     flex: 1;
     transition: margin-left var(--dur-slow) var(--ease-smooth);
 }
@@ -1045,11 +1045,11 @@ body.sidebar-collapsed .sidebar__item {
   width: 100%;
   max-width: var(--content-max);
   margin: 0 auto;
-  padding: 0 var(--sp-4);
+  padding: 0 var(--page-gutter);
 }
 
-@media (min-width: 768px)  { .container { padding: 0 var(--sp-6); } }
-@media (min-width: 1280px) { .container { padding: 0 var(--sp-8); } }
+@media (min-width: 768px)  { .container { padding: 0 var(--page-gutter-md); } }
+@media (min-width: 1280px) { .container { padding: 0 var(--page-gutter-lg); } }
 
 /* ── PRODUCT GRID ── */
 .product-grid {
@@ -1346,7 +1346,7 @@ body.sidebar-collapsed .sidebar__account {
 .main-content {
   margin-top: var(--topbar-height);
   margin-left: var(--sidebar-width);
-  padding: var(--sp-8);
+  padding: var(--page-content-pad-lg);
   transition: margin-left var(--dur-base) var(--ease-spring);
   min-height: calc(100vh - var(--topbar-height));
 }
@@ -1401,7 +1401,7 @@ body.portal-customer .main-content .page-content,
 body.portal-seller .main-content .page-content {
   margin-left: 0;
   margin-top: 0;
-  padding: var(--sp-5);
+  padding: var(--page-content-pad);
 }
 
 /* Customer templates still use an inner .main-content wrapper; neutralize it

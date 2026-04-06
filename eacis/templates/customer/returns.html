@@ -25,11 +25,11 @@
       <section class="glass-card stagger-item page-enter" style="margin-bottom: var(--sp-8);">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--sp-6);">
           <div>
-            <div class="type-label--sm" style="color: var(--brand-primary); margin-bottom: 4px;">ACTIVE REQUEST: #RET-2023-01</div>
-            <h3 class="type-h4">Smart 2-Door Refrigerator</h3>
-            <span class="type-body-sm text-muted">Claiming: Item Defective</span>
+            <div class="type-label--sm" style="color: var(--brand-primary); margin-bottom: 4px;">ACTIVE REQUESTS</div>
+            <h3 class="type-h4">Track refund progress</h3>
+            <span class="type-body-sm text-muted">Monitor each return request by status.</span>
           </div>
-          <span class="badge badge--dot badge--pending">Reviewing Request</span>
+          <span class="badge badge--dot badge--pending">{{ returns|length }} requests</span>
         </div>
 
         <!-- Stepper Component -->
@@ -66,26 +66,30 @@
             <h3 class="type-h4">New Return Request</h3>
             <button class="btn btn--sm btn--ghost" id="close-form">Cancel</button>
          </div>
-         <form class="form-stack">
+        <form class="form-stack" method="post" action="/customer/returns">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="form-group">
                <label class="form-label">Select Order</label>
-               <select class="form-select">
-                  <option>EACIS-9002 (Purchased Oct 24)</option>
-                  <option>EACIS-9001 (Purchased Oct 12)</option>
+            <select class="form-select" name="order_ref" required>
+              {% for order in orders %}
+              <option value="{{ order.order_ref }}">{{ order.order_ref }} ({{ order.created_at.strftime('%b %d, %Y') if order.created_at else '' }})</option>
+              {% else %}
+              <option value="">No orders available</option>
+              {% endfor %}
                </select>
             </div>
             <div class="form-group">
                <label class="form-label">Reason for Return</label>
-               <select class="form-select">
-                  <option>Defective / Does not work</option>
-                  <option>Damaged during shipping</option>
-                  <option>Incorrect item received</option>
-                  <option>Changed my mind</option>
+            <select class="form-select" name="reason" required>
+              <option value="Defective / Does not work">Defective / Does not work</option>
+              <option value="Damaged during shipping">Damaged during shipping</option>
+              <option value="Incorrect item received">Incorrect item received</option>
+              <option value="Changed my mind">Changed my mind</option>
                </select>
             </div>
             <div class="form-group">
                <label class="form-label">Describe the issue</label>
-               <textarea class="form-textarea" placeholder="Please explain what happened. Be as detailed as possible."></textarea>
+            <textarea class="form-textarea" name="description" placeholder="Please explain what happened. Be as detailed as possible."></textarea>
             </div>
             <div class="form-group">
                <label class="form-label">Upload Proof (Photos/Video)</label>
@@ -96,7 +100,7 @@
                  <div class="type-body-sm">Click or Drag & Drop items here to upload</div>
                </div>
             </div>
-            <button type="button" class="btn btn--primary btn--full" onclick="Toast.success('Request Filed','Keep your phone active for verification.')">Submit Request</button>
+            <button type="submit" class="btn btn--primary btn--full">Submit Request</button>
          </form>
       </section>
 
@@ -116,16 +120,22 @@
               </tr>
             </thead>
             <tbody>
+              {% for item in returns %}
               <tr>
-                <td class="type-body-sm fw-medium">#RET-2023-00</td>
-                <td>Portable Fan Pro</td>
-                <td><span class="badge badge--dot badge--success">Resolved</span></td>
-                <td style="text-align: right; font-weight: 600;">PHP 1,200</td>
+                <td class="type-body-sm fw-medium">#{{ item.rrt_ref }}</td>
+                <td>{{ item.order.order_ref if item.order else 'Order' }} - {{ item.reason }}</td>
+                <td><span class="badge badge--dot badge--{{ 'warning' if item.status == 'pending' else ('success' if item.status in ['accepted','refunded'] else 'danger') }}">{{ item.status|replace('_', ' ')|title }}</span></td>
+                <td style="text-align: right; font-weight: 600;">PHP {{ '%.2f'|format(item.refund_amount|float if item.refund_amount else 0) }}</td>
               </tr>
+              {% else %}
+              <tr>
+                <td colspan="4" class="text-muted" style="text-align:center; padding:var(--sp-6);">No return requests yet.</td>
+              </tr>
+              {% endfor %}
             </tbody>
           </table>
         </div>
-      </div>
+      </section>
     </main>
   </div>
 </div>

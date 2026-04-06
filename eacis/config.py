@@ -1,7 +1,14 @@
 import os
-from dotenv import load_dotenv
+import importlib
 from datetime import timedelta
 from pathlib import Path
+
+_dotenv_module = importlib.util.find_spec('dotenv')
+if _dotenv_module is not None:
+    load_dotenv = importlib.import_module('dotenv').load_dotenv
+else:
+    def load_dotenv(*args, **kwargs):
+        return False
 
 # Prefer a .env located in the package directory, fall back to default search
 _pkg_dotenv = Path(__file__).resolve().parent / '.env'
@@ -30,6 +37,10 @@ class Config:
         except Exception:
             WTF_CSRF_TIME_LIMIT = 3600
     # Control whether to run development seeds on app startup.
-    # Set USE_DEV_SEEDS=1 or True in your .env to enable; default is False.
-    _raw_use_dev = os.getenv('USE_DEV_SEEDS', 'False')
-    USE_DEV_SEEDS = str(_raw_use_dev).lower() in ('1', 'true', 'yes')
+    # If USE_DEV_SEEDS is not set, enable it automatically in development mode.
+    _raw_use_dev = os.getenv('USE_DEV_SEEDS')
+    if _raw_use_dev is None:
+        _env = os.getenv('FLASK_ENV', '').lower()
+        USE_DEV_SEEDS = _env == 'development'
+    else:
+        USE_DEV_SEEDS = str(_raw_use_dev).lower() in ('1', 'true', 'yes')

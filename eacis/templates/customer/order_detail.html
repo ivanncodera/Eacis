@@ -4,8 +4,8 @@
 <div class="container" style="padding-top: calc(var(--topbar-height) + var(--sp-10)); border-bottom: var(--sp-10) solid transparent;">
   <div style="margin-bottom: var(--sp-6); display:flex; align-items:center; gap: var(--sp-4);">
      <a href="/customer/orders" class="btn btn--ghost btn--sm">← Back to Orders</a>
-     <h1 class="type-display-md">Order EACIS-9002</h1>
-     <span class="badge badge--dot badge--pending">Processing</span>
+     <h1 class="type-display-md">Order {{ order.order_ref }}</h1>
+     <span class="badge badge--dot badge--{{ 'success' if order.status == 'delivered' else ('warning' if order.status in ['pending','paid','packed'] else 'danger') }}">{{ order.status|capitalize }}</span>
   </div>
 
   <div style="display: grid; grid-template-columns: 1fr 320px; gap: var(--sp-8); align-items: start;">
@@ -24,19 +24,21 @@
                     </tr>
                  </thead>
                  <tbody>
+                    {% for item in order.items.all() %}
                     <tr>
                        <td>
                           <div style="display: flex; gap: var(--sp-3); align-items: center;">
-                             <div style="width: 48px; height: 48px; background:var(--grey-50); border-radius: var(--radius-sm);"><img src="/static/assets/products/2-door-refrigirator.webp" style="width:100%;height:100%;object-fit:contain;" /></div>
+                             <div style="width: 48px; height: 48px; background:var(--grey-50); border-radius: var(--radius-sm); display:flex; align-items:center; justify-content:center;">{{ item.quantity }}x</div>
                              <div>
-                                <div class="fw-semibold">Smart 2-Door Refrigerator</div>
-                                <div class="type-body-sm text-muted">REF-A9X20</div>
+                                <div class="fw-semibold">{{ item.product.name if item.product else 'Unknown product' }}</div>
+                                <div class="type-body-sm text-muted">{{ item.product.product_ref if item.product else '-' }}</div>
                              </div>
                           </div>
                        </td>
-                       <td>1</td>
-                       <td style="text-align:right;" class="fw-semibold">PHP 24,500.00</td>
+                       <td>{{ item.quantity }}</td>
+                       <td style="text-align:right;" class="fw-semibold">PHP {{ '%.2f'|format(item.subtotal|float) }}</td>
                     </tr>
+                    {% endfor %}
                  </tbody>
               </table>
            </div>
@@ -56,7 +58,7 @@
               <div style="width: 12px; height: 12px; background: var(--brand-primary); border-radius: 50%; margin-top: 6px;"></div>
               <div>
                  <div class="fw-semibold">Order Placed</div>
-                 <div class="type-body-sm text-muted">Just now</div>
+                 <div class="type-body-sm text-muted">{{ order.created_at.strftime('%b %d, %Y %I:%M %p') if order.created_at else 'Just now' }}</div>
               </div>
            </div>
         </div>
@@ -65,16 +67,23 @@
 
      <aside class="glass-card p-6">
         <h3 class="type-h4" style="margin-bottom: var(--sp-4);">Customer Details</h3>
-        <p class="type-body-sm"><strong class="type-body">Name:</strong> Juan Dela Cruz</p>
-        <p class="type-body-sm"><strong class="type-body">Email:</strong> juan@example.com</p>
+        <p class="type-body-sm"><strong class="type-body">Name:</strong> {{ order.customer.full_name if order.customer else current_user.full_name }}</p>
+        <p class="type-body-sm"><strong class="type-body">Email:</strong> {{ order.customer.email if order.customer else current_user.email }}</p>
         <hr style="border:none; border-top: 1px solid var(--border-subtle); margin: var(--sp-3) 0;" />
         <h3 class="type-h4" style="margin-bottom: var(--sp-4); margin-top: var(--sp-4);">Shipping Address</h3>
         <p class="type-body-sm text-muted" style="line-height: var(--leading-relaxed);">
-           123 Main Street<br>Barangay San Isidro<br>Makati City, Metro Manila 1200<br>Philippines
+           {{ order.shipping_address.get('line1') if order.shipping_address else 'No shipping address saved' }}<br>
+           {{ order.shipping_address.get('line2') if order.shipping_address and order.shipping_address.get('line2') else '' }}<br>
+           {{ order.shipping_address.get('city') if order.shipping_address else '' }}, {{ order.shipping_address.get('province') if order.shipping_address else '' }}<br>
+           {{ order.shipping_address.get('country') if order.shipping_address else 'Philippines' }}
         </p>
 
         <div class="mt-6">
+           {% if not existing_return %}
            <a href="/customer/returns" class="btn btn--secondary btn--full">Request Return</a>
+           {% else %}
+           <span class="badge badge--warning">Return: {{ existing_return.status|replace('_', ' ')|title }}</span>
+           {% endif %}
         </div>
      </aside>
 

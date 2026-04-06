@@ -11,7 +11,7 @@
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
-  padding: var(--sp-6);
+  padding: var(--card-padding-md);
   position: relative;
   overflow: hidden;
   transition:
@@ -346,7 +346,7 @@ a.btn.btn--primary.btn--xl .btn__ripple {
 }
 
 .form-group + .form-group {
-  margin-top: var(--sp-5);
+  margin-top: var(--form-row-gap);
 }
 
 /* ── LABEL ── */
@@ -389,7 +389,7 @@ a.btn.btn--primary.btn--xl .btn__ripple {
 
 .form-input,
 .form-select {
-  height: var(--input-height-lg);
+  height: var(--control-size-lg);
   padding: 0 var(--sp-4);
 }
 
@@ -836,9 +836,9 @@ a.btn.btn--primary.btn--xl .btn__ripple {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--sp-4) var(--sp-5);
+  padding: var(--table-cell-pad-y) var(--sp-5);
   border-bottom: 1px solid var(--border-subtle);
-  gap: var(--sp-3);
+  gap: var(--space-control-gap);
 }
 
 .data-table {
@@ -854,7 +854,7 @@ a.btn.btn--primary.btn--xl .btn__ripple {
   font-weight: var(--weight-bold);
   letter-spacing: var(--tracking-widest);
   text-transform: uppercase;
-  padding: var(--sp-3) var(--sp-4);
+  padding: var(--table-cell-pad-y) var(--table-cell-pad-x);
   text-align: left;
   border-bottom: 1px solid var(--border-default);
   white-space: nowrap;
@@ -895,7 +895,7 @@ a.btn.btn--primary.btn--xl .btn__ripple {
 }
 
 .data-table td {
-  padding: var(--sp-3) var(--sp-4);
+  padding: var(--table-cell-pad-y) var(--table-cell-pad-x);
   color: var(--grey-700);
   vertical-align: middle;
   line-height: var(--leading-normal);

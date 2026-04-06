@@ -18,119 +18,74 @@
         <p class="type-body-sm text-muted">Track your recent orders, manage returns, and view warranty documents.</p>
       </header>
 
-      <!-- Category Filter Pills -->
-      <div class="pill-group" style="width: fit-content; margin-bottom: var(--sp-6);">
-        <button class="pill pill--active">All Orders</button>
-        <button class="pill">Processing</button>
-        <button class="pill">To Ship</button>
-        <button class="pill">Delivered</button>
-        <button class="pill">Returns</button>
-      </div>
+      <form method="get" action="/customer/orders" class="pill-group" style="width: fit-content; margin-bottom: var(--sp-6); display:flex; gap:var(--sp-2); flex-wrap:wrap;">
+        <input type="hidden" name="q" value="{{ filters.q if filters else '' }}">
+        <button class="pill {% if not filters or filters.status == 'all' %}pill--active{% endif %}" name="status" value="all">All Orders</button>
+        <button class="pill {% if filters and filters.status == 'pending' %}pill--active{% endif %}" name="status" value="pending">Processing</button>
+        <button class="pill {% if filters and filters.status == 'packed' %}pill--active{% endif %}" name="status" value="packed">To Ship</button>
+        <button class="pill {% if filters and filters.status == 'delivered' %}pill--active{% endif %}" name="status" value="delivered">Delivered</button>
+        <button class="pill {% if filters and filters.status == 'cancelled' %}pill--active{% endif %}" name="status" value="cancelled">Cancelled</button>
+      </form>
 
       <!-- Orders List -->
       <div style="display: flex; flex-direction: column; gap: var(--sp-5);">
 
-        <!-- Order Card 1 -->
+        {% for order in orders %}
         <div class="glass-card stagger-item page-enter" style="padding: 0; overflow: hidden; border: 1px solid var(--border-subtle);">
-          <!-- Top bar -->
           <div style="padding: var(--sp-4) var(--sp-5); background: var(--grey-50); border-bottom: 1px solid var(--border-default); display: flex; justify-content: space-between; align-items: center;">
-            <div style="display: flex; gap: var(--sp-6); align-items: center;">
+            <div style="display: flex; gap: var(--sp-6); align-items: center; flex-wrap: wrap;">
               <div>
                 <span class="type-label" style="font-size: 10px; opacity: 0.6;">ORDER PLACED</span>
-                <div class="type-body-sm fw-medium">Oct 24, 2023</div>
+                <div class="type-body-sm fw-medium">{{ order.created_at.strftime('%b %d, %Y') if order.created_at else '-' }}</div>
               </div>
               <div>
                 <span class="type-label" style="font-size: 10px; opacity: 0.6;">TOTAL AMOUNT</span>
-                <div class="type-body-sm fw-medium">PHP 24,500.00</div>
+                <div class="type-body-sm fw-medium">PHP {{ '%.2f'|format(order.total|float) }}</div>
               </div>
               <div>
                 <span class="type-label" style="font-size: 10px; opacity: 0.6;">SHIP TO</span>
-                <div class="type-body-sm text-primary fw-medium" style="cursor: pointer; text-decoration: underline;">Juan Dela Cruz</div>
+                <div class="type-body-sm text-primary fw-medium">{{ order.customer.full_name if order.customer else current_user.full_name }}</div>
               </div>
             </div>
             <div style="text-align: right;">
-              <span class="type-label" style="font-size: 10px; opacity: 0.6;">ORDER # EACIS-9002</span>
+              <span class="type-label" style="font-size: 10px; opacity: 0.6;">ORDER # {{ order.order_ref }}</span>
               <div>
-                <a href="/customer/orders/EACIS-9002" class="type-body-sm text-primary fw-semibold">View Details</a>
+                <a href="/customer/orders/{{ order.order_ref }}" class="type-body-sm text-primary fw-semibold">View Details</a>
               </div>
             </div>
           </div>
-          <!-- Body -->
-          <div style="padding: var(--sp-5); display: flex; justify-content: space-between; align-items: center;">
+          <div style="padding: var(--sp-5); display: flex; justify-content: space-between; align-items: center; gap: var(--sp-4); flex-wrap: wrap;">
             <div style="display: flex; gap: var(--sp-4); align-items: center;">
-              <div style="width: 64px; height: 64px; background: var(--grey-50); border-radius: 8px; overflow: hidden; border: 1px solid var(--border-subtle);">
-                <img src="/static/assets/products/2-door-refrigirator.webp" style="width: 100%; height: 100%; object-fit: contain;">
+              <div style="width: 64px; height: 64px; background: var(--grey-50); border-radius: 8px; overflow: hidden; border: 1px solid var(--border-subtle); display:flex; align-items:center; justify-content:center;">
+                <span class="type-body-xs text-muted">{{ order.items.count() if order.items else 0 }} items</span>
               </div>
               <div>
-                 <h4 class="type-body fw-bold">Smart 2-Door Refrigerator</h4>
-                 <div style="display: flex; align-items: center; gap: var(--sp-3); margin-top: 4px;">
-                   <span class="badge badge--dot badge--pending">Processing</span>
-                   <span class="type-body-sm text-muted">Est. Arrival: Oct 28 - Oct 30</span>
+                 <h4 class="type-body fw-bold">{{ order.items.first().product.name if order.items.first() and order.items.first().product else 'Order Items' }}</h4>
+                 <div style="display: flex; align-items: center; gap: var(--sp-3); margin-top: 4px; flex-wrap: wrap;">
+                   <span class="badge badge--dot badge--{{ 'success' if order.status == 'delivered' else ('warning' if order.status in ['pending','paid','packed'] else 'danger') }}">{{ order.status|capitalize }}</span>
+                   <span class="type-body-sm text-muted">{% if order.status == 'delivered' %}Delivered{% elif order.status in ['pending','paid','packed'] %}Processing{% else %}Needs attention{% endif %}</span>
                  </div>
               </div>
             </div>
-            <div style="display: flex; flex-direction: column; gap: var(--sp-2);">
-              <div style="display: flex; align-items: center; gap: var(--sp-2); background: var(--brand-primary-subtle); color: var(--brand-primary); padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;">
-                 <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-                 Under Warranty
-              </div>
-              <button class="btn btn--secondary btn--sm">Track Shipment</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Order Card 2 -->
-        <div class="glass-card stagger-item page-enter" style="padding: 0; overflow: hidden; border: 1.5px solid var(--border-default);">
-          <!-- Top bar -->
-          <div style="padding: var(--sp-4) var(--sp-5); background: var(--grey-50); border-bottom: 1px solid var(--border-default); display: flex; justify-content: space-between; align-items: center;">
-            <div style="display: flex; gap: var(--sp-6); align-items: center;">
-              <div>
-                <span class="type-label" style="font-size: 10px; opacity: 0.6;">ORDER PLACED</span>
-                <div class="type-body-sm fw-medium">Oct 12, 2023</div>
-              </div>
-              <div>
-                <span class="type-label" style="font-size: 10px; opacity: 0.6;">TOTAL AMOUNT</span>
-                <div class="type-body-sm fw-medium">PHP 1,200.00</div>
-              </div>
-              <div>
-                <span class="type-label" style="font-size: 10px; opacity: 0.6;">SHIP TO</span>
-                <div class="type-body-sm text-primary fw-medium" style="cursor: pointer; text-decoration: underline;">Juan Dela Cruz</div>
-              </div>
-            </div>
-            <div style="text-align: right;">
-              <span class="type-label" style="font-size: 10px; opacity: 0.6;">ORDER # EACIS-9001</span>
-              <div>
-                <a href="/customer/orders/EACIS-9001" class="type-body-sm text-primary fw-semibold">View Details</a>
-              </div>
-            </div>
-          </div>
-          <!-- Body -->
-          <div style="padding: var(--sp-5); display: flex; justify-content: space-between; align-items: center;">
-            <div style="display: flex; gap: var(--sp-4); align-items: center;">
-              <div style="width: 64px; height: 64px; background: var(--grey-50); border-radius: 8px; overflow: hidden; border: 1px solid var(--border-subtle);">
-                <img src="/static/assets/products/portable-fan.webp" style="width: 100%; height: 100%; object-fit: contain;">
-              </div>
-              <div>
-                 <h4 class="type-body fw-bold">Portable Desk Fan Pro </h4>
-                 <div style="display: flex; align-items: center; gap: var(--sp-3); margin-top: 4px;">
-                   <span class="badge badge--dot badge--success">Delivered</span>
-                   <span class="type-body-sm text-muted">Received Oct 15</span>
-                 </div>
-              </div>
-            </div>
-            <div style="display: flex; gap: var(--sp-2);">
+            <div style="display: flex; gap: var(--sp-2); flex-wrap: wrap;">
+              {% set return_item = return_map.get(order.id) %}
+              {% if order.status == 'delivered' and not return_item %}
               <a href="/customer/returns" class="btn btn--ghost btn--sm">Return / Refund</a>
-              <button class="btn btn--secondary btn--sm">Buy Again</button>
+              {% elif return_item %}
+              <span class="badge badge--warning">Return: {{ return_item.status|replace('_', ' ')|title }}</span>
+              {% endif %}
+              <a class="btn btn--secondary btn--sm" href="/customer/orders/{{ order.order_ref }}">Open</a>
             </div>
           </div>
         </div>
+        {% else %}
+        <div class="glass-card p-6 text-muted">No orders found.</div>
+        {% endfor %}
 
       </div>
 
       <div class="pagination" style="margin-top: var(--sp-12); justify-content: center;">
-         <button class="pagination__btn" disabled>&lt;</button>
-         <button class="pagination__btn active">1</button>
-         <button class="pagination__btn" disabled>&gt;</button>
+         <div class="type-body-sm text-muted">Showing {{ orders|length }} of {{ stats.total if stats else orders|length }} orders</div>
       </div>
     </main>
   </div>

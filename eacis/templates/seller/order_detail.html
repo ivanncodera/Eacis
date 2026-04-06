@@ -11,14 +11,19 @@
               <span class="type-label" style="color:var(--grey-500);">Fulfillment Detail</span>
            </div>
            <div style="display:flex; align-items:center; gap:var(--sp-3);">
-              <h1 class="type-display-md">Order #EACIS-9221</h1>
-              <span class="badge badge--dot badge--pending">Pending</span>
+              <h1 class="type-display-md">Order #{{ order.order_ref }}</h1>
+              <span class="badge badge--dot badge--{{ 'success' if order.status == 'delivered' else ('warning' if order.status in ['pending','paid','packed'] else 'danger') }}">{{ order.status|capitalize }}</span>
            </div>
-           <div class="type-body-sm text-muted mt-1">Placed on Oct 24, 2023 at 10:42 AM</div>
+           <div class="type-body-sm text-muted mt-1">Placed on {{ order.created_at.strftime('%b %d, %Y at %I:%M %p') if order.created_at else '-' }}</div>
         </div>
         <div class="seller-header__actions">
            <button class="btn btn--secondary">Print Packing Slip</button>
-           <button class="btn btn--primary" onclick="Toast.info('Status Updated','Order marked as Processing')">Mark as Processing</button>
+           <form method="post" action="/seller/orders/{{ order.order_ref }}" style="display:inline;">
+             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+             <input type="hidden" name="action" value="update_status">
+             <input type="hidden" name="status" value="packed">
+             <button class="btn btn--primary" type="submit">Mark as Packed</button>
+           </form>
         </div>
      </div>
 
@@ -36,20 +41,22 @@
                     </tr>
                  </thead>
                  <tbody>
+                    {% for item in seller_items %}
                     <tr>
                        <td>
                           <div style="display:flex; gap:var(--sp-3); align-items:center;">
-                             <div style="width:40px; height:40px; background:var(--grey-50); border-radius:var(--radius-sm);"><img src="/static/assets/products/2-door-refrigirator.webp" style="width:100%;height:100%;object-fit:cover;"/></div>
+                             <div style="width:40px; height:40px; background:var(--grey-50); border-radius:var(--radius-sm);"></div>
                              <div>
-                                <div class="fw-semibold">Smart 2-Door Refrigerator</div>
-                                <div class="type-body-xs text-muted">REF-A9X20</div>
+                                <div class="fw-semibold">{{ item.product.name if item.product else 'Unknown product' }}</div>
+                                <div class="type-body-xs text-muted">{{ item.product.product_ref if item.product else '-' }}</div>
                              </div>
                           </div>
                        </td>
-                       <td>PHP 24,500</td>
-                       <td>1</td>
-                       <td style="text-align:right;" class="fw-semibold">PHP 24,500</td>
+                       <td>PHP {{ '%.2f'|format(item.unit_price|float) }}</td>
+                       <td>{{ item.quantity }}</td>
+                       <td style="text-align:right;" class="fw-semibold">PHP {{ '%.2f'|format(item.subtotal|float) }}</td>
                     </tr>
+                    {% endfor %}
                  </tbody>
               </table>
            </div>
@@ -76,21 +83,32 @@
         <div class="order-side">
            <div class="glass-card p-6 order-hero reveal" data-delay="110">
               <h3 class="type-h4 mb-4">Customer Details</h3>
-              <p class="type-body-sm mb-2"><strong class="type-body">Juan Dela Cruz</strong></p>
-              <p class="type-body-sm text-muted mb-1">ju***@example.com</p>
-              <p class="type-body-sm text-muted mb-4">+63 917 *** 4567</p>
+              <p class="type-body-sm mb-2"><strong class="type-body">{{ order.customer.full_name if order.customer else 'Unknown Customer' }}</strong></p>
+              <p class="type-body-sm text-muted mb-1">{{ order.customer.email if order.customer else '-' }}</p>
+              <p class="type-body-sm text-muted mb-4">{{ order.customer.phone if order.customer and order.customer.phone else 'No phone saved' }}</p>
 
               <h3 class="type-h4 mb-3 mt-4">Shipping Address</h3>
               <p class="type-body-sm text-muted" style="line-height:1.5;">
-                 Barangay San Isidro, Makati City<br>Metro Manila, Philippines
+                 {{ order.shipping_address.get('line1') if order.shipping_address else 'No shipping address saved' }}<br>
+                 {{ order.shipping_address.get('city') if order.shipping_address else '' }} {{ order.shipping_address.get('province') if order.shipping_address else '' }}
               </p>
            </div>
 
            <div class="glass-card p-6 reveal" data-delay="180">
               <h3 class="type-h4 mb-4">Action Queue</h3>
               <div style="display:flex; flex-direction:column; gap:var(--sp-3);">
-                <button class="btn btn--secondary btn--sm btn--full">Print packing slip</button>
-                <button class="btn btn--secondary btn--sm btn--full">Reserve courier pickup</button>
+                <form method="post" action="/seller/orders/{{ order.order_ref }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <input type="hidden" name="action" value="update_status">
+                  <input type="hidden" name="status" value="shipped">
+                  <button class="btn btn--secondary btn--sm btn--full" type="submit">Mark as Shipped</button>
+                </form>
+                <form method="post" action="/seller/orders/{{ order.order_ref }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <input type="hidden" name="action" value="update_status">
+                  <input type="hidden" name="status" value="delivered">
+                  <button class="btn btn--secondary btn--sm btn--full" type="submit">Mark as Delivered</button>
+                </form>
                 <button class="btn btn--secondary btn--sm btn--full">Message customer</button>
               </div>
            </div>

@@ -3,6 +3,11 @@
    ============================================ */
 
 document.addEventListener('DOMContentLoaded', () => {
+
+    // Ensure no stale dropdown open state survives partial reloads.
+    document.querySelectorAll('.dropdown.dropdown--open').forEach(d => {
+        d.classList.remove('dropdown--open');
+    });
     
     // ── TOPBAR SCROLL EFFECT ──
     const topbar = document.querySelector('.topbar');
@@ -61,6 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (toggle) {
             e.preventDefault();
             const dropdown = toggle.closest('.dropdown');
+            if (!dropdown) return;
             const isOpen = dropdown.classList.contains('dropdown--open');
             
             // Close all dropdowns first
@@ -74,6 +80,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } else if (!e.target.closest('.dropdown-menu')) {
             // Clicked outside - close all
+            document.querySelectorAll('.dropdown').forEach(d => {
+                d.classList.remove('dropdown--open');
+            });
+        }
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
             document.querySelectorAll('.dropdown').forEach(d => {
                 d.classList.remove('dropdown--open');
             });
