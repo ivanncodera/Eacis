@@ -138,9 +138,9 @@
     <div class="sidebar__inner">
        <!-- Account Header (Clickable) -->
        <a href="/customer/profile" class="sidebar__account" style="text-decoration: none; padding: var(--sp-6) var(--sp-4); border-bottom: 1px solid var(--border-subtle); margin-bottom: var(--sp-4); display: flex; align-items: center; gap: var(--sp-3); transition: background var(--dur-fast); border-radius: var(--radius-lg);">
-         <div class="topbar__avatar" style="width: 32px; height: 32px; border-radius: 50%; font-size: 10px; background: var(--grey-100);">{{ current_user.full_name[:1] }}</div>
+         <div class="topbar__avatar" style="width: 32px; height: 32px; border-radius: 50%; font-size: 10px; background: var(--grey-100);">{{ (current_user.full_name or current_user.email or '?')[:1].upper() }}</div>
          <div class="sidebar__account-info" style="min-width: 0;">
-           <div class="type-body-sm fw-bold" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--grey-900);">{{ current_user.full_name }}</div>
+           <div class="type-body-sm fw-bold" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--grey-900);">{{ current_user.full_name or current_user.email or 'Account' }}</div>
            <div class="type-label-xs" style="color: var(--grey-400);">Customer Portal</div>
          </div>
        </a>
@@ -189,18 +189,26 @@
   <aside class="sidebar sidebar--seller" id="app-sidebar">
     <div class="sidebar__inner">
        <a href="/seller/dashboard" class="sidebar__account" style="text-decoration: none; padding: var(--sp-6) var(--sp-4); border-bottom: 1px solid var(--border-subtle); margin-bottom: var(--sp-4); display: flex; align-items: center; gap: var(--sp-3); transition: background var(--dur-fast); border-radius: var(--radius-lg);">
-         <div class="topbar__avatar" style="width: 32px; height: 32px; border-radius: 50%; font-size: 10px; background: var(--grey-100);">{{ current_user.full_name[:1] }}</div>
+         <div class="topbar__avatar" style="width: 32px; height: 32px; border-radius: 50%; font-size: 10px; background: var(--grey-100);">{{ (current_user.full_name or current_user.email or '?')[:1].upper() }}</div>
          <div class="sidebar__account-info" style="min-width: 0;">
-           <div class="type-body-sm fw-bold" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--grey-900);">{{ current_user.full_name }}</div>
+           <div class="type-body-sm fw-bold" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--grey-900);">{{ current_user.full_name or current_user.email or 'Account' }}</div>
            <div class="type-label-xs" style="color: var(--grey-400);">Seller Portal</div>
          </div>
        </a>
 
+      {% set seller_verification = (current_user.seller_verification_status or '')|lower %}
+      {% set seller_limited = seller_verification in ['pending', 'rejected'] %}
       <div class="sidebar__section">Seller Module</div>
       <a href="/seller/dashboard" class="sidebar__item {% if request.path == '/seller/dashboard' %}active{% endif %}">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
         <span class="sidebar__label">Dashboard</span>
       </a>
+      {% if seller_limited %}
+      <div class="glass-card seller-sunken" style="margin: var(--sp-4) var(--sp-2); padding: var(--sp-3); box-shadow: none;">
+        <div class="type-body-xs text-muted">Verification in progress</div>
+        <div class="type-body-sm fw-semibold mt-1">Only Dashboard, Business Profile, and Security are available right now.</div>
+      </div>
+      {% else %}
       <a href="/seller/products" class="sidebar__item {% if request.path.startswith('/seller/products') or request.path == '/seller/product/create' %}active{% endif %}">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 16.2A2 2 0 0 0 21 14.5v-5a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 9.5v5c0 .7.4 1.4 1 1.7l7 4a2 2 0 0 0 2 0z"/><polyline points="12 22 12 12"/></svg>
         <span class="sidebar__label">Products</span>
@@ -215,10 +223,6 @@
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         <span class="sidebar__label">Orders</span>
       </a>
-      <a href="/seller/customer-orders" class="sidebar__item {% if request.path == '/seller/customer-orders' %}active{% endif %}">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-        <span class="sidebar__label">Customer Orders</span>
-      </a>
       <a href="/seller/installment-payments" class="sidebar__item {% if request.path == '/seller/installment-payments' %}active{% endif %}">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/><path d="M7 15h4"/></svg>
         <span class="sidebar__label">Installment Payments</span>
@@ -227,29 +231,25 @@
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="18" y="3" width="4" height="18"/><rect x="10" y="8" width="4" height="13"/><rect x="2" y="13" width="4" height="8"/></svg>
         <span class="sidebar__label">Sales Analytics</span>
       </a>
-      <a href="/seller/returns" class="sidebar__item {% if request.path == '/seller/returns' %}active{% endif %}">
+      <a href="/seller/returns" class="sidebar__item {% if request.path == '/seller/returns' or request.path == '/seller/return-transactions' or request.path == '/seller/refund-transactions' %}active{% endif %}">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
         <span class="sidebar__label">Returns &amp; Refunds</span>
       </a>
 
       <div class="sidebar__section">CRM</div>
-      <a href="/seller/customer-inquiries" class="sidebar__item {% if request.path == '/seller/customer-inquiries' %}active{% endif %}">
+      <a href="/seller/customer-inquiries" class="sidebar__item {% if request.path == '/seller/customer-inquiries' or request.path == '/seller/inquiries' or request.path.startswith('/seller/inquiries/') or request.path.startswith('/seller/customer-inquiries/') %}active{% endif %}">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         <span class="sidebar__label">Customer Inquiries</span>
-      </a>
-      <a href="/seller/return-transactions" class="sidebar__item {% if request.path == '/seller/return-transactions' %}active{% endif %}">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="M15 15 3 3"/></svg>
-        <span class="sidebar__label">Return Transactions</span>
       </a>
       <a href="/seller/customer-accounts" class="sidebar__item {% if request.path == '/seller/customer-accounts' %}active{% endif %}">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path d="M17 11v6"/><path d="M20 14h-6"/><path d="M3 21a6 6 0 0 1 12 0"/></svg>
         <span class="sidebar__label">Customer Accounts</span>
       </a>
-      <a href="/seller/crm-analytics" class="sidebar__item {% if request.path == '/seller/crm-analytics' %}active{% endif %}">
+      <a href="/seller/crm-analytics" class="sidebar__item {% if request.path == '/seller/crm-analytics' or request.path == '/seller/retention-engagement' %}active{% endif %}">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m7 14 3-3 3 2 4-5"/></svg>
         <span class="sidebar__label">CRM Analytics</span>
       </a>
-      <a href="/seller/vouchers" class="sidebar__item {% if request.path == '/seller/vouchers' %}active{% endif %}">
+      <a href="/seller/vouchers" class="sidebar__item {% if request.path.startswith('/seller/vouchers') %}active{% endif %}">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="M9 9h.01"/><path d="M15 15h.01"/></svg>
         <span class="sidebar__label">Price Vouchers</span>
       </a>
@@ -269,10 +269,16 @@
       </a>
 
       <div class="sidebar__section">Settings</div>
+      <a href="/seller/settings" class="sidebar__item {% if request.path == '/seller/settings' %}active{% endif %}">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 1.6V21a2 2 0 0 1-4 0v-.06a1.7 1.7 0 0 0-1-1.6A1.7 1.7 0 0 0 7.6 15l-.06.06A2 2 0 1 1 4.71 12.3l.06-.06A1.7 1.7 0 0 0 6.6 11a1.7 1.7 0 0 0-1.6-1H5a2 2 0 0 1 0-4h.06a1.7 1.7 0 0 0 1.6-1A1.7 1.7 0 0 0 8.6 3l.06.06A2 2 0 0 1 12 2.71a2 2 0 0 1 2.83-.65l.06.06A1.7 1.7 0 0 0 16.4 3a1.7 1.7 0 0 0 1 1.6V5a2 2 0 0 1 0 4h-.06a1.7 1.7 0 0 0-1.6 1 1.7 1.7 0 0 0 .06 1.06z"/></svg>
+        <span class="sidebar__label">Settings Home</span>
+      </a>
+
       <a href="/seller/payouts" class="sidebar__item {% if request.path == '/seller/payouts' %}active{% endif %}">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14a3 3 0 0 1 0 6H6"/></svg>
         <span class="sidebar__label">Payouts</span>
       </a>
+      {% endif %}
       <a href="/seller/profile" class="sidebar__item {% if request.path == '/seller/profile' %}active{% endif %}">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg>
         <span class="sidebar__label">Business Profile</span>
@@ -297,7 +303,7 @@
   <aside class="sidebar sidebar--admin" id="app-sidebar">
     <div class="sidebar__inner">
        <a href="/admin/dashboard" class="sidebar__account" style="text-decoration: none; padding: var(--sp-6) var(--sp-4); border-bottom: 1px solid var(--border-subtle); margin-bottom: var(--sp-4); display: flex; align-items: center; gap: var(--sp-3); transition: background var(--dur-fast); border-radius: var(--radius-lg);">
-         <div class="topbar__avatar" style="width: 32px; height: 32px; border-radius: 50%; font-size: 10px; background: var(--grey-100);">{{ current_user.full_name[:1] }}</div>
+         <div class="topbar__avatar" style="width: 32px; height: 32px; border-radius: 50%; font-size: 10px; background: var(--grey-100);">{{ (current_user.full_name or current_user.email or '?')[:1].upper() }}</div>
          <div class="sidebar__account-info" style="min-width: 0;">
            <div class="type-body-sm fw-bold" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--grey-900);">{{ current_user.full_name }}</div>
            <div class="type-label-xs" style="color: var(--grey-400);">Admin Portal</div>
@@ -322,10 +328,6 @@
       <a href="/admin/customers" class="sidebar__item {% if request.path == '/admin/customers' %}active{% endif %}">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg>
         <span class="sidebar__label">Customers</span>
-      </a>
-      <a href="/admin/refunds" class="sidebar__item {% if request.path.startswith('/admin/refunds') %}active{% endif %}">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7"/><polyline points="21 3 21 9 15 9"/></svg>
-        <span class="sidebar__label">Refunds Queue</span>
       </a>
       <a href="/admin/audit" class="sidebar__item {% if request.path == '/admin/audit' %}active{% endif %}">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
@@ -407,6 +409,38 @@
     </a>
   </nav>
   {% endif %}
+
+  <footer class="footer reveal" style="padding: var(--sp-20) 0; border-top: 1px solid var(--border-subtle); margin-top: var(--sp-20); background: var(--grey-0);">
+    <div class="container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--sp-12);">
+      <div>
+        <div class="topbar__logo mb-4" style="font-size: 1.5rem;">E-ACIS</div>
+        <p class="type-body-sm text-muted" style="max-width: 300px;">The next generation of smart appliance commerce, built on transparency and security.</p>
+      </div>
+      <div>
+        <h4 class="type-label-sm mb-6" style="color: var(--grey-900);">Navigation</h4>
+        <ul style="list-style: none; padding: 0; display: grid; gap: var(--sp-3);">
+          <li><a href="/" class="type-body-sm text-muted">Home</a></li>
+          <li><a href="/shop" class="type-body-sm text-muted">Shop</a></li>
+          <li><a href="/support" class="type-body-sm text-muted">Support Hub</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="type-label-sm mb-6" style="color: var(--grey-900);">Legal & Compliance</h4>
+        <ul style="list-style: none; padding: 0; display: grid; gap: var(--sp-3);">
+          <li><a href="/terms" class="type-body-sm text-muted">Terms of Service</a></li>
+          <li><a href="/privacy" class="type-body-sm text-muted">Privacy Policy</a></li>
+          <li><a href="https://privacy.gov.ph" target="_blank" class="type-body-sm text-muted">National Privacy Commission</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="container mt-20 pt-10" style="border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--sp-4);">
+      <p class="type-body-xs text-muted">© 2026 E-ACIS Appliance Commerce. All rights reserved.</p>
+      <div style="display: flex; gap: var(--sp-4);">
+        <span class="badge badge--success">RA 10173 Compliant</span>
+        <span class="badge">Philippine Regulatory Verified</span>
+      </div>
+    </div>
+  </footer>
   
   <script>
     // Global EACIS Namespace (Moved to end to ensure document.body exists)
@@ -499,5 +533,6 @@
   <script src="/static/js/main.js"></script>
   <script src="/static/js/ui.js"></script>
   <script src="/static/js/security.js"></script>
+  <script src="/static/js/ui/inputMask.js"></script>
 </body>
 </html>

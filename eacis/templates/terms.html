@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}Terms of Service — E-ACIS{% endblock %}
+{% block content %}
+<div class="page-center bg-grey-50" style="padding: var(--sp-20) var(--sp-6);">
+  <div class="stagger-children" style="max-width: 900px; width: 100%;">
+    <div class="text-center mb-16 reveal">
+      <div class="type-label mb-4" style="color: var(--brand-primary); letter-spacing: 0.15em; font-weight: 800;">LEGAL FRAMEWORK</div>
+      <h1 class="type-display-md mb-6">Terms & Conditions</h1>
+      <p class="type-body-md text-muted mx-auto" style="max-width: 600px;">Comprehensive usage rules, user rights, and platform responsibilities for the E-ACIS marketplace.</p>
+    </div>
+
+    <div class="glass-card p-12 reveal" style="border-radius: var(--radius-3xl);">
+      <article class="type-body-md" style="line-height: 1.8; color: var(--grey-700);">
+        <section class="mb-10">
+          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">1. Regulatory Compliance (Philippines)</h2>
+          <p>This agreement is governed by the laws of the Republic of the Philippines. E-ACIS operates in strict accordance with the <strong>Data Privacy Act of 2012 (RA 10173)</strong> as implemented by the National Privacy Commission (NPC).</p>
+        </section>
+
+        <section class="mb-10">
+          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">2. User Responsibilities</h2>
+          <p>By creating an account or using our checkout functions, you acknowledge and agree to:</p>
+          <ul class="mt-4" style="padding-left: var(--sp-6); display: grid; gap: var(--sp-2);">
+            <li>Provide accurate personal and business information.</li>
+            <li>Maintain the confidentiality of your account credentials.</li>
+            <li>Use the system only for its intended purpose of appliance commerce.</li>
+            <li>Adhere to the Least Privilege Principle regarding data access.</li>
+          </ul>
+        </section>
+
+        <section class="mb-10">
+          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">3. Merchant Onboarding & Compliance</h2>
+          <p>Sellers must undergo a mandatory compliance review. You are required to submit valid government-issued permits, including but not limited to:</p>
+          <ul class="mt-4" style="padding-left: var(--sp-6); display: grid; gap: var(--sp-2);">
+            <li>DTI/SEC Business Permit</li>
+            <li>Barangay Permit</li>
+            <li>Mayor's Permit</li>
+          </ul>
+          <p class="mt-4">E-ACIS reserves the right to suspend accounts failing to meet verified compliance standards.</p>
+        </section>
+
+        <section class="mb-10">
+          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">4. System Usage & Security</h2>
+          <p>Our platform implements Role-Based Access Control (RBAC) and AES-256 encryption for sensitive data. Users must not attempt to circumvent these security measures. Administrators are required to use Multi-Factor Authentication (MFA) where available.</p>
+        </section>
+
+        <section>
+          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">5. Intellectual Property</h2>
+          <p>All software, design elements, and platform content are protected by intellectual property laws. Usage of the system constitutes an agreement to the End-User License Agreement (EULA).</p>
+        </section>
+      </article>
+
+      <div class="mt-12 pt-8" style="border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--sp-4);">
+        <div class="type-body-xs text-muted">Last updated: April 14, 2026</div>
+        <a href="javascript:window.print()" class="btn btn--ghost btn--sm">Print Documents</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

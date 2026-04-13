@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Vouchers - Seller Portal{% endblock %}
+{% block content %}
+<div class="page-content seller-shell" style="padding:var(--sp-8);">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--sp-6);">
+    <h1 class="type-display-sm">Vouchers</h1>
+    <a href="/seller/vouchers/create" class="btn btn--primary btn--sm">Create Voucher</a>
+  </div>
+  <div class="kpi-grid mb-6">
+    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Active</div><div class="type-display-md mt-2">{{ stats.active }}</div></div></div>
+    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Redemptions</div><div class="type-display-md mt-2">{{ stats.redemptions_today }}</div></div></div>
+    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Discount Total</div><div class="type-display-md mt-2">PHP {{ '%.2f'|format(stats.discount_total) }}</div></div></div>
+    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Expiring Soon</div><div class="type-display-md mt-2">{{ stats.expiring_soon }}</div></div></div>
+  </div>
+  <div class="table-wrapper">
+    <table class="data-table">
+      <thead><tr><th>Code</th><th>Type</th><th>Value</th><th>Uses</th><th>Valid Until</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for voucher in vouchers %}
+        <tr>
+          <td>{{ voucher.code }}</td>
+          <td>{{ voucher.discount_type }}</td>
+          <td>{{ voucher.discount_value }}</td>
+          <td>{{ voucher.uses_count or 0 }} / {{ voucher.max_uses or '∞' }}</td>
+          <td>{{ voucher.valid_until.strftime('%Y-%m-%d') if voucher.valid_until else '-' }}</td>
+          <td>{{ 'Active' if voucher.is_active else 'Inactive' }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" style="text-align:center;">No vouchers yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

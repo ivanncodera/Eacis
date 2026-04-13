@@ -9,18 +9,36 @@
 {% block content %}
 <div class="main-content">
   <div class="stagger-children">
-  <header style="margin-bottom: var(--sp-10);">
-    <div style="display: flex; align-items: center; gap: var(--sp-3); margin-bottom: var(--sp-2);">
-      <a href="/cart" class="text-muted" style="display: flex; align-items: center; gap: 4px; font-size: var(--text-sm); text-decoration: none;">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"></path></svg>
-        Return to Cart
-      </a>
+  <header class="mb-12">
+    <div class="breadcrumb-wrap mb-4">
+      <a href="/cart" class="breadcrumb-link type-body-sm">Shopping Cart</a>
+      <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" style="color: var(--grey-300); opacity: 0.5;"><path d="M9 5l7 7-7 7"/></svg>
+      <span class="type-body-sm fw-bold" style="color: var(--grey-900);">Secure Checkout</span>
     </div>
-    <h1 class="type-display-md">Checkout</h1>
-    <p class="type-body-sm text-muted">Complete your purchase securely. Fast delivery nationwide.</p>
+    <h1 class="type-display-md">Complete Your Order</h1>
+    <p class="type-body-sm text-muted">Review your information and secure your doorstep delivery.</p>
   </header>
 
-  <form method="post" action="/checkout" class="checkout-layout" style="display: grid; grid-template-columns: 1fr 400px; gap: var(--sp-10); align-items: start;">
+  {% set checkout_form = checkout_form or {} %}
+  {% set checkout_errors = checkout_errors or {} %}
+  {% if checkout_errors.get('general') %}
+  <div class="form-error" role="alert" style="margin-bottom: var(--sp-6);">{{ checkout_errors.get('general') }}</div>
+  {% endif %}
+
+  {% set selected_payment = selected_payment or 'full_pay' %}
+  {% set selected_plan = checkout_form.get('plan_months', 12) | int %}
+  {% set recipient_name = checkout_form.get('recipient_name') or current_user.computed_full_name or current_user.full_name or '' %}
+  {% set default_phone = checkout_form.get('phone') or (current_user.phone or '')|replace('+63', '') %}
+  {% set default_address = [
+    checkout_form.get('address_line1') or current_user.address_line1,
+    current_user.address_line2,
+    current_user.barangay,
+    current_user.city_municipality,
+    current_user.province,
+    current_user.region
+  ] | select | join(', ') %}
+
+  <form method="post" action="/checkout" class="checkout-layout" style="display: grid; grid-template-columns: 1fr 400px; gap: var(--sp-10); align-items: start;" data-enhance="submit-loading">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     
     <!-- Checkout Flow -->
@@ -35,24 +53,28 @@
         
         <div class="form-stack">
           <div class="form-group">
-             <label class="form-label">Full Recipient Name</label>
-             <input type="text" name="recipient_name" class="form-input" placeholder="e.g. Juan Dela Cruz" value="{{ current_user.full_name }}">
+             <label class="form-label">Full Recipient Name <abbr class="required" title="required">*</abbr></label>
+             <input type="text" name="recipient_name" class="form-input" placeholder="e.g. Juan Dela Cruz" value="{{ recipient_name }}" required>
+             {% if checkout_errors.get('recipient_name') %}<div class="form-error" role="alert">{{ checkout_errors.get('recipient_name') }}</div>{% endif %}
           </div>
           <div class="form-group">
-             <label class="form-label">Complete Delivery Address</label>
-             <textarea name="address_line1" class="form-textarea" style="height: 80px;" placeholder="House No., Street Name, Barangay, Municipality/City...">123 Makisig St., Brgy. San Antonio, Makati City, Metro Manila</textarea>
+             <label class="form-label">Complete Delivery Address <abbr class="required" title="required">*</abbr></label>
+             <textarea name="address_line1" class="form-textarea" style="height: 100px;" placeholder="House No., Street Name, Barangay, Municipality/City..." required>{{ default_address }}</textarea>
+             {% if checkout_errors.get('address_line1') %}<div class="form-error" role="alert">{{ checkout_errors.get('address_line1') }}</div>{% endif %}
           </div>
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-4);">
              <div class="form-group">
                <label class="form-label">Postal / ZIP Code</label>
-               <input type="text" name="postal_code" class="form-input" value="1203">
+               <input type="text" name="postal_code" class="form-input" value="{{ checkout_form.get('postal_code') or current_user.postal_code or '' }}">
+               {% if checkout_errors.get('postal_code') %}<div class="form-error" role="alert">{{ checkout_errors.get('postal_code') }}</div>{% endif %}
              </div>
              <div class="form-group">
                <label class="form-label">Primary Mobile Number</label>
                <div class="form-input-group">
                  <span class="form-input-group__icon">+63</span>
-                 <input type="text" name="phone" class="form-input" value="9171234567">
+                 <input type="text" name="phone" class="form-input" value="{{ default_phone }}">
                </div>
+               {% if checkout_errors.get('phone') %}<div class="form-error" role="alert">{{ checkout_errors.get('phone') }}</div>{% endif %}
              </div>
           </div>
         </div>
@@ -67,11 +89,11 @@
         
         <div style="display:flex; flex-direction:column; gap: var(--sp-3);">
           <!-- Payment Options -->
-          <label class="payment-option checked">
-             <input type="radio" name="payment" value="credit" checked>
+           <label class="payment-option {% if selected_payment == 'full_pay' %}checked{% endif %}">
+             <input type="radio" name="payment" value="full_pay" {% if selected_payment == 'full_pay' %}checked{% endif %}>
              <div class="payment-option__info">
-                <strong>Credit / Debit Card</strong>
-                <span class="text-muted type-body-sm">Visa, Mastercard, JCB</span>
+               <strong>Pay in Full</strong>
+               <span class="text-muted type-body-sm">Card, e-wallet, or cash on delivery</span>
              </div>
              <div style="display: flex; gap: 4px;">
                <img src="https://img.icons8.com/color/48/visa.png" width="24"/>
@@ -79,8 +101,8 @@
              </div>
           </label>
 
-          <label class="payment-option" id="installment-trigger">
-             <input type="radio" name="payment" value="installment">
+           <label class="payment-option {% if selected_payment == 'installment' %}checked{% endif %}" id="installment-trigger">
+             <input type="radio" name="payment" value="installment" {% if selected_payment == 'installment' %}checked{% endif %}>
              <div class="payment-option__info">
                 <strong>0% Interest Installment</strong>
                 <span class="text-primary type-body-sm fw-bold">Up to 24 Months available</span>
@@ -89,59 +111,44 @@
           </label>
 
           <!-- Hidden Installment Box -->
-          <div id="installment-details" class="installment-box" style="display: none; margin-top: -8px; border-top: none; border-top-left-radius: 0; border-top-right-radius: 0;">
+           <div id="installment-details" class="installment-box {{ 'is-visible' if selected_payment == 'installment' else '' }}">
             <p class="type-label" style="font-size: 11px; color: var(--brand-primary); margin-bottom: var(--sp-3);">SELECT PLAN FOR PHP {{ '%.2f'|format(order_total|float) }}</p>
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-3);">
               <label class="plan-card">
-                <input type="radio" name="plan" value="6" checked>
+                <input type="radio" name="plan" value="6" {% if selected_plan == 6 %}checked{% endif %}>
                 <div class="plan-card__inner">
                   <div class="fw-bold">6 Mo</div>
-                  <div class="type-body-sm text-primary">₱4,083/mo</div>
+                  <div class="type-body-sm text-primary">PHP {{ '%.2f'|format((order_total|float) / 6) }}/mo</div>
                 </div>
               </label>
               <label class="plan-card">
-                <input type="radio" name="plan" value="12">
+                <input type="radio" name="plan" value="12" {% if selected_plan == 12 %}checked{% endif %}>
                 <div class="plan-card__inner">
                   <div class="fw-bold">12 Mo</div>
-                  <div class="type-body-sm text-primary">₱2,041/mo</div>
+                  <div class="type-body-sm text-primary">PHP {{ '%.2f'|format((order_total|float) / 12) }}/mo</div>
                 </div>
               </label>
               <label class="plan-card">
-                <input type="radio" name="plan" value="24">
+                <input type="radio" name="plan" value="24" {% if selected_plan == 24 %}checked{% endif %}>
                 <div class="plan-card__inner">
                   <div class="fw-bold">24 Mo</div>
-                  <div class="type-body-sm text-primary">₱1,020/mo</div>
+                  <div class="type-body-sm text-primary">PHP {{ '%.2f'|format((order_total|float) / 24) }}/mo</div>
                 </div>
               </label>
             </div>
             <div class="type-body-sm text-muted" style="margin-top: var(--sp-3); font-size: 11px;">* Includes ₱100 processing fee. No interest for Metrobank/BDO cards.</div>
           </div>
-
-          <label class="payment-option">
-             <input type="radio" name="payment" value="wallet">
-             <div class="payment-option__info">
-                <strong>E-Wallet</strong>
-                <span class="text-muted type-body-sm">GCash, Maya, ShopeePay</span>
-             </div>
-             <div style="display: flex; gap: 4px; align-items: center;">
-                <span class="badge badge--dot badge--success" style="font-size: 10px;">PROMO</span>
-             </div>
-          </label>
-
-          <label class="payment-option">
-             <input type="radio" name="payment" value="cod">
-             <div class="payment-option__info">
-                <strong>Cash on Delivery (COD)</strong>
-                <span class="text-muted type-body-sm">Pay upon receipt in cash</span>
-             </div>
-          </label>
+          {% if checkout_errors.get('payment') %}<div class="form-error" role="alert">{{ checkout_errors.get('payment') }}</div>{% endif %}
         </div>
 
-        <div style="margin-top:var(--sp-8); border-top: 1px solid var(--border-subtle); padding-top: var(--sp-6);">
-           <button class="btn btn--primary btn--lg" id="btn-place-order" type="submit" name="action" value="place_order" style="min-width: 240px; border-radius: var(--radius-pill); box-shadow: var(--shadow-primary);">
-             Place Secure Order
-             <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-left: 8px;"><path d="M5 13l4 4L19 7"></path></svg>
-           </button>
+        <div style="display: flex; gap: var(--sp-4); margin-top: var(--sp-8);">
+          <button class="btn btn--white btn--xl" type="button" onclick="window.history.back()" style="flex: 1; border: 1.5px solid var(--border-default); font-weight: 600; color: var(--grey-500);">
+             <span class="btn__label">Discard Changes</span>
+          </button>
+          <button class="btn btn--primary btn--xl" id="save-settings-btn" type="submit" style="flex: 2; box-shadow: 0 10px 25px rgba(0,122,255,0.25);">
+             <span class="btn__label">Complete Order</span>
+             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="margin-left: 6px;"><path d="M5 13l4 4L19 7"></path></svg>
+          </button>
         </div>
       </section>
     </div>
@@ -217,11 +224,17 @@
 
        <div class="type-body-sm text-muted" style="text-align:right;">Points to earn after purchase: {{ earned_points }}</div>
        
-       <div id="billing-subtitle" class="type-body-sm text-primary" style="display: none; text-align: right; font-weight: 500;">
-         Billed Monthly: <strong>₱2,041.00</strong>
+       <div id="billing-subtitle" class="type-body-sm text-primary {{ 'is-visible' if selected_payment == 'installment' else '' }}" style="text-align: right; font-weight: 500;">
+         Billed Monthly: <strong>PHP {{ '%.2f'|format((order_total|float) / 12) }}</strong>
        </div>
 
-       <p class="type-body-sm text-muted" style="margin-top:var(--sp-6); font-size: 11px;">By placing an order, you agree to our <a href="#" class="text-primary">E-ACIS Buyer Protection</a> and Terms of Use.</p>
+       <div style="margin-top: var(--sp-6);">
+          <label class="type-body-sm" style="display: flex; gap: var(--sp-2); align-items: flex-start; cursor: pointer;">
+            <input type="checkbox" name="agree_terms" value="1" style="margin-top: 3px;" required>
+            <span>I have read and agree to the <a href="/terms" target="_blank" class="text-primary fw-bold">Terms of Service</a> and <a href="/privacy" target="_blank" class="text-primary fw-bold">Privacy Policy</a>.</span>
+          </label>
+       </div>
+       <p class="type-body-sm text-muted" style="margin-top:var(--sp-4); font-size: 11px;">By placing an order, you agree to our <a href="/terms" class="text-primary">E-ACIS Buyer Protection</a> and platform usage rules.</p>
     </aside>
 
   </form>
@@ -295,6 +308,26 @@
   box-shadow: var(--shadow-md);
 }
 
+.installment-box {
+  display: none;
+  margin-top: -8px;
+  border-top: none;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.installment-box.is-visible {
+  display: block;
+}
+
+#billing-subtitle {
+  display: none;
+}
+
+#billing-subtitle.is-visible {
+  display: block;
+}
+
 .checkout-summary {
   box-shadow: var(--shadow-md);
 }
@@ -335,20 +368,28 @@ document.addEventListener('DOMContentLoaded', () => {
   const details = document.getElementById('installment-details');
   const subtitle = document.getElementById('billing-subtitle');
 
+  const syncPaymentUI = (value) => {
+    document.querySelectorAll('.payment-option').forEach(p => p.classList.remove('checked'));
+    const selectedInput = document.querySelector(`input[name="payment"][value="${value}"]`);
+    if (selectedInput && selectedInput.closest('.payment-option')) {
+      selectedInput.closest('.payment-option').classList.add('checked');
+    }
+
+    if(value === 'installment') {
+      details.style.display = 'block';
+      subtitle.style.display = 'block';
+    } else {
+      details.style.display = 'none';
+      subtitle.style.display = 'none';
+    }
+  };
+
+  const initiallySelected = document.querySelector('input[name="payment"]:checked');
+  syncPaymentUI(initiallySelected ? initiallySelected.value : 'full_pay');
+
   options.forEach(opt => {
     opt.addEventListener('change', (e) => {
-      // Manage visuals
-      document.querySelectorAll('.payment-option').forEach(p => p.classList.remove('checked'));
-      e.target.closest('.payment-option').classList.add('checked');
-
-      // Installment logic
-      if(e.target.value === 'installment') {
-        details.style.display = 'block';
-        subtitle.style.display = 'block';
-      } else {
-        details.style.display = 'none';
-        subtitle.style.display = 'none';
-      }
+      syncPaymentUI(e.target.value);
     });
   });
 

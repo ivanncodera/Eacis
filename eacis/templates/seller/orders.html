@@ -3,6 +3,13 @@
 {% block content %}
 <div class="stagger-children">
     <div class="page-content bg-grey-50 seller-shell">
+          <nav class="mb-6" aria-label="Breadcrumb">
+             <div class="breadcrumb-wrap">
+                <a href="/seller/dashboard" class="breadcrumb-link type-body-sm">Dashboard</a>
+                <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" style="color: var(--grey-300); opacity: 0.5;"><path d="M9 5l7 7-7 7"/></svg>
+                <span class="type-body-sm fw-bold" style="color: var(--grey-900);">{{ page_title or 'Orders' }}</span>
+             </div>
+          </nav>
        <div class="seller-header" style="align-items:flex-start; margin-bottom:var(--sp-8);">
                   <div class="seller-header__head">
                       <div class="seller-header__meta">
@@ -10,19 +17,36 @@
                  <span class="type-label" style="color:var(--grey-500);">{{ page_title or 'Orders' }}</span>
                </div>
                <h1 class="type-display-md" style="color:var(--grey-900); margin:0;">{{ page_title or 'Orders' }}</h1>
-               {% if page_subtitle %}<p class="type-body-sm mt-2" style="color:var(--grey-600);">{{ page_subtitle }}</p>{% endif %}
+                      <p class="type-body-sm mt-2" style="color:var(--grey-600);">{{ page_subtitle or 'Track fulfillment, update statuses, and manage customer order flow.' }}</p>
             </div>
+                  <div class="seller-header__actions">
                      <button class="btn btn--secondary btn--sm">{{ export_label or 'Export CSV' }}</button>
+                  </div>
      </div>
 
+       <div class="kpi-grid mb-10" aria-label="Order KPIs">
+          <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Total Orders</div><div class="type-display-md mt-2">{{ stats.total if stats else orders|length }}</div></div></div>
+          <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Pending</div><div class="type-display-md mt-2" style="color:var(--color-warning);">{{ stats.pending if stats else 0 }}</div></div></div>
+          <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Shipped</div><div class="type-display-md mt-2" style="color:var(--brand-primary);">{{ stats.shipped if stats else 0 }}</div></div></div>
+          <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Delivered</div><div class="type-display-md mt-2" style="color:var(--color-success);">{{ stats.delivered if stats else 0 }}</div></div></div>
+       </div>
+
      <div class="table-wrapper">
-           <form class="table-toolbar" method="get" action="/seller/orders" style="display:flex; gap:var(--sp-3); flex-wrap:wrap; align-items:end;">
-              <div class="form-input-group" style="width:320px;">
-                 <span class="form-input-group__icon">🔍</span>
-                 <input type="text" class="form-input" name="q" value="{{ filters.q if filters else '' }}" placeholder="Search order ID or customer..." />
+           <form class="table-toolbar" method="get" action="/seller/orders" style="display:flex; gap:var(--sp-3); flex-wrap:wrap; align-items:end;" data-enhance="submit-loading" aria-label="Filter orders">
+              <div class="form-group" style="margin:0; width:320px;">
+                 <label class="form-label" for="seller-orders-q">Search</label>
+                 <div class="form-input-group">
+                  <span class="form-input-group__icon" style="color: var(--grey-400);" aria-hidden="true">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  </span>
+                 <input id="seller-orders-q" type="search" class="form-input" name="q" value="{{ filters.q if filters else '' }}" placeholder="Order or customer" autocomplete="off" aria-describedby="seller-orders-q-help" />
+                 </div>
+                 <small id="seller-orders-q-help" class="form-helper">Matches order reference or customer name when supported.</small>
               </div>
-              <select class="form-select" name="status" style="min-width:170px;">
-                 <option value="all" {% if not filters or filters.status == 'all' %}selected{% endif %}>Status: All</option>
+              <div class="form-group" style="margin:0; min-width:170px;">
+                 <label class="form-label" for="seller-orders-status">Status</label>
+                 <select id="seller-orders-status" class="form-select" name="status" aria-describedby="seller-orders-status-help">
+                 <option value="all" {% if not filters or filters.status == 'all' %}selected{% endif %}>All statuses</option>
                  <option value="pending" {% if filters and filters.status == 'pending' %}selected{% endif %}>Pending</option>
                  <option value="paid" {% if filters and filters.status == 'paid' %}selected{% endif %}>Paid</option>
                  <option value="packed" {% if filters and filters.status == 'packed' %}selected{% endif %}>Packed</option>
@@ -30,7 +54,9 @@
                  <option value="delivered" {% if filters and filters.status == 'delivered' %}selected{% endif %}>Delivered</option>
                  <option value="cancelled" {% if filters and filters.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
               </select>
-              <button class="btn btn--secondary btn--sm" type="submit">Apply</button>
+                 <small id="seller-orders-status-help" class="form-helper">Optional</small>
+              </div>
+               <button class="btn btn--secondary btn--lg" type="submit"><span class="btn__label">Apply filters</span></button>
            </form>
         <table class="data-table">
            <thead>
@@ -61,7 +87,10 @@
                  </tr>
                  {% else %}
                  <tr>
-                    <td colspan="6" class="text-muted" style="text-align:center; padding:var(--sp-6);">No orders found for the selected filters.</td>
+                    <td colspan="6" class="text-muted" style="text-align:center; padding:var(--sp-6);">
+                      <div class="type-body-sm fw-semibold">No orders found for the selected filters.</div>
+                      <div class="type-body-xs mt-1">Try changing filters, or publish products to start receiving customer orders.</div>
+                    </td>
                  </tr>
                  {% endfor %}
            </tbody>

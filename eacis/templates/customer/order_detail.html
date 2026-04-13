@@ -48,7 +48,7 @@
            </div>
            <hr style="border:none; border-top: 1px solid var(--border-default); margin: var(--sp-4) 0;" />
            <div style="display:flex; justify-content:space-between;">
-              <span class="type-h4">Total Paid</span><span class="type-price-sm">PHP 24,500.00</span>
+              <span class="type-h4">Total Paid</span><span class="type-price-sm">PHP {{ '%.2f'|format(order.total|float) }}</span>
            </div>
         </div>
 
@@ -72,9 +72,9 @@
         <hr style="border:none; border-top: 1px solid var(--border-subtle); margin: var(--sp-3) 0;" />
         <h3 class="type-h4" style="margin-bottom: var(--sp-4); margin-top: var(--sp-4);">Shipping Address</h3>
         <p class="type-body-sm text-muted" style="line-height: var(--leading-relaxed);">
-           {{ order.shipping_address.get('line1') if order.shipping_address else 'No shipping address saved' }}<br>
-           {{ order.shipping_address.get('line2') if order.shipping_address and order.shipping_address.get('line2') else '' }}<br>
-           {{ order.shipping_address.get('city') if order.shipping_address else '' }}, {{ order.shipping_address.get('province') if order.shipping_address else '' }}<br>
+           {{ order.shipping_address.get('address_line1') if order.shipping_address else 'No shipping address saved' }}<br>
+           {{ order.shipping_address.get('address_line2') if order.shipping_address and order.shipping_address.get('address_line2') else '' }}<br>
+           {{ order.shipping_address.get('city_municipality') if order.shipping_address else '' }}, {{ order.shipping_address.get('province') if order.shipping_address else '' }}<br>
            {{ order.shipping_address.get('country') if order.shipping_address else 'Philippines' }}
         </p>
 

@@ -1,103 +1,34 @@
 {% extends 'base.html' %}
-{% block title %}Payouts — Seller Portal{% endblock %}
+{% block title %}Payouts - Seller Portal{% endblock %}
 {% block content %}
-<div class="stagger-children">
-  <div class="page-content bg-grey-50 seller-shell">
-    <div class="seller-header reveal">
-      <div class="seller-header__head">
-        <div class="seller-header__meta">
-          <span class="badge seller-header__chip seller-header__chip--danger">Financial Settings</span>
-          <span class="type-label" style="color:var(--grey-500);">Settlement Center</span>
-        </div>
-        <h1 class="type-display-md">Payouts</h1>
-        <p class="type-body-sm text-muted mt-1">Track your available balance, scheduled transfers, and payout history.</p>
-      </div>
-      <div class="seller-header__actions">
-        <span class="badge badge--success">Auto-settle enabled</span>
-        <button class="btn btn--primary btn--sm">Request Payout</button>
-      </div>
-    </div>
+<div class="page-content seller-shell" style="padding:var(--sp-8);">
+  <h1 class="type-display-sm" style="margin-bottom:var(--sp-6);">Payouts</h1>
 
-    <div class="kpi-grid mb-6">
-      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Available Balance</div><div class="type-display-md mt-2">PHP 45,280</div><div class="type-body-xs text-success mt-1">Ready for Friday transfer</div></div></div>
-      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Pending Clearance</div><div class="type-display-md mt-2">PHP 18,400</div><div class="type-body-xs text-muted mt-1">Held until delivery confirmation</div></div></div>
-      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Next Transfer</div><div class="type-display-md mt-2">Apr 5</div><div class="type-body-xs text-primary mt-1">Bank transfer scheduled</div></div></div>
-      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Bank Account</div><div class="type-display-md mt-2">**** 4421</div><div class="type-body-xs text-muted mt-1">Metrobank settlement account</div></div></div>
-    </div>
+  <div class="kpi-grid mb-6">
+    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Available Balance</div><div class="type-display-md mt-2">PHP {{ '%.2f'|format(stats.available_balance or 0) }}</div></div></div>
+    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Pending Clearance</div><div class="type-display-md mt-2">PHP {{ '%.2f'|format(stats.pending_clearance or 0) }}</div></div></div>
+    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Next Transfer</div><div class="type-display-md mt-2">{{ stats.next_transfer.strftime('%Y-%m-%d') if stats.next_transfer else '-' }}</div></div></div>
+    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Payout Entries</div><div class="type-display-md mt-2">{{ stats.payout_count }}</div></div></div>
+  </div>
 
-    <div class="seller-grid-2">
-      <div class="glass-card p-6 reveal" data-delay="60">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--sp-4);">
-          <div>
-            <h3 class="type-h4">Payout History</h3>
-            <p class="type-body-sm text-muted mt-1">Last six transfers with status and totals.</p>
-          </div>
-          <span class="type-body-xs text-muted">Last 6 transfers</span>
-        </div>
-        <div class="table-wrapper" style="border:none; box-shadow:none;">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Reference</th>
-                <th>Status</th>
-                <th style="text-align:right;">Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>Mar 29, 2026</td><td>PAY-20260329-0001</td><td><span class="badge badge--success">Completed</span></td><td style="text-align:right; font-weight:600;">PHP 24,900</td></tr>
-              <tr><td>Mar 22, 2026</td><td>PAY-20260322-0004</td><td><span class="badge badge--pending">Processing</span></td><td style="text-align:right; font-weight:600;">PHP 19,850</td></tr>
-              <tr><td>Mar 15, 2026</td><td>PAY-20260315-0002</td><td><span class="badge badge--success">Completed</span></td><td style="text-align:right; font-weight:600;">PHP 31,100</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="voucher-side">
-        <div class="glass-card p-6 reveal" data-delay="100">
-          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:var(--sp-4); margin-bottom:var(--sp-4);">
-            <div>
-              <h3 class="type-h4">Transfer Settings</h3>
-              <p class="type-body-sm text-muted mt-1">Adjust settlement cadence and payout destination.</p>
-            </div>
-            <span class="badge badge--pending">Next run Apr 5</span>
-          </div>
-          <div class="form-group mb-4">
-            <label class="form-label">Settlement Frequency</label>
-            <select class="form-select">
-              <option>Weekly</option>
-              <option>Bi-weekly</option>
-              <option>Monthly</option>
-            </select>
-          </div>
-          <div class="form-group mb-4">
-            <label class="form-label">Settlement Account</label>
-            <input class="form-input" value="Metrobank **** 4421" readonly>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Minimum Payout Threshold</label>
-            <input class="form-input" value="PHP 5,000" readonly>
-          </div>
-        </div>
-
-        <div class="glass-card p-6 reveal" data-delay="160">
-          <h3 class="type-h4">Settlement Notes</h3>
-          <div class="ops-list mt-4">
-            <div class="ops-list-item">
-              <div class="type-body-sm fw-semibold">Auto-settlement keeps cash flow predictable</div>
-              <div class="type-body-xs text-muted mt-1">Manual requests should be reserved for exceptions.</div>
-            </div>
-            <div class="ops-list-item">
-              <div class="type-body-sm fw-semibold">Keep bank details verified</div>
-              <div class="type-body-xs text-muted mt-1">Changes to settlement accounts should be reviewed carefully.</div>
-            </div>
-          </div>
-          <div class="seller-sunken mt-4" style="padding:var(--sp-4);">
-            <div class="type-body-xs text-muted">Payout reference</div>
-            <div class="type-body-sm fw-semibold">PAY-20260405-0002</div>
-          </div>
-        </div>
-      </div>
+  <div class="glass-card p-6">
+    <h2 class="type-h4" style="margin:0 0 var(--sp-4) 0;">Payout History</h2>
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead><tr><th>Order</th><th>Date</th><th>Status</th><th style="text-align:right;">Amount</th></tr></thead>
+        <tbody>
+          {% for order in history %}
+          <tr>
+            <td><a href="/seller/orders/{{ order.order_ref }}">{{ order.order_ref }}</a></td>
+            <td>{{ (order.delivered_at or order.created_at).strftime('%Y-%m-%d') if (order.delivered_at or order.created_at) else '-' }}</td>
+            <td>{{ order.status|title }}</td>
+            <td style="text-align:right;">PHP {{ '%.2f'|format(order.total or 0) }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="4" style="text-align:center;">No payout records yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
   </div>
 </div>

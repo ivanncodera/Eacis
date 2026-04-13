@@ -1,0 +1,232 @@
+{% extends 'base.html' %}
+{% block title %}Create Account — E-ACIS{% endblock %}
+{% block content %}
+<div class="page-center bg-grey-50" style="padding: var(--sp-12) var(--sp-6);">
+  <div class="stagger-children" style="max-width: 640px; width: 100%;">
+    <div class="text-center mb-10 reveal">
+      <h1 class="type-display-md mb-2">Join the Community</h1>
+      <p class="type-body-sm text-muted">Complete your profile to unlock exclusive appliance deals.</p>
+    </div>
+
+    <!-- Progress Tracker -->
+    <div class="mb-10 reveal" style="display: flex; justify-content: space-between; position: relative;">
+      <div style="position: absolute; top: 12px; left: 0; right: 0; height: 2px; background: var(--border-default); z-index: 1;"></div>
+      <div id="prog-bar" style="position: absolute; top: 12px; left: 0; width: 33%; height: 2px; background: var(--brand-primary); z-index: 2; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);"></div>
+      
+      {% for step in ['Identity', 'Location', 'Security'] %}
+      <div class="step-node" data-step="{{ loop.index }}">
+        <div class="step-circle {{ 'is-active' if loop.index == 1 else '' }}">
+          {{ loop.index }}
+        </div>
+        <span class="type-label-xs {{ 'is-active' if loop.index == 1 else '' }}">
+          {{ step }}
+        </span>
+      </div>
+      {% endfor %}
+    </div>
+
+    <style>
+      .step-node {
+        position: relative;
+        z-index: 3;
+        background: var(--grey-50);
+        padding: 0 var(--sp-2);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--sp-2);
+      }
+      .step-circle {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        border: 2px solid var(--border-strong);
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 800;
+        color: var(--grey-400);
+        transition: all 0.3s;
+      }
+      .step-circle.is-active {
+        border-color: var(--brand-primary);
+        color: var(--brand-primary);
+      }
+      .step-node span {
+        color: var(--grey-400);
+      }
+      .step-node span.is-active {
+        color: var(--grey-900);
+      }
+    </style>
+
+    <form method="post" action="/auth/register/customer" novalidate id="reg-form" class="glass-card reveal" style="padding: var(--sp-10); border-radius: var(--radius-2xl);">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="role" value="customer">
+
+      <!-- Step 1: Identity -->
+      <div class="form-step active" data-step="1">
+        <h3 class="type-h4 mb-4">Personal Details</h3>
+        <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:var(--sp-6);">
+          <div class="form-group">
+            <label class="form-label">First Name</label>
+            <input class="form-input" name="first_name" placeholder="e.g. Juan" value="{{ form.get('first_name','') }}" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name</label>
+            <input class="form-input" name="last_name" placeholder="e.g. Dela Cruz" value="{{ form.get('last_name','') }}" required>
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:var(--sp-6);">
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input class="form-input" type="email" name="email" placeholder="name@example.com" value="{{ form.get('email','') }}" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mobile</label>
+            <input class="form-input" name="phone" placeholder="0917XXXXXXX" value="{{ form.get('phone','') }}">
+          </div>
+        </div>
+        <div class="mt-8">
+          <button type="button" class="btn btn--primary btn--full btn--xl next-step">Continue to Location</button>
+        </div>
+      </div>
+
+      <!-- Step 2: Location -->
+      <div class="form-step" data-step="2" style="display:none;">
+        <h3 class="type-h4 mb-4">Delivery Address</h3>
+        <div class="form-group">
+          <label class="form-label">Address Line 1</label>
+          <input class="form-input" name="address_line1" placeholder="House/Bldg No., Street" value="{{ form.get('address_line1','') }}">
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:var(--sp-6);">
+          <div class="form-group"><label class="form-label">Barangay</label><input class="form-input" name="barangay" value="{{ form.get('barangay','') }}"></div>
+          <div class="form-group"><label class="form-label">City / Municipality</label><input class="form-input" name="city_municipality" id="city_municipality" value="{{ form.get('city_municipality','') }}"></div>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:var(--sp-6);">
+          <div class="form-group"><label class="form-label">Province</label><input class="form-input" name="province" value="{{ form.get('province','') }}"></div>
+          <div class="form-group"><label class="form-label">Postal Code</label><input class="form-input" name="postal_code" id="postal_code" value="{{ form.get('postal_code','') }}"></div>
+        </div>
+        <div class="mt-8" style="display:flex; gap:var(--sp-3);">
+          <button type="button" class="btn btn--secondary btn--xl prev-step">Back</button>
+          <button type="button" class="btn btn--primary btn--xl next-step" style="flex:1;">Continue to Security</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Security -->
+      <div class="form-step" data-step="3" style="display:none;">
+        <h3 class="type-h4 mb-4">Secure Your Account</h3>
+        
+        {% if errors %}
+        <div class="form-error mb-6" role="alert">
+          <ul class="type-body-xs" style="margin:0; padding-left:14px;">
+            {% for k, m in errors.items() %}<li>{{ m }}</li>{% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+
+        <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:var(--sp-6);">
+          <div class="form-group">
+            <label class="form-label">Create Password</label>
+            <input class="form-input" type="password" name="password" id="pw" required>
+            <div id="pw-strength" class="type-label-xs mt-2" style="color: var(--grey-400);">Strength: To be evaluated</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Confirm Password</label>
+            <input class="form-input" type="password" name="confirm_password" required>
+          </div>
+        </div>
+
+        <label class="type-body-sm mt-8" style="display:flex; gap:10px; align-items:flex-start; cursor:pointer;">
+          <input type="checkbox" name="agree" value="1" style="margin-top:2px;" {% if form.get('agree') %}checked{% endif %}> 
+          <span>I agree to the <a href="/terms" class="text-primary fw-bold">Terms of Service</a> and <a href="/privacy" class="text-primary fw-bold">Privacy Policy</a>.</span>
+        </label>
+
+        <div class="mt-8" style="display:flex; gap:var(--sp-3);">
+          <button type="button" class="btn btn--secondary btn--lg prev-step">Back</button>
+          <button type="submit" class="btn btn--primary btn--lg btn--full" style="flex:1;">Complete Registration</button>
+        </div>
+      </div>
+    </form>
+    
+    <div class="text-center mt-8 reveal" data-delay="100">
+      <p class="type-body-sm text-muted">Registering a business? <a href="/auth/register/seller" class="fw-bold text-primary">Join as a Merchant</a></p>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('reg-form');
+  const steps = Array.from(form.querySelectorAll('.form-step'));
+  const progBar = document.getElementById('prog-bar');
+  const nodes = Array.from(document.querySelectorAll('.step-node'));
+
+  function updateStep(idx) {
+    steps.forEach((s, i) => s.style.display = i === idx ? 'block' : 'none');
+    progBar.style.width = ((idx + 1) / steps.length * 100) + '%';
+    
+    nodes.forEach((node, i) => {
+      const circle = node.querySelector('.step-circle');
+      const label = node.querySelector('span');
+      if (i <= idx) {
+        circle.style.borderColor = 'var(--brand-primary)';
+        circle.style.color = 'var(--brand-primary)';
+        label.style.color = 'var(--grey-900)';
+        if (i < idx) circle.style.background = 'var(--brand-primary-subtle-2)';
+      } else {
+        circle.style.borderColor = 'var(--border-strong)';
+        circle.style.color = 'var(--grey-400)';
+        label.style.color = 'var(--grey-400)';
+        circle.style.background = 'white';
+      }
+    });
+  }
+
+  form.querySelectorAll('.next-step').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const currentIdx = steps.findIndex(s => s.style.display !== 'none');
+      if (currentIdx < steps.length - 1) updateStep(currentIdx + 1);
+    });
+  });
+
+  form.querySelectorAll('.prev-step').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const currentIdx = steps.findIndex(s => s.style.display !== 'none');
+      if (currentIdx > 0) updateStep(currentIdx - 1);
+    });
+  });
+
+  // PW Strength
+  const pw = document.getElementById('pw');
+  const strengthEl = document.getElementById('pw-strength');
+  pw?.addEventListener('input', () => {
+    const val = pw.value;
+    if (!val) { strengthEl.textContent = 'Strength: To be evaluated'; return; }
+    let score = 0;
+    if (val.length >= 8) score++;
+    if (/[A-Z]/.test(val)) score++;
+    if (/[0-9]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+    
+    const labels = ['Weak', 'Fair', 'Good', 'Strong'];
+    const colors = ['var(--color-danger)', 'var(--color-warning)', 'var(--brand-primary)', 'var(--color-success)'];
+    strengthEl.textContent = 'Strength: ' + (labels[score-1] || 'Weak');
+    strengthEl.style.color = colors[score-1] || 'var(--color-danger)';
+  });
+
+  // Postal Suggestion
+  const cityInput = document.getElementById('city_municipality');
+  const postalInput = document.getElementById('postal_code');
+  cityInput?.addEventListener('blur', async () => {
+    const city = cityInput.value.trim();
+    if (!city || postalInput.value.trim()) return;
+    const response = await fetch(`/api/postal/suggest?city=${encodeURIComponent(city)}`);
+    const data = await response.json();
+    if (data && data.postal_code) postalInput.value = data.postal_code;
+  });
+});
+</script>
+{% endblock %}

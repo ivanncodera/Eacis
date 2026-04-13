@@ -1,211 +1,59 @@
 {% extends 'base.html' %}
-
-{% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/customer.css') }}">
-{% endblock %}
-
-{% block title %}Dashboard — E-ACIS{% endblock %}
-
+{% block title %}Customer Profile - E-ACIS{% endblock %}
 {% block content %}
 <div class="main-content">
   <div class="stagger-children">
-    
+    <header style="display:flex; justify-content:space-between; align-items:flex-end; gap:var(--sp-4); margin-bottom:var(--sp-8); flex-wrap:wrap;">
+      <div>
+        <h1 class="type-display-sm" style="margin-bottom:var(--sp-2);">My Profile</h1>
+        <p class="type-body-sm text-muted">Your account identity, order stats, and quick actions.</p>
+      </div>
+      <a href="/customer/profile/edit" class="btn btn--primary btn--sm">Edit Profile</a>
+    </header>
 
-    <!-- Main Dashboard Content -->
-    <main style="flex: 1; min-width: 0;">
-      <!-- Personalized Welcome Hero -->
-      <section class="welcome-hero stagger-item" style="margin-bottom: var(--sp-12); min-height: 280px; align-items: center;">
-        <div class="welcome-hero__bg"></div>
-        <div class="welcome-hero__glass" style="background: linear-gradient(90deg, rgba(0,0,0,0.8) 0%, transparent 100%);"></div>
-        <div class="welcome-hero__content">
-          <div class="member-badge member-badge--gold">
-            <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            Gold Member
-          </div>
-          <h1 class="type-display-md text-white" style="margin-bottom: var(--sp-3); font-weight: 900; letter-spacing: -0.03em;">Welcome back, <span id="user-display-name">Friend</span>!</h1>
-          <p class="type-body-md text-white-50" style="max-width: 460px; line-height: 1.7; font-size: 16px;">Your premium home experience continues. You have 1,250 points and 4 active vouchers ready to use.</p>
+    <div class="kpi-grid mb-6" style="grid-template-columns: repeat(5, minmax(0, 1fr));">
+      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Total Orders</div><div class="type-display-md mt-2">{{ profile_stats.total_orders }}</div></div></div>
+      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Pending</div><div class="type-display-md mt-2">{{ profile_stats.pending_orders }}</div></div></div>
+      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Delivered</div><div class="type-display-md mt-2">{{ profile_stats.delivered_orders }}</div></div></div>
+      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Returns</div><div class="type-display-md mt-2">{{ profile_stats.returns }}</div></div></div>
+      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Total Spend</div><div class="type-display-md mt-2">PHP {{ '%.2f'|format(profile_stats.total_spent or 0) }}</div></div></div>
+    </div>
+
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:var(--sp-6); align-items:start;">
+      <section class="glass-card p-6">
+        <h2 class="type-h4" style="margin:0 0 var(--sp-4) 0;">Account Information</h2>
+        <div style="display:grid; gap:var(--sp-3);">
+          <div><span class="type-body-xs text-muted">Full Name</span><div class="type-body-sm fw-semibold">{{ current_user.computed_full_name or current_user.full_name }}</div></div>
+          <div><span class="type-body-xs text-muted">Email</span><div class="type-body-sm fw-semibold">{{ current_user.email }}</div></div>
+          <div><span class="type-body-xs text-muted">Phone</span><div class="type-body-sm fw-semibold">{{ current_user.phone or '-' }}</div></div>
+          <div><span class="type-body-xs text-muted">Address</span><div class="type-body-sm fw-semibold">{{ current_user.address_line1 or '-' }}{% if current_user.city_municipality %}, {{ current_user.city_municipality }}{% endif %}{% if current_user.province %}, {{ current_user.province }}{% endif %}</div></div>
+          <div><span class="type-body-xs text-muted">Loyalty Points</span><div class="type-body-sm fw-semibold">{{ current_user.loyalty_points or 0 }}</div></div>
         </div>
       </section>
 
-      <!-- KPI Metrics Row -->
-      <!-- KPI Metrics Layer -->
-      <div class="kpi-grid" style="margin-bottom: var(--sp-12); gap: var(--sp-6);">
-        <!-- Points -->
-        <div class="glass-card glass-card--kpi stagger-item">
-          <div class="kpi__content">
-            <div class="type-label type-label--sm text-muted">E-ACIS Points</div>
-            <div class="type-display-md mt-2 kpi-val" data-format="number" data-value="1250">0</div>
-            <div class="type-body-2xs text-success mt-1 fw-bold">↑ 240 this month</div>
-          </div>
-          <div class="kpi__chart">
-            <svg class="sparkline sparkline--brand" viewBox="0 0 100 40">
-              <path d="M0,35 Q10,32 20,28 T40,25 T60,15 T80,18 T100,5" />
-            </svg>
-          </div>
+      <section class="glass-card p-6">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--sp-4);">
+          <h2 class="type-h4" style="margin:0;">Recent Orders</h2>
+          <a href="/customer/orders" class="type-body-sm text-primary">View all</a>
         </div>
-        <!-- Savings -->
-        <div class="glass-card glass-card--kpi stagger-item">
-          <div class="kpi__content">
-            <div class="type-label type-label--sm text-muted">Total Savings</div>
-            <div class="type-display-md mt-2 kpi-val" data-format="currency" data-value="12450">0</div>
-            <div class="type-body-2xs text-brand mt-1 fw-bold">Life-time value</div>
-          </div>
-          <div class="kpi__chart">
-            <svg class="sparkline sparkline--success" viewBox="0 0 100 40">
-              <path d="M0,20 Q25,28 50,32 T75,25 T100,2" />
-            </svg>
-          </div>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead><tr><th>Order</th><th>Status</th><th style="text-align:right;">Total</th></tr></thead>
+            <tbody>
+              {% for order in recent_orders %}
+              <tr>
+                <td><a href="/customer/orders/{{ order.order_ref }}">{{ order.order_ref }}</a></td>
+                <td>{{ order.status|title }}</td>
+                <td style="text-align:right;">PHP {{ '%.2f'|format(order.total or 0) }}</td>
+              </tr>
+              {% else %}
+              <tr><td colspan="3" style="text-align:center;">No orders yet.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
-        <!-- Active Orders -->
-        <div class="glass-card glass-card--kpi stagger-item">
-          <div class="kpi__content">
-            <div class="type-label type-label--sm text-muted">Active Orders</div>
-            <div class="type-display-md mt-2 kpi-val" data-format="number" data-value="2">0</div>
-            <div class="type-body-2xs text-warning mt-1 fw-bold">1 In Transit</div>
-          </div>
-          <div class="kpi__chart">
-            <svg class="sparkline sparkline--warning" viewBox="0 0 100 40">
-              <path d="M0,30 Q25,28 50,32 T75,25 T100,28" />
-            </svg>
-          </div>
-        </div>
-      </div>
-
-      <!-- Main Command Grid -->
-      <div style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--sp-10); align-items: start;">
-        <div style="display: flex; flex-direction: column; gap: var(--sp-6);">
-          
-          <!-- Latest Order Status Tracking -->
-          <section class="glass-card stagger-item" style="padding: var(--sp-10);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--sp-6);">
-              <div>
-                <h3 class="type-h4 fw-extrabold">Active Status Tracking</h3>
-                <div class="type-body-2xs text-muted mt-1">Order #EACIS-9221 • 2 items</div>
-              </div>
-              <span class="badge badge--dot badge--primary">In Transit</span>
-            </div>
-            
-            <div class="tracker-pipeline">
-              <div class="tracker-progress" style="width: 66%;"></div>
-              <div class="tracker-step tracker-step--completed">
-                <div class="tracker-step__dot"><svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
-                <div class="tracker-step__label">Ordered</div>
-              </div>
-              <div class="tracker-step tracker-step--completed">
-                <div class="tracker-step__dot"><svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
-                <div class="tracker-step__label">Process</div>
-              </div>
-              <div class="tracker-step tracker-step--active">
-                <div class="tracker-step__dot"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></div>
-                <div class="tracker-step__label">Shipping</div>
-              </div>
-              <div class="tracker-step">
-                <div class="tracker-step__dot"></div>
-                <div class="tracker-step__label">Arrived</div>
-              </div>
-            </div>
-          </section>
-
-          <!-- History Table -->
-          <section class="glass-card p-0 overflow-hidden stagger-item">
-            <div style="padding: var(--sp-8) var(--sp-10); border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
-              <h3 class="type-h4 fw-extrabold">Recent Activity</h3>
-              <a href="/customer/orders" class="btn btn--white btn--xs">View Full History</a>
-            </div>
-            <div class="table-wrapper">
-              <table class="premium-table">
-                <thead>
-                  <tr>
-                    <th>Identifier</th>
-                    <th>Date</th>
-                    <th>Status</th>
-                    <th style="text-align: right;">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td><span class="fw-bold">#EACIS-9221</span></td>
-                    <td class="text-muted type-body-sm">Today</td>
-                    <td><span class="badge badge--dot badge--primary">In Transit</span></td>
-                    <td style="text-align: right; font-weight: 800; color: var(--grey-900);">PHP 12,400</td>
-                  </tr>
-                  <tr>
-                    <td><span class="fw-bold">#EACIS-9210</span></td>
-                    <td class="text-muted type-body-sm">Oct 28</td>
-                    <td><span class="badge badge--dot badge--success">Delivered</span></td>
-                    <td style="text-align: right; font-weight: 800; color: var(--grey-900);">PHP 5,600</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </section>
-        </div>
-
-        <!-- Profile / Account Sidebar -->
-        <div style="display: flex; flex-direction: column; gap: var(--sp-6);">
-          
-          <!-- Loyalty Widget -->
-          <section class="glass-card stagger-item" style="background: var(--grey-900); color: white;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--sp-6);">
-              <div>
-                <div class="type-label" style="color: var(--grey-400); font-size: 10px;">LOYALTY PROGRESS</div>
-                <h4 class="type-h4" style="color: white; margin-top: 4px;">Platinum Tier</h4>
-              </div>
-              <div style="color: #FFD700;">
-                <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-              </div>
-            </div>
-            
-            <div style="display: flex; align-items: center; gap: var(--sp-6);">
-              <div style="position: relative; width: 64px; height: 64px;">
-                <svg viewBox="0 0 36 36" style="width: 100%; height: 100%; transform: rotate(-90deg);">
-                  <circle cx="18" cy="18" r="16" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="3" />
-                  <circle cx="18" cy="18" r="16" fill="none" stroke="#FFD700" stroke-width="3" stroke-dasharray="75, 100" />
-                </svg>
-                <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800;">75%</div>
-              </div>
-              <div style="flex: 1;">
-                <div class="type-body-2xs text-white-50">350 points to go until Platinum status unlock.</div>
-              </div>
-            </div>
-          </section>
-
-          <section class="glass-card stagger-item" style="padding: var(--sp-10);">
-            <h3 class="type-h4" style="margin-bottom: var(--sp-6); font-weight: var(--weight-extrabold);">Account Access</h3>
-            <div class="form-stack" style="gap: var(--sp-6);">
-              <div class="form-group" style="margin-bottom: var(--sp-4);">
-                <label class="type-label" style="font-size: 10px; color: var(--grey-400);">IDENTITY</label>
-                <div class="type-body-sm fw-bold" style="color: var(--grey-900);">{{ current_user.full_name }}</div>
-              </div>
-              <div class="form-group" style="margin-bottom: var(--sp-4);">
-                <label class="type-label" style="font-size: 10px; color: var(--grey-400);">SECURE EMAIL</label>
-                <div class="type-body-sm fw-medium" style="color: var(--grey-700);">{{ current_user.email }}</div>
-              </div>
-              <a href="/customer/profile/edit" class="btn btn--ghost btn--sm btn--full" style="margin-top: var(--sp-2);">Manage Settings</a>
-            </div>
-          </section>
-
-          <section class="glass-card stagger-item" style="background: var(--surface-sunken); border: 1px solid var(--border-default); padding: var(--sp-8);">
-            <div style="display: flex; gap: var(--sp-3); align-items: flex-start;">
-              <div style="color: var(--brand-primary);">
-                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-              </div>
-              <div>
-                <h4 class="type-h4" style="font-size: var(--text-sm);">Guarantee Shield</h4>
-                <p class="type-body-2xs text-muted mt-1" style="line-height: 1.5;">Every purchase is secured by the E-ACIS 365-day protection plan.</p>
-              </div>
-            </div>
-          </section>
-        </div>
-      </div>
-    </main>
+      </section>
+    </div>
   </div>
 </div>
-
-<script>
-    // Personalize greeting
-    const userDisplayName = "{{ current_user.full_name.split(' ')[0] }}";
-    const el = document.getElementById('user-display-name');
-    if (el) el.textContent = userDisplayName || 'Friend';
-</script>
 {% endblock %}

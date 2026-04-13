@@ -3,6 +3,13 @@
 {% block content %}
 <div class="stagger-children">
     <div class="page-content bg-grey-50 seller-shell">
+          <nav class="mb-6" aria-label="Breadcrumb">
+             <div class="breadcrumb-wrap">
+                <a href="/seller/dashboard" class="breadcrumb-link type-body-sm">Dashboard</a>
+                <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" style="color: var(--grey-300); opacity: 0.5;"><path d="M9 5l7 7-7 7"/></svg>
+                <span class="type-body-sm fw-bold" style="color: var(--grey-900);">{{ page_title or 'Returns & Merchant RMA' }}</span>
+             </div>
+          </nav>
        <div class="seller-header" style="align-items:flex-start; margin-bottom:var(--sp-8);">
                   <div class="seller-header__head">
                       <div class="seller-header__meta">
@@ -10,25 +17,35 @@
                  <span class="type-label" style="color:var(--grey-500);">{{ page_title or 'Returns & Merchant RMA' }}</span>
                </div>
                       <h1 class="type-display-md" style="color:var(--grey-900); margin:0;">{{ page_title or 'Returns & Merchant RMA' }}</h1>
-                      {% if page_subtitle %}<p class="type-body-sm mt-2" style="color:var(--grey-600);">{{ page_subtitle }}</p>{% endif %}
+                                 <p class="type-body-sm mt-2" style="color:var(--grey-600);">{{ page_subtitle or 'Review return requests, capture seller notes, and complete refund updates.' }}</p>
             </div>
      </div>
 
      <div class="table-wrapper">
-        <form method="get" action="/seller/returns" class="table-toolbar" style="display:flex; gap:var(--sp-3); flex-wrap:wrap; align-items:end;">
-           <div class="form-input-group" style="width:320px;">
-              <span class="form-input-group__icon">🔍</span>
-              <input type="text" class="form-input" name="q" value="{{ filters.q if filters else '' }}" placeholder="Search RMA or reason..." />
+        <form method="get" action="/seller/returns" class="table-toolbar" style="display:flex; gap:var(--sp-3); flex-wrap:wrap; align-items:end;" data-enhance="submit-loading" aria-label="Filter returns">
+           <div class="form-group" style="margin:0; width:320px;">
+              <label class="form-label" for="seller-returns-q">Search</label>
+              <div class="form-input-group">
+                    <span class="form-input-group__icon" style="color: var(--grey-400);" aria-hidden="true">
+                      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    </span>
+              <input id="seller-returns-q" type="search" class="form-input" name="q" value="{{ filters.q if filters else '' }}" placeholder="RMA or reason" autocomplete="off" aria-describedby="seller-returns-q-help" />
+              </div>
+              <small id="seller-returns-q-help" class="form-helper">Narrow the queue by keyword.</small>
            </div>
-           <select class="form-select" name="status" style="min-width:170px;">
-              <option value="all" {% if not filters or filters.status == 'all' %}selected{% endif %}>Status: All</option>
+           <div class="form-group" style="margin:0; min-width:170px;">
+              <label class="form-label" for="seller-returns-status">Status</label>
+              <select id="seller-returns-status" class="form-select" name="status" aria-describedby="seller-returns-status-help">
+              <option value="all" {% if not filters or filters.status == 'all' %}selected{% endif %}>All statuses</option>
               <option value="pending" {% if filters and filters.status == 'pending' %}selected{% endif %}>Pending</option>
               <option value="accepted" {% if filters and filters.status == 'accepted' %}selected{% endif %}>Accepted</option>
               <option value="rejected" {% if filters and filters.status == 'rejected' %}selected{% endif %}>Rejected</option>
               <option value="refund_requested" {% if filters and filters.status == 'refund_requested' %}selected{% endif %}>Refund Requested</option>
               <option value="refunded" {% if filters and filters.status == 'refunded' %}selected{% endif %}>Refunded</option>
            </select>
-           <button class="btn btn--secondary btn--sm" type="submit">Apply</button>
+              <small id="seller-returns-status-help" class="form-helper">Optional</small>
+           </div>
+           <button class="btn btn--secondary btn--sm" type="submit"><span class="btn__label">Apply filters</span></button>
         </form>
 
         <div class="kpi-grid mb-6">
@@ -65,7 +82,10 @@
               </tr>
               {% else %}
               <tr>
-                <td colspan="6" class="text-muted" style="text-align:center; padding:var(--sp-6);">No return requests found for the selected filters.</td>
+                        <td colspan="6" class="text-muted" style="text-align:center; padding:var(--sp-6);">
+                           <div class="type-body-sm fw-semibold">No return requests found for the selected filters.</div>
+                           <div class="type-body-xs mt-1">When customers file returns, requests will appear here for approval, denial, or refund processing.</div>
+                        </td>
               </tr>
               {% endfor %}
            </tbody>
@@ -76,7 +96,7 @@
 
 {% for item in returns %}
 <dialog id="rma-{{ item.rrt_ref }}" style="border:none; border-radius:var(--radius-xl); max-width:640px; width:calc(100% - 2rem); box-shadow:var(--shadow-xl);">
-  <form method="post" action="/seller/returns/{{ item.rrt_ref }}" style="padding:var(--sp-6);">
+   <form method="post" action="/seller/returns/{{ item.rrt_ref }}" style="padding:var(--sp-6);" data-enhance="submit-loading">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="modal__header" style="display:flex; justify-content:space-between; align-items:flex-start; gap:var(--sp-4);">
       <div class="modal__title-group">
@@ -89,14 +109,15 @@
       <p><strong>Reason for return:</strong> {{ item.reason }}</p>
       <p class="mt-2 text-muted">{{ item.description }}</p>
       <div class="mt-4 form-group">
-         <label class="form-label">Seller Notes</label>
-         <textarea class="form-textarea" name="seller_notes" placeholder="Add notes for the customer...">{{ item.seller_notes or '' }}</textarea>
+         <label class="form-label" for="seller-notes-{{ item.rrt_ref }}">Seller notes <span class="optional">(optional)</span></label>
+         <textarea id="seller-notes-{{ item.rrt_ref }}" class="form-textarea" name="seller_notes" placeholder="Visible to operations and the customer when shared." aria-describedby="seller-notes-{{ item.rrt_ref }}-help">{{ item.seller_notes or '' }}</textarea>
+         <small id="seller-notes-{{ item.rrt_ref }}-help" class="form-helper">Add context for approval, denial, or refund decisions.</small>
       </div>
     </div>
-    <div class="modal__footer" style="display:flex; gap:var(--sp-3); justify-content:flex-end;">
-      <button class="btn btn--danger" type="submit" name="action" value="deny">Deny</button>
-      <button class="btn btn--secondary" type="submit" name="action" value="refund">Mark Refunded</button>
-      <button class="btn btn--primary" type="submit" name="action" value="approve">Approve Return</button>
+    <div class="modal__footer" style="display:flex; gap:var(--sp-3); justify-content:flex-end; flex-wrap:wrap;">
+         <button class="btn btn--danger" type="submit" name="action" value="deny" onclick="return confirm('Deny this return request? This action updates the request status.');"><span class="btn__label">Deny request</span></button>
+         <button class="btn btn--secondary" type="submit" name="action" value="refund" onclick="return confirm('Mark this return as refunded? Ensure refund amount is correct before confirming.');"><span class="btn__label">Confirm refunded</span></button>
+      <button class="btn btn--primary" type="submit" name="action" value="approve"><span class="btn__label">Approve return</span></button>
     </div>
   </form>
 </dialog>

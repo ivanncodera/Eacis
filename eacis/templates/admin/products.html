@@ -1,90 +1,113 @@
 {% extends 'base.html' %}
-{% block title %}Products — Admin Portal{% endblock %}
+{% block title %}Global Catalog — Admin Portal{% endblock %}
 {% block content %}
 <div class="stagger-children">
-  <div class="page-content bg-grey-50">
-    <div style="display:flex; justify-content:space-between; align-items:flex-end; gap:var(--sp-4); margin-bottom:var(--sp-6);">
+  <div class="page-content bg-grey-50" style="padding: var(--sp-12);">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:var(--sp-4); margin-bottom:var(--sp-10);">
       <div>
-        <h1 class="type-display-md">Products</h1>
-        <p class="type-body-sm text-muted mt-1">View the global catalog, filter results, and manage status, price, and stock.</p>
+        <h1 class="type-display-md">Global Catalog</h1>
+        <p class="type-body-sm text-muted mt-1">Supervise product listings, manage stock levels, and enforce pricing standards across all merchants.</p>
       </div>
-      <a class="btn btn--secondary btn--sm" href="/admin/products/export?q={{ filters.q }}&status={{ filters.status }}">Export CSV</a>
+      <div style="display:flex; gap:var(--sp-4);">
+        <a class="btn btn--white" href="/admin/products/export?q={{ filters.q }}&status={{ filters.status }}">
+           <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right: 8px;"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+           Export Catalog
+        </a>
+      </div>
     </div>
 
-    <div class="kpi-grid mb-6">
-      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Total Products</div><div class="type-display-md mt-2">{{ stats.total }}</div></div></div>
-      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Active Products</div><div class="type-display-md mt-2">{{ stats.active }}</div></div></div>
-      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Low Stock</div><div class="type-display-md mt-2">{{ stats.low_stock }}</div></div></div>
+    <div class="kpi-grid mb-10">
+      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Total Listings</div><div class="type-display-md mt-2">{{ stats.total }}</div></div></div>
+      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Live Storefront</div><div class="type-display-md mt-2" style="color: var(--color-success);">{{ stats.active }}</div></div></div>
+      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Stock Alerts</div><div class="type-display-md mt-2" style="color: var(--color-warning);">{{ stats.low_stock }}</div></div></div>
     </div>
 
-    <div class="glass-card p-6 mb-6">
-      <form method="get" action="/admin/products" class="form-stack">
-        <div style="display:grid; grid-template-columns:2fr 1fr auto; gap:var(--sp-4); align-items:end;">
+    <div class="glass-card p-8 mb-10">
+      <form method="get" action="/admin/products" class="form-stack" data-enhance="submit-loading">
+        <div style="display:grid; grid-template-columns:1fr 240px auto; gap:var(--sp-6); align-items:end;">
           <div class="form-group">
-            <label class="form-label" for="q">Search by ref, name, category</label>
-            <input class="form-input" id="q" name="q" value="{{ filters.q }}" placeholder="Search products">
+            <label class="form-label">Universal Search</label>
+            <div class="form-input-group">
+               <span class="form-input-group__icon" style="color: var(--grey-400);">
+                 <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+               </span>
+               <input class="form-input" name="q" value="{{ filters.q }}" placeholder="Search by SKU, Product Name, or Category...">
+            </div>
           </div>
           <div class="form-group">
-            <label class="form-label" for="status">Status</label>
-            <select class="form-select" id="status" name="status">
-              <option value="all" {% if filters.status == 'all' %}selected{% endif %}>All</option>
-              <option value="active" {% if filters.status == 'active' %}selected{% endif %}>Active</option>
-              <option value="inactive" {% if filters.status == 'inactive' %}selected{% endif %}>Inactive</option>
-              <option value="low_stock" {% if filters.status == 'low_stock' %}selected{% endif %}>Low Stock</option>
+            <label class="form-label">Listing Visibility</label>
+            <select class="form-select" name="status">
+              <option value="all" {% if filters.status == 'all' %}selected{% endif %}>All Listing States</option>
+              <option value="active" {% if filters.status == 'active' %}selected{% endif %}>Live Only</option>
+              <option value="inactive" {% if filters.status == 'inactive' %}selected{% endif %}>Hidden Only</option>
+              <option value="low_stock" {% if filters.status == 'low_stock' %}selected{% endif %}>Near Out of Stock</option>
             </select>
           </div>
-          <button class="btn btn--secondary btn--sm" type="submit">Apply</button>
+          <button class="btn btn--secondary btn--lg" type="submit">Refresh Feed</button>
         </div>
       </form>
     </div>
 
-    <div class="glass-card p-6">
-      <div class="table-wrapper" style="border:none; box-shadow:none;">
+    <div class="glass-card p-10">
+      <div class="table-wrapper">
         <table class="data-table">
-          <thead><tr><th>Ref</th><th>Name</th><th>Seller</th><th>Status</th><th>Stock</th><th>Price</th><th>Actions</th></tr></thead>
+          <thead>
+            <tr>
+              <th>SKU / Product</th>
+              <th>Merchant</th>
+              <th>Status</th>
+              <th>Stock</th>
+              <th>SRP (PHP)</th>
+              <th style="text-align:right;">Supervision Controls</th>
+            </tr>
+          </thead>
           <tbody>
             {% for product in products %}
             <tr>
-              <td class="fw-semibold">{{ product.product_ref }}</td>
-              <td>{{ product.name }}</td>
-              <td>{{ product.seller.full_name if product.seller else ('Seller #' ~ product.seller_id) }}</td>
+              <td>
+                <div class="fw-bold">{{ product.product_ref }}</div>
+                <div class="type-body-xs text-muted mt-1">{{ product.name }}</div>
+              </td>
+              <td class="fw-semibold text-muted">{{ product.seller.full_name if product.seller else ('Merchant #' ~ product.seller_id) }}</td>
               <td>
                 {% if product.is_active %}
                   {% if product.stock <= product.low_stock_threshold %}
-                  <span class="badge badge--warning">Low Stock</span>
+                  <span class="badge badge--warning badge--dot">Stock Warning</span>
                   {% else %}
-                  <span class="badge badge--success">Active</span>
+                  <span class="badge badge--success badge--dot">Active</span>
                   {% endif %}
                 {% else %}
-                <span class="badge badge--danger">Inactive</span>
+                <span class="badge badge--danger badge--dot">Hidden</span>
                 {% endif %}
               </td>
-              <td>{{ product.stock }}</td>
-              <td>PHP {{ '%.2f'|format(product.price|float) }}</td>
-              <td>
-                <form method="post" action="/admin/products?q={{ filters.q }}&status={{ filters.status }}" style="display:flex; gap:var(--sp-2); flex-wrap:wrap; align-items:center;">
-                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                  <input type="hidden" name="action" value="update">
-                  <input type="hidden" name="product_id" value="{{ product.id }}">
-                  <input class="form-input" type="number" name="stock" value="{{ product.stock }}" min="0" style="width:86px;">
-                  <input class="form-input" type="number" name="price" value="{{ product.price|float }}" min="0" step="0.01" style="width:110px;">
-                  <select class="form-select" name="is_active" style="width:116px;">
-                    <option value="1" {% if product.is_active %}selected{% endif %}>Active</option>
-                    <option value="0" {% if not product.is_active %}selected{% endif %}>Inactive</option>
-                  </select>
-                  <button class="btn btn--ghost btn--xs" type="submit">Save</button>
-                </form>
-                <form method="post" action="/admin/products?q={{ filters.q }}&status={{ filters.status }}" style="margin-top:var(--sp-2);" onsubmit="return confirm('Delete {{ product.product_ref }}? This action cannot be undone.');">
-                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                  <input type="hidden" name="action" value="delete">
-                  <input type="hidden" name="product_id" value="{{ product.id }}">
-                  <button class="btn btn--danger btn--xs" type="submit">Delete</button>
-                </form>
+              <td class="fw-bold">{{ product.stock }}</td>
+              <td class="fw-bold">{{ '%.2f'|format(product.price|float) }}</td>
+              <td style="text-align:right;">
+                <div style="display:flex; flex-direction: column; gap: var(--sp-3); align-items: flex-end;">
+                   <form method="post" action="/admin/products?q={{ filters.q }}&status={{ filters.status }}" style="display:flex; gap:var(--sp-2); align-items:center;" data-enhance="submit-loading">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="action" value="update">
+                    <input type="hidden" name="product_id" value="{{ product.id }}">
+                    <input class="form-input form-input--sm" type="number" name="stock" value="{{ product.stock }}" min="0" style="width:80px;" title="Update Stock">
+                    <input class="form-input form-input--sm" type="number" name="price" value="{{ product.price|float }}" min="0" step="0.01" style="width:100px;" title="Update Price">
+                    <select class="form-select form-select--sm" name="is_active" style="width:100px;">
+                      <option value="1" {% if product.is_active %}selected{% endif %}>Live</option>
+                      <option value="0" {% if not product.is_active %}selected{% endif %}>Hidden</option>
+                    </select>
+                    <button class="btn btn--primary btn--xs" type="submit">Apply</button>
+                  </form>
+                  <form method="post" action="/admin/products?q={{ filters.q }}&status={{ filters.status }}" onsubmit="return confirm('Permanently remove Listing {{ product.product_ref }}?');" data-enhance="submit-loading">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="product_id" value="{{ product.id }}">
+                    <button class="btn btn--muted btn--xs" type="submit" style="color: var(--color-danger);">Unlist Listing</button>
+                  </form>
+                </div>
               </td>
             </tr>
             {% else %}
             <tr>
-              <td colspan="7" class="text-muted" style="text-align:center; padding:var(--sp-6);">No products found for the selected filters.</td>
+              <td colspan="6" class="text-muted" style="text-align:center; padding:var(--sp-12);">No product listings found with the applied filters.</td>
             </tr>
             {% endfor %}
           </tbody>

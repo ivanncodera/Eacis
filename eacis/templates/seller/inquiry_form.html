@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}New Inquiry Ticket - Seller Portal{% endblock %}
+{% block content %}
+<div class="page-content seller-shell" style="max-width:840px; margin:0 auto; padding:var(--sp-8);">
+  <h1 class="type-display-sm" style="margin-bottom:var(--sp-6);">Create Inquiry Ticket</h1>
+  {% set form = form or {} %}
+  {% set errors = errors or {} %}
+  {% if errors.get('general') %}
+  <div class="form-error" role="alert" style="margin-bottom:var(--sp-4);">{{ errors.get('general') }}</div>
+  {% endif %}
+  <form method="post" class="glass-card p-6" style="display:grid; gap:var(--sp-4);">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div>
+      <label class="form-label">Customer Email</label>
+      <input class="form-input" name="customer_email" value="{{ form.get('customer_email', '') }}" required>
+      {% if errors.get('customer_email') %}<div class="form-error" role="alert">{{ errors.get('customer_email') }}</div>{% endif %}
+    </div>
+    <div>
+      <label class="form-label">Order Ref (optional)</label>
+      <input class="form-input" name="order_ref" value="{{ form.get('order_ref', '') }}">
+      {% if errors.get('order_ref') %}<div class="form-error" role="alert">{{ errors.get('order_ref') }}</div>{% endif %}
+    </div>
+    <div>
+      <label class="form-label">Subject</label>
+      <input class="form-input" name="subject" value="{{ form.get('subject', '') }}" required>
+      {% if errors.get('subject') %}<div class="form-error" role="alert">{{ errors.get('subject') }}</div>{% endif %}
+    </div>
+    <div>
+      <label class="form-label">Description</label>
+      <textarea class="form-textarea" name="description" required>{{ form.get('description', '') }}</textarea>
+      {% if errors.get('description') %}<div class="form-error" role="alert">{{ errors.get('description') }}</div>{% endif %}
+    </div>
+    <div>
+      <label class="form-label">Priority</label>
+      <select class="form-select" name="priority">
+        <option value="low" {% if form.get('priority', 'medium') == 'low' %}selected{% endif %}>Low</option>
+        <option value="medium" {% if form.get('priority', 'medium') == 'medium' %}selected{% endif %}>Medium</option>
+        <option value="high" {% if form.get('priority', 'medium') == 'high' %}selected{% endif %}>High</option>
+        <option value="urgent" {% if form.get('priority', 'medium') == 'urgent' %}selected{% endif %}>Urgent</option>
+      </select>
+    </div>
+    <div style="display:flex; justify-content:flex-end; gap:var(--sp-3);">
+      <a class="btn btn--secondary" href="/seller/inquiries">Cancel</a>
+      <button class="btn btn--primary" type="submit">Create Ticket</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

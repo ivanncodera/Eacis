@@ -1,399 +1,96 @@
 {% extends 'base.html' %}
-{% block title %}Product Detail — E-ACIS{% endblock %}
+{% block title %}{{ product.name }} - E-ACIS{% endblock %}
 {% block content %}
 <div class="main-content">
   <div class="stagger-children">
-  <div class="container">
+    <div style="display:flex; align-items:center; gap:var(--sp-2); margin-bottom:var(--sp-6);">
+      <a href="/shop" class="type-body-sm text-muted" style="text-decoration:none;">Shop</a>
+      <span class="text-muted">/</span>
+      <span class="type-body-sm fw-semibold">{{ product.name }}</span>
+    </div>
 
-    <!-- Premium Breadcrumb -->
-    <nav aria-label="Breadcrumb" style="margin-bottom:var(--sp-8);">
-      <ol style="display:flex;align-items:center;gap:var(--sp-2);list-style:none;margin:0;padding:0;">
-        <li><a href="/" class="type-link-xs" style="color:var(--grey-400);opacity:0.8;transition:opacity 0.2s;">Home</a></li>
-        <li><span style="color:var(--grey-200);font-size:10px;">/</span></li>
-        <li><a href="/shop" class="type-link-xs" style="color:var(--grey-400);opacity:0.8;transition:opacity 0.2s;">Shop</a></li>
-        <li><span style="color:var(--grey-200);font-size:10px;">/</span></li>
-        <li id="pd-bc-cat" style="display:none;"><a href="#" class="type-link-xs" style="color:var(--grey-400);opacity:0.8;transition:opacity 0.2s;"><span id="pd-category-label">Category</span></a></li>
-        <li id="pd-bc-sep" style="display:none;"><span style="color:var(--grey-200);font-size:10px;">/</span></li>
-        <li><span id="pd-breadcrumb" class="type-body-xs fw-bold" style="color:var(--grey-800);letter-spacing:0.02em;"></span></li>
-      </ol>
-    </nav>
-
-    <div style="display:grid;grid-template-columns:1fr 420px;gap:var(--sp-10);align-items:start;">
-
-      <!-- ── LEFT: Gallery ── -->
-      <div>
-        <!-- Main Image -->
-        <div style="background:var(--grey-50);border-radius:var(--radius-2xl);overflow:hidden;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;border:1px solid var(--border-subtle);margin-bottom:var(--sp-4);position:relative;background:var(--glass-ultra);backdrop-filter:var(--glass-blur-lg);">
-          <img id="pd-img" src="" alt="" style="width:100%;height:100%;object-fit:contain;transition:all 0.3s var(--ease-out);" />
-          <!-- Badge overlay -->
-          <div id="pd-badge-overlay" style="position:absolute;top:var(--sp-4);left:var(--sp-4);display:flex;gap:var(--sp-2);"></div>
+    <div style="display:grid; grid-template-columns: 1fr 420px; gap:var(--sp-8); align-items:start;">
+      <section class="glass-card p-6">
+        <div style="aspect-ratio: 4 / 3; border-radius: var(--radius-lg); background: var(--grey-50); border: 1px solid var(--border-subtle); display:flex; align-items:center; justify-content:center; overflow:hidden; margin-bottom: var(--sp-5);">
+          {% if product.image_url %}
+          <img src="{{ product.image_url }}" alt="{{ product.name }}" style="width:100%; height:100%; object-fit:cover;">
+          {% else %}
+          <span class="type-body-sm text-muted">No product image</span>
+          {% endif %}
         </div>
-        <!-- Thumbnails -->
-        <div id="pd-thumbs" style="display:flex;gap:var(--sp-3);"></div>
 
-        <!-- Specs / Description -->
-        <div style="margin-top:var(--sp-8);background:var(--grey-0);border:1px solid var(--border-default);border-radius:var(--radius-xl);padding:var(--sp-6);">
-          <h2 class="type-h4" style="margin-bottom:var(--sp-5);">Product Details</h2>
-          <div id="pd-desc" class="type-body" style="line-height:var(--leading-relaxed);color:var(--grey-600);"></div>
+        <h3 class="type-h4" style="margin-bottom: var(--sp-3);">Description</h3>
+        <p class="type-body-sm text-muted" style="margin:0 0 var(--sp-5) 0;">{{ product.description or 'No description available yet.' }}</p>
 
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4);margin-top:var(--sp-6);" id="pd-specs"></div>
-        </div>
-      </div>
-
-      <!-- ── RIGHT: Purchase Panel ── -->
-      <aside style="position:sticky;top:calc(var(--topbar-height)+var(--sp-4));">
-        <div style="background:var(--glass-ultra);backdrop-filter:var(--glass-blur-lg);border:1px solid var(--border-subtle);border-radius:var(--radius-2xl);padding:var(--sp-8);box-shadow:var(--shadow-lg);">
-
-          <!-- Category label -->
-          <div id="pd-category-lbl" class="type-label--sm" style="margin-bottom:var(--sp-3);"></div>
-
-          <!-- Product name -->
-          <h1 id="pd-name" class="type-h2" style="line-height:1.15;margin-bottom:var(--sp-4);"></h1>
-
-          <!-- Rating row -->
-          <div style="display:flex;align-items:center;gap:var(--sp-3);margin-bottom:var(--sp-5);">
-            <div id="pd-stars" style="display:flex;gap:2px;color:#FFAB00;font-size:var(--text-lg);"></div>
-            <span id="pd-rating-val" class="fw-semibold" style="font-size:var(--text-sm);"></span>
-            <span id="pd-reviews" class="type-body-sm" style="color:var(--grey-400);"></span>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3);">
+          <div class="glass-card seller-sunken" style="padding:var(--sp-3); box-shadow:none;">
+            <div class="type-body-xs text-muted">Category</div>
+            <div class="type-body-sm fw-semibold">{{ product.category or 'Uncategorized' }}</div>
           </div>
-
-          <!-- Price block -->
-          <div style="background:var(--brand-primary-subtle);border-radius:var(--radius-lg);padding:var(--sp-4);margin-bottom:var(--sp-5);">
-            <div style="display:flex;align-items:baseline;gap:var(--sp-3);">
-              <div id="pd-price" class="type-price-hero" style="color:var(--brand-primary);"></div>
-              <div id="pd-compare-price" style="font-size:var(--text-xl);color:var(--grey-400);text-decoration:line-through;font-variant-numeric:tabular-nums;display:none;"></div>
-            </div>
-            <div id="pd-installment" class="type-body-sm" style="color:var(--brand-primary);margin-top:4px;display:none;">
-              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:inline;vertical-align:-2px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              As low as PHP&nbsp;<span id="pd-monthly"></span>/mo · 0% interest for 12 months
-            </div>
+          <div class="glass-card seller-sunken" style="padding:var(--sp-3); box-shadow:none;">
+            <div class="type-body-xs text-muted">Warranty</div>
+            <div class="type-body-sm fw-semibold">{{ product.warranty_months or 0 }} months</div>
           </div>
-
-          <!-- Badges -->
-          <div id="pd-badges" style="display:flex;gap:var(--sp-2);flex-wrap:wrap;margin-bottom:var(--sp-5);"></div>
-
-          <!-- Stock indicator -->
-          <div id="pd-stock-row" style="display:flex;align-items:center;gap:var(--sp-2);margin-bottom:var(--sp-5);">
-            <svg width="14" height="14" fill="none" stroke="var(--color-success)" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-            <span id="pd-stock" class="type-body-sm" style="color:var(--color-success);font-weight:var(--weight-medium);"></span>
+          <div class="glass-card seller-sunken" style="padding:var(--sp-3); box-shadow:none;">
+            <div class="type-body-xs text-muted">Stock</div>
+            <div class="type-body-sm fw-semibold">{{ product.stock or 0 }} units</div>
           </div>
-
-          <!-- Quantity selector -->
-          <div style="margin-bottom:var(--sp-5);">
-            <label class="type-label" style="margin-bottom:var(--sp-2);display:block;">Quantity</label>
-            <div style="display:flex;align-items:center;gap:0;border:1.5px solid var(--border-medium);border-radius:var(--radius-md);overflow:hidden;width:fit-content;">
-              <button id="qty-minus" aria-label="Decrease quantity" style="width:40px;height:44px;background:var(--grey-50);border:none;cursor:pointer;font-size:var(--text-xl);color:var(--grey-700);display:flex;align-items:center;justify-content:center;transition:background var(--dur-fast);" onmouseover="this.style.background='var(--grey-100)'" onmouseout="this.style.background='var(--grey-50)'">−</button>
-              <input id="pd-qty" type="number" value="1" min="1" aria-label="Quantity" style="width:56px;height:44px;text-align:center;border:none;border-left:1.5px solid var(--border-medium);border-right:1.5px solid var(--border-medium);font-size:var(--text-base);font-weight:var(--weight-semibold);outline:none;color:var(--grey-900);" />
-              <button id="qty-plus" aria-label="Increase quantity" style="width:40px;height:44px;background:var(--grey-50);border:none;cursor:pointer;font-size:var(--text-xl);color:var(--grey-700);display:flex;align-items:center;justify-content:center;transition:background var(--dur-fast);" onmouseover="this.style.background='var(--grey-100)'" onmouseout="this.style.background='var(--grey-50)'">+</button>
-            </div>
-          </div>
-
-          <!-- CTA buttons -->
-          <div style="display:flex;flex-direction:column;gap:var(--sp-3);">
-            {% if current_user.is_authenticated and current_user.role == 'customer' %}
-              <button id="pd-add" class="btn btn--primary btn--lg btn--full">
-                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="margin-right:8px;"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
-                <span class="btn__label">Add to Cart</span>
-              </button>
-              <button id="pd-buy" class="btn btn--ghost btn--lg btn--full" style="margin-top:var(--sp-2);">Buy Now · Pay on Delivery</button>
-              <form id="pd-cart-form" method="post" action="/cart" style="display:none;">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <input type="hidden" name="action" value="add">
-                <input type="hidden" name="product_ref" id="pd-form-product-ref" value="{{ ref }}">
-                <input type="hidden" name="qty" id="pd-form-qty" value="1">
-                <input type="hidden" name="next" id="pd-form-next" value="">
-              </form>
-            {% else %}
-              <a href="/auth/login?next={{ request.path }}" class="btn btn--primary btn--lg btn--full">
-                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="margin-right:8px;"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                Sign In to Purchase
-              </a>
-            {% endif %}
-          </div>
-
-          <!-- Divider -->
-          <div style="border-top:1px solid var(--border-subtle);margin:var(--sp-5) 0;"></div>
-
-          <!-- Trust signals -->
-          <div style="display:flex;flex-direction:column;gap:var(--sp-3);">
-            <div style="display:flex;align-items:center;gap:var(--sp-3);">
-              <div style="width:32px;height:32px;background:var(--color-success-subtle);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                <svg width="16" height="16" fill="none" stroke="var(--color-success)" stroke-width="1.5" viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-              </div>
-              <span class="type-body-sm">Free delivery on orders over PHP 5,000</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:var(--sp-3);">
-              <div style="width:32px;height:32px;background:var(--brand-primary-subtle);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                <svg width="16" height="16" fill="none" stroke="var(--brand-primary)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              </div>
-              <span class="type-body-sm">1-year manufacturer warranty</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:var(--sp-3);">
-              <div style="width:32px;height:32px;background:var(--color-warning-subtle);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                <svg width="16" height="16" fill="none" stroke="var(--color-warning)" stroke-width="1.5" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
-              </div>
-              <span class="type-body-sm">30-day hassle-free returns</span>
-            </div>
-          </div>
-
-          <!-- SKU / Ref -->
-          <div style="margin-top:var(--sp-5);padding-top:var(--sp-4);border-top:1px solid var(--border-subtle);">
-            <span class="type-body-sm" style="color:var(--grey-400);">SKU: </span>
-            <span id="pd-ref" class="type-ref" style="font-size:var(--text-xs);"></span>
+          <div class="glass-card seller-sunken" style="padding:var(--sp-3); box-shadow:none;">
+            <div class="type-body-xs text-muted">Reference</div>
+            <div class="type-body-sm fw-semibold">{{ product.product_ref }}</div>
           </div>
         </div>
+      </section>
+
+      <aside class="glass-card p-6" style="position: sticky; top: calc(var(--topbar-height) + var(--sp-6));">
+        <div class="type-label mb-2">{{ product.category or 'Category' }}</div>
+        <h1 class="type-display-sm" style="margin-bottom: var(--sp-3);">{{ product.name }}</h1>
+        <div class="type-price-sm" style="margin-bottom: var(--sp-4);">PHP {{ '%.2f'|format(product.price|float) }}</div>
+
+        {% if (product.stock or 0) > 0 %}
+        <div class="badge badge--success" style="margin-bottom: var(--sp-5);">In Stock</div>
+        {% else %}
+        <div class="badge badge--danger" style="margin-bottom: var(--sp-5);">Out of Stock</div>
+        {% endif %}
+
+        {% if current_user.is_authenticated and current_user.role == 'customer' and (product.stock or 0) > 0 %}
+        <form method="post" action="/cart" class="form-stack">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="action" value="add">
+          <input type="hidden" name="product_ref" value="{{ product.product_ref }}">
+          <input type="hidden" name="next" value="{{ request.path }}">
+          <div class="form-group">
+            <label class="form-label">Quantity</label>
+            <input type="number" min="1" max="{{ product.stock or 1 }}" name="qty" value="1" class="form-input">
+          </div>
+          <button class="btn btn--primary btn--full" type="submit">Add to Cart</button>
+          <a class="btn btn--secondary btn--full" href="/cart">Go to Cart</a>
+        </form>
+        {% elif not current_user.is_authenticated %}
+        <a class="btn btn--primary btn--full" href="/auth/login?next={{ request.path }}">Sign in to purchase</a>
+        {% else %}
+        <button class="btn btn--secondary btn--full" disabled>Out of stock</button>
+        {% endif %}
       </aside>
     </div>
 
-    <!-- ── Next Level: Product Reviews & Community ── -->
-    <section class="stagger-children" style="margin-top:var(--sp-16);border-top:1px solid var(--border-subtle);padding-top:var(--sp-16);">
-      <div style="display:grid;grid-template-columns:300px 1fr;gap:var(--sp-12);align-items:start;">
-        
-        <!-- Ratings Summary Card -->
-        <div class="glass-card" style="background:white;padding:var(--sp-8);border-radius:var(--radius-xl);text-align:center;">
-          <div class="type-display-sm fw-extrabold mb-1" id="review-score-big">4.8</div>
-          <div id="pd-stars-big" style="display:flex;justify-content:center;gap:4px;color:#FFAB00;font-size:20px;margin-bottom:var(--sp-2);"></div>
-          <div class="type-body-sm text-muted mb-8">Based on <span id="review-count-big">128</span> verified reviews</div>
-          
-          <div style="display:flex;flex-direction:column;gap:8px;text-align:left;">
-            {% for i in range(5, 0, -1) %}
-            {% set pct = [85, 10, 3, 1, 1][5-i] %}
-            <div style="display:flex;align-items:center;gap:var(--sp-3);">
-              <span class="type-label-xs" style="width:20px;">{{ i }}★</span>
-              <div style="flex:1;height:6px;background:var(--grey-50);border-radius:3px;overflow:hidden;">
-                <div class="review-bar-fill" data-bar-width="{{ pct }}%"></div>
-              </div>
-              <span class="type-body-xs text-muted" style="width:30px;">{{ pct }}%</span>
-            </div>
-            {% endfor %}
-          </div>
-          
-          <button class="btn btn--secondary btn--full mt-8" style="font-size:var(--text-xs);">Write a Review</button>
-        </div>
-        
-        <style>
-          .review-bar-fill { height: 100%; background: #FFAB00; transition: width 0.6s var(--ease-out); }
-        </style>
-
-        <!-- Review List -->
-        <div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--sp-8);">
-            <h2 class="type-h3">Customer Reviews</h2>
-            <div style="display:flex;gap:var(--sp-3);">
-              <select class="form-input" style="height:32px;padding:0 var(--sp-3);font-size:var(--text-xs);width:140px;">
-                <option>Most Relevant</option>
-                <option>Newest First</option>
-                <option>Highest Rating</option>
-              </select>
-            </div>
-          </div>
-
-          <div style="display:flex;flex-direction:column;gap:var(--sp-10);">
-            <!-- Review 1 -->
-            <div class="reveal">
-              <div style="display:flex;justify-content:space-between;margin-bottom:var(--sp-2);">
-                <div style="display:flex;align-items:center;gap:var(--sp-3);">
-                  <div id="stars-r1" style="color:#FFAB00;">★★★★★</div>
-                  <span class="type-body-sm fw-bold">Best investment for my smart home</span>
-                </div>
-                <span class="type-body-xs text-muted">2 weeks ago</span>
-              </div>
-              <div class="type-body-sm mb-4" style="color:var(--grey-700);line-height:1.6;">
-                The integration with ACIS Core is seamless. Performance is exactly as advertised. The delivery was also handled very professionally. Highly recommended for power users.
-              </div>
-              <div style="display:flex;align-items:center;gap:var(--sp-4);">
-                <div class="badge badge--success" style="font-size:10px;padding:2px 8px;">Verified Purchase</div>
-                <button class="type-link-xs" style="color:var(--grey-400);background:none;border:none;cursor:pointer;">Helpful (12)</button>
-              </div>
-            </div>
-
-            <!-- Review 2 -->
-            <div class="reveal">
-              <div style="display:flex;justify-content:space-between;margin-bottom:var(--sp-2);">
-                <div style="display:flex;align-items:center;gap:var(--sp-3);">
-                  <div id="stars-r2" style="color:#FFAB00;">★★★★☆</div>
-                  <span class="type-body-sm fw-bold">Solid build quality</span>
-                </div>
-                <span class="type-body-xs text-muted">1 month ago</span>
-              </div>
-              <div class="type-body-sm mb-4" style="color:var(--grey-700);line-height:1.6;">
-                Great product overall. The packaging was a bit bulky, but that probably kept it safe during transit. The app UI could use a bit more polish, but the hardware is 5/5.
-              </div>
-              <div style="display:flex;align-items:center;gap:var(--sp-4);">
-                <div class="badge badge--success" style="font-size:10px;padding:2px 8px;">Verified Purchase</div>
-                <button class="type-link-xs" style="color:var(--grey-400);background:none;border:none;cursor:pointer;">Helpful (3)</button>
-              </div>
-            </div>
-          </div>
-          
-          <button class="btn btn--ghost btn--full mt-12">View All Reviews</button>
-        </div>
-
+    <section style="margin-top: var(--sp-10);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: var(--sp-4);">
+        <h2 class="type-h4">Related Products</h2>
+        <a href="/shop" class="type-body-sm text-primary">View all</a>
+      </div>
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--sp-4);">
+        {% for row in related_products %}
+        <a href="/products/{{ row.product_ref }}" class="glass-card" style="padding:var(--sp-4); text-decoration:none; color:inherit; border: 1px solid var(--border-subtle);">
+          <div class="type-body-sm fw-semibold" style="margin-bottom:4px;">{{ row.name }}</div>
+          <div class="type-body-xs text-muted" style="margin-bottom: var(--sp-2);">{{ row.category or 'Uncategorized' }}</div>
+          <div class="type-body-sm fw-bold">PHP {{ '%.2f'|format(row.price|float) }}</div>
+        </a>
+        {% else %}
+        <div class="type-body-sm text-muted">No related products found.</div>
+        {% endfor %}
       </div>
     </section>
   </div>
 </div>
-
-<script src="/static/js/data/products.js"></script>
-<script>
-(function(){
-  // Resolve ref from URL or fallback to first product
-  const pathParts = window.location.pathname.split('/');
-  const ref = pathParts[pathParts.length - 1];
-  const p = (window.PRODUCTS || []).find(x => x.ref === ref) || window.PRODUCTS?.[0];
-
-  if (!p) {
-    document.querySelector('.container').innerHTML = '<div class="empty-state"><div class="empty-state__title">Product not found</div><a href="/shop" class="btn btn--primary" style="margin-top:var(--sp-4);">Back to Shop</a></div>';
-    return;
-  }
-
-  function formatPHP(n){ return 'PHP\u00A0' + Number(n).toLocaleString('en-PH', {minimumFractionDigits:2}); }
-
-  // Set document title
-  document.title = p.name + ' — E-ACIS';
-
-  // Populate
-  document.getElementById('pd-name').textContent       = p.name;
-  document.getElementById('pd-ref').textContent        = p.ref;
-  document.getElementById('pd-price').textContent      = formatPHP(p.price);
-  document.getElementById('pd-price').textContent      = formatPHP(p.price);
-  
-  if (p.category) {
-    document.getElementById('pd-category-label').textContent = p.category;
-    document.getElementById('pd-bc-cat').style.display = 'block';
-    document.getElementById('pd-bc-sep').style.display = 'block';
-  }
-
-  document.getElementById('pd-breadcrumb').textContent = p.name.slice(0, 42) + (p.name.length > 42 ? '…' : '');
-  document.getElementById('pd-desc').textContent       = p.description || (p.category + ' — A premium home appliance built for modern Filipino living. Engineered for performance, designed for style.');
-
-  // Compare price
-  if (p.comparePrice) {
-    document.getElementById('pd-compare-price').textContent = formatPHP(p.comparePrice);
-    document.getElementById('pd-compare-price').style.display = 'block';
-  }
-
-  // Installment
-  if (p.price > 10000) {
-    document.getElementById('pd-installment').style.display = 'block';
-    document.getElementById('pd-monthly').textContent = Number(p.price / 12).toLocaleString('en-PH', {minimumFractionDigits:0, maximumFractionDigits:0});
-  }
-
-  // Stars
-  const rating = parseFloat(p.rating || 4.8);
-  const starsEl = document.getElementById('pd-stars');
-  const full = Math.floor(rating);
-  for (let i = 0; i < 5; i++) {
-    const s = document.createElement('span');
-    s.style.color = i < full ? '#FFAB00' : (i < rating ? '#FFAB00' : 'var(--grey-200)');
-    s.style.opacity = i < rating && i >= full ? '0.6' : '1';
-    s.textContent = '★';
-    starsEl.appendChild(s);
-  }
-  document.getElementById('pd-rating-val').textContent = rating.toFixed(1);
-  document.getElementById('pd-reviews').textContent    = `(${p.reviews} reviews)`;
-
-  // Stock
-  const stockRow = document.getElementById('pd-stock-row');
-  const stockSpan = document.getElementById('pd-stock');
-  if (p.stock <= 0) {
-    stockRow.querySelector('svg').setAttribute('stroke', 'var(--color-danger)');
-    stockSpan.style.color = 'var(--color-danger)';
-    stockSpan.textContent = 'Out of Stock';
-  } else if (p.stock < 10) {
-    stockRow.querySelector('svg').setAttribute('stroke', 'var(--color-warning)');
-    stockSpan.style.color = 'var(--color-warning)';
-    stockSpan.textContent = `Only ${p.stock} left in stock — order soon`;
-  } else {
-    stockSpan.textContent = `In Stock (${p.stock} units available)`;
-  }
-
-  // Badges
-  const badgesEl = document.getElementById('pd-badges');
-  if (p.badge) badgesEl.innerHTML += `<span class="badge badge--primary">${p.badge}</span>`;
-  badgesEl.innerHTML += `<span class="badge badge--info">0% Installment</span>`;
-  badgesEl.innerHTML += `<span class="badge badge--muted">${p.category}</span>`;
-
-  const overlay = document.getElementById('pd-badge-overlay');
-  if (p.badge) overlay.innerHTML = `<span class="badge badge--primary">${p.badge}</span>`;
-
-  // Main image + thumbs
-  const mainImg = document.getElementById('pd-img');
-  mainImg.src = p.image;
-  mainImg.alt = p.name;
-
-  const thumbImages = [p.image, p.image, p.image]; // placeholder multi-view
-  const thumbsWrap  = document.getElementById('pd-thumbs');
-  thumbImages.forEach((src, i) => {
-    const t = document.createElement('button');
-    t.style.cssText = `width:72px;height:72px;border-radius:var(--radius-md);overflow:hidden;border:2px solid ${i===0?'var(--brand-primary)':'var(--border-default)'};background:var(--grey-50);cursor:pointer;padding:0;transition:border-color var(--dur-fast);flex-shrink:0;`;
-    const img = document.createElement('img');
-    img.src = src; img.alt = ''; img.style.cssText = 'width:100%;height:100%;object-fit:contain;';
-    t.appendChild(img);
-    t.addEventListener('click', () => {
-      mainImg.style.opacity = '0';
-      setTimeout(() => { mainImg.src = src; mainImg.style.opacity = '1'; }, 150);
-      thumbsWrap.querySelectorAll('button').forEach(b => b.style.borderColor = 'var(--border-default)');
-      t.style.borderColor = 'var(--brand-primary)';
-    });
-    thumbsWrap.appendChild(t);
-  });
-
-  // Specs grid
-  const specs = {
-    'Category': p.category,
-    'SKU / Ref': p.ref,
-    'Stock': p.stock > 0 ? p.stock + ' units' : 'Out of Stock',
-    'Rating': rating.toFixed(1) + ' / 5.0',
-    'Warranty': '1 Year Manufacturer',
-    'Delivery': 'Metro Manila: 2–3 days',
-  };
-  const specsGrid = document.getElementById('pd-specs');
-  Object.entries(specs).forEach(([k, v]) => {
-    specsGrid.innerHTML += `
-      <div style="border-top:1px solid var(--border-subtle);padding-top:var(--sp-3);">
-        <div class="type-label--sm" style="margin-bottom:4px;">${k}</div>
-        <div class="type-body-sm" style="color:var(--grey-800);font-weight:var(--weight-medium);">${v}</div>
-      </div>`;
-  });
-
-  // Qty stepper
-  const qtyInput = document.getElementById('pd-qty');
-  document.getElementById('qty-minus').addEventListener('click', () => {
-    if (parseInt(qtyInput.value) > 1) qtyInput.value = parseInt(qtyInput.value) - 1;
-  });
-  document.getElementById('qty-plus').addEventListener('click', () => {
-    if (parseInt(qtyInput.value) < p.stock) qtyInput.value = parseInt(qtyInput.value) + 1;
-    else if (window.Toast) Toast.warning('Stock limit', `Only ${p.stock} units available.`);
-  });
-
-  // Add to cart
-  document.getElementById('pd-add').addEventListener('click', () => {
-    const qty = parseInt(qtyInput.value) || 1;
-    if (window.Toast) Toast.success('Added to cart', `${qty}× ${p.name} added to your cart.`);
-    document.getElementById('pd-add').classList.add('btn--loading');
-    document.getElementById('pd-form-qty').value = String(qty);
-    document.getElementById('pd-form-next').value = '/cart';
-    setTimeout(() => {
-      document.getElementById('pd-add').classList.remove('btn--loading');
-      document.getElementById('pd-cart-form').submit();
-    }, 250);
-  });
-
-  // Buy now
-  document.getElementById('pd-buy').addEventListener('click', () => {
-    if (window.Toast) Toast.info('Redirecting', 'Taking you to checkout…');
-    document.getElementById('pd-form-qty').value = String(parseInt(qtyInput.value) || 1);
-    document.getElementById('pd-form-next').value = '/checkout';
-    setTimeout(() => document.getElementById('pd-cart-form').submit(), 250);
-  });
-
-  // Apply review bar widths (Fixes CSS lint issues with Jinja2 in style tags)
-  document.querySelectorAll('[data-bar-width]').forEach(el => {
-    el.style.width = el.dataset.barWidth;
-  });
-
-  document.body.classList.add('has-sidebar');
-})();
-</script>
 {% endblock %}

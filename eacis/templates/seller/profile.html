@@ -1,111 +1,99 @@
 {% extends 'base.html' %}
-{% block title %}Business Profile — Seller Portal{% endblock %}
+{% block title %}Business Profile - Seller Portal{% endblock %}
 {% block content %}
-<div class="stagger-children">
-  <div class="page-content bg-grey-50 seller-shell">
-    <div class="seller-header">
-      <div class="seller-header__head">
-        <h1 class="type-display-md">Business Profile</h1>
-        <p class="type-body-sm text-muted mt-1">Update your store identity, contact channels, and fulfillment details.</p>
+<div class="page-content seller-shell" style="max-width:980px; margin:0 auto; padding:var(--sp-8);">
+  <h1 class="type-display-sm" style="margin-bottom:var(--sp-6);">Business Profile</h1>
+  {% set form = form or {} %}
+  {% set errors = errors or {} %}
+  
+  <div class="glass-card p-6 mb-6" style="border-left: 4px solid {% if (seller.seller_verification_status or 'pending') == 'approved' %}var(--color-success){% elif (seller.seller_verification_status or 'pending') == 'rejected' %}var(--color-danger){% else %}var(--color-warning){% endif %};">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <div class="type-label-sm text-muted">Verification Status</div>
+        <div class="type-h4 mt-1">{{ (seller.seller_verification_status or 'pending')|title }}</div>
       </div>
-      <div class="seller-header__actions">
-        <span class="badge badge--success">Verified store</span>
-        <button class="btn btn--primary btn--sm">Save Profile</button>
+      <div class="type-body-xs text-muted">
+        {% if (seller.seller_verification_status or 'pending') == 'approved' %}
+          Your account is fully verified for all marketplace operations.
+        {% elif (seller.seller_verification_status or 'pending') == 'rejected' %}
+          Application was rejected. Please contact administration for details.
+        {% else %}
+          Application is currently under administrative review.
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  {% if errors.get('general') %}
+  <div class="form-error" role="alert" style="margin-bottom:var(--sp-4);">{{ errors.get('general') }}</div>
+  {% endif %}
+  <form method="post" class="glass-card p-6" style="display:grid; gap:var(--sp-4);">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-4);">
+      <div>
+        <label class="form-label">Business Name</label>
+        <input class="form-input" name="business_name" value="{{ form.get('business_name', seller.business_name or '') }}">
+        {% if errors.get('business_name') %}<div class="form-error" role="alert">{{ errors.get('business_name') }}</div>{% endif %}
+      </div>
+      <div>
+        <label class="form-label">Owner Name</label>
+        <input class="form-input" name="full_name" value="{{ form.get('full_name', seller.full_name or '') }}">
+        {% if errors.get('full_name') %}<div class="form-error" role="alert">{{ errors.get('full_name') }}</div>{% endif %}
       </div>
     </div>
 
-    <div class="seller-grid-16">
-      <div class="form-stack">
-        <div class="glass-card p-6">
-          <div style="display:flex; align-items:center; gap:var(--sp-4); margin-bottom:var(--sp-5);">
-            <div style="width:56px; height:56px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:var(--brand-primary-subtle); color:var(--brand-primary); font-weight:700; font-size:var(--text-xl);">S</div>
-            <div>
-              <h3 class="type-h4">Store Identity</h3>
-              <p class="type-body-sm text-muted mt-1">What shoppers and admins see across the seller portal.</p>
-            </div>
-          </div>
-          <div class="form-group mb-4">
-            <label class="form-label">Store Name</label>
-            <input class="form-input" value="SLR01 Store">
-          </div>
-          <div class="form-group mb-4">
-            <label class="form-label">Business Name</label>
-            <input class="form-input" value="SLR01 Home Appliances Trading">
-          </div>
-          <div class="form-group mb-4">
-            <label class="form-label">Store Bio</label>
-            <textarea class="form-textarea" style="min-height:120px;">Premium home appliances with flexible installment options and same-day dispatch for selected Metro Manila orders.</textarea>
-          </div>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-4);">
-            <div class="form-group">
-              <label class="form-label">Business Email</label>
-              <input class="form-input" value="seller@slr01store.ph">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Support Phone</label>
-              <input class="form-input" value="+63 917 555 4421">
-            </div>
-          </div>
-        </div>
-
-        <div class="glass-card p-6">
-          <h3 class="type-h4 mb-4">Fulfillment Defaults</h3>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-4);">
-            <div class="form-group">
-              <label class="form-label">Default Handling Time</label>
-              <select class="form-select">
-                <option>Same day</option>
-                <option>1-2 days</option>
-                <option>3-5 days</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Default Courier</label>
-              <select class="form-select">
-                <option>J&T Express</option>
-                <option>LBC</option>
-                <option>Ninja Van</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-group mt-4">
-            <label style="display:flex; align-items:center; gap:var(--sp-2);">
-              <input type="checkbox" checked style="width:16px; height:16px; margin:0;">
-              <span class="fw-semibold">Auto-accept low-risk orders</span>
-            </label>
-          </div>
-        </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-4);">
+      <div><label class="form-label">Email</label><input class="form-input" value="{{ seller.email or '' }}" readonly></div>
+      <div>
+        <label class="form-label">Phone</label>
+        <input class="form-input" name="phone" value="{{ form.get('phone', seller.phone or '') }}">
+        {% if errors.get('phone') %}<div class="form-error" role="alert">{{ errors.get('phone') }}</div>{% endif %}
       </div>
+    </div>
 
-      <div class="form-stack">
-        <div class="glass-card p-6">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--sp-4);">
-            <h3 class="type-h4">Store Snapshot</h3>
-            <span class="badge badge--success">Live</span>
-          </div>
-          <div class="table-wrapper" style="border:none; box-shadow:none;">
-            <table class="data-table">
-              <tbody>
-                <tr><td class="fw-semibold">Seller ID</td><td style="text-align:right;">SLR01</td></tr>
-                <tr><td class="fw-semibold">Status</td><td style="text-align:right;"><span class="badge badge--success">Verified</span></td></tr>
-                <tr><td class="fw-semibold">Products</td><td style="text-align:right;">142</td></tr>
-                <tr><td class="fw-semibold">Orders Today</td><td style="text-align:right;">8</td></tr>
-                <tr><td class="fw-semibold">Payout Balance</td><td style="text-align:right;">PHP 45,280</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+    <div><label class="form-label">Address Line 1</label><input class="form-input" name="address_line1" value="{{ form.get('address_line1', seller.address_line1 or '') }}"></div>
+    <div><label class="form-label">Address Line 2</label><input class="form-input" name="address_line2" value="{{ form.get('address_line2', seller.address_line2 or '') }}"></div>
 
-        <div class="glass-card p-6">
-          <h3 class="type-h4 mb-4">Masked Contact View</h3>
-          <p class="type-body-sm text-muted mb-2">Public-facing details are masked by default.</p>
-          <div class="glass-card seller-sunken" style="padding:var(--sp-4);">
-            <div class="type-body-sm"><strong>Email:</strong> se***@slr01store.ph</div>
-            <div class="type-body-sm mt-2"><strong>Phone:</strong> +63 917 *** 4421</div>
-          </div>
-          <div class="type-body-xs text-muted mt-4">Use the mission-aligned masked display for customer-visible seller data.</div>
-        </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-4);">
+      <div><label class="form-label">Barangay</label><input class="form-input" name="barangay" value="{{ form.get('barangay', seller.barangay or '') }}"></div>
+      <div><label class="form-label">City / Municipality</label><input class="form-input" name="city_municipality" value="{{ form.get('city_municipality', seller.city_municipality or '') }}"></div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--sp-4);">
+      <div><label class="form-label">Province</label><input class="form-input" name="province" value="{{ form.get('province', seller.province or '') }}"></div>
+      <div><label class="form-label">Region</label><input class="form-input" name="region" value="{{ form.get('region', seller.region or '') }}"></div>
+      <div>
+        <label class="form-label">Postal Code</label>
+        <input class="form-input" name="postal_code" value="{{ form.get('postal_code', seller.postal_code or '') }}">
+        {% if errors.get('postal_code') %}<div class="form-error" role="alert">{{ errors.get('postal_code') }}</div>{% endif %}
       </div>
+    </div>
+
+    <div style="display:flex; justify-content:flex-end; gap:var(--sp-3);">
+      <a href="/seller/dashboard" class="btn btn--secondary">Cancel</a>
+      <button type="submit" class="btn btn--primary">Save Profile</button>
+    </div>
+  </form>
+
+  <div class="glass-card p-6 mt-6">
+    <h3 class="type-h4 mb-4">Verification Documents</h3>
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:var(--sp-4);">
+      <div>
+        <div class="type-label-xs text-muted">Business Permit</div>
+        <div class="type-body-sm mt-1 fw-semibold">{{ seller.business_permit_path.split('/')[-1] if seller.business_permit_path else 'Not Found' }}</div>
+      </div>
+      <div>
+        <div class="type-label-xs text-muted">Barangay Permit</div>
+        <div class="type-body-sm mt-1 fw-semibold">{{ seller.barangay_permit_path.split('/')[-1] if seller.barangay_permit_path else 'Not Found' }}</div>
+      </div>
+      <div>
+        <div class="type-label-xs text-muted">Mayor's Permit</div>
+        <div class="type-body-sm mt-1 fw-semibold">{{ seller.mayors_permit_path.split('/')[-1] if seller.mayors_permit_path else 'Not Found' }}</div>
+      </div>
+    </div>
+    <div class="type-body-xs text-muted mt-6" style="font-style:italic;">
+      Documents are locked once submitted. Please contact admin if you need to update your permits.
     </div>
   </div>
 </div>

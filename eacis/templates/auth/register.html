@@ -1,16 +1,15 @@
 {% extends 'base.html' %}
 {% block title %}Create Account — E-ACIS{% endblock %}
 {% block content %}
-<div class="page-center" style="align-items:flex-start; padding-top: calc(var(--topbar-height) + var(--sp-10)); padding-bottom: var(--sp-10);">
-  <div class="card--narrow" style="max-width:520px;">
-
+<div class="page-center" style="padding: var(--sp-12) var(--sp-6);">
+  <div class="glass-card glass-card--interactive" style="max-width: 560px; width: 100%; padding: var(--sp-12) var(--sp-10);">
     <!-- Header -->
-    <div class="text-center" style="margin-bottom:var(--sp-6);">
-      <div style="width:52px;height:52px;border-radius:var(--radius-xl);background:var(--brand-primary-subtle);display:flex;align-items:center;justify-content:center;margin:0 auto var(--sp-4);">
-        <svg width="26" height="26" fill="none" stroke="var(--brand-primary)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <div class="text-center" style="margin-bottom: var(--sp-8);">
+      <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--brand-primary-subtle-2); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--sp-5); color: var(--brand-primary);">
+        <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       </div>
-      <h1 class="type-h2">Create your account</h1>
-      <p class="type-body-sm" style="margin-top:var(--sp-2);">Join thousands of Filipinos shopping and selling on E-ACIS.</p>
+      <h1 class="type-display-md" style="color: var(--grey-900);">Create Secure Account</h1>
+      <p class="type-body-sm text-muted" style="margin-top: var(--sp-2);">One identity for shopping or selling on E-ACIS.</p>
     </div>
 
     <!-- Portal Selector -->
@@ -42,9 +41,30 @@
     </div>
     {% endif %}
 
-    <form id="register-form" method="post" action="/auth/register" novalidate>
+    <form id="register-form" method="post" action="/auth/register" novalidate data-enhance="submit-loading">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <input type="hidden" name="role" id="role-input" value="{{ form.get('role', 'customer') }}">
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-4);">
+        <div class="form-group">
+          <label for="first_name" class="form-label">First Name <abbr class="required" title="required">*</abbr></label>
+          <input id="first_name" name="first_name" type="text" class="form-input" value="{{ form.get('first_name','') }}" placeholder="Juan" required />
+        </div>
+        <div class="form-group">
+          <label for="last_name" class="form-label">Last Name <abbr class="required" title="required">*</abbr></label>
+          <input id="last_name" name="last_name" type="text" class="form-input" value="{{ form.get('last_name','') }}" placeholder="dela Cruz" required />
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-3);">
+        <div class="form-group">
+          <label for="middle_name" class="form-label">Middle Name</label>
+          <input id="middle_name" name="middle_name" type="text" class="form-input" value="{{ form.get('middle_name','') }}" />
+        </div>
+        <div class="form-group">
+          <label for="suffix" class="form-label">Suffix</label>
+          <input id="suffix" name="suffix" type="text" class="form-input" placeholder="Jr., III" value="{{ form.get('suffix','') }}" />
+        </div>
+      </div>
 
       <!-- Full Name -->
       <div class="form-group">
@@ -56,7 +76,7 @@
             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           </span>
           <input id="full_name" name="full_name" type="text" class="form-input {% if errors.get('full_name') %}is-error{% endif %}"
-            placeholder="Juan dela Cruz" autocomplete="name" value="{{ form.get('full_name','') }}" required />
+            placeholder="Juan dela Cruz" autocomplete="name" value="{{ form.get('full_name','') }}" />
         </div>
         {% if errors.get('full_name') %}
         <div class="form-error" id="full_name-error">
@@ -102,6 +122,40 @@
         {% else %}
         <div class="form-helper">Used for delivery updates and account recovery. PH numbers only.</div>
         {% endif %}
+      </div>
+
+      <div class="form-group">
+        <label for="address_line1" class="form-label">Address Line 1</label>
+        <input id="address_line1" name="address_line1" type="text" class="form-input" value="{{ form.get('address_line1','') }}" />
+      </div>
+      <div class="form-group">
+        <label for="address_line2" class="form-label">Address Line 2</label>
+        <input id="address_line2" name="address_line2" type="text" class="form-input" value="{{ form.get('address_line2','') }}" />
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-3);">
+        <div class="form-group">
+          <label for="barangay" class="form-label">Barangay</label>
+          <input id="barangay" name="barangay" type="text" class="form-input" value="{{ form.get('barangay','') }}" />
+        </div>
+        <div class="form-group">
+          <label for="city_municipality" class="form-label">City / Municipality</label>
+          <input id="city_municipality" name="city_municipality" type="text" class="form-input" value="{{ form.get('city_municipality','') }}" />
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--sp-3);">
+        <div class="form-group">
+          <label for="province" class="form-label">Province</label>
+          <input id="province" name="province" type="text" class="form-input" value="{{ form.get('province','') }}" />
+        </div>
+        <div class="form-group">
+          <label for="region" class="form-label">Region</label>
+          <input id="region" name="region" type="text" class="form-input" value="{{ form.get('region','') }}" />
+        </div>
+        <div class="form-group">
+          <label for="postal_code" class="form-label">Postal Code</label>
+          <input id="postal_code" name="postal_code" type="text" class="form-input {% if errors.get('postal_code') %}is-error{% endif %}" value="{{ form.get('postal_code','') }}" />
+          {% if errors.get('postal_code') %}<div class="form-error">{{ errors.postal_code }}</div>{% endif %}
+        </div>
       </div>
 
       <!-- Password -->
@@ -190,17 +244,19 @@
       </div>
 
       <!-- Submit -->
-      <div style="margin-top:var(--sp-6);">
-        <button id="submit-btn" type="submit" class="btn btn--primary btn--full btn--lg" disabled aria-disabled="true">
+      <div style="margin-top:var(--sp-8);">
+        <button id="submit-btn" type="submit" class="btn btn--primary btn--full btn--xl" disabled aria-disabled="true">
           <span class="btn__label">Create Account</span>
         </button>
       </div>
 
+      {% if not current_user.is_authenticated %}
       <div style="margin-top:var(--sp-5);text-align:center;">
         <span class="type-body-sm">Already have an account?
           <a href="/auth/login" style="color:var(--brand-primary);font-weight:var(--weight-semibold);">Sign in</a>
         </span>
       </div>
+      {% endif %}
     </form>
   </div>
 </div>
@@ -324,10 +380,20 @@ document.body.classList.add('auth-page');
 
   /* ── Email live de-dupe hint ── */
   const emailInput = document.getElementById('email');
+  const cityInput = document.getElementById('city_municipality');
+  const postalInput = document.getElementById('postal_code');
   let emailTimer;
   emailInput.addEventListener('input', () => {
     clearTimeout(emailTimer);
     updateSubmit();
+  });
+
+  cityInput?.addEventListener('blur', async () => {
+    const city = cityInput.value.trim();
+    if (!city || postalInput.value.trim()) return;
+    const response = await fetch(`/api/postal/suggest?city=${encodeURIComponent(city)}`);
+    const data = await response.json();
+    if (data && data.postal_code) postalInput.value = data.postal_code;
   });
 
   /* ── Terms checkbox ── */
@@ -335,7 +401,10 @@ document.body.classList.add('auth-page');
 
   /* ── Enable/disable submit ── */
   function updateSubmit(){
-    const nameOk  = document.getElementById('full_name').value.trim().length >= 2;
+    const fullName = document.getElementById('full_name').value.trim();
+    const firstName = (document.getElementById('first_name')?.value || '').trim();
+    const lastName = (document.getElementById('last_name')?.value || '').trim();
+    const nameOk  = fullName.length >= 2 || (firstName.length >= 1 && lastName.length >= 1);
     const emailOk = /\S+@\S+\.\S+/.test(emailInput.value.trim());
     const pwdOk   = checkStrength(pwdInput.value) >= 3;
     const cfrOk   = cfrInput.value === pwdInput.value && cfrInput.value.length > 0;

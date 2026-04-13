@@ -1,119 +1,42 @@
 {% extends 'base.html' %}
-{% block title %}Installment Payments — Seller Portal{% endblock %}
+{% block title %}Installment Payments - Seller Portal{% endblock %}
 {% block content %}
-<div class="stagger-children">
-  <div class="page-content bg-grey-50 seller-shell">
-    <div class="seller-header reveal">
-      <div class="seller-header__head">
-        <div class="seller-header__meta">
-          <span class="badge seller-header__chip seller-header__chip--success">Financial</span>
-          <span class="type-label" style="color:var(--grey-500);">Collections Board</span>
-        </div>
-        <h1 class="type-display-md">Installment Payments</h1>
-        <p class="type-body-sm text-muted mt-1">Track due dates, overdue balances, and collection actions in one place.</p>
-      </div>
-      <div class="seller-header__actions">
-        <span class="badge badge--warning">4 overdue</span>
-        <button class="btn btn--primary btn--sm">Send Reminders</button>
-      </div>
-    </div>
+<div class="page-content seller-shell" style="padding:var(--sp-8);">
+  <h1 class="type-display-sm" style="margin-bottom:var(--sp-6);">Installment Payments</h1>
 
-    <div class="reveal" data-delay="60" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:var(--sp-4); margin-bottom:var(--sp-8);">
-      <div class="glass-card p-4" style="background:linear-gradient(180deg, #00875A10 0%, transparent 40%);">
-        <div class="type-body-xs" style="color:var(--grey-500); font-weight:600;">ACTIVE PLANS</div>
-        <div class="type-display-md mt-2" style="color:#00875A; margin:0;">63</div>
-        <div class="type-body-xs mt-2" style="color:var(--grey-600);">41 customers</div>
-      </div>
-      <div class="glass-card p-4" style="background:linear-gradient(180deg, #0052CC10 0%, transparent 40%);">
-        <div class="type-body-xs" style="color:var(--grey-500); font-weight:600;">DUE THIS WEEK</div>
-        <div class="type-display-md mt-2" style="color:#0052CC; margin:0;">PHP 128k</div>
-        <div class="type-body-xs mt-2" style="color:var(--grey-600);">14 schedules</div>
-      </div>
-      <div class="glass-card p-4" style="background:linear-gradient(180deg, #00875A10 0%, transparent 40%);">
-        <div class="type-body-xs" style="color:var(--grey-500); font-weight:600;">COLLECTION RATE</div>
-        <div class="type-display-md mt-2" style="color:#00875A; margin:0;">96.1%</div>
-        <div class="type-body-xs mt-2" style="color:var(--color-success); font-weight:600;">Last 30 days</div>
-      </div>
-      <div class="glass-card p-4" style="background:linear-gradient(180deg, #DE350B10 0%, transparent 40%);">
-        <div class="type-body-xs" style="color:var(--grey-500); font-weight:600;">OVERDUE</div>
-        <div class="type-display-md mt-2" style="color:#DE350B; margin:0;">4</div>
-        <div class="type-body-xs mt-2" style="color:#DE350B; font-weight:600;">Needs follow-up</div>
-      </div>
-    </div>
+  <div class="kpi-grid mb-6">
+    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Active Plans</div><div class="type-display-md mt-2">{{ stats.active_plans }}</div></div></div>
+    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Due This Week</div><div class="type-display-md mt-2">PHP {{ '%.2f'|format(stats.due_this_week or 0) }}</div></div></div>
+    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Collection Rate</div><div class="type-display-md mt-2">{{ '%.1f'|format(stats.collection_rate or 0) }}%</div></div></div>
+    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Overdue</div><div class="type-display-md mt-2">{{ stats.overdue_count }}</div></div></div>
+  </div>
 
-    <div class="seller-grid-2">
-      <div class="glass-card p-6 reveal" data-delay="100">
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:var(--sp-4); margin-bottom:var(--sp-4);">
-          <div>
-            <h3 class="type-h4">Payment Timeline</h3>
-            <p class="type-body-sm text-muted mt-1">Schedules sorted by urgency and payment progress.</p>
-          </div>
-          <span class="badge badge--pending">Updated 12 min ago</span>
-        </div>
-
-        <div style="display:flex; flex-direction:column; gap:var(--sp-4); padding-left:var(--sp-4);">
-          <div>
-            <div style="display:flex; justify-content:space-between; align-items:baseline; gap:var(--sp-3); margin-bottom:var(--sp-2);">
-              <div class="type-body-sm fw-semibold">INST-8821 • Juan Dela Cruz</div>
-              <span class="badge badge--warning">Upcoming</span>
-            </div>
-            <div class="type-body-xs text-muted">Due: Apr 05, 2026 · PHP 6,200 due · Remaining: PHP 18,600</div>
-            <div style="height:4px; background:var(--grey-100); border-radius:2px; margin-top:var(--sp-2); overflow:hidden;">
-              <div style="width:65%; height:100%; background:#0052CC; border-radius:2px;"></div>
-            </div>
-          </div>
-          <div>
-            <div style="display:flex; justify-content:space-between; align-items:baseline; gap:var(--sp-3); margin-bottom:var(--sp-2);">
-              <div class="type-body-sm fw-semibold">INST-8814 • Maria Santos</div>
+  <div class="glass-card p-6">
+    <h2 class="type-h4" style="margin:0 0 var(--sp-4) 0;">Payment Timeline</h2>
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead><tr><th>Order</th><th>Due Date</th><th style="text-align:right;">Amount</th><th>Status</th></tr></thead>
+        <tbody>
+          {% for row in timeline %}
+          <tr>
+            <td>{{ row.order.order_ref if row.order else '-' }}</td>
+            <td>{{ row.schedule.due_date.strftime('%Y-%m-%d') if row.schedule.due_date else '-' }}</td>
+            <td style="text-align:right;">PHP {{ '%.2f'|format(row.schedule.amount or 0) }}</td>
+            <td>
+              {% if row.urgency == 'overdue' %}
               <span class="badge badge--danger">Overdue</span>
-            </div>
-            <div class="type-body-xs text-muted">Due: Apr 02, 2026 · PHP 4,000 due · Remaining: PHP 8,000</div>
-            <div style="height:4px; background:#DE350B20; border-radius:2px; margin-top:var(--sp-2); overflow:hidden;">
-              <div style="width:50%; height:100%; background:#DE350B; border-radius:2px;"></div>
-            </div>
-          </div>
-          <div>
-            <div style="display:flex; justify-content:space-between; align-items:baseline; gap:var(--sp-3); margin-bottom:var(--sp-2);">
-              <div class="type-body-sm fw-semibold">INST-8806 • Peter Ramos</div>
-              <span class="badge badge--info">Upcoming</span>
-            </div>
-            <div class="type-body-xs text-muted">Due: Apr 08, 2026 · PHP 3,500 due · Remaining: PHP 10,500</div>
-            <div style="height:4px; background:var(--grey-100); border-radius:2px; margin-top:var(--sp-2); overflow:hidden;">
-              <div style="width:33%; height:100%; background:#0052CC; border-radius:2px;"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="glass-card p-6 reveal" data-delay="140">
-        <h3 class="type-h4">Collections Playbook</h3>
-        <p class="type-body-sm text-muted mt-1">Use a consistent follow-up sequence to protect cash flow.</p>
-        <div class="ops-list mt-4">
-          <div class="ops-list-item">
-            <div class="type-body-sm fw-semibold">1. Pre-due alert</div>
-            <div class="type-body-xs text-muted mt-1">Send reminders 48 hours before payment is due.</div>
-          </div>
-          <div class="ops-list-item">
-            <div class="type-body-sm fw-semibold">2. Escalate overdue</div>
-            <div class="type-body-xs text-muted mt-1">Move accounts to escalation after 3 days past due.</div>
-          </div>
-          <div class="ops-list-item">
-            <div class="type-body-sm fw-semibold">3. Risk scoring</div>
-            <div class="type-body-xs text-muted mt-1">Use payment history to update CRM risk profiles.</div>
-          </div>
-        </div>
-
-        <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:var(--sp-3); margin-top:var(--sp-5);">
-          <div class="glass-card" style="padding:var(--sp-4); background:linear-gradient(180deg, #0052CC10 0%, transparent 40%); border:1px solid #0052CC25; box-shadow:none;">
-            <div class="type-body-xs text-muted">Promise to Pay</div>
-            <div class="type-h4 mt-1">12</div>
-          </div>
-          <div class="glass-card" style="padding:var(--sp-4); background:linear-gradient(180deg, #00875A10 0%, transparent 40%); border:1px solid #00875A25; box-shadow:none;">
-            <div class="type-body-xs text-muted">Recovered Today</div>
-            <div class="type-h4 mt-1">PHP 34k</div>
-          </div>
-        </div>
-      </div>
+              {% elif row.urgency == 'upcoming' %}
+              <span class="badge badge--warning">Upcoming</span>
+              {% else %}
+              <span class="badge badge--success">Settled</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="4" style="text-align:center;">No installment schedule data yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
   </div>
 </div>

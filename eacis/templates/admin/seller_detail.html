@@ -1,27 +1,119 @@
 {% extends 'base.html' %}
-{% block title %}Seller {{ seller_id }} — Admin Portal{% endblock %}
+{% block title %}Seller {{ seller.id }} — Admin Portal{% endblock %}
 {% block content %}
 <div class="stagger-children">
   <div class="page-content bg-grey-50">
     <div style="display:flex; justify-content:space-between; align-items:flex-end; gap:var(--sp-4); margin-bottom:var(--sp-6);">
       <div>
-        <h1 class="type-display-md">Seller {{ seller_id }}</h1>
+        <h1 class="type-display-md">{{ seller.business_name or (seller.computed_full_name or seller.full_name or seller.email) }}</h1>
         <p class="type-body-sm text-muted mt-1">Inspect seller health, compliance, and catalog access.</p>
       </div>
       <div style="display:flex; gap:var(--sp-3); flex-wrap:wrap;">
-        <span class="badge badge--success">Verified</span>
-        <button class="btn btn--secondary btn--sm">Suspend</button>
+        <span class="badge {% if (seller.seller_verification_status or 'pending') == 'approved' %}badge--success{% elif (seller.seller_verification_status or 'pending') == 'rejected' %}badge--danger{% else %}badge--pending{% endif %}">
+          {{ (seller.seller_verification_status or 'pending')|title }}
+        </span>
+        <a class="btn btn--secondary btn--sm" href="/admin/sellers">Back to Sellers</a>
       </div>
     </div>
     <div class="kpi-grid mb-6">
-      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Products</div><div class="type-display-md mt-2">142</div></div></div>
-      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Orders</div><div class="type-display-md mt-2">8</div></div></div>
-      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Refunds</div><div class="type-display-md mt-2">2</div></div></div>
-      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Payout</div><div class="type-display-md mt-2">PHP 45K</div></div></div>
+      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Products</div><div class="type-display-md mt-2">{{ metrics.products }}</div></div></div>
+      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Orders</div><div class="type-display-md mt-2">{{ metrics.orders }}</div></div></div>
+      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Returns</div><div class="type-display-md mt-2">{{ metrics.returns }}</div></div></div>
+      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Order Value</div><div class="type-display-md mt-2">PHP {{ '%.2f'|format(metrics.payout_total or 0) }}</div></div></div>
     </div>
-    <div class="glass-card p-6">
-      <h3 class="type-h4 mb-4">Compliance Notes</h3>
-      <p class="type-body-sm text-muted">Seller profile, PII masking, and financial actions are available in the admin control surface.</p>
+
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:var(--sp-6);">
+      <div class="glass-card p-6">
+        <h3 class="type-h4 mb-4">Seller Profile</h3>
+        <div class="type-body-sm">Name: {{ seller.computed_full_name or seller.full_name or '-' }}</div>
+        <div class="type-body-sm">Email: {{ seller.email }}</div>
+        <div class="type-body-sm">Phone: {{ seller.phone or '-' }}</div>
+        <div class="type-body-sm">Code: {{ seller.seller_code or '-' }}</div>
+      </div>
+
+      <div class="glass-card p-6">
+        <h3 class="type-h4 mb-4">Recent Products</h3>
+        <ul style="margin:0; padding-left:18px;">
+          {% for row in recent_products %}
+          <li>{{ row.product_ref }} - {{ row.name }}</li>
+          {% else %}
+          <li>No products yet.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:var(--sp-6); margin-top:var(--sp-6);">
+      <div class="glass-card p-6">
+        <h3 class="type-h4 mb-4">Verification Documents</h3>
+        <div style="display:grid; gap:var(--sp-4);">
+          <div>
+            <span class="type-label-xs text-muted">Business Permit</span>
+            <div class="mt-1">
+              {% if seller.business_permit_path %}
+              <a href="{{ url_for('admin_view_permit', filename=seller.business_permit_path.split('/')[-1]) }}" target="_blank" class="btn btn--secondary btn--sm">View Document</a>
+              {% else %}
+              <span class="text-muted">Not uploaded</span>
+              {% endif %}
+            </div>
+          </div>
+          <div>
+            <span class="type-label-xs text-muted">Barangay Permit</span>
+            <div class="mt-1">
+              {% if seller.barangay_permit_path %}
+              <a href="{{ url_for('admin_view_permit', filename=seller.barangay_permit_path.split('/')[-1]) }}" target="_blank" class="btn btn--secondary btn--sm">View Document</a>
+              {% else %}
+              <span class="text-muted">Not uploaded</span>
+              {% endif %}
+            </div>
+          </div>
+          <div>
+            <span class="type-label-xs text-muted">Mayor's Permit</span>
+            <div class="mt-1">
+              {% if seller.mayors_permit_path %}
+              <a href="{{ url_for('admin_view_permit', filename=seller.mayors_permit_path.split('/')[-1]) }}" target="_blank" class="btn btn--secondary btn--sm">View Document</a>
+              {% else %}
+              <span class="text-muted">Not uploaded</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        {% if (seller.seller_verification_status or 'pending') == 'pending' %}
+        <div style="margin-top:var(--sp-8); padding-top:var(--sp-6); border-top:1px solid var(--border-subtle); display:flex; gap:var(--sp-3);">
+          <form method="post" data-enhance="submit-loading">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="approve">
+            <button type="submit" class="btn btn--primary">Approve Merchant</button>
+          </form>
+          <form method="post" data-enhance="submit-loading">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="reject">
+            <button type="submit" class="btn btn--muted">Reject Application</button>
+          </form>
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="glass-card p-6">
+        <h3 class="type-h4 mb-4">Recent Audit Entries</h3>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead><tr><th>Time</th><th>Action</th><th>Actor</th></tr></thead>
+            <tbody>
+              {% for row in recent_actions %}
+              <tr>
+                <td>{{ row.created_at.strftime('%Y-%m-%d %H:%M') if row.created_at else '-' }}</td>
+                <td>{{ row.action or '-' }}</td>
+                <td>{{ row.actor_name or '-' }}</td>
+              </tr>
+              {% else %}
+              <tr><td colspan="3" style="text-align:center;">No audit events yet.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 </div>

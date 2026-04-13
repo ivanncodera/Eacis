@@ -55,39 +55,19 @@
         </div>
       </section>
 
-      <!-- Discovery Category Navigator -->
-      <h3 class="type-label mb-6 stagger-item" style="letter-spacing:0.08em; color:var(--grey-400);">Discover by Collection</h3>
+      <!-- Discovery Category Navigator (categories from catalog) -->
+      <h3 class="type-label mb-6 stagger-item" style="letter-spacing:0.08em; color:var(--grey-400);">Discover by collection</h3>
       <section class="discovery-category-grid mb-12 stagger-item">
-        <div class="category-card" data-cat="Kitchen & Cooking">
-          <div class="category-card__icon">
-            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M4 10h16m-8-3V4M7 7V4m10 3V4M5 20h14a2 2 0 002-2V10H3v8a2 2 0 002 2z"></path></svg>
+        {% for cat in (shop_categories or [])[:8] %}
+        <a href="{{ url_for('shop', category=cat) }}" class="category-card" data-cat="{{ cat }}" style="text-decoration:none; color:inherit;">
+          <div class="category-card__icon" aria-hidden="true">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M4 6h16v4H4zM4 14h10v4H4zM18 14h2v4h-2z"></path></svg>
           </div>
-          <div class="category-card__label">Kitchen</div>
-        </div>
-        <div class="category-card" data-cat="Laundry & Cleaning">
-          <div class="category-card__icon">
-            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 21a9 9 0 100-18 9 9 0 000 18z"></path><path d="M9 12a3 3 0 106 0 3 3 0 00-6 0z"></path></svg>
-          </div>
-          <div class="category-card__label">Laundry</div>
-        </div>
-        <div class="category-card" data-cat="Cooling & Air Quality">
-          <div class="category-card__icon">
-            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-          </div>
-          <div class="category-card__label">Cooling</div>
-        </div>
-        <div class="category-card" data-cat="Home Entertainment">
-          <div class="category-card__icon">
-            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M7 4h10a2 2 0 012 2v1h-14V6a2 2 0 012-2zM4 9h16v8h-16V9zM7 20h10"></path></svg>
-          </div>
-          <div class="category-card__label">Entertainment</div>
-        </div>
-        <div class="category-card" data-cat="Gadgets">
-          <div class="category-card__icon">
-            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
-          </div>
-          <div class="category-card__label">Gadgets</div>
-        </div>
+          <div class="category-card__label">{{ cat }}</div>
+        </a>
+        {% else %}
+        <p class="type-body-sm text-muted stagger-item">Categories will appear here once sellers tag products.</p>
+        {% endfor %}
       </section>
 
       <h3 id="trending" class="type-display-sm mb-6 stagger-item" style="font-weight:var(--weight-extrabold);">Trending Now</h3>
@@ -100,17 +80,16 @@
             {% if view_mode == 'discovery' %}
               Hand-picked appliance trends and premium selections.
             {% else %}
-              Search and filter our complete catalog of 500+ appliances.
+              Browse {{ products|length }} active listing{% if products|length != 1 %}s{% endif %}{% if shop_active_category %} in {{ shop_active_category }}{% endif %}.
             {% endif %}
           </p>
         </div>
-        <!-- Category chips -->
+        <!-- Category chips (sourced from live catalog) -->
         <div style="display:flex;gap:var(--sp-2);flex-wrap:wrap;" id="category-chips">
-          <button class="chip chip--active" data-cat="">All</button>
-          <button class="chip" data-cat="Kitchen &amp; Cooking">Kitchen &amp; Cooking</button>
-          <button class="chip" data-cat="Cooling &amp; Air Quality">Cooling &amp; Air Quality</button>
-          <button class="chip" data-cat="Laundry &amp; Cleaning">Laundry &amp; Cleaning</button>
-          <button class="chip" data-cat="Personal Care">Personal Care</button>
+          <button type="button" class="chip {% if not shop_active_category %}chip--active{% endif %}" data-cat="">All</button>
+          {% for cat in (shop_categories or []) %}
+          <button type="button" class="chip {% if shop_active_category == cat %}chip--active{% endif %}" data-cat="{{ cat }}">{{ cat }}</button>
+          {% endfor %}
         </div>
       </div>
     </div>
@@ -163,7 +142,7 @@
             </label>
           </div>
 
-          <button id="apply-filters" class="btn btn--primary btn--full" style="margin-top:var(--sp-2);">Apply Filters</button>
+          <button id="apply-filters" class="btn btn--primary btn--full btn--lg" style="margin-top:var(--sp-2);">Apply Filters</button>
         </div>
       </aside>
       {% endif %}
@@ -261,21 +240,52 @@
 
 <script src="/static/js/data/products.js"></script>
 <script src="/static/js/components/productGrid.js"></script>
+{# Build a JSON-serializable list of product dicts in Jinja, then emit it once #}
+{% set ns = namespace(arr=[]) %}
+{% for p in products %}
+  {% set cp = p.compare_price %}
+  {% set _ = ns.arr.append({
+    'id': p.id,
+    'ref': p.product_ref,
+    'product_ref': p.product_ref,
+    'name': p.name,
+    'category': p.category,
+    'price': (p.price or 0) | float,
+    'stock': p.stock,
+    'image': p.image_url or '/static/assets/products/refrigerator.webp',
+    'image_url': p.image_url or '/static/assets/products/refrigerator.webp',
+    'installment_enabled': p.installment_enabled,
+    'comparePrice': (cp | float) if cp is not none else none,
+  }) %}
+{% endfor %}
+
+<script id="__products__" type="application/json">{{ ns.arr | tojson | safe }}</script>
+
 <script>
 (function(){
   const PAGE_SIZE = 12;
-  let all = (window.PRODUCTS || []).slice();
+
+  // BRIDGE: Read products JSON emitted by server into JS safely.
+  let all = JSON.parse(document.getElementById('__products__').textContent || '[]');
+
   let filtered = all.slice();
   let page = 1;
 
+  // --- KEEP ALL YOUR EXISTING FUNCTIONS BELOW (getFilters, applyFilters, render, etc.) ---
+  
   function getFilters() {
+    const priceMinEl = document.getElementById('price-min');
+    const priceMaxEl = document.getElementById('price-max');
+    const ratingEl = document.querySelector('input[name="rating-filter"]:checked');
+    const inStockEl = document.getElementById('instock-filter');
+    const installmentEl = document.getElementById('installment-filter');
     return {
-      category: document.querySelector('.chip--active')?.dataset.cat || '',
-      priceMin: parseFloat(document.getElementById('price-min').value) || 0,
-      priceMax: parseFloat(document.getElementById('price-max').value) || Infinity,
-      rating:   parseFloat(document.querySelector('input[name="rating-filter"]:checked')?.value) || 0,
-      inStock:  document.getElementById('instock-filter').checked,
-      install:  document.getElementById('installment-filter').checked,
+      category: document.querySelector('#category-chips .chip--active')?.dataset.cat || '',
+      priceMin: parseFloat(priceMinEl?.value || '') || 0,
+      priceMax: parseFloat(priceMaxEl?.value || '') || Infinity,
+      rating:   parseFloat(ratingEl?.value || '') || 0,
+      inStock:  Boolean(inStockEl?.checked),
+      install:  Boolean(installmentEl?.checked),
     };
   }
 
@@ -287,11 +297,12 @@
       if (p.price < f.priceMin || p.price > f.priceMax) return false;
       if (f.rating && (p.rating || 0) < f.rating) return false;
       if (f.inStock && p.stock <= 0) return false;
-      if (f.install && p.price <= 10000) return false;
+      // Use your actual DB boolean for installments
+      if (f.install && !p.installment_enabled) return false; 
       return true;
     });
 
-    const sort = document.getElementById('sort-select') ? document.getElementById('sort-select').value : 'rating';
+    const sort = document.getElementById('sort-select') ? document.getElementById('sort-select').value : 'relevance';
     if (sort === 'price-asc')  filtered.sort((a,b) => a.price - b.price);
     else if (sort === 'price-desc') filtered.sort((a,b) => b.price - a.price);
     else if (sort === 'rating')     filtered.sort((a,b) => (b.rating||0) - (a.rating||0));
@@ -325,8 +336,10 @@
     }
   }
 
-  // Category Navigator & Hero Section
+  // --- KEEP ALL YOUR EXISTING EVENT LISTENERS BELOW ---
+  
   document.querySelectorAll('.category-card').forEach(card => {
+    if (card.tagName === 'A') return;
     card.addEventListener('click', () => {
       const cat = card.dataset.cat;
       const chip = document.querySelector(`#category-chips .chip[data-cat="${cat}"]`);
@@ -335,20 +348,16 @@
     });
   });
 
-  // Initialization logic based on View Mode
   const shopRoot = document.getElementById('shop-root');
   const viewMode = shopRoot?.dataset.viewMode || 'catalog';
 
   if (viewMode === 'discovery') {
-    // Curated sort for Discovery Hub
     all.sort((a,b) => (b.rating || 0) - (a.rating || 0));
     filtered = all.slice();
   }
 
-  // Initial render
   render();
 
-  // Category chips
   document.querySelectorAll('#category-chips .chip').forEach(chip => {
     chip.addEventListener('click', () => {
       document.querySelectorAll('#category-chips .chip').forEach(c => c.classList.remove('chip--active'));
@@ -357,25 +366,26 @@
     });
   });
 
-  document.getElementById('apply-filters').addEventListener('click', applyFilters);
-  document.getElementById('sort-select').addEventListener('change', applyFilters);
-  document.getElementById('page-prev').addEventListener('click', () => { page--; render(); window.scrollTo({top:0,behavior:'smooth'}); });
-  document.getElementById('page-next').addEventListener('click', () => { page++; render(); window.scrollTo({top:0,behavior:'smooth'}); });
+  document.getElementById('apply-filters')?.addEventListener('click', applyFilters);
+  document.getElementById('sort-select')?.addEventListener('change', applyFilters);
+  document.getElementById('page-prev')?.addEventListener('click', () => { page--; render(); window.scrollTo({top:0,behavior:'smooth'}); });
+  document.getElementById('page-next')?.addEventListener('click', () => { page++; render(); window.scrollTo({top:0,behavior:'smooth'}); });
 
   function clearAll() {
-    document.getElementById('price-min').value = '';
-    document.getElementById('price-max').value = '';
-    document.querySelector('input[name="rating-filter"][value="0"]').checked = true;
-    document.getElementById('instock-filter').checked = false;
-    document.getElementById('installment-filter').checked = false;
-    document.getElementById('sort-select').value = 'relevance';
+    if (document.getElementById('price-min')) document.getElementById('price-min').value = '';
+    if (document.getElementById('price-max')) document.getElementById('price-max').value = '';
+    const ratingDefault = document.querySelector('input[name="rating-filter"][value="0"]');
+    if (ratingDefault) ratingDefault.checked = true;
+    if (document.getElementById('instock-filter')) document.getElementById('instock-filter').checked = false;
+    if (document.getElementById('installment-filter')) document.getElementById('installment-filter').checked = false;
+    if (document.getElementById('sort-select')) document.getElementById('sort-select').value = 'relevance';
     document.querySelectorAll('#category-chips .chip').forEach(c => c.classList.remove('chip--active'));
     document.querySelector('#category-chips .chip[data-cat=""]').classList.add('chip--active');
     applyFilters();
   }
 
-  document.getElementById('clear-filters').addEventListener('click', clearAll);
-  document.getElementById('reset-btn').addEventListener('click', clearAll);
+  document.getElementById('clear-filters')?.addEventListener('click', clearAll);
+  document.getElementById('reset-btn')?.addEventListener('click', clearAll);
 
   applyFilters();
 })();

@@ -342,11 +342,17 @@ a.btn.btn--primary.btn--xl .btn__ripple {
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: var(--sp-2);
+  gap: var(--sp-1);
 }
 
 .form-group + .form-group {
-  margin-top: var(--form-row-gap);
+  /* Removed global adjacent margin to prevent misalignment in grids */
+  margin-top: 0;
+}
+
+/* Vertical spacing for stacked fields in stacks */
+.form-stack > .form-group {
+  margin-bottom: var(--form-row-gap);
 }
 
 /* ── LABEL ── */
@@ -357,11 +363,13 @@ a.btn.btn--primary.btn--xl .btn__ripple {
   display: flex;
   align-items: center;
   gap: var(--sp-1);
+  line-height: 1.2;
 }
 
 .form-label .required {
   color: var(--color-danger);
-  font-size: var(--text-xs);
+  font-size: 13px;
+  line-height: 1;
 }
 
 .form-label .optional {
@@ -370,17 +378,21 @@ a.btn.btn--primary.btn--xl .btn__ripple {
   font-weight: var(--weight-regular);
 }
 
-/* ── INPUT ── */
 .form-input,
 .form-select,
 .form-textarea {
+  display: block;
   width: 100%;
+  margin: 0;
   background: var(--grey-0);
   border: 1.5px solid var(--border-medium);
   border-radius: var(--radius-md);
   font-family: var(--font-sans);
   font-size: var(--text-base);
   color: var(--grey-900);
+  box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
   transition:
     border-color var(--dur-fast) var(--ease-out),
     box-shadow var(--dur-fast) var(--ease-out),
@@ -391,6 +403,7 @@ a.btn.btn--primary.btn--xl .btn__ripple {
 .form-select {
   height: var(--control-size-lg);
   padding: 0 var(--sp-4);
+  vertical-align: middle;
 }
 
 .form-textarea {
@@ -457,30 +470,40 @@ a.btn.btn--primary.btn--xl .btn__ripple {
 /* Input with icon */
 .form-input-group {
   position: relative;
+  display: flex;
+  align-items: stretch;
+  width: 100%;
 }
 
 .form-input-group .form-input {
-  padding-left: 40px;
+  padding-left: 48px;
+  flex: 1;
 }
 
 .form-input-group__icon {
   position: absolute;
-  left: var(--sp-3);
-  top: 50%;
-  transform: translateY(-50%);
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: var(--grey-400);
-  width: 18px;
-  height: 18px;
   pointer-events: none;
+  font-size: 14px;
+  font-weight: 600;
+  z-index: 2;
 }
 
 .form-input-group__suffix {
   position: absolute;
-  right: var(--sp-3);
+  right: var(--sp-4);
   top: 50%;
   transform: translateY(-50%);
   color: var(--grey-500);
   font-size: var(--text-sm);
+  z-index: 2;
 }
 
 /* ── EMPTY STATE ── */

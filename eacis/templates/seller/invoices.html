@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Seller Invoices - E-ACIS{% endblock %}
+{% block content %}
+<div class="page-content seller-shell" style="padding:var(--sp-8);">
+  <h1 class="type-display-sm" style="margin-bottom:var(--sp-6);">Seller Invoices</h1>
+  <div class="table-wrapper">
+    <table class="data-table">
+      <thead><tr><th>Invoice</th><th>Order</th><th>Customer</th><th>Status</th><th>Issued</th><th style="text-align:right;">Total</th></tr></thead>
+      <tbody>
+        {% for invoice in invoices %}
+        <tr>
+          <td><a href="/seller/invoices/{{ invoice.invoice_ref }}">{{ invoice.invoice_ref }}</a></td>
+          <td>{{ invoice.order.order_ref if invoice.order else '-' }}</td>
+          <td>{{ invoice.customer.computed_full_name if invoice.customer else '-' }}</td>
+          <td>{{ invoice.status|title }}</td>
+          <td>{{ invoice.issued_at.strftime('%Y-%m-%d') if invoice.issued_at else '-' }}</td>
+          <td style="text-align:right;">PHP {{ '%.2f'|format(invoice.grand_total or 0) }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" style="text-align:center;">No invoices yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -57,7 +57,9 @@
       if(form.__eacisWired) return; form.__eacisWired = true;
       form.addEventListener('submit', (e)=>{
         try{
-          const btn = form.querySelector('[type="submit"], .btn--primary, .btn');
+          const btn = form.querySelector('button[type="submit"].btn--primary')
+            || form.querySelector('button[type="submit"].btn--secondary')
+            || form.querySelector('[type="submit"]');
           if(btn){ setButtonLoading(btn, true); }
         }catch(err){/* noop */}
       });

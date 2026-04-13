@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% block title %}Edit Profile - E-ACIS{% endblock %}
+{% block content %}
+<div class="page-content" style="max-width:860px; margin:0 auto; padding:var(--sp-8);">
+  <h1 class="type-display-sm" style="margin-bottom:var(--sp-6);">Edit Profile</h1>
+  {% set form = form or {} %}
+  {% set errors = errors or {} %}
+  {% if errors.get('general') %}
+  <div class="form-error" role="alert" style="margin-bottom:var(--sp-4);">{{ errors.get('general') }}</div>
+  {% endif %}
+  <form method="post" class="glass-card p-10" style="display:grid; gap:var(--sp-6);" data-enhance="submit-loading">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-4);">
+      <div>
+        <label class="form-label">First Name</label>
+        <input class="form-input" name="first_name" required value="{{ form.get('first_name', current_user.first_name or '') }}">
+      </div>
+      <div>
+        <label class="form-label">Last Name</label>
+        <input class="form-input" name="last_name" required value="{{ form.get('last_name', current_user.last_name or '') }}">
+      </div>
+    </div>
+    {% if errors.get('full_name') %}<div class="form-error" role="alert">{{ errors.get('full_name') }}</div>{% endif %}
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-4);">
+      <div>
+        <label class="form-label">Middle Name</label>
+        <input class="form-input" name="middle_name" value="{{ form.get('middle_name', current_user.middle_name or '') }}">
+      </div>
+      <div>
+        <label class="form-label">Suffix</label>
+        <input class="form-input" name="suffix" value="{{ form.get('suffix', current_user.suffix or '') }}">
+      </div>
+    </div>
+
+    <div>
+      <label class="form-label">Phone</label>
+      <input class="form-input" name="phone" value="{{ form.get('phone', current_user.phone or '') }}">
+      {% if errors.get('phone') %}<div class="form-error" role="alert">{{ errors.get('phone') }}</div>{% endif %}
+    </div>
+
+    <div>
+      <label class="form-label">Address Line 1</label>
+      <input class="form-input" name="address_line1" value="{{ form.get('address_line1', current_user.address_line1 or '') }}">
+    </div>
+    <div>
+      <label class="form-label">Address Line 2</label>
+      <input class="form-input" name="address_line2" value="{{ form.get('address_line2', current_user.address_line2 or '') }}">
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-4);">
+      <div>
+        <label class="form-label">Barangay</label>
+        <input class="form-input" name="barangay" value="{{ form.get('barangay', current_user.barangay or '') }}">
+      </div>
+      <div>
+        <label class="form-label">City / Municipality</label>
+        <input class="form-input" name="city_municipality" id="city_municipality" value="{{ form.get('city_municipality', current_user.city_municipality or '') }}">
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--sp-4);">
+      <div>
+        <label class="form-label">Province</label>
+        <input class="form-input" name="province" value="{{ form.get('province', current_user.province or '') }}">
+      </div>
+      <div>
+        <label class="form-label">Region</label>
+        <input class="form-input" name="region" value="{{ form.get('region', current_user.region or '') }}">
+      </div>
+      <div>
+        <label class="form-label">Postal Code</label>
+        <input class="form-input" name="postal_code" id="postal_code" value="{{ form.get('postal_code', current_user.postal_code or '') }}">
+        {% if errors.get('postal_code') %}<div class="form-error" role="alert">{{ errors.get('postal_code') }}</div>{% endif %}
+      </div>
+    </div>
+
+    <div style="display:flex; gap:var(--sp-4); justify-content:flex-end; border-top: 1px solid var(--border-subtle); padding-top: var(--sp-6); margin-top: var(--sp-2);">
+      <a class="btn btn--white" href="/customer/profile">Cancel</a>
+      <button class="btn btn--primary btn--xl" type="submit" style="min-width: 200px;">Save Profile Changes</button>
+    </div>
+  </form>
+</div>
+<script>
+  const cityInput = document.getElementById('city_municipality');
+  const postalInput = document.getElementById('postal_code');
+  cityInput?.addEventListener('blur', async () => {
+    const city = cityInput.value.trim();
+    if (!city || postalInput.value.trim()) return;
+    const response = await fetch(`/api/postal/suggest?city=${encodeURIComponent(city)}`);
+    const data = await response.json();
+    if (data && data.postal_code) postalInput.value = data.postal_code;
+  });
+</script>
+{% endblock %}

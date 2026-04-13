@@ -76,7 +76,8 @@
               </div>
             </header>
 
-            <form class="form-stack">
+            <form class="form-stack" id="profile-general-form" method="post" action="/customer/profile/edit" data-enhance="submit-loading">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <div class="type-label mb-6" style="color: var(--brand-primary); letter-spacing: 0.1em; font-size: 10px;">PRIVATE ACCOUNT DATA</div>
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-10);">
                 <div class="form-group">
@@ -223,10 +224,10 @@
       <span style="display: inline-block; width: 6px; height: 6px; background: var(--color-success); border-radius: 50%; margin-right: 8px;"></span>
       Synchronized at <span id="sync-time">12:00 PM</span>
     </div>
-    <button class="btn btn--white" style="border: 1px solid var(--border-default); font-weight: 600; color: var(--grey-500); background: white;">
+    <button class="btn btn--white" type="button" onclick="window.history.back()" style="border: 1px solid var(--border-default); font-weight: 600; color: var(--grey-500); background: white;">
        <span class="btn__label">Discard Changes</span>
     </button>
-    <button class="btn btn--primary" id="save-settings-btn" style="min-width: 220px; box-shadow: 0 10px 25px rgba(var(--brand-primary-rgb), 0.3);">
+    <button class="btn btn--primary btn--xl" id="save-settings-btn" type="submit" style="min-width: 280px; box-shadow: 0 10px 25px rgba(var(--brand-primary-rgb), 0.3);">
        <span class="btn__label">Commit Account Updates</span>
     </button>
   </footer>

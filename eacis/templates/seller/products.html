@@ -42,23 +42,23 @@
 
            <div class="table-wrapper mt-6">
               <div class="table-toolbar p-4 bg-grey-25 border-b">
-                 <form method="get" action="/seller/products" style="display:flex; gap:var(--sp-3); width:100%; flex-wrap:wrap; align-items:end;">
-                   <div class="form-input-group" style="width:320px;">
-                      <span class="form-input-group__icon">
-                         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                      </span>
-                      <input type="text" class="form-input" id="seller-search" name="q" value="{{ filters.q }}" placeholder="Search by name or ref..." />
-                   </div>
-                   <div style="display:flex; gap:var(--sp-3);">
-                      <select class="form-select" name="status" style="min-width:170px;">
-                         <option value="all" {% if filters.status == 'all' %}selected{% endif %}>Status: All</option>
-                         <option value="active" {% if filters.status == 'active' %}selected{% endif %}>Active</option>
-                         <option value="inactive" {% if filters.status == 'inactive' %}selected{% endif %}>Inactive</option>
-                         <option value="low_stock" {% if filters.status == 'low_stock' %}selected{% endif %}>Low Stock</option>
-                      </select>
-                   </div>
-                   <button class="btn btn--secondary btn--sm" type="submit">Apply</button>
-                 </form>
+                  <form method="get" action="/seller/products" style="display:flex; gap:var(--sp-4); width:100%; flex-wrap:wrap; align-items:end;" data-enhance="submit-loading">
+                    <div class="form-input-group" style="width:360px;">
+                       <span class="form-input-group__icon">
+                          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                       </span>
+                       <input type="text" class="form-input" id="seller-search" name="q" value="{{ filters.q }}" placeholder="Search by name or reference..." />
+                    </div>
+                    <div style="display:flex; gap:var(--sp-3);">
+                       <select class="form-select" name="status" style="min-width:200px;">
+                          <option value="all" {% if filters.status == 'all' %}selected{% endif %}>Status: All Listings</option>
+                          <option value="active" {% if filters.status == 'active' %}selected{% endif %}>Live Storefront</option>
+                          <option value="inactive" {% if filters.status == 'inactive' %}selected{% endif %}>Inactive Listings</option>
+                          <option value="low_stock" {% if filters.status == 'low_stock' %}selected{% endif %}>Critical Inventory</option>
+                       </select>
+                    </div>
+                    <button class="btn btn--secondary btn--lg" type="submit">Filter Catalog</button>
+                  </form>
               </div>
               <table class="data-table">
                  <thead>
@@ -98,9 +98,9 @@
                      </td>
                      <td style="text-align:right; display:flex; gap:var(--sp-2); justify-content:flex-end;">
                         <a href="/seller/products/{{ product.product_ref }}/edit" class="btn btn--secondary btn--sm">Edit</a>
-                        <form method="post" action="/seller/products/{{ product.product_ref }}/delete" onsubmit="return confirm('Delete {{ product.product_ref }}?');">
+                         <form method="post" action="/seller/products/{{ product.product_ref }}/delete" onsubmit="return confirm('Delete {{ product.product_ref }}?');" data-enhance="submit-loading">
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                          <button class="btn btn--ghost btn--sm" type="submit">Delete</button>
+                          <button class="btn btn--ghost btn--sm" type="submit" style="color:var(--color-danger);">Delete</button>
                         </form>
                      </td>
                    </tr>

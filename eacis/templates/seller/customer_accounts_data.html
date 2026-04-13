@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Customer Accounts - Seller Portal{% endblock %}
+{% block content %}
+<div class="page-content seller-shell" style="padding:var(--sp-8);">
+  <h1 class="type-display-sm" style="margin-bottom:var(--sp-6);">Customer Accounts</h1>
+  <div class="kpi-grid mb-6">
+    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Total Accounts</div><div class="type-display-md mt-2">{{ stats.total_accounts }}</div></div></div>
+    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">VIP</div><div class="type-display-md mt-2">{{ stats.vip }}</div></div></div>
+    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">At Risk</div><div class="type-display-md mt-2">{{ stats.at_risk }}</div></div></div>
+    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Average LTV</div><div class="type-display-md mt-2">PHP {{ '%.2f'|format(stats.avg_ltv) }}</div></div></div>
+  </div>
+  <div class="table-wrapper">
+    <table class="data-table">
+      <thead><tr><th>Customer</th><th>Orders</th><th style="text-align:right;">LTV</th><th>Last Order</th><th>Name Fields</th></tr></thead>
+      <tbody>
+        {% for row in accounts %}
+        <tr>
+          <td>{{ row.user.computed_full_name or row.user.full_name or row.user.email }}</td>
+          <td>{{ row.orders }}</td>
+          <td style="text-align:right;">PHP {{ '%.2f'|format(row.ltv) }}</td>
+          <td>{{ row.last_order.strftime('%Y-%m-%d') if row.last_order else '-' }}</td>
+          <td>{{ (row.user.first_name or '-') ~ ' | ' ~ (row.user.middle_name or '-') ~ ' | ' ~ (row.user.last_name or '-') ~ ' | ' ~ (row.user.suffix or '-') }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" style="text-align:center;">No customer account data yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block title %}Join the Marketplace — E-ACIS{% endblock %}
+{% block content %}
+<div class="page-center bg-grey-50" style="padding: var(--sp-20) var(--sp-6);">
+  <div class="stagger-children" style="max-width: var(--container-lg); width: 100%;">
+    <div class="text-center reveal mb-16">
+      <div class="type-label mb-4" style="color: var(--brand-primary); letter-spacing: 0.15em; font-weight: 800;">ONBOARDING</div>
+      <h1 class="type-display-lg mb-4">Choose Your Experience</h1>
+      <p class="type-body-lg text-muted mx-auto" style="max-width: 600px;">Experience the next generation of appliance commerce. Select an account type to begin your journey.</p>
+    </div>
+
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap:var(--sp-10);">
+      <!-- Customer Card -->
+      <a href="/auth/register/customer" class="glass-card glass-card--interactive p-12 reveal" data-delay="100" style="text-decoration:none; display: flex; flex-direction: column; align-items: flex-start; border-radius: var(--radius-3xl); position: relative; overflow: hidden;">
+        <div style="position: absolute; top: 0; right: 0; padding: var(--sp-6); opacity: 0.05;">
+          <svg width="120" height="120" fill="currentColor" viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+        </div>
+        
+        <div style="width: 56px; height: 56px; background: var(--brand-primary); color: white; border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center; margin-bottom: var(--sp-8); box-shadow: var(--shadow-sm);">
+          <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
+        </div>
+        
+        <h2 class="type-h2 mb-4" style="color: var(--grey-900);">Personal Shopper</h2>
+        <p class="type-body-md text-muted mb-10" style="line-height: 1.6;">Browse a curated selection of smart appliances with flexible installments and loyalty benefits.</p>
+        
+        <ul style="list-style: none; padding: 0; margin: 0 0 var(--sp-10) 0; display: grid; gap: var(--sp-3);">
+          <li style="display: flex; align-items: center; gap: var(--sp-3); font-size: var(--text-sm); color: var(--grey-700);">
+            <svg width="16" height="16" fill="none" stroke="var(--color-success)" stroke-width="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg> One-click checkout
+          </li>
+          <li style="display: flex; align-items: center; gap: var(--sp-3); font-size: var(--text-sm); color: var(--grey-700);">
+            <svg width="16" height="16" fill="none" stroke="var(--color-success)" stroke-width="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg> Order tracking stats
+          </li>
+          <li style="display: flex; align-items: center; gap: var(--sp-3); font-size: var(--text-sm); color: var(--grey-700);">
+            <svg width="16" height="16" fill="none" stroke="var(--color-success)" stroke-width="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg> Rewards program access
+          </li>
+        </ul>
+
+        <span class="btn btn--primary btn--xl btn--full" style="margin-top: auto; border-radius: var(--radius-xl);">Create Shopper Account</span>
+      </a>
+
+      <!-- Seller Card -->
+      <a href="/auth/register/seller" class="glass-card glass-card--interactive p-12 reveal" data-delay="200" style="text-decoration:none; display: flex; flex-direction: column; align-items: flex-start; border-radius: var(--radius-3xl); position: relative; overflow: hidden; background: var(--grey-900); border-color: var(--grey-800);">
+        <div style="position: absolute; top: 0; right: 0; padding: var(--sp-6); opacity: 0.1; color: white;">
+          <svg width="120" height="120" fill="currentColor" viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM3 5h18v14H3V5zm2 2h14v10H5V7zm2 2h10v6H7V9z"/></svg>
+        </div>
+
+        <div style="width: 56px; height: 56px; background: white; color: var(--grey-900); border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center; margin-bottom: var(--sp-8); box-shadow: var(--shadow-sm);">
+          <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 3H3v18h18V3zM3 10h18M10 21V10"/></svg>
+        </div>
+
+        <h2 class="type-h2 mb-4" style="color: white;">Business Merchant</h2>
+        <p class="type-body-md mb-10" style="line-height: 1.6; color: var(--grey-300);">Scale your operations with advanced inventory management, analytics, and CRM tools.</p>
+        
+        <ul style="list-style: none; padding: 0; margin: 0 0 var(--sp-10) 0; display: grid; gap: var(--sp-3);">
+          <li style="display: flex; align-items: center; gap: var(--sp-3); font-size: var(--text-sm); color: var(--grey-400);">
+            <svg width="16" height="16" fill="none" stroke="white" stroke-width="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg> Global inventory sync
+          </li>
+          <li style="display: flex; align-items: center; gap: var(--sp-3); font-size: var(--text-sm); color: var(--grey-400);">
+            <svg width="16" height="16" fill="none" stroke="white" stroke-width="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg> Financial reporting docs
+          </li>
+          <li style="display: flex; align-items: center; gap: var(--sp-3); font-size: var(--text-sm); color: var(--grey-400);">
+            <svg width="16" height="16" fill="none" stroke="white" stroke-width="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg> Customer CRM insights
+          </li>
+        </ul>
+
+        <span class="btn btn--xl btn--full" style="margin-top: auto; background: white; color: var(--grey-900); border-radius: var(--radius-xl);">Launch Merchant Store</span>
+      </a>
+    </div>
+
+    {% if not current_user.is_authenticated %}
+    <div class="reveal mt-16 text-center" data-delay="300">
+      <p class="type-body-sm text-muted">Already a member? <a href="/auth/login" class="fw-bold" style="color: var(--brand-primary); text-decoration: none; border-bottom: 2px solid var(--brand-primary-subtle);">Sign in to your portal</a></p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

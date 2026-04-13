@@ -1,17 +1,17 @@
 {% extends "base.html" %}
 {% block title %}System Error - E-ACIS{% endblock %}
 {% block content %}
-<main style="min-height: 80vh; display: flex; align-items: center; justify-content: center; padding: var(--sp-10);">
-  <div class="glass-card reveal" style="text-align: center; max-width: 500px; padding: var(--sp-12) var(--sp-8);">
-    <div style="width: 80px; height: 80px; background: var(--color-danger-subtle); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--sp-6); color: var(--color-danger);">
-      <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+<main class="main-content main-content--center" style="min-height: 80vh;">
+  <div class="glass-card glass-card--interactive reveal" style="text-align: center; max-width: 540px; padding: var(--sp-12) var(--sp-10);">
+    <div style="width: 100px; height: 100px; background: var(--color-danger-subtle); border: 1px solid var(--color-danger-subtle); border-radius: var(--radius-2xl); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--sp-8); color: var(--color-danger);">
+      <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
     </div>
-    <h1 class="type-display-md mb-2" style="color: var(--grey-900);">500</h1>
-    <h2 class="type-h4 mb-4" style="color: var(--grey-600);">System malfunction.</h2>
-    <p class="type-body-sm mb-8" style="color: var(--grey-500);">Our smart hub lost connection. The engineering team has been notified. Please try again later.</p>
-    <div style="display: flex; gap: var(--sp-4); justify-content: center;">
-      <a href="javascript:window.location.reload();" class="btn btn--secondary btn--lg">Try Again</a>
-      <a href="/" class="btn btn--primary btn--lg">Return Home</a>
+    <h1 class="type-display-lg mb-1" style="color: var(--grey-900);">500</h1>
+    <h2 class="type-h3 mb-4" style="color: var(--grey-700);">System Malfunction</h2>
+    <p class="type-body-md mb-10" style="color: var(--grey-500); max-width: 400px; margin-left: auto; margin-right: auto;">Our smart hub lost connection. Our engineering team is troubleshooting the diagnostic reports.</p>
+    <div style="display: flex; gap: var(--sp-4); justify-content: center; flex-wrap: wrap;">
+      <a href="javascript:window.location.reload();" class="btn btn--secondary btn--xl">Try Again</a>
+      <a href="/" class="btn btn--primary btn--xl">Return Home</a>
     </div>
   </div>
 </main>

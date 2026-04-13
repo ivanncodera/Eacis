@@ -9,23 +9,60 @@
 {% block content %}
 <div class="main-content">
   <div class="stagger-children">
+    <nav class="mb-6 stagger-item" aria-label="Breadcrumb">
+      <div class="breadcrumb-wrap">
+        <a href="/customer/home" class="breadcrumb-link type-body-sm">Home</a>
+        <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" style="color: var(--grey-300); opacity: 0.5;"><path d="M9 5l7 7-7 7"/></svg>
+        <span class="type-body-sm fw-bold" style="color: var(--grey-900);">Order History</span>
+      </div>
+    </nav>
     
 
     <!-- Main Content Area -->
     <main style="flex: 1; min-width: 0;">
-      <header style="margin-bottom: var(--sp-8);">
-        <h1 class="type-display-sm">Order History</h1>
-        <p class="type-body-sm text-muted">Track your recent orders, manage returns, and view warranty documents.</p>
+      <header class="seller-header" style="margin-bottom: var(--sp-8);">
+        <div class="seller-header__head">
+          <h1 class="type-display-sm">Order History</h1>
+          <p class="type-body-sm text-muted">Track your recent orders, manage returns, and view warranty documents.</p>
+        </div>
+        <div class="seller-header__actions">
+          <a class="btn btn--secondary btn--sm" href="/shop">Continue Shopping</a>
+        </div>
       </header>
 
-      <form method="get" action="/customer/orders" class="pill-group" style="width: fit-content; margin-bottom: var(--sp-6); display:flex; gap:var(--sp-2); flex-wrap:wrap;">
-        <input type="hidden" name="q" value="{{ filters.q if filters else '' }}">
-        <button class="pill {% if not filters or filters.status == 'all' %}pill--active{% endif %}" name="status" value="all">All Orders</button>
-        <button class="pill {% if filters and filters.status == 'pending' %}pill--active{% endif %}" name="status" value="pending">Processing</button>
-        <button class="pill {% if filters and filters.status == 'packed' %}pill--active{% endif %}" name="status" value="packed">To Ship</button>
-        <button class="pill {% if filters and filters.status == 'delivered' %}pill--active{% endif %}" name="status" value="delivered">Delivered</button>
-        <button class="pill {% if filters and filters.status == 'cancelled' %}pill--active{% endif %}" name="status" value="cancelled">Cancelled</button>
-      </form>
+      <section class="kpi-grid mb-6" aria-label="Order summary">
+        <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Total Orders</div><div class="type-display-md mt-2">{{ stats.total if stats else orders|length }}</div></div></div>
+        <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Processing</div><div class="type-display-md mt-2">{{ stats.pending if stats else 0 }}</div></div></div>
+        <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Shipped</div><div class="type-display-md mt-2">{{ stats.shipped if stats else 0 }}</div></div></div>
+        <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Delivered</div><div class="type-display-md mt-2">{{ stats.delivered if stats else 0 }}</div></div></div>
+      </section>
+
+      <div class="table-wrapper" style="margin-bottom: var(--sp-6);">
+        <form method="get" action="/customer/orders" class="table-toolbar" style="display:flex; gap:var(--sp-3); flex-wrap:wrap; align-items:end;" data-enhance="submit-loading" aria-label="Filter orders">
+          <div class="form-group" style="margin:0; width:320px;">
+            <label class="form-label" for="orders-filter-q">Search</label>
+            <div class="form-input-group">
+              <span class="form-input-group__icon" style="color: var(--grey-400);" aria-hidden="true">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              </span>
+              <input id="orders-filter-q" type="search" class="form-input" name="q" value="{{ filters.q if filters else '' }}" placeholder="Order reference" autocomplete="off" aria-describedby="orders-filter-q-help" />
+            </div>
+            <small id="orders-filter-q-help" class="form-helper">Filter the list by reference text.</small>
+          </div>
+          <div class="form-group" style="margin:0; min-width:170px;">
+            <label class="form-label" for="orders-filter-status">Status</label>
+            <select id="orders-filter-status" class="form-select" name="status" aria-describedby="orders-filter-status-help">
+            <option value="all" {% if not filters or filters.status == 'all' %}selected{% endif %}>All statuses</option>
+            <option value="pending" {% if filters and filters.status == 'pending' %}selected{% endif %}>Processing</option>
+            <option value="packed" {% if filters and filters.status == 'packed' %}selected{% endif %}>To ship</option>
+            <option value="delivered" {% if filters and filters.status == 'delivered' %}selected{% endif %}>Delivered</option>
+            <option value="cancelled" {% if filters and filters.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+          </select>
+            <small id="orders-filter-status-help" class="form-helper">Optional</small>
+          </div>
+          <button class="btn btn--secondary btn--sm" type="submit"><span class="btn__label">Apply filters</span></button>
+        </form>
+      </div>
 
       <!-- Orders List -->
       <div style="display: flex; flex-direction: column; gap: var(--sp-5);">
@@ -79,7 +116,10 @@
           </div>
         </div>
         {% else %}
-        <div class="glass-card p-6 text-muted">No orders found.</div>
+        <div class="glass-card p-6 text-muted" role="status">
+          <div class="type-body-sm fw-semibold">No orders found.</div>
+          <div class="type-body-xs mt-1">Start from the catalog and place your first order to see tracking and invoice history here.</div>
+        </div>
         {% endfor %}
 
       </div>

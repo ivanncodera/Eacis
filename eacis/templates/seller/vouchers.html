@@ -1,101 +1,115 @@
 {% extends 'base.html' %}
-{% block title %}Seller Vouchers — Seller Portal{% endblock %}
+{% block title %}Seller Vouchers - Seller Portal{% endblock %}
 {% block content %}
-<div class="stagger-children">
-  <div class="page-content bg-grey-50 seller-shell">
-    <div class="seller-header reveal">
-      <div class="seller-header__head">
-        <div class="seller-header__meta">
-          <span class="badge seller-header__chip seller-header__chip--danger">CRM Module</span>
-          <span class="type-label" style="color:var(--grey-500);">Voucher Lab</span>
-        </div>
-        <h1 class="type-display-md">Vouchers</h1>
-        <p class="type-body-sm text-muted mt-1">Create store promotions and track voucher performance.</p>
-      </div>
-      <div class="seller-header__actions">
-        <span class="badge badge--success">Promo engine active</span>
-        <button class="btn btn--primary btn--sm" id="create-voucher">Create Voucher</button>
-      </div>
-    </div>
+{% set stats = stats if stats is defined else {'active': 0, 'redemptions_today': 0, 'discount_total': 0, 'expiring_soon': 0} %}
+{% set vouchers = vouchers if vouchers is defined else [] %}
+<div class="page-content seller-shell" style="padding:var(--sp-8);">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--sp-6);">
+    <h1 class="type-display-sm">Vouchers</h1>
+    <a href="/seller/vouchers/create" class="btn btn--primary btn--sm">Create Voucher</a>
+  </div>
 
-    <div class="voucher-layout">
-      <div class="voucher-hero reveal" data-delay="80">
-        <div class="kpi-grid mb-6" style="grid-template-columns: repeat(4, minmax(0, 1fr));">
-          <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Active Vouchers</div><div class="type-display-md mt-2">4</div></div></div>
-          <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Redemptions Today</div><div class="type-display-md mt-2">21</div></div></div>
-          <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Total Discount</div><div class="type-display-md mt-2">PHP 8,140</div></div></div>
-          <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Expiring Soon</div><div class="type-display-md mt-2">2</div></div></div>
-        </div>
+  <div class="kpi-grid mb-6" style="grid-template-columns: repeat(4, minmax(0, 1fr));">
+    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Active Vouchers</div><div class="type-display-md mt-2">{{ stats.active }}</div></div></div>
+    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Redemptions</div><div class="type-display-md mt-2">{{ stats.redemptions_today }}</div></div></div>
+    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Total Discount</div><div class="type-display-md mt-2">PHP {{ '%.2f'|format(stats.discount_total or 0) }}</div></div></div>
+    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Expiring Soon</div><div class="type-display-md mt-2">{{ stats.expiring_soon }}</div></div></div>
+  </div>
 
-        <div class="table-wrapper" style="border:none; box-shadow:none;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--sp-4);">
-            <div>
-              <h3 class="type-h4">Active Promotions</h3>
-              <p class="type-body-sm text-muted mt-1">Voucher performance at a glance with current usage and expiry.</p>
-            </div>
-            <span class="badge badge--pending">2 expiring soon</span>
-          </div>
-          <table class="data-table">
-            <thead>
-              <tr><th>Code</th><th>Type</th><th>Usage</th><th>Ends</th><th>Status</th></tr>
-            </thead>
-            <tbody>
-              <tr><td class="fw-semibold">SAVE10</td><td>10% off selected appliances</td><td>34 / 100</td><td>Apr 10, 2026</td><td><span class="badge badge--success">Active</span></td></tr>
-              <tr><td class="fw-semibold">FANFREE</td><td>Free shipping</td><td>17 / 50</td><td>Apr 4, 2026</td><td><span class="badge badge--warning">Expiring</span></td></tr>
-              <tr><td class="fw-semibold">INSTALL5</td><td>PHP 500 off installment orders</td><td>8 / 25</td><td>Apr 18, 2026</td><td><span class="badge badge--success">Active</span></td></tr>
-            </tbody>
-          </table>
+  {% if create_mode %}
+  <div class="glass-card p-6" style="margin-bottom:var(--sp-6);">
+    <h2 class="type-h4" style="margin:0 0 var(--sp-4) 0;">Create Voucher</h2>
+    <form method="post" action="/seller/vouchers/create" style="display:grid; gap:var(--sp-4);">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div style="display:grid; grid-template-columns: 1.2fr 1fr 1fr; gap:var(--sp-4);">
+        <div>
+          <label class="form-label">Voucher Code</label>
+          <input type="text" name="code" class="form-input" placeholder="e.g. SUMMER15" value="{{ form.code if form else '' }}" required>
+        </div>
+        <div>
+          <label class="form-label">Discount Type</label>
+          <select name="discount_type" class="form-input">
+            <option value="percent" {% if form and form.discount_type == 'percent' %}selected{% endif %}>Percent</option>
+            <option value="fixed" {% if form and form.discount_type == 'fixed' %}selected{% endif %}>Fixed Amount</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">Discount Value</label>
+          <input type="number" step="0.01" min="0" name="discount_value" class="form-input" value="{{ form.discount_value if form else '' }}" required>
         </div>
       </div>
 
-      <div class="voucher-side">
-        <div class="glass-card p-6 reveal" data-delay="120">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--sp-4);">
-            <h3 class="type-h4">Promo Composer</h3>
-            <span class="badge badge--success">Draft</span>
-          </div>
-          <div class="voucher-lab">
-            <div class="form-group">
-              <label class="form-label">Voucher Code</label>
-              <input class="form-input" value="APRIL20">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Discount Type</label>
-              <select class="form-select"><option>Percentage</option><option>Fixed Amount</option><option>Free Shipping</option></select>
-            </div>
-          </div>
-          <div class="form-group mb-4">
-            <label class="form-label">Value</label>
-            <input class="form-input" value="20">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Minimum Spend</label>
-            <input class="form-input" value="5000">
-          </div>
-          <button class="btn btn--secondary btn--full mt-4">Save Draft</button>
-          <div class="type-body-xs text-muted mt-3">Use concise codes and set expiry windows to keep seller promos clean.</div>
+      <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:var(--sp-4);">
+        <div>
+          <label class="form-label">Min Order Amount</label>
+          <input type="number" step="0.01" min="0" name="min_order_amount" class="form-input" value="{{ form.min_order_amount if form else '0' }}">
         </div>
-
-        <div class="glass-card p-6 reveal" data-delay="180">
-          <h3 class="type-h4">Campaign Notes</h3>
-          <div class="ops-list mt-4">
-            <div class="ops-list-item">
-              <div class="type-body-sm fw-semibold">Best used for clearance and bundle pushes</div>
-              <div class="type-body-xs text-muted mt-1">Promote slow movers without degrading margin.</div>
-            </div>
-            <div class="ops-list-item">
-              <div class="type-body-sm fw-semibold">Keep finance approvals visible</div>
-              <div class="type-body-xs text-muted mt-1">Avoid discount stacking on already thin categories.</div>
-            </div>
-          </div>
+        <div>
+          <label class="form-label">Max Uses (blank = unlimited)</label>
+          <input type="number" min="1" name="max_uses" class="form-input" value="{{ form.max_uses if form else '' }}">
+        </div>
+        <div>
+          <label class="form-label">Per User Limit</label>
+          <input type="number" min="1" name="per_user_limit" class="form-input" value="{{ form.per_user_limit if form else '1' }}">
         </div>
       </div>
-    </div>
+
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:var(--sp-4);">
+        <div>
+          <label class="form-label">Valid From</label>
+          <input type="datetime-local" name="valid_from" class="form-input" value="{{ form.valid_from if form else '' }}">
+        </div>
+        <div>
+          <label class="form-label">Valid Until</label>
+          <input type="datetime-local" name="valid_until" class="form-input" value="{{ form.valid_until if form else '' }}">
+        </div>
+      </div>
+
+      <label class="type-body-sm" style="display:flex; align-items:center; gap:var(--sp-2);">
+        <input type="checkbox" name="is_active" value="1" {% if not form or form.get('is_active') %}checked{% endif %}>
+        Activate this voucher immediately
+      </label>
+
+      <div style="display:flex; justify-content:flex-end; gap:var(--sp-3);">
+        <a href="/seller/vouchers" class="btn btn--secondary">Cancel</a>
+        <button type="submit" class="btn btn--primary">Create Voucher</button>
+      </div>
+    </form>
+  </div>
+  {% endif %}
+
+  <div class="table-wrapper">
+    <table class="data-table">
+      <thead>
+        <tr><th>Code</th><th>Description</th><th>Discount</th><th>Usage</th><th>Valid Until</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        {% for voucher in vouchers %}
+        <tr>
+          <td class="fw-semibold">{{ voucher.code }}</td>
+          <td>{{ voucher.voucher_ref or '-' }}</td>
+          <td>
+            {% if voucher.discount_type == 'percent' %}
+              {{ voucher.discount_value }}%
+            {% else %}
+              PHP {{ '%.2f'|format(voucher.discount_value or 0) }}
+            {% endif %}
+          </td>
+          <td>{{ voucher.uses_count or 0 }} / {{ voucher.max_uses or '-' }}</td>
+          <td>{{ voucher.valid_until.strftime('%Y-%m-%d') if voucher.valid_until else '-' }}</td>
+          <td>
+            {% if voucher.is_active %}
+            <span class="badge badge--success">Active</span>
+            {% else %}
+            <span class="badge badge--danger">Inactive</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" style="text-align:center;">No vouchers available.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
 </div>
-<script>
-  document.getElementById('create-voucher')?.addEventListener('click', () => {
-    Toast.info('Voucher builder', 'Voucher creation UI can be expanded into a dedicated form next.');
-  });
-</script>
 {% endblock %}

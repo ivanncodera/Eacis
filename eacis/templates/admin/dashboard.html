@@ -2,119 +2,111 @@
 {% block title %}Dashboard — Admin Portal{% endblock %}
 {% block content %}
 <div class="stagger-children">
-   <div class="page-content bg-grey-50">
-       <div style="display:flex; justify-content:space-between; align-items:flex-end; gap:var(--sp-4); margin-bottom:var(--sp-6);">
-          <div>
-             <h1 class="type-display-md">System Dashboard</h1>
-             <p class="type-body-sm text-muted mt-1">Manage users, monitor products, track sales, review complaints, and watch system security.</p>
-          </div>
-          <div style="display:flex; gap:var(--sp-3); flex-wrap:wrap; align-items:center;">
-             <span class="badge badge--success">System online</span>
-             <button class="btn btn--secondary btn--sm">Global Search</button>
-          </div>
-       </div>
-
-     <div class="kpi-grid mb-6">
-       <div class="glass-card glass-card--kpi">
-          <div class="type-label type-label--sm text-muted">Platform GMV (Today)</div>
-          <div class="type-display-md mt-2 kpi-val" data-format="currency" data-value="1250000">0</div>
-          <div class="type-body-xs text-success mt-1">↑ 8% vs yesterday</div>
-       </div>
-       <div class="glass-card glass-card--kpi">
-          <div class="type-label type-label--sm text-muted">Active Sellers</div>
-          <div class="type-display-md mt-2 kpi-val" data-format="number" data-value="48">0</div>
-          <div class="type-body-xs text-muted mt-1">3 pending approval</div>
-       </div>
-       <div class="glass-card glass-card--kpi">
-          <div class="type-label type-label--sm text-muted">System Errors</div>
-          <div class="type-display-md mt-2 text-danger kpi-val" data-format="number" data-value="0">0</div>
-          <div class="type-body-xs text-success mt-1">All services operational</div>
-       </div>
-       <div class="glass-card glass-card--kpi">
-               <div class="type-label type-label--sm text-muted">Refund Escalations</div>
-          <div class="type-display-md mt-2 kpi-val" data-format="number" data-value="5">0</div>
-          <div class="type-body-xs text-warning mt-1">Require admin review</div>
-       </div>
-     </div>
-
-       <div class="glass-card p-6 mb-6">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--sp-4); gap:var(--sp-4);">
-             <div>
-                <h3 class="type-h4">Quick Access</h3>
-                <p class="type-body-sm text-muted mt-1">Jump directly to the core admin workflows.</p>
-             </div>
-             <span class="badge badge--pending">5 return/refund items</span>
-          </div>
-          <div style="display:flex; gap:var(--sp-3); flex-wrap:wrap;">
-             <a href="/admin/refunds" class="btn btn--primary btn--sm">Refund Queue</a>
-             <a href="/admin/reports" class="btn btn--secondary btn--sm">Sales Reports</a>
-             <a href="/admin/sellers" class="btn btn--secondary btn--sm">Sellers</a>
-             <a href="/admin/customers" class="btn btn--secondary btn--sm">Customers</a>
-             <a href="/admin/audit" class="btn btn--secondary btn--sm">Audit Logs</a>
-             <a href="/admin/settings" class="btn btn--secondary btn--sm">Settings</a>
-          </div>
-       </div>
-
-     <div style="display:grid; grid-template-columns: 2fr 1fr; gap:var(--sp-6);">
-        <!-- Chart placeholder -->
-        <div class="glass-card p-6">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--sp-4);">
-                   <div>
-                      <h3 class="type-h4">Sales Trend Monitor</h3>
-                      <p class="type-body-sm text-muted mt-1">Daily, weekly, and monthly platform sales movement.</p>
-                   </div>
-                   <span class="badge badge--success">Live</span>
-                </div>
-           <div style="height: 240px; background: repeating-linear-gradient(0deg, transparent, transparent 19px, var(--border-default) 20px);">
-              <!-- Line chart CSS mock -->
-              <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
-                 <path d="M0,80 Q10,70 20,75 T40,60 T60,50 T80,30 T100,20 L100,100 L0,100 Z" fill="rgba(0,122,255,0.1)" stroke="var(--brand-primary)" stroke-width="2"></path>
-              </svg>
+   <div class="page-content bg-grey-50" style="padding: var(--sp-12);">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:var(--sp-4); margin-bottom:var(--sp-10);">
+           <div>
+              <h1 class="type-display-md">Platform Nexus</h1>
+              <p class="type-body-sm text-muted mt-1">Real-time supervision of users, inventory, and system security.</p>
            </div>
-        </div>
-        
-        <!-- Alerts -->
-        <div class="glass-card p-0">
-           <div class="p-5 border-b" style="display:flex; justify-content:space-between; align-items:center; gap:var(--sp-4);">
-              <div>
-                <h3 class="type-h4">System Alerts</h3>
-                <p class="type-body-xs text-muted mt-1">Operational and compliance events.</p>
+           <div style="display:flex; gap:var(--sp-3); flex-wrap:wrap; align-items:center;">
+              <div class="system-status-indicator">
+                 <div class="pulse-dot pulse-dot--active"></div>
+                 <span class="type-label" style="font-size: 11px;">System Health: Optimal</span>
               </div>
-              <span class="badge badge--warning">Attention</span>
-           </div>
-           <div class="p-4 border-b hover-bg-light cursor-pointer">
-              <div class="fw-semibold text-danger">Customer Complaint Spike</div>
-              <div class="type-body-sm text-muted">Complaints tagged "late delivery" crossed threshold.</div>
-              <div class="type-body-xs text-muted mt-2">10 mins ago</div>
-           </div>
-           <div class="p-4 border-b hover-bg-light cursor-pointer">
-              <div class="fw-semibold">High-Risk Login Detected</div>
-              <div class="type-body-sm text-muted">Security policy flagged repeated failed admin logins.</div>
-              <div class="type-body-xs text-muted mt-2">1 hour ago</div>
-           </div>
-           <div class="p-4 border-b hover-bg-light cursor-pointer">
-              <div class="fw-semibold">Refund Queue Update</div>
-              <div class="type-body-sm text-muted">5 cases awaiting approval.</div>
-              <div class="type-body-xs text-muted mt-2">2 hours ago</div>
-           </div>
-           <div class="p-4 text-center">
-              <a href="/admin/audit" class="type-body-sm fw-semibold text-primary">View all alerts</a>
            </div>
         </div>
-     </div>
+
+      <div class="kpi-grid mb-10">
+        <div class="glass-card glass-card--kpi">
+           <div class="type-label type-label--sm text-muted">Platform GMV (Today)</div>
+           <div class="type-display-md mt-2">PHP {{ '%.2f'|format(stats.gmv_today or 0) }}</div>
+           <div class="type-body-xs text-muted mt-1">From confirmed customer orders</div>
+        </div>
+        <div class="glass-card glass-card--kpi">
+           <div class="type-label type-label--sm text-muted">Active Sellers</div>
+           <div class="type-display-md mt-2" style="color: var(--brand-primary);">{{ stats.active_sellers }}</div>
+           <div class="type-body-xs text-muted mt-1">Approved merchant accounts</div>
+        </div>
+        <div class="glass-card glass-card--kpi">
+           <div class="type-label type-label--sm text-muted">System Errors</div>
+           <div class="type-display-md mt-2 {% if stats.system_errors > 0 %}text-danger{% endif %}">{{ stats.system_errors }}</div>
+           <div class="type-body-xs {% if stats.system_errors > 0 %}text-warning{% else %}text-success{% endif %} mt-1">
+             {% if stats.system_errors > 0 %}Investigate failed actions{% else %}All services operational{% endif %}
+           </div>
+        </div>
+        <div class="glass-card glass-card--kpi">
+           <div class="type-label type-label--sm text-muted">Compliance Alerts</div>
+           <div class="type-display-md mt-2" style="color: var(--color-warning);">{{ stats.compliance_alerts }}</div>
+           <div class="type-body-xs text-muted mt-1">Review pending validation flags</div>
+        </div>
+      </div>
+
+      <div class="glass-card p-10 mb-10">
+           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--sp-6); gap:var(--sp-4);">
+              <div>
+                 <h3 class="type-h4">Administrative Hub</h3>
+                 <p class="type-body-sm text-muted mt-1">Navigate to core platform governance modules.</p>
+              </div>
+              <span class="badge badge--warning" style="padding: 6px 12px;">{{ alerts|length }} unresolved issues</span>
+           </div>
+           <div style="display:flex; gap:var(--sp-4); flex-wrap:wrap;">
+              <a href="/admin/reports" class="btn btn--secondary btn--lg">Business Intelligence</a>
+              <a href="/admin/sellers" class="btn btn--secondary btn--lg">Merchant Registry</a>
+              <a href="/admin/customers" class="btn btn--secondary btn--lg">Consumer Directory</a>
+              <a href="/admin/audit" class="btn btn--secondary btn--lg">Security Audit</a>
+              <a href="/admin/settings" class="btn btn--secondary btn--lg">Control Panel</a>
+           </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns: 2.2fr 1fr; gap:var(--sp-8);">
+         <div class="glass-card p-10">
+                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--sp-6);">
+                    <div>
+                       <h3 class="type-h4">Sales Trend Monitor</h3>
+                       <p class="type-body-sm text-muted mt-1">Platform-wide sales movement visualization.</p>
+                    </div>
+                    <span class="badge badge--success">Live Sync</span>
+                 </div>
+                 <div class="table-wrapper">
+                    <table class="data-table">
+                       <thead><tr><th>Timeline</th><th style="text-align:right;">Recorded Sales</th></tr></thead>
+                       <tbody>
+                          {% for point in sales_points %}
+                          <tr>
+                             <td class="fw-semibold">{{ point.label }}</td>
+                             <td style="text-align:right;" class="fw-bold">PHP {{ '%.2f'|format(point.value or 0) }}</td>
+                          </tr>
+                          {% else %}
+                          <tr><td colspan="2" style="text-align:center; padding: var(--sp-10);" class="text-muted">No sales activity tracked in this period.</td></tr>
+                          {% endfor %}
+                       </tbody>
+                    </table>
+                 </div>
+         </div>
+         
+         <!-- Alerts -->
+         <div class="glass-card p-0" style="overflow: hidden;">
+            <div class="p-6 border-b" style="display:flex; justify-content:space-between; align-items:center; gap:var(--sp-4); background: var(--grey-25);">
+               <div>
+                 <h3 class="type-h4">System Alerts</h3>
+                 <p class="type-body-xs text-muted mt-1">Recent operational events.</p>
+               </div>
+               <span class="badge badge--warning">Attention</span>
+            </div>
+            <div class="alert-feed">
+               {% for alert in alerts %}
+               <div class="p-6 border-b hover-bg-light cursor-pointer transition-base">
+                  <div class="fw-bold type-body-sm {% if 'Pending' in alert.title or 'Open' in alert.title %}text-danger{% endif %}">{{ alert.title }}</div>
+                  <div class="type-body-xs text-muted mt-1">{{ alert.message }}</div>
+                  <div class="type-body-xs text-muted mt-3" style="font-size: 10px; opacity: 0.7;">{{ alert.time }}</div>
+               </div>
+               {% endfor %}
+            </div>
+            <div class="p-6 text-center">
+               <a href="/admin/audit" class="type-body-sm fw-bold text-primary" style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 4px;">Explore Full Audit Trail <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+            </div>
+         </div>
+      </div>
    </div>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.kpi-val').forEach(el => {
-        const to = parseFloat(el.dataset.value);
-        if (el.dataset.format === 'percent') {
-            el.textContent = to + '%';
-        } else {
-            animateValue(el, 0, to, 1500);
-        }
-    });
-});
-</script>
 {% endblock %}

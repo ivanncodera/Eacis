@@ -2,62 +2,70 @@
 {% block title %}Settings — Admin Portal{% endblock %}
 {% block content %}
 <div class="stagger-children">
-  <div class="page-content bg-grey-50">
-     <div style="display:flex; justify-content:space-between; align-items:flex-end; gap:var(--sp-4); margin-bottom:var(--sp-6);">
-        <div>
-          <h1 class="type-display-md">Platform Settings</h1>
-               <p class="type-body-sm text-muted mt-1">Maintain database security posture and core system configuration.</p>
-        </div>
-        <div style="display:flex; gap:var(--sp-3); align-items:center; flex-wrap:wrap;">
-          <span class="badge badge--success">Saved locally</span>
-          <button class="btn btn--primary" onclick="Toast.success('Saved', 'Settings applied successfully!')">Save Changes</button>
-        </div>
-     </div>
+  <div class="page-content bg-grey-50" style="padding: var(--sp-12);">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:var(--sp-4); margin-bottom:var(--sp-10);">
+         <div>
+           <h1 class="type-display-md">Global Configuration</h1>
+           <p class="type-body-sm text-muted mt-1">Maintain database security posture and orchestrate core platform parameters.</p>
+         </div>
+         <div style="display:flex; gap:var(--sp-3); align-items:center; flex-wrap:wrap;">
+           <span class="badge badge--success" style="padding: 8px 16px; font-weight: 700;">Synchronized Nexus</span>
+         </div>
+      </div>
 
-     <div class="kpi-grid mb-6">
-       <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Maintenance</div><div class="type-display-md mt-2">Off</div></div></div>
-          <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Admin MFA</div><div class="type-display-md mt-2">Required</div></div></div>
-          <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Audit Retention</div><div class="type-display-md mt-2">365 days</div></div></div>
-          <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">DB Backup</div><div class="type-display-md mt-2">Daily</div></div></div>
-     </div>
+      <div class="kpi-grid mb-10">
+           <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Service State</div><div class="type-display-md mt-2">{{ settings_state.maintenance_mode }}</div></div></div>
+           <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Session TTL</div><div class="type-display-md mt-2">{{ settings_state.admin_timeout_minutes }} min</div></div></div>
+           <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Data Retention</div><div class="type-display-md mt-2">{{ settings_state.audit_retention_days }} days</div></div></div>
+           <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Persistence Cycle</div><div class="type-display-md mt-2">{{ settings_state.backup_frequency }}</div></div></div>
+      </div>
 
-     <div style="max-width: 880px;" class="form-stack">
-        <div class="glass-card mb-6 p-6">
-           <h3 class="type-h4 mb-4">Storefront Configuration</h3>
-           <div class="form-stack">
-              <div class="form-group">
-                 <label class="form-label">Platform Name</label>
-                 <input type="text" class="form-input" value="E-ACIS">
-              </div>
-              <div class="form-group">
-                 <label class="form-label">Maintenance Mode</label>
-                 <select class="form-select">
-                    <option>Disabled (Live)</option>
-                    <option>Enabled (Under Maintenance)</option>
-                 </select>
-                 <div class="form-helper">When enabled, customers will see a maintenance screen. Admins can bypass.</div>
-              </div>
-           </div>
-        </div>
-        
-        <div class="glass-card mb-6 p-6">
-           <h3 class="type-h4 mb-4">Security & Database Controls</h3>
-           <div class="form-stack">
-              <div class="form-group">
-                 <label class="form-label">Admin Session Timeout (minutes)</label>
-                 <input type="number" class="form-input" value="15">
-              </div>
-              <div class="form-group">
-                 <label class="form-label">Audit Log Retention</label>
-                 <select class="form-select"><option>90 days</option><option selected>365 days</option><option>730 days</option></select>
-              </div>
-              <div class="form-group">
-                 <label class="form-label">Database Backup Frequency</label>
-                 <select class="form-select"><option>Every 6 hours</option><option selected>Daily</option><option>Weekly</option></select>
-              </div>
-           </div>
-        </div>
-     </div>
+      <div style="max-width: 960px;" class="form-stack">
+         <div class="glass-card mb-10 p-10">
+            <h3 class="type-h4 mb-6">Storefront Orchestration</h3>
+            <div class="form-stack">
+               <div class="form-group">
+                  <label class="form-label">Canonical Platform Name</label>
+                  <input type="text" class="form-input" value="{{ settings_state.platform_name }}" readonly>
+               </div>
+               <div class="form-group">
+                  <label class="form-label">Operational Mode</label>
+                  <select class="form-select">
+                     <option {% if settings_state.maintenance_mode == 'Disabled (Live)' %}selected{% endif %}>Live Production Vector</option>
+                     <option {% if settings_state.maintenance_mode == 'Enabled (Under Maintenance)' %}selected{% endif %}>Maintenance Isolation Mode</option>
+                  </select>
+                  <div class="form-helper">In Isolation Mode, customers are redirected to a maintenance shield. Privileged personnel maintain bypass access.</div>
+               </div>
+            </div>
+         </div>
+         
+         <div class="glass-card mb-10 p-10">
+            <h3 class="type-h4 mb-6">Governance & Retention Policy</h3>
+            <div class="form-stack">
+               <div class="form-group">
+                  <label class="form-label">Administrative Session TTL (Minutes)</label>
+                  <input type="number" class="form-input" value="{{ settings_state.admin_timeout_minutes }}" readonly>
+               </div>
+               <div class="form-group">
+                  <label class="form-label">Audit Persistence Duration</label>
+                  <select class="form-select"><option {% if settings_state.audit_retention_days == 90 %}selected{% endif %}>90 Iterations</option><option {% if settings_state.audit_retention_days == 365 %}selected{% endif %}>365 Iterations</option><option {% if settings_state.audit_retention_days == 730 %}selected{% endif %}>730 Iterations</option></select>
+               </div>
+               <div class="form-group">
+                  <label class="form-label">Persistence Backup Cadence</label>
+                  <select class="form-select"><option {% if settings_state.backup_frequency == 'Every 6 hours' %}selected{% endif %}>Quadratic Daily (6h)</option><option {% if settings_state.backup_frequency == 'Daily' %}selected{% endif %}>Singular Daily</option><option {% if settings_state.backup_frequency == 'Weekly' %}selected{% endif %}>Standard Weekly</option></select>
+               </div>
+               <div class="form-group">
+                  <label class="form-label">Latest Persistence Event</label>
+                  <input type="text" class="form-input fw-bold" value="{{ settings_state.latest_backup }}" readonly>
+               </div>
+            </div>
+         </div>
+
+         <div style="display: flex; justify-content: flex-end; gap: var(--sp-4);">
+            <button class="btn btn--white btn--lg">Discard Draft</button>
+            <button class="btn btn--primary btn--xl" style="min-width: 280px;">Commit Global Changes</button>
+         </div>
+      </div>
   </div>
 </div>
 {% endblock %}

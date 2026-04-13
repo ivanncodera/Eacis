@@ -7,92 +7,116 @@
 {% block title %}Returns & Refunds — E-ACIS{% endblock %}
 
 {% block content %}
+{% set form = form or {} %}
+{% set errors = errors or {} %}
+{% set pending_count = returns|selectattr('status', 'equalto', 'pending')|list|length %}
+{% set accepted_count = returns|selectattr('status', 'equalto', 'accepted')|list|length %}
+{% set refunded_count = returns|selectattr('status', 'equalto', 'refunded')|list|length %}
 <div class="main-content">
   <div class="stagger-children">
+    <nav class="mb-6 stagger-item" aria-label="Breadcrumb">
+      <div class="breadcrumb-wrap">
+        <a href="/customer/home" class="breadcrumb-link type-body-sm">Home</a>
+        <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" style="color: var(--grey-300); opacity: 0.5;"><path d="M9 5l7 7-7 7"/></svg>
+        <span class="type-body-sm fw-bold" style="color: var(--grey-900);">Returns & Refunds</span>
+      </div>
+    </nav>
     
 
     <!-- Main Content Area -->
     <main style="flex: 1; min-width: 0;">
-      <header style="margin-bottom: var(--sp-8); display: flex; justify-content: space-between; align-items: flex-end;">
-         <div>
+      <header class="seller-header" style="margin-bottom: var(--sp-8);">
+         <div class="seller-header__head">
            <h1 class="type-display-sm">Returns & Refunds</h1>
            <p class="type-body-sm text-muted">Manage your return requests and track your refund progress.</p>
          </div>
-         <button class="btn btn--primary btn--sm" id="new-return-trigger">Start New Return</button>
+         <div class="seller-header__actions">
+           <a class="btn btn--secondary btn--sm" href="/customer/orders">View Orders</a>
+           <button class="btn btn--primary btn--sm" id="new-return-trigger">Start New Return</button>
+         </div>
       </header>
 
-      <!-- Active Refund Tracking -->
+      <section class="kpi-grid mb-6" aria-label="Return summary">
+        <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Total Requests</div><div class="type-display-md mt-2">{{ returns|length }}</div></div></div>
+        <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Pending</div><div class="type-display-md mt-2">{{ pending_count }}</div></div></div>
+        <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Accepted</div><div class="type-display-md mt-2">{{ accepted_count }}</div></div></div>
+        <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Refunded</div><div class="type-display-md mt-2">{{ refunded_count }}</div></div></div>
+      </section>
+
+      <!-- Return queue summary -->
       <section class="glass-card stagger-item page-enter" style="margin-bottom: var(--sp-8);">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--sp-6);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--sp-6); flex-wrap: wrap; gap: var(--sp-4);">
           <div>
-            <div class="type-label--sm" style="color: var(--brand-primary); margin-bottom: 4px;">ACTIVE REQUESTS</div>
+            <div class="type-label--sm" style="color: var(--brand-primary); margin-bottom: 4px;">RETURN QUEUE</div>
             <h3 class="type-h4">Track refund progress</h3>
-            <span class="type-body-sm text-muted">Monitor each return request by status.</span>
+            <span class="type-body-sm text-muted">Statuses update as sellers and operations process each request.</span>
           </div>
-          <span class="badge badge--dot badge--pending">{{ returns|length }} requests</span>
+          <span class="badge badge--dot badge--pending">{{ returns|length }} request{% if returns|length != 1 %}s{% endif %}</span>
         </div>
-
-        <!-- Stepper Component -->
-        <div class="status-track">
-          <div class="status-step complete">
-            <div class="status-dot">✓</div>
-            <span class="type-label" style="font-size: 10px;">Submitted</span>
-          </div>
-          <div class="status-step active">
-            <div class="status-dot">2</div>
-            <span class="type-label" style="font-size: 10px;">Reviewing</span>
-          </div>
-          <div class="status-step">
-            <div class="status-dot">3</div>
-            <span class="type-label" style="font-size: 10px;">Pick-up</span>
-          </div>
-          <div class="status-step">
-            <div class="status-dot">4</div>
-            <span class="type-label" style="font-size: 10px;">Refund</span>
-          </div>
-        </div>
-
-        <div style="background: var(--surface-sunken); border-radius: 8px; padding: var(--sp-4); margin-top: var(--sp-6); display: flex; gap: var(--sp-3); align-items: center;">
-          <div style="color: var(--color-warning);">
+        {% if pending_count > 0 %}
+        <div style="background: var(--surface-sunken); border-radius: 8px; padding: var(--sp-4); display: flex; gap: var(--sp-3); align-items: flex-start;" role="status">
+          <div style="color: var(--color-warning); flex-shrink: 0;" aria-hidden="true">
              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
           </div>
-          <p class="type-body-sm">Our team is currently reviewing your photos. Expect an update within <strong>24-48 hours</strong>.</p>
+          <p class="type-body-sm">You have <strong>{{ pending_count }}</strong> request{% if pending_count != 1 %}s{% endif %} awaiting review. Use the history table below for the latest status on each return.</p>
         </div>
+        {% endif %}
       </section>
 
       <!-- Return Request Form (Hidden by default) -->
       <section id="return-form-section" class="glass-card stagger-item page-enter" style="display: none; margin-bottom: var(--sp-8); border: 2px solid var(--brand-primary-light);">
          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--sp-6);">
             <h3 class="type-h4">New Return Request</h3>
-            <button class="btn btn--sm btn--ghost" id="close-form">Cancel</button>
+            <button type="button" class="btn btn--sm btn--ghost" id="close-form">Cancel</button>
          </div>
-        <form class="form-stack" method="post" action="/customer/returns">
+          {% if errors.get('order_ref') or errors.get('reason') or errors.get('description') %}
+          <div class="glass-card" style="margin-bottom: var(--sp-4); border:1px solid var(--color-danger);" role="alert" aria-live="polite">
+            <p class="form-error fw-semibold">Please correct the highlighted fields before submitting.</p>
+            <ul class="type-body-sm" style="margin: var(--sp-2) 0 0 var(--sp-5); color: var(--grey-700);">
+              {% if errors.get('order_ref') %}<li><a href="#return-order-ref" class="breadcrumb-link">Order selection is required.</a></li>{% endif %}
+              {% if errors.get('reason') %}<li><a href="#return-reason" class="breadcrumb-link">Return reason is required.</a></li>{% endif %}
+              {% if errors.get('description') %}<li><a href="#return-description" class="breadcrumb-link">Description must be completed.</a></li>{% endif %}
+            </ul>
+          </div>
+          {% endif %}
+          {% if errors.get('general') %}
+          <div class="glass-card" style="margin-bottom: var(--sp-4); border:1px solid var(--color-danger);">
+           <p class="form-error" role="alert">{{ errors.get('general') }}</p>
+          </div>
+          {% endif %}
+          <form class="form-stack" method="post" action="/customer/returns" data-enhance="submit-loading">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="form-group">
-               <label class="form-label">Select Order</label>
-            <select class="form-select" name="order_ref" required>
+               <label class="form-label" for="return-order-ref">Select order <abbr class="required" title="required">*</abbr></label>
+            <select id="return-order-ref" class="form-select {% if errors.get('order_ref') %}is-error{% endif %}" name="order_ref" required aria-describedby="return-order-ref-help {% if errors.get('order_ref') %}return-order-ref-error{% endif %}">
               {% for order in orders %}
-              <option value="{{ order.order_ref }}">{{ order.order_ref }} ({{ order.created_at.strftime('%b %d, %Y') if order.created_at else '' }})</option>
+              <option value="{{ order.order_ref }}" {% if form.get('order_ref') == order.order_ref %}selected{% endif %}>{{ order.order_ref }} ({{ order.created_at.strftime('%b %d, %Y') if order.created_at else '' }})</option>
               {% else %}
               <option value="">No orders available</option>
               {% endfor %}
                </select>
+              <small id="return-order-ref-help" class="form-helper">Choose the order reference you want to return.</small>
+              {% if errors.get('order_ref') %}<small id="return-order-ref-error" class="form-error" role="alert">{{ errors.get('order_ref') }}</small>{% endif %}
             </div>
             <div class="form-group">
-               <label class="form-label">Reason for Return</label>
-            <select class="form-select" name="reason" required>
-              <option value="Defective / Does not work">Defective / Does not work</option>
-              <option value="Damaged during shipping">Damaged during shipping</option>
-              <option value="Incorrect item received">Incorrect item received</option>
-              <option value="Changed my mind">Changed my mind</option>
+               <label class="form-label" for="return-reason">Reason for return <abbr class="required" title="required">*</abbr></label>
+            <select id="return-reason" class="form-select {% if errors.get('reason') %}is-error{% endif %}" name="reason" required aria-describedby="return-reason-help {% if errors.get('reason') %}return-reason-error{% endif %}">
+              <option value="Defective / Does not work" {% if form.get('reason') == 'Defective / Does not work' %}selected{% endif %}>Defective / Does not work</option>
+              <option value="Damaged during shipping" {% if form.get('reason') == 'Damaged during shipping' %}selected{% endif %}>Damaged during shipping</option>
+              <option value="Incorrect item received" {% if form.get('reason') == 'Incorrect item received' %}selected{% endif %}>Incorrect item received</option>
+              <option value="Changed my mind" {% if form.get('reason') == 'Changed my mind' %}selected{% endif %}>Changed my mind</option>
                </select>
+              <small id="return-reason-help" class="form-helper">Select the closest reason to help us route your request quickly.</small>
+              {% if errors.get('reason') %}<small id="return-reason-error" class="form-error" role="alert">{{ errors.get('reason') }}</small>{% endif %}
             </div>
             <div class="form-group">
-               <label class="form-label">Describe the issue</label>
-            <textarea class="form-textarea" name="description" placeholder="Please explain what happened. Be as detailed as possible."></textarea>
+               <label class="form-label" for="return-description">Describe the issue <abbr class="required" title="required">*</abbr></label>
+            <textarea id="return-description" class="form-textarea {% if errors.get('description') %}is-error{% endif %}" name="description" placeholder="Please explain what happened. Be as detailed as possible." aria-describedby="return-description-help {% if errors.get('description') %}return-description-error{% endif %}">{{ form.get('description', '') }}</textarea>
+            <small id="return-description-help" class="form-helper">Include what happened, when it happened, and the product condition.</small>
+            {% if errors.get('description') %}<small id="return-description-error" class="form-error" role="alert">{{ errors.get('description') }}</small>{% endif %}
             </div>
             <div class="form-group">
-               <label class="form-label">Upload Proof (Photos/Video)</label>
+               <label class="form-label">Upload proof <span class="optional">(optional)</span></label>
                <div style="border: 2px dashed var(--border-medium); border-radius: var(--radius-lg); padding: var(--sp-8); text-align: center; color: var(--grey-400); cursor: pointer;"
                     onmouseover="this.style.borderColor='var(--brand-primary)'"
                     onmouseout="this.style.borderColor='var(--border-medium)'">
@@ -100,7 +124,7 @@
                  <div class="type-body-sm">Click or Drag & Drop items here to upload</div>
                </div>
             </div>
-            <button type="submit" class="btn btn--primary btn--full">Submit Request</button>
+            <button type="submit" class="btn btn--primary btn--full"><span class="btn__label">Submit return request</span></button>
          </form>
       </section>
 
@@ -129,7 +153,10 @@
               </tr>
               {% else %}
               <tr>
-                <td colspan="4" class="text-muted" style="text-align:center; padding:var(--sp-6);">No return requests yet.</td>
+                <td colspan="4" class="text-muted" style="text-align:center; padding:var(--sp-6);">
+                  <div class="type-body-sm fw-semibold">No return requests yet.</div>
+                  <div class="type-body-xs mt-1">Select an order above and submit a return request to start refund tracking.</div>
+                </td>
               </tr>
               {% endfor %}
             </tbody>
@@ -148,5 +175,8 @@
   document.getElementById('close-form').addEventListener('click', () => {
      document.getElementById('return-form-section').style.display = 'none';
   });
+  {% if errors.get('order_ref') or errors.get('reason') or errors.get('description') or errors.get('general') %}
+    document.getElementById('return-form-section').style.display = 'block';
+  {% endif %}
 </script>
 {% endblock %}

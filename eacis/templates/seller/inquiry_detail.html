@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Inquiry {{ ticket.ticket_ref }} - Seller Portal{% endblock %}
+{% block content %}
+<div class="page-content seller-shell" style="max-width:880px; margin:0 auto; padding:var(--sp-8);">
+  <h1 class="type-display-sm" style="margin-bottom:var(--sp-5);">Ticket {{ ticket.ticket_ref }}</h1>
+  {% set form = form or {} %}
+  {% set errors = errors or {} %}
+  {% if errors.get('general') %}
+  <div class="form-error" role="alert" style="margin-bottom:var(--sp-4);">{{ errors.get('general') }}</div>
+  {% endif %}
+  <form method="post" class="glass-card p-6" style="display:grid; gap:var(--sp-4);">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div><strong>Customer:</strong> {{ ticket.customer.computed_full_name if ticket.customer else '-' }}</div>
+    <div><strong>Order:</strong> {{ ticket.order.order_ref if ticket.order else '-' }}</div>
+    <div><strong>Subject:</strong> {{ ticket.subject }}</div>
+    <div>
+      <label class="form-label">Status</label>
+      <select class="form-select" name="status">
+        <option value="open" {% if form.get('status', ticket.status) == 'open' %}selected{% endif %}>Open</option>
+        <option value="in_progress" {% if form.get('status', ticket.status) == 'in_progress' %}selected{% endif %}>In Progress</option>
+        <option value="resolved" {% if form.get('status', ticket.status) == 'resolved' %}selected{% endif %}>Resolved</option>
+        <option value="closed" {% if form.get('status', ticket.status) == 'closed' %}selected{% endif %}>Closed</option>
+      </select>
+      {% if errors.get('status') %}<div class="form-error" role="alert">{{ errors.get('status') }}</div>{% endif %}
+    </div>
+    <div>
+      <label class="form-label">Description / Notes</label>
+      <textarea class="form-textarea" name="description">{{ form.get('description', ticket.description) }}</textarea>
+      {% if errors.get('description') %}<div class="form-error" role="alert">{{ errors.get('description') }}</div>{% endif %}
+    </div>
+    <div style="display:flex; justify-content:flex-end; gap:var(--sp-3);">
+      <a class="btn btn--secondary" href="/seller/inquiries">Back</a>
+      <button class="btn btn--primary" type="submit">Save</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

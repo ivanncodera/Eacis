@@ -16,6 +16,24 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(255), nullable=False)
     role = db.Column(db.Enum('customer','seller','admin', name='user_roles'), nullable=False)
     full_name = db.Column(db.String(255))
+    first_name = db.Column(db.String(100))
+    middle_name = db.Column(db.String(100))
+    last_name = db.Column(db.String(100))
+    suffix = db.Column(db.String(20))
+
+    address_line1 = db.Column(db.String(255))
+    address_line2 = db.Column(db.String(255))
+    barangay = db.Column(db.String(120))
+    city_municipality = db.Column(db.String(120))
+    province = db.Column(db.String(120))
+    region = db.Column(db.String(120))
+    postal_code = db.Column(db.String(20))
+
+    business_name = db.Column(db.String(255))
+    business_permit_path = db.Column(db.String(500))
+    barangay_permit_path = db.Column(db.String(500))
+    mayors_permit_path = db.Column(db.String(500))
+    seller_verification_status = db.Column(db.String(20), default='pending')
     phone = db.Column(db.String(20))
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -30,6 +48,14 @@ class User(UserMixin, db.Model):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+    @property
+    def computed_full_name(self):
+        parts = [self.first_name, self.middle_name, self.last_name, self.suffix]
+        normalized = [str(part).strip() for part in parts if part and str(part).strip()]
+        if normalized:
+            return ' '.join(normalized)
+        return (self.full_name or '').strip()
 
     def __repr__(self):
         return f"<User {self.email} ({self.role})>"

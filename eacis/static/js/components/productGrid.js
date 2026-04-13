@@ -29,6 +29,10 @@ async function addProductToCart(ref, qty){
     throw new Error('Failed to add to cart');
   }
 
+  if (window.EACIS && typeof window.EACIS.refreshMiniCart === 'function') {
+    window.EACIS.refreshMiniCart();
+  }
+
   return true;
 }
 
@@ -38,10 +42,16 @@ window.renderProducts = function(sel, list){
   root.innerHTML = '';
 
   list.forEach(p => {
+    const refValue = p.ref || p.product_ref || '';
+    const imageValue = p.image || p.image_url || '/static/assets/products/refrigerator.webp';
+    const reviewsValue = Number(p.reviews || 0);
+    const ratingRaw = p.rating != null && p.rating !== '' ? Number(p.rating) : NaN;
+    const ratingValue = Number.isFinite(ratingRaw) && ratingRaw > 0 ? ratingRaw : null;
+
     const card = document.createElement('article');
     card.className = 'product-card reveal';
     card.tabIndex = 0;
-    const titleId = 'prod-title-' + (p.ref || Math.random().toString(36).slice(2,8));
+    const titleId = 'prod-title-' + (refValue || Math.random().toString(36).slice(2,8));
     card.setAttribute('aria-labelledby', titleId);
 
     /* ─── IMAGE WRAP ─── */
@@ -51,7 +61,7 @@ window.renderProducts = function(sel, list){
     imgWrap.style.backdropFilter = 'var(--glass-blur-sm)';
 
     const img = document.createElement('img');
-    img.src = p.image;
+    img.src = imageValue;
     img.alt = p.name;
     img.loading = 'lazy';
     imgWrap.appendChild(img);
@@ -91,7 +101,7 @@ window.renderProducts = function(sel, list){
           </div>
           <div class="modal__body pq-layout">
             <div class="pq-image-container">
-              <img src="${p.image}" alt="${p.name}">
+              <img src="${imageValue}" alt="${p.name}">
             </div>
             <div class="pq-details">
               <div class="type-label--sm mb-2" style="letter-spacing:0.06em;">${p.category}</div>
@@ -99,20 +109,20 @@ window.renderProducts = function(sel, list){
               <div class="pq-meta">
                 <div class="rating-badge">
                   <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                  <span class="fw-bold">${p.rating || '4.8'}</span>
+                  <span class="fw-bold">${ratingValue || '4.8'}</span>
                 </div>
                 <span class="dot-divider"></span>
-                <span class="type-body-sm">${p.reviews} reviews</span>
+                <span class="type-body-sm">${reviewsValue} reviews</span>
                 <span class="dot-divider"></span>
                 <span class="type-body-sm fw-semibold ${p.stock > 5 ? 'text-success' : 'text-danger'}">${p.stock > 0 ? (p.stock <= 5 ? 'Only '+p.stock+' left' : 'In Stock') : 'Out of Stock'}</span>
               </div>
               <div class="pq-price">${formatPHP(p.price)}</div>
               <div class="pq-actions">
-                <button class="btn btn--primary btn--lg" data-add-ref="${p.ref}" ${p.stock <= 0 ? 'disabled' : ''}>
+                <button class="btn btn--primary btn--lg" data-add-ref="${refValue}" ${p.stock <= 0 ? 'disabled' : ''}>
                   <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
                   ${window.EACIS?.isAuthenticated ? 'Add to Cart' : 'Sign In to Buy'}
                 </button>
-                <a href="/products/${p.ref}" class="btn btn--secondary btn--square btn--lg" aria-label="View full details" title="View full details">
+                <a href="/products/${refValue}" class="btn btn--secondary btn--square btn--lg" aria-label="View full details" title="View full details">
                   <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </a>
               </div>
@@ -148,7 +158,7 @@ window.renderProducts = function(sel, list){
         if(addBtn){
           addBtn.addEventListener('click', async () => {
             try {
-              await addProductToCart(p.ref, 1);
+              await addProductToCart(refValue, 1);
             } catch (e) {
               if(window.Toast) Toast.error('Could not add to cart', 'Please try again.');
               return;
@@ -178,7 +188,7 @@ window.renderProducts = function(sel, list){
         btn.addEventListener('click', async (ev) => {
           ev.stopPropagation();
           try {
-            await addProductToCart(p.ref, 1);
+            await addProductToCart(refValue, 1);
           } catch (e) {
             if(window.Toast) Toast.error('Could not add to cart', 'Please try again.');
             return;
@@ -207,24 +217,12 @@ window.renderProducts = function(sel, list){
 
     const ref = document.createElement('div');
     ref.className = 'product-card__ref';
-    ref.textContent = p.ref;
+    ref.textContent = refValue;
 
     const title = document.createElement('div');
     title.className = 'product-card__name';
     title.textContent = p.name;
     title.id = titleId;
-
-    // Star rating — spec-exact: star array + numeric value
-    const rating = document.createElement('div');
-    rating.className = 'product-card__rating';
-    const ratingVal = parseFloat(p.rating || 4.8);
-    const fullStars = Math.floor(ratingVal);
-    const halfStar = ratingVal % 1 >= 0.5;
-    let starsHTML = '<div class="product-card__stars">';
-    for(let i = 0; i < fullStars; i++) starsHTML += '★';
-    if(halfStar) starsHTML += '½';
-    starsHTML += '</div>';
-    rating.innerHTML = `${starsHTML}<div class="product-card__review-count">(${p.reviews})</div>`;
 
     const priceRow = document.createElement('div');
     priceRow.className = 'product-card__price-row';
@@ -243,16 +241,30 @@ window.renderProducts = function(sel, list){
       priceRow.appendChild(compare);
     }
 
-    if(p.price > 10000){
+    if(p.installment_enabled){
       const inst = document.createElement('div');
       inst.className = 'product-card__installment';
-      inst.textContent = 'Up to 12mo • 0% Interest';
+      inst.textContent = 'Installments available';
       priceRow.appendChild(inst);
     }
 
     body.appendChild(ref);
     body.appendChild(title);
-    body.appendChild(rating);
+    if(ratingValue != null || reviewsValue > 0){
+      const rating = document.createElement('div');
+      rating.className = 'product-card__rating';
+      let starsHTML = '<div class="product-card__stars">';
+      if(ratingValue != null){
+        const fullStars = Math.floor(ratingValue);
+        const halfStar = ratingValue % 1 >= 0.5;
+        for(let i = 0; i < fullStars; i++) starsHTML += '★';
+        if(halfStar) starsHTML += '½';
+      }
+      starsHTML += '</div>';
+      const reviewPart = reviewsValue > 0 ? `<div class="product-card__review-count">(${reviewsValue})</div>` : '';
+      rating.innerHTML = `${starsHTML}${reviewPart}`;
+      body.appendChild(rating);
+    }
     body.appendChild(priceRow);
 
     /* ─── FOOTER ─── */
@@ -266,10 +278,10 @@ window.renderProducts = function(sel, list){
 
     /* ─── CLICK NAVIGATION ─── */
     card.addEventListener('click', (e) => {
-      if(!e.target.closest('.product-card__action-btn')) window.location.href = `/products/${p.ref}`;
+      if(!e.target.closest('.product-card__action-btn')) window.location.href = `/products/${refValue}`;
     });
     card.addEventListener('keydown', (e) => {
-      if(e.key === 'Enter') window.location.href = `/products/${p.ref}`;
+      if(e.key === 'Enter') window.location.href = `/products/${refValue}`;
     });
 
     card.appendChild(imgWrap);

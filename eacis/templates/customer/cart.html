@@ -20,14 +20,14 @@
                      <div class="type-ref" style="margin-bottom: var(--sp-2);">{{ line.product.product_ref }}</div>
                      <div class="type-price-sm">PHP {{ '%.2f'|format(line.product.price|float) }}</div>
                   </div>
-                  <form method="post" action="/cart" class="form-group" style="width: 90px; margin:0;">
+                  <form method="post" action="/cart" class="form-group" style="width: 90px; margin:0;" data-enhance="submit-loading">
                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                      <input type="hidden" name="action" value="update">
                      <input type="hidden" name="product_id" value="{{ line.product.id }}">
                      <label class="sr-only">Quantity</label>
                      <input type="number" name="qty" value="{{ line.qty }}" min="1" class="form-input" style="height: var(--input-height-sm);" onchange="this.form.submit()">
                   </form>
-                  <form method="post" action="/cart" style="margin:0;">
+                  <form method="post" action="/cart" style="margin:0;" data-enhance="submit-loading">
                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                      <input type="hidden" name="action" value="remove">
                      <input type="hidden" name="product_id" value="{{ line.product.id }}">
@@ -55,19 +55,42 @@
                <span class="type-body-sm text-muted">Shipping</span>
                <span class="type-body-sm fw-semibold text-success">Free</span>
             </div>
+            <div style="display:flex; justify-content:space-between; margin-bottom: var(--sp-3);">
+               <span class="type-body-sm text-muted">Voucher Discount</span>
+               <span class="type-body-sm fw-semibold">- PHP {{ '%.2f'|format(voucher_discount|default(0)|float) }}</span>
+            </div>
+
+            <form method="post" action="/cart" style="margin-bottom: var(--sp-4);" data-enhance="submit-loading">
+               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+               <input type="hidden" name="action" value="apply_voucher">
+               <div class="form-input-group">
+                  <input type="text" name="voucher_code" class="form-input" placeholder="Enter voucher code" value="{{ voucher_code|default('') }}">
+                  <button type="submit" class="btn btn--secondary btn--lg">Apply</button>
+               </div>
+            </form>
+            {% if applied_voucher %}
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: var(--sp-4); gap: var(--sp-2);">
+               <span class="type-body-xs text-muted">Applied: <strong>{{ applied_voucher.code }}</strong></span>
+               <form method="post" action="/cart" style="margin:0;" data-enhance="submit-loading">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <input type="hidden" name="action" value="remove_voucher">
+                  <button type="submit" class="btn btn--ghost" style="padding: 0 var(--sp-2);">Remove</button>
+               </form>
+            </div>
+            {% endif %}
 
             <hr style="border:none; border-top: 1px solid var(--border-default); margin: var(--sp-4) 0;" />
 
             <div style="display:flex; justify-content:space-between; margin-bottom: var(--sp-6);">
                <span class="type-h4">Total</span>
-               <span class="type-price-sm">PHP {{ '%.2f'|format(subtotal|float) }}</span>
+               <span class="type-price-sm">PHP {{ '%.2f'|format(grand_total|default(subtotal)|float) }}</span>
             </div>
 
             <div class="form-stack">
                {% if has_items %}
-               <a id="checkout-link" href="/checkout" class="btn btn--primary btn--full">Proceed to Checkout</a>
+               <a id="checkout-link" href="/checkout" class="btn btn--primary btn--full btn--xl">Proceed to Checkout</a>
                {% else %}
-               <button class="btn btn--primary btn--full" disabled>Proceed to Checkout</button>
+               <button class="btn btn--primary btn--full btn--xl" disabled>Proceed to Checkout</button>
                {% endif %}
                <form method="post" action="/cart" style="margin:0;">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

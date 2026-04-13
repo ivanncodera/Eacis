@@ -1,108 +1,34 @@
 {% extends 'base.html' %}
-{% block title %}Delivery Services — Seller Portal{% endblock %}
+{% block title %}Delivery Services - Seller Portal{% endblock %}
 {% block content %}
-<div class="stagger-children">
-  <div class="page-content bg-grey-50 seller-shell">
-    <div class="seller-header" style="align-items:flex-start; margin-bottom:var(--sp-8);">
-      <div class="seller-header__head">
-        <div class="seller-header__meta">
-          <span class="badge seller-header__chip seller-header__chip--primary">Inventory</span>
-          <span class="type-label" style="color:var(--grey-500);">Logistics Control</span>
-        </div>
-        <h1 class="type-display-md" style="color:var(--grey-900); margin:0;">Delivery Services</h1>
-        <p class="type-body-sm mt-2" style="color:var(--grey-600);">Courier performance, SLA tracking, and failed delivery resolution.</p>
-      </div>
-      <button class="btn btn--secondary btn--sm">Coordinate Carriers</button>
-    </div>
+<div class="page-content seller-shell" style="padding:var(--sp-8);">
+  <h1 class="type-display-sm" style="margin-bottom:var(--sp-6);">Delivery Services</h1>
 
-    <div class="reveal" data-delay="60ms" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:var(--sp-4); margin-bottom:var(--sp-8);">
-      <div class="glass-card p-4" style="background:linear-gradient(180deg, #0052CC10 0%, transparent 40%);">
-        <div class="type-body-xs" style="color:var(--grey-500); font-weight:600;">IN TRANSIT</div>
-        <div class="type-display-md mt-2" style="color:#0052CC; margin:0;">37</div>
-        <div class="type-body-xs mt-2" style="color:var(--grey-600);">Live shipments</div>
-      </div>
-      <div class="glass-card p-4" style="background:linear-gradient(180deg, #00875A10 0%, transparent 40%);">
-        <div class="type-body-xs" style="color:var(--grey-500); font-weight:600;">ON-TIME DELIVERY</div>
-        <div class="type-display-md mt-2" style="color:#00875A; margin:0;">94.7%</div>
-        <div class="type-body-xs mt-2" style="color:var(--color-success); font-weight:600;">Rolling 30d</div>
-      </div>
-      <div class="glass-card p-4" style="background:linear-gradient(180deg, #DE350B10 0%, transparent 40%);">
-        <div class="type-body-xs" style="color:var(--grey-500); font-weight:600;">FAILED ATTEMPTS</div>
-        <div class="type-display-md mt-2" style="color:#DE350B; margin:0;">3</div>
-        <div class="type-body-xs mt-2" style="color:#DE350B; font-weight:600;">Needs callback</div>
-      </div>
-      <div class="glass-card p-4" style="background:linear-gradient(180deg, #FF8B0010 0%, transparent 40%);">
-        <div class="type-body-xs" style="color:var(--grey-500); font-weight:600;">AVG DELIVERY TIME</div>
-        <div class="type-display-md mt-2" style="color:#FF8B00; margin:0;">2.3 days</div>
-        <div class="type-body-xs mt-2" style="color:var(--grey-600);">Metro to provincial</div>
-      </div>
-    </div>
+  <div class="kpi-grid mb-6">
+    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">In Transit</div><div class="type-display-md mt-2">{{ stats.in_transit }}</div></div></div>
+    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">On-time Delivery</div><div class="type-display-md mt-2">{{ '%.1f'|format(stats.on_time_rate or 0) }}%</div></div></div>
+    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Failed Attempts</div><div class="type-display-md mt-2">{{ stats.failed_attempts }}</div></div></div>
+    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Avg Delivery Time</div><div class="type-display-md mt-2">{{ '%.1f'|format(stats.avg_delivery_days or 0) }} days</div></div></div>
+  </div>
 
-    <div class="reveal" data-delay="100ms" style="display:grid; grid-template-columns:1fr; gap:var(--sp-6); margin-bottom:var(--sp-8);">
-      <div class="glass-card p-6" style="background:linear-gradient(180deg, #0052CC10 0%, transparent 40%);">
-        <h3 class="type-h4" style="margin:0 0 var(--sp-4) 0;">Courier Scorecard</h3>
-        <div style="display:flex; flex-direction:column; gap:var(--sp-5);">
-          <div>
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--sp-2);">
-              <div class="type-h5 fw-semibold">FastTrack Logistics</div>
-              <span class="badge badge--success">Preferred</span>
-            </div>
-            <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:var(--sp-3); margin-top:var(--sp-3); padding-bottom:var(--sp-4);">
-              <div><div class="type-body-xs text-muted">Assigned</div><div class="type-body-sm fw-semibold">18 shipments</div></div>
-              <div><div class="type-body-xs text-muted">On-Time</div><div class="type-body-sm fw-semibold" style="color:#00875A;">96% ✓</div></div>
-              <div><div class="type-body-xs text-muted">Failed</div><div class="type-body-sm fw-semibold">1</div></div>
-              <div><div class="type-body-xs text-muted">Avg Time</div><div class="type-body-sm fw-semibold">1.8 days</div></div>
-            </div>
-          </div>
-          <div>
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--sp-2);">
-              <div class="type-h5 fw-semibold">NationX Delivery</div>
-              <span class="badge badge--warning">Monitor</span>
-            </div>
-            <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:var(--sp-3); margin-top:var(--sp-3); padding-bottom:var(--sp-4);">
-              <div><div class="type-body-xs text-muted">Assigned</div><div class="type-body-sm fw-semibold">11 shipments</div></div>
-              <div><div class="type-body-xs text-muted">On-Time</div><div class="type-body-sm fw-semibold">92%</div></div>
-              <div><div class="type-body-xs text-muted">Failed</div><div class="type-body-sm fw-semibold">2</div></div>
-              <div><div class="type-body-xs text-muted">Avg Time</div><div class="type-body-sm fw-semibold">2.6 days</div></div>
-            </div>
-          </div>
-          <div>
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--sp-2);">
-              <div class="type-h5 fw-semibold">IslandShip Express</div>
-              <span class="badge badge--success">Healthy</span>
-            </div>
-            <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:var(--sp-3); margin-top:var(--sp-3);">
-              <div><div class="type-body-xs text-muted">Assigned</div><div class="type-body-sm fw-semibold">8 shipments</div></div>
-              <div><div class="type-body-xs text-muted">On-Time</div><div class="type-body-sm fw-semibold" style="color:#00875A;">95% ✓</div></div>
-              <div><div class="type-body-xs text-muted">Failed</div><div class="type-body-sm fw-semibold">0</div></div>
-              <div><div class="type-body-xs text-muted">Avg Time</div><div class="type-body-sm fw-semibold">3.1 days</div></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="reveal" data-delay="140ms">
-      <div class="glass-card p-6">
-        <h3 class="type-h4" style="margin:0 0 var(--sp-4) 0;">Delivery Strategy</h3>
-        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:var(--sp-4);">
-          <div style="padding:var(--sp-4); background:linear-gradient(180deg, #00875A10 0%, transparent 40%); border-radius:var(--radius-md); border:1px solid #00875A30;">
-            <div style="font-size:18px; margin-bottom:var(--sp-2);">⚡</div>
-            <div class="type-body-sm fw-semibold">Escalate Failed</div>
-            <div class="type-body-xs text-muted mt-2">Contact within 12 hrs to prevent cancellation.</div>
-          </div>
-          <div style="padding:var(--sp-4); background:linear-gradient(180deg, #FF8B0010 0%, transparent 40%); border-radius:var(--radius-md); border:1px solid #FF8B0030;">
-            <div style="font-size:18px; margin-bottom:var(--sp-2);">🎯</div>
-            <div class="type-body-sm fw-semibold">Smart Routing</div>
-            <div class="type-body-xs text-muted mt-2">Preferred couriers for high-value appliances.</div>
-          </div>
-          <div style="padding:var(--sp-4); background:linear-gradient(180deg, #0052CC10 0%, transparent 40%); border-radius:var(--radius-md); border:1px solid #0052CC30;">
-            <div style="font-size:18px; margin-bottom:var(--sp-2);">📅</div>
-            <div class="type-body-sm fw-semibold">Buffer Spikes</div>
-            <div class="type-body-xs text-muted mt-2">Plan for seasonal lead-time increases.</div>
-          </div>
-        </div>
-      </div>
+  <div class="glass-card p-6">
+    <h2 class="type-h4" style="margin:0 0 var(--sp-4) 0;">Recent Shipments</h2>
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead><tr><th>Order</th><th>Status</th><th>Shipped</th><th>Delivered</th></tr></thead>
+        <tbody>
+          {% for row in recent_shipments %}
+          <tr>
+            <td><a href="/seller/orders/{{ row.order_ref }}">{{ row.order_ref }}</a></td>
+            <td>{{ row.status|title }}</td>
+            <td>{{ row.shipped_at.strftime('%Y-%m-%d') if row.shipped_at else '-' }}</td>
+            <td>{{ row.delivered_at.strftime('%Y-%m-%d') if row.delivered_at else '-' }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="4" style="text-align:center;">No shipment records yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
   </div>
 </div>

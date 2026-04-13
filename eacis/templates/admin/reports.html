@@ -3,14 +3,24 @@
 {% block content %}
 <div class="stagger-children">
   <div class="page-content bg-grey-50">
-    <div style="display:flex; justify-content:space-between; align-items:flex-end; gap:var(--sp-4); margin-bottom:var(--sp-6);">
-      <div>
+    <nav class="mb-6" aria-label="Breadcrumb">
+      <div class="breadcrumb-wrap">
+        <a href="/admin/dashboard" class="breadcrumb-link type-body-sm">Dashboard</a>
+        <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" style="color: var(--grey-300); opacity: 0.5;"><path d="M9 5l7 7-7 7"/></svg>
+        <span class="type-body-sm fw-bold" style="color: var(--grey-900);">Reports</span>
+      </div>
+    </nav>
+
+    <div class="seller-header" style="margin-bottom:var(--sp-6);">
+      <div class="seller-header__head">
         <h1 class="type-display-md">Sales & Feedback Reports</h1>
         <p class="type-body-sm text-muted mt-1">Track daily, weekly, and monthly sales, plus feedback and complaint trends.</p>
       </div>
-      <div style="display:flex; gap:var(--sp-3); align-items:center; flex-wrap:wrap;">
+      <div class="seller-header__actions">
         <span class="badge badge--success">Monthly snapshot ready</span>
         <a class="btn btn--secondary btn--sm" href="/admin/reports/export">Export CSV</a>
+        <a class="btn btn--secondary btn--sm" href="/admin/reports/export/excel">Export Excel</a>
+        <a class="btn btn--secondary btn--sm" href="/admin/reports/export/pdf">Export PDF</a>
       </div>
     </div>
 
@@ -36,7 +46,10 @@
             </tr>
             {% else %}
             <tr>
-              <td colspan="4" class="text-muted" style="text-align:center; padding:var(--sp-6);">No complaint trends available yet.</td>
+              <td colspan="4" class="text-muted" style="text-align:center; padding:var(--sp-6);">
+                <div class="type-body-sm fw-semibold">No complaint trends available yet.</div>
+                <div class="type-body-xs mt-1">As returns and feedback are filed, this table will show 24-hour and 7-day trend movement.</div>
+              </td>
             </tr>
             {% endfor %}
           </tbody>

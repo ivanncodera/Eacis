@@ -29,45 +29,36 @@
 
       <!-- Main Text -->
       <article class="stagger-children">
-        <div class="glass-card" style="background: white; border-color: var(--border-medium); padding: var(--sp-12); box-shadow: var(--shadow-sm);">
-          <p class="type-body-lg mb-12" style="color: var(--grey-600); line-height: 1.8;">
-            This is a placeholder for the <strong>{{ title }}</strong> of the E-ACISS platform. In a production environment, this page would contain the full legal, contact, or biographical text as required by law and business operations.
+        <div class="glass-card glass-card--interactive" style="background: var(--glass-surface); backdrop-filter: var(--glass-blur-md); border: 1px solid var(--glass-border-strong); padding: var(--sp-12); box-shadow: var(--shadow-sm); border-radius: var(--radius-2xl);">
+          <p class="type-body-lg mb-12" style="color: var(--grey-700); line-height: 1.8; font-weight: 450;">
+            {{ intro }}
           </p>
 
-          <h2 class="type-h3 mb-6" style="border-bottom: 2px solid var(--surface-sunken); padding-bottom: var(--sp-2);">Core Principles</h2>
-          <p class="type-body-md mb-6" style="color: var(--grey-700); line-height: 1.8;">
-            At E-ACIS, we prioritize transparency, security, and user performance. Whether you are a customer browsing for the latest smart devices or a seller managing a multi-brand inventory, our platform is designed to facilitate high-trust commerce.
-          </p>
-
-          <div style="background: var(--surface-sunken); border-radius: var(--radius-lg); padding: var(--sp-8); margin: var(--sp-10) 0;">
-            <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: var(--sp-4);">
-              <li style="display: flex; gap: var(--sp-4);">
-                <span style="color: var(--brand-primary); font-weight: 800;">01</span>
+          <h2 class="type-h3 mb-6" style="border-bottom: 2px solid var(--brand-primary-subtle-2); padding-bottom: var(--sp-2); color: var(--grey-900);">Core Principles</h2>
+          <div style="background: var(--brand-primary-subtle-2); border: 1px solid var(--brand-primary-subtle); border-radius: var(--radius-xl); padding: var(--sp-8); margin: var(--sp-10) 0;">
+            <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: var(--sp-6);">
+              {% for item in principles %}
+              <li style="display: flex; gap: var(--sp-5); align-items: flex-start;">
+                <span class="flex-shrink-0" style="width: 32px; height: 32px; background: var(--brand-primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.75rem;">{{ loop.index }}</span>
                 <div>
-                  <strong class="type-body-md" style="display: block; margin-bottom: 2px; color: var(--grey-900);">Utility-First Design</strong>
-                  <span class="type-body-sm" style="color: var(--grey-500);">We focus on speed and clarity in every navigation path.</span>
+                  <strong class="type-body-md" style="display: block; margin-bottom: 4px; color: var(--grey-900);">{{ item.title }}</strong>
+                  <span class="type-body-sm" style="color: var(--grey-600); line-height: 1.6;">{{ item.description }}</span>
                 </div>
               </li>
-              <li style="display: flex; gap: var(--sp-4);">
-                <span style="color: var(--brand-primary); font-weight: 800;">02</span>
-                <div>
-                  <strong class="type-body-md" style="display: block; margin-bottom: 2px; color: var(--grey-900);">Secure Transactions</strong>
-                  <span class="type-body-sm" style="color: var(--grey-500);">Integrated with multi-tier portal guards and PayMongo processing.</span>
-                </div>
-              </li>
+              {% endfor %}
             </ul>
           </div>
 
-          <div style="padding-top: var(--sp-12); margin-top: var(--sp-12); border-top: 1px solid var(--border-subtle); color: var(--grey-400);">
-            <p class="type-body-xs">
-              Last Updated: April 02, 2026<br>
-              Document Reference: ACIS-{{ title[:3].upper() }}-2026
+          <div style="padding-top: var(--sp-12); margin-top: var(--sp-12); border-top: 1px solid var(--glass-border); color: var(--grey-400);">
+            <p class="type-body-xs" style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: var(--sp-4);">
+              <span>Last Updated: <strong style="color: var(--grey-500);">{{ updated_at }}</strong></span>
+              <span>Document Ref: <code style="background: var(--grey-100); padding: 2px 6px; border-radius: 4px;">{{ doc_ref }}</code></span>
             </p>
           </div>
         </div>
 
         <div style="margin-top: var(--sp-12); display: flex; align-items: center; justify-content: center; gap: var(--sp-6);">
-          <a href="/" class="btn btn--secondary">Back to Home</a>
+          <a href="/" class="btn btn--secondary btn--lg">Back to Home</a>
           <button class="btn btn--ghost btn--sm" onclick="window.scrollTo({top:0, behavior:'smooth'})">Scroll to Top</button>
         </div>
       </article>

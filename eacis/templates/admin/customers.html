@@ -2,144 +2,170 @@
 {% block title %}Customers — Admin Portal{% endblock %}
 {% block content %}
 <div class="stagger-children">
-  <div class="page-content bg-grey-50">
-    <div style="display:flex; justify-content:space-between; align-items:flex-end; gap:var(--sp-4); margin-bottom:var(--sp-6);">
+  <div class="page-content bg-grey-50" style="padding: var(--sp-12);">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:var(--sp-4); margin-bottom:var(--sp-10);">
       <div>
-        <h1 class="type-display-md">User Management</h1>
-        <p class="type-body-sm text-muted mt-1">Manage customers, sellers, and admins with search, filters, role updates, and account controls.</p>
+        <h1 class="type-display-md">Identity Management</h1>
+        <p class="type-body-sm text-muted mt-1">Global registry for platform consumers, merchants, and internal personnel.</p>
       </div>
-      <a class="btn btn--secondary btn--sm" href="/admin/customers/export?q={{ filters.q }}&role={{ filters.role }}&status={{ filters.status }}">Export CSV</a>
+      <div style="display:flex; gap:var(--sp-4);">
+        <a class="btn btn--white" href="/admin/customers/export?q={{ filters.q }}&role={{ filters.role }}&status={{ filters.status }}">
+           <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right: 8px;"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+           Export Directory (CSV)
+        </a>
+      </div>
     </div>
 
-    <div class="kpi-grid mb-6">
-      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Total Users</div><div class="type-display-md mt-2">{{ stats.total }}</div></div></div>
-      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Active Users</div><div class="type-display-md mt-2">{{ stats.active }}</div></div></div>
-      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Customers</div><div class="type-display-md mt-2">{{ stats.customers }}</div></div></div>
-      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Sellers / Admins</div><div class="type-display-md mt-2">{{ stats.sellers }} / {{ stats.admins }}</div></div></div>
+    <div class="kpi-grid mb-10">
+      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Platform Population</div><div class="type-display-md mt-2">{{ stats.total }}</div></div></div>
+      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Active Sessions</div><div class="type-display-md mt-2" style="color: var(--color-success);">{{ stats.active }}</div></div></div>
+      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Consumers</div><div class="type-display-md mt-2">{{ stats.customers }}</div></div></div>
+      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Personnel Hub</div><div class="type-display-md mt-2">{{ stats.sellers }} / {{ stats.admins }}</div></div></div>
     </div>
 
-    <div class="glass-card p-6 mb-6">
-      <h3 class="type-h4">Create User</h3>
-      <form method="post" action="/admin/customers" class="form-stack mt-4">
+    <!-- User Creation Hub -->
+    <div class="glass-card p-10 mb-10" style="border-top: 4px solid var(--brand-primary);">
+      <div style="margin-bottom: var(--sp-6);">
+        <h3 class="type-h4">Direct Identity Creation</h3>
+        <p class="type-body-sm text-muted mt-1">Privileged operation for manual account provisioning.</p>
+      </div>
+      <form method="post" action="/admin/customers" class="form-stack" data-enhance="submit-loading">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="action" value="create">
-        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:var(--sp-4);">
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:var(--sp-6);">
           <div class="form-group">
-            <label class="form-label" for="new_full_name">Full Name</label>
-            <input class="form-input" id="new_full_name" name="full_name" required minlength="2" placeholder="User full name">
+            <label class="form-label" for="new_full_name">Legal Name <abbr class="required">*</abbr></label>
+            <input class="form-input" id="new_full_name" name="full_name" required minlength="2" placeholder="e.g. Maria Clara">
           </div>
           <div class="form-group">
-            <label class="form-label" for="new_email">Email</label>
-            <input class="form-input" id="new_email" name="email" type="email" required placeholder="name@example.com">
+            <label class="form-label" for="new_email">Email Vector <abbr class="required">*</abbr></label>
+            <input class="form-input" id="new_email" name="email" type="email" required placeholder="user@eacis.com">
           </div>
           <div class="form-group">
-            <label class="form-label" for="new_role">Role</label>
+            <label class="form-label" for="new_role">System Role <abbr class="required">*</abbr></label>
             <select class="form-select" id="new_role" name="role">
-              <option value="customer">Customer</option>
-              <option value="seller">Seller</option>
-              <option value="admin">Admin</option>
+              <option value="customer">Consumer</option>
+              <option value="seller">Merchant Partner</option>
+              <option value="admin">Platform Personnel</option>
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label" for="new_password">Password</label>
-            <input class="form-input" id="new_password" name="password" type="password" required minlength="8" placeholder="Minimum 8 characters">
+            <label class="form-label" for="new_password">Security Key <abbr class="required">*</abbr></label>
+            <input class="form-input" id="new_password" name="password" type="password" required minlength="8" placeholder="••••••••">
           </div>
         </div>
-        <div style="display:flex; justify-content:flex-end;">
-          <button class="btn btn--primary btn--sm" type="submit">Create User</button>
+        <div style="display:flex; justify-content:flex-end; margin-top: var(--sp-6); padding-top: var(--sp-6); border-top: 1px solid var(--border-subtle);">
+          <button class="btn btn--primary btn--xl" type="submit" style="min-width: 240px;">Provision Identity</button>
         </div>
       </form>
     </div>
 
-    <div class="glass-card p-6 mb-6">
-      <h3 class="type-h4">Search and Filters</h3>
-      <form method="get" action="/admin/customers" class="form-stack mt-4">
-        <div style="display:grid; grid-template-columns:2fr 1fr 1fr auto; gap:var(--sp-4); align-items:end;">
+    <!-- Search & Filters -->
+    <div class="glass-card p-8 mb-10">
+      <form method="get" action="/admin/customers" class="form-stack" data-enhance="submit-loading">
+        <div style="display:grid; grid-template-columns:1fr 220px 220px auto; gap:var(--sp-6); align-items:end;">
           <div class="form-group">
-            <label class="form-label" for="q">Search name or email</label>
-            <input class="form-input" id="q" name="q" value="{{ filters.q }}" placeholder="Search users">
+            <label class="form-label" for="q">Identity Search</label>
+            <div class="form-input-group">
+               <span class="form-input-group__icon" style="color: var(--grey-400);">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </span>
+               <input class="form-input" id="q" name="q" value="{{ filters.q }}" placeholder="Search by name or email vector...">
+            </div>
           </div>
           <div class="form-group">
-            <label class="form-label" for="role">Role</label>
+            <label class="form-label" for="role">Filter by Role</label>
             <select class="form-select" id="role" name="role">
-              <option value="all" {% if filters.role == 'all' %}selected{% endif %}>All</option>
-              <option value="customer" {% if filters.role == 'customer' %}selected{% endif %}>Customer</option>
-              <option value="seller" {% if filters.role == 'seller' %}selected{% endif %}>Seller</option>
-              <option value="admin" {% if filters.role == 'admin' %}selected{% endif %}>Admin</option>
+              <option value="all" {% if filters.role == 'all' %}selected{% endif %}>All System Roles</option>
+              <option value="customer" {% if filters.role == 'customer' %}selected{% endif %}>Consumer</option>
+              <option value="seller" {% if filters.role == 'seller' %}selected{% endif %}>Merchant</option>
+              <option value="admin" {% if filters.role == 'admin' %}selected{% endif %}>Personnel</option>
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label" for="status">Status</label>
+            <label class="form-label" for="status">Account State</label>
             <select class="form-select" id="status" name="status">
-              <option value="all" {% if filters.status == 'all' %}selected{% endif %}>All</option>
-              <option value="active" {% if filters.status == 'active' %}selected{% endif %}>Active</option>
-              <option value="inactive" {% if filters.status == 'inactive' %}selected{% endif %}>Inactive</option>
+              <option value="all" {% if filters.status == 'all' %}selected{% endif %}>Show All States</option>
+              <option value="active" {% if filters.status == 'active' %}selected{% endif %}>Active Only</option>
+              <option value="inactive" {% if filters.status == 'inactive' %}selected{% endif %}>Deactivated Only</option>
             </select>
           </div>
-          <button class="btn btn--secondary btn--sm" type="submit">Apply</button>
+          <button class="btn btn--secondary btn--lg" type="submit">Execute Filter</button>
         </div>
       </form>
     </div>
 
-    <div class="glass-card p-6">
-      <div class="table-wrapper" style="border:none; box-shadow:none;">
+    <!-- User Grid -->
+    <div class="glass-card p-10">
+      <div class="table-wrapper">
         <table class="data-table">
-          <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
+          <thead>
+            <tr>
+              <th>Identity</th>
+              <th>System Role</th>
+              <th>Status</th>
+              <th>Created Date</th>
+              <th style="text-align:right;">Management</th>
+            </tr>
+          </thead>
           <tbody>
             {% for user in users %}
             <tr>
-              <td class="fw-semibold">{{ user.full_name or 'Unnamed User' }}</td>
-              <td>{{ user.email }}</td>
               <td>
-                <form method="post" action="/admin/customers?q={{ filters.q }}&role={{ filters.role }}&status={{ filters.status }}" style="display:flex; gap:var(--sp-2); align-items:center;">
+                <div class="fw-bold">{{ user.full_name or 'Anonymous Entity' }}</div>
+                <div class="type-body-xs text-muted mt-1">{{ user.email }}</div>
+              </td>
+              <td>
+                <form method="post" action="/admin/customers?q={{ filters.q }}&role={{ filters.role }}&status={{ filters.status }}" style="display:flex; gap:var(--sp-2); align-items:center;" data-enhance="submit-loading">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                   <input type="hidden" name="action" value="update">
                   <input type="hidden" name="user_id" value="{{ user.id }}">
                   <input type="hidden" name="full_name" value="{{ user.full_name or '' }}">
-                  <select class="form-select" name="role" style="min-width:120px;">
-                    <option value="customer" {% if user.role == 'customer' %}selected{% endif %}>Customer</option>
-                    <option value="seller" {% if user.role == 'seller' %}selected{% endif %}>Seller</option>
-                    <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
+                  <select class="form-select form-select--sm" name="role" style="min-width:140px;">
+                    <option value="customer" {% if user.role == 'customer' %}selected{% endif %}>Consumer</option>
+                    <option value="seller" {% if user.role == 'seller' %}selected{% endif %}>Merchant</option>
+                    <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Personnel</option>
                   </select>
                   <input type="hidden" name="is_active" value="{{ 1 if user.is_active else 0 }}">
-                  <button class="btn btn--ghost btn--xs" type="submit">Save</button>
+                  <button class="btn btn--ghost btn--xs" type="submit">Update</button>
                 </form>
               </td>
               <td>
-                {% if user.is_active %}
-                <span class="badge badge--success">Active</span>
-                {% else %}
-                <span class="badge badge--danger">Inactive</span>
-                {% endif %}
+                <span class="badge {% if user.is_active %}badge--success{% else %}badge--danger{% endif %} badge--dot">
+                  {{ 'Active' if user.is_active else 'Deactivated' }}
+                </span>
               </td>
-              <td>{{ user.created_at.strftime('%Y-%m-%d') if user.created_at else '-' }}</td>
-              <td>
-                <div style="display:flex; gap:var(--sp-2); flex-wrap:wrap;">
-                  <form method="post" action="/admin/customers?q={{ filters.q }}&role={{ filters.role }}&status={{ filters.status }}" style="display:inline;">
+              <td class="text-muted">{{ user.created_at.strftime('%b %d, %Y') if user.created_at else '-' }}</td>
+              <td style="text-align:right;">
+                <div style="display:flex; gap:var(--sp-3); justify-content:flex-end; align-items:center;">
+                  <form method="post" action="/admin/customers?q={{ filters.q }}&role={{ filters.role }}&status={{ filters.status }}" style="display:inline;" data-enhance="submit-loading">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <input type="hidden" name="action" value="update">
                     <input type="hidden" name="user_id" value="{{ user.id }}">
                     <input type="hidden" name="full_name" value="{{ user.full_name or '' }}">
                     <input type="hidden" name="role" value="{{ user.role }}">
                     <input type="hidden" name="is_active" value="{{ 0 if user.is_active else 1 }}">
-                    <button class="btn btn--secondary btn--xs" type="submit">{{ 'Deactivate' if user.is_active else 'Activate' }}</button>
+                    <button class="btn btn--secondary btn--xs" type="submit">{{ 'Freeze' if user.is_active else 'Restore' }}</button>
                   </form>
-                  <form method="post" action="/admin/customers?q={{ filters.q }}&role={{ filters.role }}&status={{ filters.status }}" style="display:inline;" onsubmit="return confirm('Delete {{ user.email }}? This action cannot be undone.');">
+                  <form method="post" action="/admin/customers?q={{ filters.q }}&role={{ filters.role }}&status={{ filters.status }}" style="display:inline;" onsubmit="return confirm('Purge identity record for {{ user.email }}?');" data-enhance="submit-loading">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <input type="hidden" name="action" value="delete">
                     <input type="hidden" name="user_id" value="{{ user.id }}">
-                    <button class="btn btn--danger btn--xs" type="submit">Delete</button>
+                    <button class="btn btn--ghost btn--xs" type="submit" style="color: var(--color-danger);">Purge</button>
                   </form>
                 </div>
               </td>
             </tr>
             {% else %}
             <tr>
-              <td colspan="6" class="text-muted" style="text-align:center; padding:var(--sp-6);">No users found for the selected filters.</td>
+              <td colspan="5" class="text-muted" style="text-align:center; padding:var(--sp-12);">No identity records detected within current parameters.</td>
             </tr>
             {% endfor %}
           </tbody>
         </table>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:var(--sp-6);">
+        <span class="type-body-xs text-muted">Exposed Registry: {{ users|length }} identities mapped</span>
       </div>
     </div>
   </div>

@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}Settings - Seller Portal{% endblock %}
+{% block content %}
+<div class="page-content seller-shell" style="padding:var(--sp-8); max-width:980px; margin:0 auto;">
+  <h1 class="type-display-sm" style="margin-bottom:var(--sp-2);">Settings</h1>
+  <p class="type-body-sm text-muted" style="margin-bottom:var(--sp-6);">Manage your operational and account settings from one place.</p>
+
+  <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:var(--sp-6);">
+    {% for card in settings_cards %}
+    <a href="{{ card.href }}" class="glass-card glass-card--interactive" style="text-decoration:none; color:inherit; padding:var(--sp-8); display:block;">
+      <div class="type-h4 mb-2">{{ card.title }}</div>
+      <div class="type-body-sm text-muted">{{ card.description }}</div>
+      <div class="type-label mt-6" style="color: var(--brand-primary); font-size: 10px; letter-spacing: 0.1em;">CONFIGURE MODULE →</div>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

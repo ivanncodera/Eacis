@@ -1,88 +1,41 @@
 {% extends 'base.html' %}
-{% block title %}Inventory — Seller Portal{% endblock %}
+{% block title %}Inventory - Seller Portal{% endblock %}
 {% block content %}
-<div class="stagger-children">
-  <div class="page-content bg-grey-50 seller-shell">
-    <div class="seller-header reveal">
-      <div class="seller-header__head">
-        <div class="seller-header__meta">
-          <span class="badge seller-header__chip seller-header__chip--danger">Inventory Module</span>
-          <span class="type-label" style="color:var(--grey-500);">Stock Tracking</span>
-        </div>
-        <h1 class="type-display-md">Inventory</h1>
-        <p class="type-body-sm text-muted mt-1">Monitor stock levels, restock triggers, and product health.</p>
-      </div>
-      <div class="seller-header__actions">
-        <span class="badge badge--warning">3 alerts</span>
-        <a href="/seller/products" class="btn btn--primary btn--sm">Go to Products</a>
-      </div>
-    </div>
+<div class="page-content seller-shell" style="padding:var(--sp-8);">
+  <h1 class="type-display-sm" style="margin-bottom:var(--sp-6);">Inventory Stocks</h1>
 
-    <div class="seller-grid-2">
-      <div class="glass-card p-6 reveal" data-delay="60">
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:var(--sp-4); margin-bottom:var(--sp-4);">
-          <div>
-            <h3 class="type-h4">Low Stock Alerts</h3>
-            <p class="type-body-sm text-muted mt-1">Items below threshold need restocking or repricing.</p>
-          </div>
-          <span class="badge badge--pending">Updated 5 min ago</span>
-        </div>
+  <div class="kpi-grid mb-10">
+    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Low Stock</div><div class="type-display-md mt-2" style="color:var(--color-warning);">{{ stats.low_stock }}</div></div></div>
+    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Out of Stock</div><div class="type-display-md mt-2" style="color:var(--color-danger);">{{ stats.out_of_stock }}</div></div></div>
+    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Restock Queue</div><div class="type-display-md mt-2" style="color:var(--brand-primary);">{{ stats.restock_queue }}</div></div></div>
+    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Total Products</div><div class="type-display-md mt-2">{{ stats.total_products }}</div></div></div>
+  </div>
 
-        <div class="kpi-grid mb-4" style="grid-template-columns: repeat(3, minmax(0, 1fr));">
-          <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Low Stock</div><div class="type-display-md mt-2">5</div></div></div>
-          <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Out of Stock</div><div class="type-display-md mt-2">2</div></div></div>
-          <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Restock Queue</div><div class="type-display-md mt-2">8</div></div></div>
-        </div>
-
-        <div class="table-wrapper" style="border:none; box-shadow:none;">
-          <table class="data-table">
-            <thead>
-              <tr><th>Product</th><th>Ref</th><th>Current</th><th>Threshold</th><th>Status</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>Smart Oven</td><td>PRD-SLR01-0048</td><td>2</td><td>10</td><td><span class="badge badge--warning">Low</span></td></tr>
-              <tr><td>Air Purifier Max</td><td>PRD-SLR01-0051</td><td>0</td><td>5</td><td><span class="badge badge--danger">Out</span></td></tr>
-              <tr><td>Cooling Fan Pro</td><td>PRD-SLR01-0062</td><td>4</td><td>8</td><td><span class="badge badge--warning">Low</span></td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="inventory-side">
-        <div class="glass-card p-6 reveal" data-delay="100">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--sp-4);">
-            <h3 class="type-h4">Bulk Adjust</h3>
-            <span class="badge badge--success">Safe mode</span>
-          </div>
-          <div class="form-group mb-4">
-            <label class="form-label">Adjustment Type</label>
-            <select class="form-select"><option>Increase stock</option><option>Decrease stock</option><option>Set exact quantity</option></select>
-          </div>
-          <div class="form-group mb-4">
-            <label class="form-label">Value</label>
-            <input class="form-input" type="number" value="10">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Notes</label>
-            <textarea class="form-textarea" placeholder="Reason for inventory adjustment"></textarea>
-          </div>
-          <button class="btn btn--secondary btn--full mt-4">Apply Adjustment</button>
-        </div>
-
-        <div class="glass-card p-6 reveal" data-delay="160">
-          <h3 class="type-h4">Restock Priorities</h3>
-          <div class="ops-list mt-4">
-            <div class="ops-list-item">
-              <div class="type-body-sm fw-semibold">Fast movers first</div>
-              <div class="type-body-xs text-muted mt-1">Reorder appliances with the highest sell-through velocity.</div>
-            </div>
-            <div class="ops-list-item">
-              <div class="type-body-sm fw-semibold">Protect high-margin SKUs</div>
-              <div class="type-body-xs text-muted mt-1">Restock premium items before promotional items.</div>
-            </div>
-          </div>
-        </div>
-      </div>
+  <div class="glass-card p-6">
+    <h2 class="type-h4" style="margin:0 0 var(--sp-4) 0;">Low Stock Alerts</h2>
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead><tr><th>Product</th><th>Ref</th><th style="text-align:right;">Current</th><th style="text-align:right;">Threshold</th><th>Status</th></tr></thead>
+        <tbody>
+          {% for product in low_stock_items %}
+          <tr>
+            <td>{{ product.name }}</td>
+            <td>{{ product.product_ref }}</td>
+            <td style="text-align:right;">{{ product.stock }}</td>
+            <td style="text-align:right;">{{ product.low_stock_threshold }}</td>
+            <td>
+              {% if (product.stock or 0) <= 0 %}
+              <span class="badge badge--danger">Out</span>
+              {% else %}
+              <span class="badge badge--warning">Low</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="5" style="text-align:center;">No low-stock items.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
   </div>
 </div>

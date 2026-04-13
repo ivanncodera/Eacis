@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Seller Invoice {{ invoice.invoice_ref }} - E-ACIS{% endblock %}
+{% block content %}
+<div class="page-content seller-shell" style="max-width:900px; margin:0 auto; padding:var(--sp-8);">
+  <h1 class="type-display-sm" style="margin-bottom:var(--sp-5);">Invoice {{ invoice.invoice_ref }}</h1>
+  <div class="glass-card p-6">
+    <p>Customer: {{ invoice.customer.computed_full_name if invoice.customer else '-' }}</p>
+    <p>Order: {{ invoice.order.order_ref if invoice.order else '-' }}</p>
+    <p>Status: {{ invoice.status|title }}</p>
+    <p>Due: {{ invoice.due_at.strftime('%Y-%m-%d') if invoice.due_at else '-' }}</p>
+    <hr style="margin:var(--sp-4) 0; opacity:.2;">
+    <p>Subtotal: PHP {{ '%.2f'|format(invoice.subtotal or 0) }}</p>
+    <p>Discount: PHP {{ '%.2f'|format(invoice.discount_total or 0) }}</p>
+    <p>Tax: PHP {{ '%.2f'|format(invoice.tax_total or 0) }}</p>
+    <p>Shipping: PHP {{ '%.2f'|format(invoice.shipping_total or 0) }}</p>
+    <h3>Grand Total: PHP {{ '%.2f'|format(invoice.grand_total or 0) }}</h3>
+  </div>
+</div>
+{% endblock %}

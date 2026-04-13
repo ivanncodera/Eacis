@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}Invoice {{ invoice.invoice_ref }} - E-ACIS{% endblock %}
+{% block content %}
+<div class="page-content" style="max-width:860px; margin:0 auto; padding:var(--sp-8);">
+  <h1 class="type-display-sm" style="margin-bottom:var(--sp-5);">Invoice {{ invoice.invoice_ref }}</h1>
+  <div class="glass-card p-6">
+    <div class="type-body-sm">Order: {{ invoice.order.order_ref if invoice.order else '-' }}</div>
+    <div class="type-body-sm">Status: {{ invoice.status|title }}</div>
+    <div class="type-body-sm">Issued: {{ invoice.issued_at.strftime('%Y-%m-%d %H:%M') if invoice.issued_at else '-' }}</div>
+    <hr style="margin:var(--sp-4) 0; opacity:.2;">
+    <div class="type-body-sm">Subtotal: PHP {{ '%.2f'|format(invoice.subtotal or 0) }}</div>
+    <div class="type-body-sm">Discount: PHP {{ '%.2f'|format(invoice.discount_total or 0) }}</div>
+    <div class="type-body-sm">Tax: PHP {{ '%.2f'|format(invoice.tax_total or 0) }}</div>
+    <div class="type-body-sm">Shipping: PHP {{ '%.2f'|format(invoice.shipping_total or 0) }}</div>
+    <div class="type-h4" style="margin-top:var(--sp-3);">Grand Total: PHP {{ '%.2f'|format(invoice.grand_total or 0) }}</div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Retention and Engagement - Seller Portal{% endblock %}
+{% block content %}
+<div class="page-content seller-shell" style="padding:var(--sp-8);">
+  <h1 class="type-display-sm" style="margin-bottom:var(--sp-6);">Retention and Engagement</h1>
+  <div class="kpi-grid">
+    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">90-Day Retention</div><div class="type-display-md mt-2">{{ '%.1f'|format(metrics.retention_90) }}%</div></div></div>
+    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Repeat Rate</div><div class="type-display-md mt-2">{{ '%.1f'|format(metrics.repeat_rate) }}%</div></div></div>
+    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Inquiry-to-Sale</div><div class="type-display-md mt-2">{{ '%.1f'|format(metrics.inquiry_to_sale) }}%</div></div></div>
+    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Churn Risk</div><div class="type-display-md mt-2">{{ '%.1f'|format(metrics.churn_risk) }}%</div></div></div>
+  </div>
+  <div class="glass-card p-6 mt-6">
+    <div>Customer Base: {{ metrics.customer_total }}</div>
+    <div>Voucher Usage: {{ metrics.voucher_usage }}</div>
+  </div>
+</div>
+{% endblock %}
