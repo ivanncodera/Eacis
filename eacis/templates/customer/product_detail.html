@@ -3,19 +3,63 @@
 {% block content %}
 <div class="main-content">
   <div class="stagger-children">
-    <div style="display:flex; align-items:center; gap:var(--sp-2); margin-bottom:var(--sp-6);">
-      <a href="/shop" class="type-body-sm text-muted" style="text-decoration:none;">Shop</a>
-      <span class="text-muted">/</span>
-      <span class="type-body-sm fw-semibold">{{ product.name }}</span>
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:var(--sp-2); margin-bottom:var(--sp-6);">
+      <div style="display:flex; align-items:center; gap:var(--sp-2);">
+        <a href="/shop" class="type-body-sm text-muted" style="text-decoration:none;">Shop</a>
+        <span class="text-muted">/</span>
+        <span class="type-body-sm fw-semibold">{{ product.name }}</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:var(--sp-2);">
+        {% set can_star = (current_user.is_authenticated and can_review) %}
+        <button type="button" id="star-btn" class="btn btn--ghost" data-ref="{{ product.product_ref }}" aria-pressed="{{ 'true' if starred_by_user else 'false' }}" aria-label="Star product" {% if not can_star %}disabled title="{% if not current_user.is_authenticated %}Sign in to star{% else %}Only customers who purchased and received this product may star it{% endif %}"{% endif %}>{% if starred_by_user %}★{% else %}☆{% endif %} <span id="star-count">{{ star_count }}</span></button>
+        <button type="button" class="btn btn--ghost" onclick="history.back()" aria-label="Go back" style="padding:6px 10px; font-size:0.95rem;">← Back</button>
+      </div>
     </div>
 
-    <div style="display:grid; grid-template-columns: 1fr 420px; gap:var(--sp-8); align-items:start;">
+    <div class="product-detail-container"><div class="product-detail-grid">
       <section class="glass-card p-6">
-        <div style="aspect-ratio: 4 / 3; border-radius: var(--radius-lg); background: var(--grey-50); border: 1px solid var(--border-subtle); display:flex; align-items:center; justify-content:center; overflow:hidden; margin-bottom: var(--sp-5);">
-          {% if product.image_url %}
-          <img src="{{ product.image_url }}" alt="{{ product.name }}" style="width:100%; height:100%; object-fit:cover;">
+        <div class="product-gallery" style="margin-bottom: var(--sp-5);">
+          {% set imgs = images if images is defined else ([product.image_url] if product and product.image_url else []) %}
+
+          {# Macro to build the image URL robustly whether img is a model with filename or a plain filename string #}
+          {% macro img_url_for(img) -%}
+            {%- if img is mapping -%}
+              {{ url_for('uploads_products_view', filename=product.product_ref ~ '/' ~ (img.filename if img.filename is defined else (img.get('filename') if img.get is defined else ''))) }}
+            {%- else -%}
+              {%- if img.filename is defined -%}
+                {{ url_for('uploads_products_view', filename=product.product_ref ~ '/' ~ img.filename) }}
+              {%- else -%}
+                {{ url_for('uploads_products_view', filename=product.product_ref ~ '/' ~ img) }}
+              {%- endif -%}
+            {%- endif -%}
+          {%- endmacro %}
+
+          {% if imgs and imgs|length > 0 %}
+          <div class="main-img-container" style="aspect-ratio: 4 / 3; border-radius: var(--radius-lg); background: var(--grey-50); border: 1px solid var(--border-subtle); display:flex; align-items:center; justify-content:center; overflow:hidden;">
+            {# main image uses first available image #}
+            {% set first_src = img_url_for(imgs[0]) if imgs[0] is not string else img_url_for(imgs[0]) %}
+            <img id="prd-main-img" src="{{ first_src }}" alt="{{ product.name }}" class="prd-main-img">
+          </div>
+
+          <div class="thumb-strip" style="display:flex; gap:var(--sp-2); margin-top:var(--sp-3); overflow-x:auto; -webkit-overflow-scrolling:touch; scroll-behavior:smooth; padding-bottom:6px;">
+            {% for img in imgs %}
+              {% set src = img_url_for(img) %}
+              <button type="button" class="thumb-btn" style="border:0; background:transparent; padding:0; width:72px; flex:0 0 auto; scroll-snap-align:center;" data-src="{{ src }}" aria-label="View image {{ loop.index }}">
+                <div class="thumb-box" style="aspect-ratio:4/3; overflow:hidden; border-radius:6px; border:1px solid var(--border-subtle);">
+                  <img src="{{ src }}" alt="thumb" style="width:100%; height:100%; object-fit:cover; display:block;">
+                </div>
+              </button>
+            {% endfor %}
+          </div>
+
+          {% elif product.image_url %}
+          <div style="aspect-ratio: 4 / 3; border-radius: var(--radius-lg); background: var(--grey-50); border: 1px solid var(--border-subtle); display:flex; align-items:center; justify-content:center; overflow:hidden;">
+            <img src="{{ product.image_url }}" alt="{{ product.name }}" style="width:100%; height:100%; object-fit:cover;">
+          </div>
           {% else %}
-          <span class="type-body-sm text-muted">No product image</span>
+          <div style="aspect-ratio: 4 / 3; border-radius: var(--radius-lg); background: var(--grey-50); border: 1px solid var(--border-subtle); display:flex; align-items:center; justify-content:center; overflow:hidden;">
+            <span class="type-body-sm text-muted">No product image</span>
+          </div>
           {% endif %}
         </div>
 
@@ -44,7 +88,8 @@
 
       <aside class="glass-card p-6" style="position: sticky; top: calc(var(--topbar-height) + var(--sp-6));">
         <div class="type-label mb-2">{{ product.category or 'Category' }}</div>
-        <h1 class="type-display-sm" style="margin-bottom: var(--sp-3);">{{ product.name }}</h1>
+        <h1 class="type-display-sm" style="margin-bottom: var(--sp-2);">{{ product.name }}</h1>
+        <div class="type-body-sm text-muted" style="margin-bottom: var(--sp-3);">Sold by: <strong style="color:var(--grey-800);">{{ product.seller.business_name or product.seller.computed_full_name or 'Unknown Seller' }}</strong></div>
         <div class="type-price-sm" style="margin-bottom: var(--sp-4);">PHP {{ '%.2f'|format(product.price|float) }}</div>
 
         {% if (product.stock or 0) > 0 %}
@@ -72,7 +117,82 @@
         <button class="btn btn--secondary btn--full" disabled>Out of stock</button>
         {% endif %}
       </aside>
-    </div>
+    </div></div>
+
+    <section class="mb-8" style="margin-top: var(--sp-10);">
+      <div class="glass-card p-6 stagger-item" style="margin-bottom: var(--sp-6);">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:var(--sp-4);">
+          <div>
+            <div class="type-body-sm fw-semibold">Customer Ratings</div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div class="type-h3" style="margin:0;">{{ '%.1f'|format(review_agg.avg) }}</div>
+              <div class="type-body-sm text-muted">({{ review_agg.count }} reviews)</div>
+            </div>
+          </div>
+          <div>
+            <a href="#reviews-list" class="type-body-sm text-primary">Read all reviews</a>
+          </div>
+        </div>
+      </div>
+
+      <section id="reviews-list" style="margin-bottom: var(--sp-8);">
+        <h2 class="type-h4">Reviews</h2>
+        <div style="margin-top:var(--sp-4);">
+          {% if reviews and reviews|length > 0 %}
+            {% for r in reviews %}
+              <div class="glass-card p-4 mb-3">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:var(--sp-3);">
+                  <div>
+                    <div class="type-body-sm fw-semibold">{% if r.is_anonymous %}Anonymous{% elif r.reviewer_name %}{{ r.reviewer_name }}{% else %}{{ (r.user and (r.user.computed_full_name or r.user.email)) or 'Customer' }}{% endif %}</div>
+                    <div class="type-label-xs text-muted">{{ r.created_at.strftime('%b %d, %Y') if r.created_at else '' }}</div>
+                  </div>
+                  <div class="type-body-md" style="font-weight:700;">{{ r.rating }}★</div>
+                </div>
+                {% if r.title %}<div class="type-body-sm fw-semibold mt-2">{{ r.title }}</div>{% endif %}
+                {% if r.body %}<p class="type-body-sm text-muted mt-2">{{ r.body }}</p>{% endif %}
+              </div>
+            {% endfor %}
+          {% else %}
+            <div class="type-body-sm text-muted">No reviews yet. Be the first to review this product.</div>
+          {% endif %}
+
+          {% if current_user.is_authenticated %}
+            {% if can_review %}
+              <form method="post" action="/products/{{ product.product_ref }}/reviews" class="form-stack mt-6" data-enhance="submit-loading">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="form-group">
+                  <label class="form-label">Rating</label>
+                  <select name="rating" class="form-select" required>
+                    <option value="5">5 - Excellent</option>
+                    <option value="4">4 - Good</option>
+                    <option value="3">3 - Average</option>
+                    <option value="2">2 - Poor</option>
+                    <option value="1">1 - Terrible</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Title (optional)</label>
+                  <input name="title" class="form-input" maxlength="255">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Review</label>
+                  <textarea name="body" rows="4" class="form-textarea"></textarea>
+                </div>
+                <div class="form-group">
+                  <label class="form-label"><input type="checkbox" name="is_anonymous" value="1"> Post review anonymously</label>
+                </div>
+                <div style="display:flex; gap:var(--sp-3);">
+                  <button type="submit" class="btn btn--primary">Submit Review</button>
+                </div>
+              </form>
+            {% else %}
+              <div class="type-body-sm text-muted">Only customers who purchased and received this product may submit a review. <a href="/customer/orders">View your orders</a></div>
+            {% endif %}
+          {% else %}
+            <div class="type-body-sm">Please <a href="/auth/login?next={{ request.path }}">sign in</a> to leave a review.</div>
+          {% endif %}
+        </div>
+      </section>
 
     <section style="margin-top: var(--sp-10);">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: var(--sp-4);">
@@ -93,4 +213,141 @@
     </section>
   </div>
 </div>
+{% endblock %}
+  <style>
+    .main-img-container { position: relative; }
+    .main-img-container .prd-main-img { width:100%; height:100%; object-fit:cover; display:block; position:relative; z-index:1; }
+    .prd-main-overlay { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; border-radius:inherit; opacity:0; transition:opacity .6s ease; z-index:2; pointer-events:none; }
+    .thumb-btn.active .thumb-box { box-shadow: 0 8px 20px rgba(15,23,42,0.12); border-color: var(--brand-primary); transform: translateY(-2px); }
+  </style>
+{% block scripts %}
+<script>
+  document.addEventListener('click', function(e){
+    const btn = e.target.closest('.thumb-btn');
+    if (!btn) return;
+    const src = btn.getAttribute('data-src');
+    if (!src) return;
+    const main = document.getElementById('prd-main-img');
+    if (main) {
+      main.src = src;
+      const thumbImg = btn.querySelector('img');
+      if (thumbImg && thumbImg.alt) main.alt = thumbImg.alt;
+    }
+
+    // Toggle active class on thumbnails instead of inline styles
+    const strip = btn.closest('.thumb-strip');
+    if (strip) {
+      strip.querySelectorAll('.thumb-btn').forEach(function(b){ b.classList.remove('active'); });
+    }
+    btn.classList.add('active');
+
+    // ensure the clicked thumbnail is visible
+    try { btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }); } catch (err) {}
+  });
+  // mark first thumbnail active on load
+  document.addEventListener('DOMContentLoaded', function(){
+    const first = document.querySelector('.thumb-strip .thumb-btn');
+    if (first) first.classList.add('active');
+  });
+
+  // Star toggle handler
+  document.addEventListener('DOMContentLoaded', function(){
+    const starBtn = document.getElementById('star-btn');
+    if (!starBtn) return;
+    starBtn.addEventListener('click', async function(ev){
+      ev.preventDefault();
+      const ref = this.dataset.ref;
+      if (!ref) return;
+      this.disabled = true;
+      try {
+        const resp = await fetch(`/products/${ref}/star`, {
+          method: 'POST',
+          headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+          credentials: 'same-origin'
+        });
+        if (!resp.ok) throw new Error('Network response not ok');
+        const data = await resp.json();
+        if (data && typeof data.starred !== 'undefined') {
+          this.setAttribute('aria-pressed', data.starred ? 'true' : 'false');
+          // Update icon + count
+          const icon = data.starred ? '★' : '☆';
+          const count = data.stars_count || 0;
+          this.innerHTML = `${icon} <span id="star-count">${count}</span>`;
+        }
+      } catch (err) {
+        console.error('Could not toggle star', err);
+      } finally {
+        this.disabled = false;
+      }
+    });
+  });
+
+  // Product image autoplay + animated crossfade
+  document.addEventListener('DOMContentLoaded', function(){
+    const mainImg = document.getElementById('prd-main-img');
+    const mainContainer = document.querySelector('.main-img-container');
+    const thumbBtns = Array.from(document.querySelectorAll('.thumb-strip .thumb-btn'));
+    if (!mainImg || !mainContainer || !thumbBtns.length) return;
+
+    let currentIndex = thumbBtns.findIndex(b=>b.classList.contains('active'));
+    if (currentIndex < 0) currentIndex = 0;
+    const autoplayDelay = 3500; // ms
+    let timer = null;
+    let isPaused = false;
+
+    function gotoIndex(idx){
+      if (idx === currentIndex) return;
+      const btn = thumbBtns[idx];
+      const src = btn.getAttribute('data-src');
+      if (!src) return;
+
+      const overlay = document.createElement('img');
+      overlay.className = 'prd-main-overlay';
+      overlay.alt = mainImg.alt || '';
+      overlay.loading = 'eager';
+      overlay.src = src;
+      mainContainer.appendChild(overlay);
+
+      overlay.onload = function(){
+        // trigger fade in
+        requestAnimationFrame(()=> overlay.style.opacity = '1');
+        // after transition, swap main src and remove overlay
+        setTimeout(()=>{
+          try { mainImg.src = src; const thumbImg = btn.querySelector('img'); if (thumbImg && thumbImg.alt) mainImg.alt = thumbImg.alt; } catch(e){}
+          overlay.remove();
+        }, 650);
+      };
+
+      // update thumbnail active states
+      thumbBtns.forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      try { btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }); } catch (e) {}
+      currentIndex = idx;
+    }
+
+    function startAutoplay(){
+      stopAutoplay();
+      if (thumbBtns.length <= 1) return;
+      timer = setInterval(()=>{ if (!isPaused) gotoIndex((currentIndex + 1) % thumbBtns.length); }, autoplayDelay);
+    }
+    function stopAutoplay(){ if (timer){ clearInterval(timer); timer = null; } }
+
+    // Pause on hover or focus
+    mainContainer.addEventListener('mouseenter', ()=> isPaused = true);
+    mainContainer.addEventListener('mouseleave', ()=> isPaused = false);
+    mainContainer.addEventListener('focusin', ()=> isPaused = true);
+    mainContainer.addEventListener('focusout', ()=> isPaused = false);
+
+    // If user clicks a thumbnail, jump and restart autoplay after a short delay
+    thumbBtns.forEach((b,i)=>{
+      b.addEventListener('click', ()=>{
+        stopAutoplay();
+        gotoIndex(i);
+        setTimeout(startAutoplay, 4000);
+      });
+    });
+
+    startAutoplay();
+  });
+</script>
 {% endblock %}

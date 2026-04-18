@@ -3,6 +3,7 @@
 {% block title %}Fulfillment Strategy{% endblock %}
 
 {% block content %}
+{% from '_icons.html' import icon_robot, icon_pin, icon_check %}
 <div class="page-content bg-grey-50 seller-shell">
   <div class="seller-header" style="align-items:flex-start; margin-bottom:var(--sp-8);">
     <div class="seller-header__head">
@@ -86,19 +87,19 @@
   <div class="reveal" data-delay="140ms">
     <div class="glass-card p-6">
       <h3 class="type-h4" style="margin:0 0 var(--sp-4) 0;">Fulfillment Automation</h3>
-      <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:var(--sp-4);">
+        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:var(--sp-4);">
         <div style="padding:var(--sp-4); background:linear-gradient(180deg, #00875A10 0%, transparent 40%); border-radius:var(--radius-md); border:1px solid #00875A30;">
-          <div style="font-size:18px; margin-bottom:var(--sp-2);">🤖</div>
+          <div style="font-size:18px; margin-bottom:var(--sp-2);">{{ icon_robot(18) | safe }}</div>
           <div class="type-body-sm fw-semibold">Auto-Pick</div>
           <div class="type-body-xs text-muted mt-2">Trigger picks when items reach reorder point.</div>
         </div>
         <div style="padding:var(--sp-4); background:linear-gradient(180deg, #FF8B0010 0%, transparent 40%); border-radius:var(--radius-md); border:1px solid #FF8B0030;">
-          <div style="font-size:18px; margin-bottom:var(--sp-2);">📍</div>
+          <div style="font-size:18px; margin-bottom:var(--sp-2);">{{ icon_pin(18) | safe }}</div>
           <div class="type-body-sm fw-semibold">Cross-Dock</div>
           <div class="type-body-xs text-muted mt-2">Route fast-movers to nearest regional hub.</div>
         </div>
         <div style="padding:var(--sp-4); background:linear-gradient(180deg, #0052CC10 0%, transparent 40%); border-radius:var(--radius-md); border:1px solid #0052CC30;">
-          <div style="font-size:18px; margin-bottom:var(--sp-2);">✓</div>
+          <div style="font-size:18px; margin-bottom:var(--sp-2);">{{ icon_check(18) | safe }}</div>
           <div class="type-body-sm fw-semibold">Cycle Count</div>
           <div class="type-body-xs text-muted mt-2">Monthly audits for 99.5% accuracy.</div>
         </div>

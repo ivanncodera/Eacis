@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}What's New — E-ACIS{% endblock %}
+{% block content %}
+<div class="page-center bg-grey-50 policy-print-shell" style="padding: var(--sp-20) var(--sp-6);">
+  <div class="stagger-children" style="max-width: 960px; width: 100%;">
+    <div class="text-center mb-12 reveal">
+      <div class="type-label mb-4" style="color: var(--brand-primary); letter-spacing: 0.15em; font-weight: 800;">UPDATE</div>
+      <h1 class="type-display-md mb-4">E-ACIS Patch 06859d7 — What's New</h1>
+      <p class="type-body-md text-muted mx-auto" style="max-width: 900px;">A curated summary of recent changes you made locally (files modified since last push). Click any item for details.</p>
+    </div>
+
+    <div class="glass-card p-12 reveal" style="border-radius: var(--radius-3xl);">
+      <h2 class="type-h4 mb-4">Highlights</h2>
+      <ul style="padding-left: var(--sp-6); display: grid; gap: var(--sp-3);">
+        <li><strong>Legal &amp; Compliance:</strong> Updated Terms of Service and Privacy Policy; added Data Compliance, Cookie Policy, and Refunds &amp; Returns pages; footer links updated.</li>
+        <li><strong>Privacy &amp; Security:</strong> DPO contact, breach-notification and retention guidance added; cookie-consent banner implemented.</li>
+        <li><strong>Seller &amp; Admin UX:</strong> Pagination and UI improvements across seller and admin pages (payouts, invoices, orders, audit logs, trusted devices).</li>
+        <li><strong>Backend &amp; DB:</strong> Model changes (orders, products, installments, vouchers, returns) and migration scripts updated.</li>
+        <li><strong>Frontend:</strong> CSS and JS updates (UI tweaks, product grid, client-side UX), template refinements across customer/seller/admin.</li>
+      </ul>
+
+      <hr style="margin: var(--sp-8) 0;" />
+
+      <h3 class="type-h5 mb-3">Files changed (tracked &amp; new)</h3>
+      <div class="type-body-sm text-muted" style="line-height:1.6;">
+        The following files were modified or added in your working tree since the last push (extracted from Git status):
+      </div>
+      <pre style="white-space:pre-wrap; background:var(--grey-100); padding:12px; border-radius:8px; margin-top:12px; font-size:13px;"> 
+env: eacis/app.py
+env: eacis/config.py
+env: eacis/validation.py
+templates: base.html, privacy.html, terms.html
+templates: data_compliance.html, cookie_policy.html, refund_policy.html
+templates (admin/customer/seller variations)
+static: css/*, js/* (ui.js, productGrid.js)
+models &amp; migrations: installment, order, product, return_request, user, voucher + migration versions
+tools &amp; docs: tools/* and UX_VALIDATION_OVERHAUL_MASTER_PLAN.md
+      </pre>
+
+      <div style="display:flex; gap:12px; margin-top: var(--sp-8);">
+        <a href="/whats-new" class="btn btn--primary">Read Full Notes</a>
+        <button id="dismiss-release" class="btn btn--white">Dismiss</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('dismiss-release')?.addEventListener('click', function(){
+    try { localStorage.setItem('eacis_seen_release_06859d7','1'); } catch(e){}
+    window.location.href = '/';
+  });
+</script>
+
+{% endblock %}

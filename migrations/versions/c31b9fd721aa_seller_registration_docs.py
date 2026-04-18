@@ -17,11 +17,21 @@ depends_on = None
 
 
 def upgrade():
-    op.add_column('users', sa.Column('business_name', sa.String(length=255), nullable=True))
-    op.add_column('users', sa.Column('business_permit_path', sa.String(length=500), nullable=True))
-    op.add_column('users', sa.Column('barangay_permit_path', sa.String(length=500), nullable=True))
-    op.add_column('users', sa.Column('mayors_permit_path', sa.String(length=500), nullable=True))
-    op.add_column('users', sa.Column('seller_verification_status', sa.String(length=20), nullable=True))
+    # Guard against duplicate-column errors when branches added these fields separately.
+    conn = op.get_bind()
+    inspector = sa.inspect(conn)
+    existing_cols = [c['name'] for c in inspector.get_columns('users')] if 'users' in inspector.get_table_names() else []
+
+    if 'business_name' not in existing_cols:
+        op.add_column('users', sa.Column('business_name', sa.String(length=255), nullable=True))
+    if 'business_permit_path' not in existing_cols:
+        op.add_column('users', sa.Column('business_permit_path', sa.String(length=500), nullable=True))
+    if 'barangay_permit_path' not in existing_cols:
+        op.add_column('users', sa.Column('barangay_permit_path', sa.String(length=500), nullable=True))
+    if 'mayors_permit_path' not in existing_cols:
+        op.add_column('users', sa.Column('mayors_permit_path', sa.String(length=500), nullable=True))
+    if 'seller_verification_status' not in existing_cols:
+        op.add_column('users', sa.Column('seller_verification_status', sa.String(length=20), nullable=True))
 
 
 def downgrade():

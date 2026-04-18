@@ -1,37 +1,166 @@
 {% extends 'base.html' %}
-{% block title %}Inquiry {{ ticket.ticket_ref }} - Seller Portal{% endblock %}
+{% block title %}Case {{ ticket.ticket_ref }} - Seller Console{% endblock %}
+
 {% block content %}
-<div class="page-content seller-shell" style="max-width:880px; margin:0 auto; padding:var(--sp-8);">
-  <h1 class="type-display-sm" style="margin-bottom:var(--sp-5);">Ticket {{ ticket.ticket_ref }}</h1>
-  {% set form = form or {} %}
-  {% set errors = errors or {} %}
-  {% if errors.get('general') %}
-  <div class="form-error" role="alert" style="margin-bottom:var(--sp-4);">{{ errors.get('general') }}</div>
-  {% endif %}
-  <form method="post" class="glass-card p-6" style="display:grid; gap:var(--sp-4);">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <div><strong>Customer:</strong> {{ ticket.customer.computed_full_name if ticket.customer else '-' }}</div>
-    <div><strong>Order:</strong> {{ ticket.order.order_ref if ticket.order else '-' }}</div>
-    <div><strong>Subject:</strong> {{ ticket.subject }}</div>
-    <div>
-      <label class="form-label">Status</label>
-      <select class="form-select" name="status">
-        <option value="open" {% if form.get('status', ticket.status) == 'open' %}selected{% endif %}>Open</option>
-        <option value="in_progress" {% if form.get('status', ticket.status) == 'in_progress' %}selected{% endif %}>In Progress</option>
-        <option value="resolved" {% if form.get('status', ticket.status) == 'resolved' %}selected{% endif %}>Resolved</option>
-        <option value="closed" {% if form.get('status', ticket.status) == 'closed' %}selected{% endif %}>Closed</option>
-      </select>
-      {% if errors.get('status') %}<div class="form-error" role="alert">{{ errors.get('status') }}</div>{% endif %}
+<div class="page-content page-enter stagger-children" style="padding: var(--sp-12) 0;">
+  <div class="container-fluid" style="max-width: 1400px; padding: 0 var(--sp-8);">
+    
+    <!-- Header -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--sp-10);">
+      <div class="stagger-item">
+        <a href="/seller/inquiries" class="type-label-sm text-primary mb-2 d-inline-block" style="text-decoration: none;">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="vertical-align: middle; margin-right: 4px;"><path d="M19 12H5m7 7l-7-7 7-7"></path></svg>
+          Back to Command Center
+        </a>
+        <h1 class="type-display-sm mb-2">{{ ticket.subject }}</h1>
+        <div style="display: flex; gap: var(--sp-3); align-items: center;">
+          <span class="type-label-xs text-muted">Incident ID: <span class="fw-bold">{{ ticket.ticket_ref }}</span></span>
+          <span class="badge rounded-pill 
+              {% if ticket.status == 'open' %}badge--info
+              {% elif ticket.status == 'in_progress' %}badge--primary
+              {% elif ticket.status in ('resolved', 'closed') %}badge--success
+              {% else %}badge--secondary{% endif %}" style="padding: 4px 12px;">
+              {{ ticket.status|replace('_', ' ')|title }}
+          </span>
+        </div>
+      </div>
+      <div class="stagger-item">
+        <div class="glass-card px-6 py-4" style="border: 1.5px solid var(--border-medium); display: flex; align-items: center; gap: 16px;">
+           <div style="text-align: right;">
+             <div class="type-label-xs text-muted">Response Deadline</div>
+             <div class="type-body-sm fw-bold text-danger">Within 12 Hours</div>
+           </div>
+           <div style="width: 1px; height: 32px; background: var(--border-medium);"></div>
+           <button class="btn btn--white btn--xs" onclick="window.print()">Print Case</button>
+        </div>
+      </div>
     </div>
-    <div>
-      <label class="form-label">Description / Notes</label>
-      <textarea class="form-textarea" name="description">{{ form.get('description', ticket.description) }}</textarea>
-      {% if errors.get('description') %}<div class="form-error" role="alert">{{ errors.get('description') }}</div>{% endif %}
+
+    <div class="grid-12 gap-8">
+      <!-- Conversation Column -->
+      <div class="col-8">
+        <!-- Original Incident Description -->
+        <div class="glass-card p-8 mb-8 stagger-item" style="background: var(--grey-50); border: 1px solid var(--border-medium);">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+            <span class="type-label-xs fw-bold text-muted">Initial Customer Report</span>
+            <span class="type-label-xs text-muted">{{ ticket.created_at.strftime('%B %d, %H:%M %p') }}</span>
+          </div>
+          <p class="type-body-sm mb-0">{{ ticket.description }}</p>
+        </div>
+
+        <div class="form-stack mb-8 conversation-view">
+          {% for reply in ticket.replies %}
+          <div class="stagger-item chat-message" data-author="{{ 'customer' if reply.author_id == ticket.customer_id else 'staff' }}">
+            <div class="glass-card p-6 bubble" data-type="{{ 'internal' if reply.is_internal else ('self' if reply.author_id != ticket.customer_id else 'other') }}">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 8px; gap: 24px;">
+                <span class="type-label-xs fw-bold author-name" data-role="{{ 'internal' if reply.is_internal else ('self' if reply.author_id != ticket.customer_id else 'other') }}">
+                  {% if reply.is_internal %}Internal Dispatch{% elif reply.author_id == ticket.customer_id %}Customer Response{% else %}My Response{% endif %}
+                </span>
+                <span class="type-label-xs" style="opacity: 0.6;">{{ reply.created_at.strftime('%H:%M') }}</span>
+              </div>
+              <p class="type-body-sm mb-0">{{ reply.body }}</p>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <style>
+          .chat-message[data-author="customer"] { align-items: flex-start; }
+          .chat-message[data-author="staff"] { align-items: flex-end; }
+          .bubble[data-type="internal"] { background: #fffbeb; border: 1px dashed #d97706; }
+          .bubble[data-type="self"] { background: var(--brand-primary); color: white; border: none; box-shadow: var(--shadow-lg); }
+          .bubble[data-type="other"] { background: white; border: 1px solid var(--border-medium); }
+          .author-name[data-role="self"] { opacity: 0.9; }
+          .author-name:not([data-role="self"]) { color: var(--brand-primary); }
+        </style>
+
+        <!-- Reply Entry -->
+        {% if ticket.status not in ('resolved', 'closed') %}
+        <div class="glass-card p-0 overflow-hidden stagger-item">
+          <form action="{{ url_for('seller_inquiry_detail', ticket_ref=ticket.ticket_ref) }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="p-6">
+              <textarea name="body" class="form-textarea" rows="5" placeholder="Formulate a resolution or internal note..." required style="border: none; background: transparent; padding: 0;"></textarea>
+            </div>
+            <div class="p-4 bg-light border-top" style="display: flex; justify-content: space-between; align-items: center;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <input type="checkbox" name="is_internal" value="true" id="internalCheck" style="width: 16px; height: 16px; cursor: pointer;">
+                <label for="internalCheck" class="type-label-xs fw-bold text-muted pointer">Internal Note Only</label>
+              </div>
+              <button type="submit" class="btn btn--primary rounded-pill px-10 shadow-primary">Transmit Message</button>
+            </div>
+          </form>
+        </div>
+        {% else %}
+        <div class="glass-card p-8 text-center stagger-item" style="border: 1.5px dashed var(--border-medium); opacity: 0.7; background: var(--grey-50);">
+           <p class="type-label-xs text-muted mb-0">This case has been documented and closed. No further communication allowed.</p>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Side Details Column -->
+      <div class="col-4">
+        <!-- Workflow Control -->
+        <div class="glass-card p-8 mb-8 stagger-item">
+           <h3 class="type-label-sm fw-bold mb-6">Workflow Status</h3>
+           <form action="{{ url_for('seller_inquiry_detail', ticket_ref=ticket.ticket_ref) }}" method="POST" class="form-stack">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="action" value="update_status">
+              <div class="form-group">
+                <select name="status" class="form-select">
+                  <option value="open" {% if ticket.status == 'open' %}selected{% endif %}>Open</option>
+                  <option value="in_progress" {% if ticket.status == 'in_progress' %}selected{% endif %}>In Progress</option>
+                  <option value="resolved" {% if ticket.status == 'resolved' %}selected{% endif %}>Mark Resolved</option>
+                  <option value="closed" {% if ticket.status == 'closed' %}selected{% endif %}>Close Permanently</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn--secondary btn--full shadow-sm">Commit Milestone</button>
+           </form>
+        </div>
+
+        <!-- Customer Profiling -->
+        <div class="glass-card p-8 mb-8 stagger-item">
+          <h3 class="type-label-sm fw-bold mb-6">Customer Profile</h3>
+          <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px;">
+            <div style="width: 48px; height: 48px; background: var(--brand-primary-subtle); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--brand-primary); font-weight: bold;">
+              {{ ticket.customer.full_name[:1] if ticket.customer else 'G' }}
+            </div>
+            <div>
+              <div class="type-body-sm fw-bold">{{ ticket.customer.full_name if ticket.customer else 'Guest Account' }}</div>
+              <div class="type-label-xs text-muted">{{ ticket.customer.email if ticket.customer else 'No Contact' }}</div>
+            </div>
+          </div>
+          
+          <div class="p-4 rounded-3 mb-6" style="background: var(--grey-50); border: 1px solid var(--border-subtle);">
+            <div class="type-label-xs text-muted mb-1">TOTAL SPEND WITH YOU</div>
+            <div class="type-body-sm fw-bold">₱{{ "{:,.2f}".format(12450.00) }} <!-- Mocked for now --></div>
+          </div>
+
+          <div style="display: flex; gap: 4px;">
+            <span class="badge badge--success" style="font-size: 9px;">Verified Customer</span>
+            <span class="badge badge--info" style="font-size: 9px;">High LTV</span>
+          </div>
+        </div>
+
+        <!-- Order Context -->
+        {% if ticket.order %}
+        <div class="glass-card p-8 stagger-item">
+          <h3 class="type-label-sm fw-bold mb-6">Linked Logistics</h3>
+          <div class="p-4 rounded-3 mb-6" style="background: var(--grey-50); border: 1px solid var(--border-subtle);">
+             <div class="type-label-sm fw-bold mb-1">{{ ticket.order.order_ref }}</div>
+             <div class="type-label-xs text-muted mb-3">{{ ticket.order.status|title }} • ₱{{ "{:,.2f}".format(ticket.order.total) }}</div>
+             <a href="{{ url_for('seller_order_detail', order_ref=ticket.order.order_ref) }}" class="btn btn--white btn--xs btn--full" style="border: 1px solid var(--border-medium);">Review Fulfillment</a>
+          </div>
+
+          <div class="p-4 rounded-3" style="background: #fef2f2; border: 1px solid #fee2e2;">
+            <div class="type-label-xs fw-bold text-danger mb-2">ESCALATION HUB</div>
+            <p class="type-label-xs text-danger mb-4">If defect is confirmed, initialize a priority resolution path.</p>
+            <a href="/seller/returns?order_ref={{ ticket.order.order_ref }}" class="btn btn--danger btn--xs btn--full py-2">Escalate to Resolution</a>
+          </div>
+        </div>
+        {% endif %}
+      </div>
     </div>
-    <div style="display:flex; justify-content:flex-end; gap:var(--sp-3);">
-      <a class="btn btn--secondary" href="/seller/inquiries">Back</a>
-      <button class="btn btn--primary" type="submit">Save</button>
-    </div>
-  </form>
+  </div>
 </div>
 {% endblock %}

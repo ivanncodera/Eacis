@@ -62,20 +62,34 @@
            </div>
 
            <div class="glass-card p-6 order-hero reveal" data-delay="140">
-              <h3 class="type-h4 mb-4">Fulfillment Timeline</h3>
+              <h3 class="type-h4 mb-4">Delivery Status Tracking</h3>
               <div class="order-timeline">
-                 <div class="order-timeline__item">
-                    <div class="type-body-sm fw-semibold">Pending</div>
-                    <div class="type-body-xs text-muted">Order confirmed and waiting for pick-and-pack.</div>
-                 </div>
-                 <div class="order-timeline__item">
-                    <div class="type-body-sm fw-semibold">Pick & Pack</div>
-                    <div class="type-body-xs text-muted">Assign warehouse staff and prepare packing slip.</div>
-                 </div>
-                 <div class="order-timeline__item">
-                    <div class="type-body-sm fw-semibold">Dispatch</div>
-                    <div class="type-body-xs text-muted">Hand over to courier and notify customer.</div>
-                 </div>
+                  <div class="order-timeline__item" data-active="{{ 'true' if order.created_at else 'false' }}">
+                     <div class="type-body-sm fw-bold">Order Confirmed</div>
+                     <div class="type-body-xs text-muted mt-1">{{ order.created_at.strftime('%b %d, %Y %I:%M %p') if order.created_at else 'Pending submission' }}</div>
+                  </div>
+                  
+                  <div class="order-timeline__item" data-active="{{ 'true' if order.paid_at else 'false' }}">
+                     <div class="type-body-sm fw-bold">Payment Secured</div>
+                     <div class="type-body-xs text-muted mt-1">{{ order.paid_at.strftime('%b %d, %Y %I:%M %p') if order.paid_at else 'Awaiting payment fulfillment' }}</div>
+                  </div>
+
+                  <div class="order-timeline__item" data-active="{{ 'true' if order.shipped_at else 'false' }}">
+                     <div class="type-body-sm fw-bold">Dispatched / Shipped</div>
+                     <div class="type-body-xs text-muted mt-1">{{ order.shipped_at.strftime('%b %d, %Y %I:%M %p') if order.shipped_at else 'Pending warehouse dispatch' }}</div>
+                  </div>
+
+                  <div class="order-timeline__item" data-success="{{ 'true' if order.delivered_at else 'false' }}">
+                     <div class="type-body-sm fw-bold">Delivered to Customer</div>
+                     <div class="type-body-xs text-muted mt-1">{{ order.delivered_at.strftime('%b %d, %Y %I:%M %p') if order.delivered_at else 'Pending final delivery' }}</div>
+                  </div>
+
+                  {% if order.status == 'cancelled' %}
+                  <div class="order-timeline__item status-cancelled">
+                     <div class="type-body-sm fw-bold">Order Cancelled</div>
+                     <div class="type-body-xs text-danger mt-1">This transaction was aborted or cancelled.</div>
+                  </div>
+                  {% endif %}
               </div>
            </div>
         </div>
@@ -89,13 +103,15 @@
 
               <h3 class="type-h4 mb-3 mt-4">Shipping Address</h3>
               <p class="type-body-sm text-muted" style="line-height:1.5;">
-                 {{ order.shipping_address.get('line1') if order.shipping_address else 'No shipping address saved' }}<br>
-                 {{ order.shipping_address.get('city') if order.shipping_address else '' }} {{ order.shipping_address.get('province') if order.shipping_address else '' }}
+                 {% set ship = order.shipping_address or {} %}
+                 {{ ship.get('address_line1') or ship.get('line1') or 'No shipping address saved' }}<br>
+                 {% if ship.get('address_line2') %}{{ ship.get('address_line2') }}<br>{% endif %}
+                 {{ ship.get('city_municipality') or ship.get('city') or '' }} {{ ship.get('province') or '' }} {{ ship.get('postal_code') or '' }}
               </p>
            </div>
 
            <div class="glass-card p-6 reveal" data-delay="180">
-              <h3 class="type-h4 mb-4">Action Queue</h3>
+              <h3 class="type-h4 mb-4">Command Actions</h3>
               <div style="display:flex; flex-direction:column; gap:var(--sp-3);">
                 <form method="post" action="/seller/orders/{{ order.order_ref }}">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -109,11 +125,25 @@
                   <input type="hidden" name="status" value="delivered">
                   <button class="btn btn--secondary btn--sm btn--full" type="submit">Mark as Delivered</button>
                 </form>
-                <button class="btn btn--secondary btn--sm btn--full">Message customer</button>
-              </div>
-           </div>
-        </div>
+                 <a href="/seller/inquiries?order_ref={{ order.order_ref }}" class="btn btn--secondary btn--sm btn--full py-2">Message Customer</a>
+                 <a href="/seller/returns?q={{ order.order_ref }}" class="btn btn--ghost btn--sm btn--full py-2 mt-1" style="border: 1.5px solid var(--border-subtle); color: var(--color-danger);">View Resolution Claims</a>
+               </div>
+            </div>
+         </div>
      </div>
    </div>
 </div>
+
+<style>
+ .order-timeline { display:flex; flex-direction:column; gap:var(--sp-4); }
+ .order-timeline__item { padding-left: var(--sp-4); border-left: 2px solid var(--grey-200); position: relative; }
+ .order-timeline__item[data-active="true"] { border-left-color: var(--brand-primary); }
+ .order-timeline__item[data-active="true"] .type-body-sm { color: var(--grey-900); }
+ .order-timeline__item[data-active="false"] .type-body-sm { color: var(--grey-500); }
+ .order-timeline__item[data-success="true"] { border-left-color: var(--color-success); }
+ .order-timeline__item[data-success="true"] .type-body-sm { color: var(--color-success); }
+ .order-timeline__item[data-success="false"] .type-body-sm { color: var(--grey-500); }
+ .status-cancelled { border-left-color: var(--color-danger); margin-top: var(--sp-2); }
+ .status-cancelled .type-body-sm { color: var(--color-danger); }
+</style>
 {% endblock %}

@@ -19,16 +19,35 @@
         <tbody>
           {% for row in recent_shipments %}
           <tr>
-            <td><a href="/seller/orders/{{ row.order_ref }}">{{ row.order_ref }}</a></td>
-            <td>{{ row.status|title }}</td>
-            <td>{{ row.shipped_at.strftime('%Y-%m-%d') if row.shipped_at else '-' }}</td>
-            <td>{{ row.delivered_at.strftime('%Y-%m-%d') if row.delivered_at else '-' }}</td>
+            <td><a href="/seller/orders/{{ row.order_ref }}" class="fw-semibold text-primary">#{{ row.order_ref }}</a></td>
+            <td><span class="badge badge--dot badge--{{ 'success' if row.status == 'delivered' else ('yellow' if row.status == 'shipped' else ('info' if row.status == 'paid' else ('warning' if row.status in ['pending','packed'] else 'danger'))) }}">{{ row.status|capitalize }}</span></td>
+            <td>{{ row.shipped_at.strftime('%b %d, %Y %I:%M %p') if row.shipped_at else '-' }}</td>
+            <td>{{ row.delivered_at.strftime('%b %d, %Y %I:%M %p') if row.delivered_at else '-' }}</td>
           </tr>
           {% else %}
-          <tr><td colspan="4" style="text-align:center;">No shipment records yet.</td></tr>
+          <tr><td colspan="4" class="text-muted" style="text-align:center; padding:var(--sp-6);">No shipment records yet.</td></tr>
           {% endfor %}
         </tbody>
       </table>
+      <!-- Pagination Footer -->
+      {% if pagination and pagination.pages > 1 %}
+      <div class="mt-8 pt-6 border-t" style="display:flex; justify-content:space-between; align-items:center; gap:var(--sp-4);">
+        <span class="type-body-xs text-muted">Showing {{ (pagination.page - 1) * pagination.per_page + 1 }} - {{ [pagination.page * pagination.per_page, pagination.total]|min }} of {{ pagination.total }} records</span>
+        <div style="display:flex; justify-content:center; gap:var(--sp-2);">
+              {% for page in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+            {% if page %}
+              {% if page == pagination.page %}
+              <span class="btn btn--primary btn--xs" style="min-width:32px;">{{ page }}</span>
+              {% else %}
+                  <a href="{{ url_for('seller_delivery_services', page=page, per_page=pagination.per_page) }}" class="btn btn--white btn--xs" style="min-width:32px;">{{ page }}</a>
+              {% endif %}
+            {% else %}
+              <span class="text-muted">...</span>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
     </div>
   </div>
 </div>

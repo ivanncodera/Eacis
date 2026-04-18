@@ -1,92 +1,81 @@
 {% extends 'base.html' %}
 {% block title %}Shop Appliances — E-ACIS{% endblock %}
 {% block content %}
-<div class="main-content">
-  <div class="stagger-children">
-
-  <!-- Shop Header -->
-  <div style="background:var(--grey-0);border-bottom:1px solid var(--border-subtle);padding-top:calc(var(--topbar-height) + var(--sp-6));padding-bottom:var(--sp-4);">
+<div class="main-content stagger-children">
+  
+  <!-- Premium Shop Header & Discovery -->
+  <div style="background:var(--grey-0); border-bottom:1px solid var(--border-subtle); padding-top:calc(var(--topbar-height) + var(--sp-8)); padding-bottom:var(--sp-6); position: relative; overflow: hidden;">
+    <div class="hero__glow" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 10% 20%, rgba(10, 132, 255, 0.03) 0%, transparent 50%); pointer-events: none;"></div>
     <div class="container">
       {% if view_mode == 'discovery' %}
-      <!-- Premium Discovery Hero -->
-      <section class="glass-card--hero mb-12">
-        <div class="hero__image-box">
-          <img src="/static/assets/products/gas-range-with-oven-4-burners.webp" alt="Premium Cooking Collection">
-        </div>
-        <div class="hero__content-box">
-          <div class="chip chip--active mb-4">Curated Collection 2026</div>
-          <h1 class="type-display-lg mb-4" style="color:var(--grey-900);">The Heart of Your Modern Home</h1>
-          <p class="type-body-lg mb-10" style="color:var(--grey-600); max-width:440px; line-height:1.6;">Precision engineered appliances designed for those who value both form and function. Discover the art of premium living.</p>
+      <!-- Immersive Discovery Hero -->
+      <section class="glass-card--hero mb-16 reveal" style="padding: 0; overflow: hidden; display: flex; align-items: stretch; min-height: 440px; border: 1px solid var(--border-default); background: linear-gradient(135deg, white 0%, var(--brand-primary-subtle-2) 100%);">
+        <div class="hero__content-box" style="flex: 1.2; padding: var(--sp-12); display: flex; flex-direction: column; justify-content: center;">
+          <div class="chip chip--active mb-4" style="width: fit-content;">Curated Collection 2026</div>
+          <h1 class="type-display-lg" style="letter-spacing: -0.04em; line-height: 1.1; margin-bottom: 20px; color: var(--grey-900);">
+            The Heart of Your <br><span class="type-gradient">Modern Home</span>
+          </h1>
+          <p class="type-body-lg text-muted mb-10" style="max-width: 460px; line-height: 1.6;">Precision engineered appliances designed for those who value both form and function. Discover the art of premium living.</p>
           <div style="display:flex; gap:var(--sp-4);">
-            <a href="/shop" class="btn btn--primary btn--lg">Explore Full Catalog</a>
-            <a href="#trending" class="btn btn--secondary btn--lg">Trending Now</a>
+            <a href="/shop" class="btn btn--primary btn--lg shadow-primary px-8">Full Catalog</a>
+            <a href="#trending" class="btn btn--white btn--lg px-8">Trending</a>
           </div>
+        </div>
+        <div class="hero__image-box" style="flex: 1; background: var(--grey-50); position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+           <div style="position: absolute; inset: 0; background: radial-gradient(circle, rgba(10, 132, 255, 0.1) 0%, transparent 70%);"></div>
+           <img src="/static/assets/Featured.png" alt="Featured" style="width: 85%; z-index: 1; filter: drop-shadow(0 20px 40px rgba(0,0,0,0.1));">
         </div>
       </section>
 
-      <!-- Value Props / Trust Bar -->
-      <section class="value-prop-bar mb-12 stagger-item">
-        <div class="value-prop-item">
-          <div class="value-prop-item__icon">
-            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
-          </div>
-          <div class="value-prop-item__text">
-            <div class="value-prop-item__title">Expert Fulfillment</div>
-            <div class="value-prop-item__desc">Safe, specialized handling</div>
-          </div>
+      <!-- Trusted Partners / Value Props -->
+      <section class="value-prop-bar mb-16 stagger-item" style="display: flex; justify-content: space-between; gap: var(--sp-6);">
+        <div class="glass-card p-6" style="flex: 1; display: flex; align-items: center; gap: 16px;">
+           <div style="color: var(--brand-primary);"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></div>
+           <div>
+              <div class="type-body-sm fw-bold">Verified Partners</div>
+              <div class="type-body-xs text-muted">100% genuine appliances</div>
+           </div>
         </div>
-        <div class="value-prop-item">
-          <div class="value-prop-item__icon">
-            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-          </div>
-          <div class="value-prop-item__text">
-            <div class="value-prop-item__title">Extended Warranty</div>
-            <div class="value-prop-item__desc">2-Year Platinum coverage</div>
-          </div>
+        <div class="glass-card p-6" style="flex: 1; display: flex; align-items: center; gap: 16px;">
+           <div style="color: var(--brand-primary);"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
+           <div>
+              <div class="type-body-sm fw-bold">0% Installments</div>
+              <div class="type-body-xs text-muted">Spread the cost effortlessly</div>
+           </div>
         </div>
-        <div class="value-prop-item">
-          <div class="value-prop-item__icon">
-            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-          </div>
-          <div class="value-prop-item__text">
-            <div class="value-prop-item__title">0% Installments</div>
-            <div class="value-prop-item__desc">Up to 24 months available</div>
-          </div>
+        <div class="glass-card p-6" style="flex: 1; display: flex; align-items: center; gap: 16px;">
+           <div style="color: var(--brand-primary);"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
+           <div>
+              <div class="type-body-sm fw-bold">Express Delivery</div>
+              <div class="type-body-xs text-muted">Safety-first fulfillment</div>
+           </div>
         </div>
       </section>
 
-      <!-- Discovery Category Navigator (categories from catalog) -->
-      <h3 class="type-label mb-6 stagger-item" style="letter-spacing:0.08em; color:var(--grey-400);">Discover by collection</h3>
-      <section class="discovery-category-grid mb-12 stagger-item">
-        {% for cat in (shop_categories or [])[:8] %}
-        <a href="{{ url_for('shop', category=cat) }}" class="category-card" data-cat="{{ cat }}" style="text-decoration:none; color:inherit;">
-          <div class="category-card__icon" aria-hidden="true">
-            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M4 6h16v4H4zM4 14h10v4H4zM18 14h2v4h-2z"></path></svg>
-          </div>
-          <div class="category-card__label">{{ cat }}</div>
-        </a>
-        {% else %}
-        <p class="type-body-sm text-muted stagger-item">Categories will appear here once sellers tag products.</p>
-        {% endfor %}
-      </section>
-
-      <h3 id="trending" class="type-display-sm mb-6 stagger-item" style="font-weight:var(--weight-extrabold);">Trending Now</h3>
+      <h3 id="trending" class="type-display-sm mb-8 stagger-item" style="display: flex; align-items: center; gap: 12px;">
+         The Current Pulse
+         <span class="system-status-indicator pulse-glow" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); padding: 4px 10px; border-radius: 20px;">
+           <div class="pulse-dot pulse-dot--active" style="width: 6px; height: 6px; background: var(--color-success); border-radius: 50%;"></div>
+           <span class="type-label-xs fw-bold" style="color: var(--color-success); font-size: 8px;">LIVE STOCK</span>
+         </span>
+      </h3>
       {% endif %}
 
-      <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:var(--sp-4);">
+      <div style="display:flex; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; gap:var(--sp-4);">
         <div>
           <h1 class="type-display-md">{% if view_mode == 'discovery' %}Discovery Hub{% else %}Shop Catalog{% endif %}</h1>
-          <p class="type-body-sm" style="color:var(--grey-400);margin-top:4px;">
+          <p class="type-body-sm text-muted mt-2">
             {% if view_mode == 'discovery' %}
-              Hand-picked appliance trends and premium selections.
+              Hand-picked trends and premium selections from verified partners.
             {% else %}
-              Browse {{ products|length }} active listing{% if products|length != 1 %}s{% endif %}{% if shop_active_category %} in {{ shop_active_category }}{% endif %}.
+              Browse {{ products|length }} live listing{% if products|length != 1 %}s{% endif %}{% if shop_active_category %} in {{ shop_active_category }}{% endif %}.
             {% endif %}
           </p>
         </div>
-        <!-- Category chips (sourced from live catalog) -->
-        <div style="display:flex;gap:var(--sp-2);flex-wrap:wrap;" id="category-chips">
-          <button type="button" class="chip {% if not shop_active_category %}chip--active{% endif %}" data-cat="">All</button>
+        
+        <!-- Category Navigator -->
+        <div style="display:flex; gap:var(--sp-2); flex-wrap:wrap;" id="category-chips">
+          <button type="button" class="chip {% if not shop_active_category %}chip--active{% endif %}" data-cat="">All Collections</button>
           {% for cat in (shop_categories or []) %}
           <button type="button" class="chip {% if shop_active_category == cat %}chip--active{% endif %}" data-cat="{{ cat }}">{{ cat }}</button>
           {% endfor %}
@@ -95,140 +84,118 @@
     </div>
   </div>
 
-  <div class="container" style="padding-top:var(--sp-8);padding-bottom:var(--sp-16);">
-    <div style="display:flex;gap:var(--sp-6);align-items:flex-start;">
+  <div class="container" style="padding-top:var(--sp-12); padding-bottom:var(--sp-24);">
+    <div style="display:flex; gap:var(--sp-8); align-items:flex-start;">
 
-      <!-- Filter Sidebar (Hidden in Discovery Mode) -->
+      <!-- Luxury Filter Sidebar -->
       {% if view_mode == 'catalog' %}
-      <aside id="filter-panel" style="width:240px;flex-shrink:0;position:sticky;top:calc(var(--topbar-height)+var(--sp-4));">
-        <div class="glass-card--strong" style="background:var(--grey-0);border:1px solid var(--border-default);border-radius:var(--radius-lg);padding:var(--sp-5);box-shadow:var(--shadow-xs);">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-4);">
-            <h2 style="font-size:var(--text-sm);font-weight:var(--weight-bold);color:var(--grey-700);letter-spacing:0.04em;text-transform:uppercase;">Filters</h2>
-            <button id="clear-filters" class="btn btn--xs btn--ghost" style="height:24px;border-radius:var(--radius-sm);">Clear</button>
+      <aside id="filter-panel" style="width:260px; flex-shrink:0; position:sticky; top:calc(var(--topbar-height) + var(--sp-6));">
+        <div class="glass-card--strong stagger-item" style="border: 1px solid var(--border-default); border-radius: 20px; padding: var(--sp-6); background: white;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:var(--sp-6);">
+            <h2 class="type-label-sm fw-bold" style="color:var(--grey-900); letter-spacing:0.1em; text-transform:uppercase;">Filters</h2>
+            <button id="clear-filters" class="btn btn--xs btn--ghost" style="color: var(--brand-primary);">Reset</button>
           </div>
 
-          <!-- Price Range -->
-          <div style="margin-bottom:var(--sp-5);">
-            <div class="type-label" style="margin-bottom:var(--sp-3);">Price Range</div>
-            <div style="display:flex;gap:var(--sp-2);">
-              <input id="price-min" type="number" placeholder="Min" class="form-input" style="height:36px;font-size:var(--text-sm);" min="0">
-              <input id="price-max" type="number" placeholder="Max" class="form-input" style="height:36px;font-size:var(--text-sm);" min="0">
+          <div class="filter-section mb-8">
+            <div class="type-label mb-3">Price Spectrum</div>
+            <div style="display:flex; gap:var(--sp-2);">
+              <input id="price-min" type="number" placeholder="Min" class="form-input" style="height:42px; font-size:var(--text-sm);">
+              <input id="price-max" type="number" placeholder="Max" class="form-input" style="height:42px; font-size:var(--text-sm);">
             </div>
           </div>
 
-          <!-- Rating -->
-          <div style="margin-bottom:var(--sp-5);">
-            <div class="type-label" style="margin-bottom:var(--sp-3);">Min. Rating</div>
-            <div style="display:flex;flex-direction:column;gap:var(--sp-2);">
-              {% for val, label in [('0','Any rating'),('4','4★ & up'),('3','3★ & up')] %}
-              <label style="display:flex;align-items:center;gap:var(--sp-2);cursor:pointer;">
-                <input type="radio" name="rating-filter" value="{{ val }}" {% if loop.first %}checked{% endif %} style="accent-color:var(--brand-primary);width:16px;height:16px;">
-                <span class="type-body-sm">{{ label }}</span>
+          <div class="filter-section mb-8">
+            <div class="type-label mb-3">Minimum Rating</div>
+            <div style="display:flex; flex-direction:column; gap:var(--sp-3);">
+              {% for val, label in [('0','Any Rating'),('4','4 Stars & up'),('3','3 Stars & up')] %}
+              <label style="display:flex; align-items:center; gap:var(--sp-3); cursor:pointer;" class="type-body-sm hover-text-primary transition-base">
+                <input type="radio" name="rating-filter" value="{{ val }}" {% if loop.first %}checked{% endif %} style="accent-color:var(--brand-primary); width:18px; height:18px;">
+                {{ label }}
               </label>
               {% endfor %}
             </div>
           </div>
 
-          <!-- Stock -->
-          <div style="margin-bottom:var(--sp-5);">
-            <div class="type-label" style="margin-bottom:var(--sp-3);">Availability</div>
-            <label style="display:flex;align-items:center;gap:var(--sp-2);cursor:pointer;">
-              <input id="instock-filter" type="checkbox" style="accent-color:var(--brand-primary);width:16px;height:16px;">
-              <span class="type-body-sm">In Stock Only</span>
+          <div class="filter-section mb-8">
+            <div class="type-label mb-3">Platform Features</div>
+            <label style="display:flex; align-items:center; gap:var(--sp-3); cursor:pointer; margin-bottom:var(--sp-3);" class="type-body-sm">
+              <input id="instock-filter" type="checkbox" style="accent-color:var(--brand-primary); width:18px; height:18px;">
+              In Stock Only
             </label>
-            <label style="display:flex;align-items:center;gap:var(--sp-2);cursor:pointer;margin-top:var(--sp-2);">
-              <input id="installment-filter" type="checkbox" style="accent-color:var(--brand-primary);width:16px;height:16px;">
-              <span class="type-body-sm">0% Installment</span>
+            <label style="display:flex; align-items:center; gap:var(--sp-3); cursor:pointer;" class="type-body-sm">
+              <input id="installment-filter" type="checkbox" style="accent-color:var(--brand-primary); width:18px; height:18px;">
+              0% Installment
             </label>
           </div>
 
-          <button id="apply-filters" class="btn btn--primary btn--full btn--lg" style="margin-top:var(--sp-2);">Apply Filters</button>
+          <button id="apply-filters" class="btn btn--primary btn--full btn--lg shadow-primary">Refine Catalog</button>
         </div>
       </aside>
       {% endif %}
 
-      <!-- Products Area -->
-      <section id="shop-root" data-view-mode="{{ view_mode }}" style="flex:1;min-width:0;">
-        <!-- Toolbar -->
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-5);gap:var(--sp-3);flex-wrap:wrap;">
-          <div class="type-body-sm" style="color:var(--grey-500);">
-            <strong id="products-count" style="color:var(--grey-800);font-weight:var(--weight-semibold);">0</strong> products found
+      <!-- Luxury Product Stream -->
+      <section id="shop-root" data-view-mode="{{ view_mode }}" style="flex:1; min-width:0;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:var(--sp-6); gap:var(--sp-3); flex-wrap:wrap;">
+          <div class="type-body-sm text-muted">
+            Viewing <strong id="products-count" class="text-grey-900 fw-bold">0</strong> precision appliances
           </div>
-          <div style="display:flex;align-items:center;gap:var(--sp-2);">
-            <label for="sort-select" class="type-body-sm" style="color:var(--grey-500);white-space:nowrap;">Sort by</label>
-            <select id="sort-select" class="form-select" style="height:36px;width:auto;font-size:var(--text-sm);">
+          <div style="display:flex; align-items:center; gap:var(--sp-3);">
+            <div class="type-body-sm text-muted">Sort By</div>
+            <select id="sort-select" class="form-select" style="height:42px; width:180px; border-radius: 10px;">
               <option value="relevance">Relevance</option>
-              <option value="price-asc">Price: Low → High</option>
-              <option value="price-desc">Price: High → Low</option>
-              <option value="rating">Best Rated</option>
-              <option value="newest">Newest</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+              <option value="rating">Highest Rated</option>
+              <option value="newest">Latest Release</option>
             </select>
           </div>
         </div>
 
-        <!-- Grid -->
         <div id="products-grid" class="product-grid stagger-children"></div>
 
-        <!-- Empty state -->
-        <div id="empty-state" class="empty-state" style="display:none;">
-          <div class="empty-state__icon">
-            <svg width="56" height="56" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11" stroke-width="1.5"/></svg>
+        <!-- Luxury Empty State -->
+        <div id="empty-state" class="empty-state reveal" style="display:none; padding: var(--sp-20) 0;">
+          <div class="empty-state__icon" style="background: var(--grey-50); color: var(--grey-300);">
+            <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           </div>
-          <div class="empty-state__title">No products found</div>
-          <div class="empty-state__message">Try adjusting your filters or search for a different item.</div>
-          <button id="reset-btn" class="btn btn--primary">Clear Filters</button>
+          <h3 class="type-h3 mt-6">No matches found</h3>
+          <p class="type-body-md text-muted mt-2">Adjust your filters or try a different collection.</p>
+          <button id="reset-btn" class="btn btn--primary mt-8">Clear All Filters</button>
         </div>
 
-        <!-- Pagination -->
-        <div id="pagination-wrap" class="pagination" style="margin-top:var(--sp-10);justify-content:center;">
-          <button id="page-prev" class="pagination__btn" disabled>
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        <div id="pagination-wrap" class="pagination mt-20" style="justify-content:center; gap: 12px;">
+          <button id="page-prev" class="pagination__btn btn--square" disabled>
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
           </button>
-          <div id="page-indicator" class="type-body-sm" style="padding:0 var(--sp-4);color:var(--grey-500);">Page 1 of 1</div>
-          <button id="page-next" class="pagination__btn">
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+          <div id="page-indicator" class="type-body-sm fw-bold px-6 py-2 glass-card" style="border-radius: 10px;">Page 1 of 1</div>
+          <button id="page-next" class="pagination__btn btn--square">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
         </div>
       </section>
     </div>
   </div>
-
-  <!-- Mobile Bottom Nav -->
-  <nav class="bottom-nav" aria-label="Mobile navigation">
-    <a href="/shop" class="bottom-nav__item active" aria-label="Shop">
-      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
-      Shop
-    </a>
-    <a href="/customer/orders" class="bottom-nav__item" aria-label="Orders">
-      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-      Orders
-    </a>
-    <a href="/customer/profile" class="bottom-nav__item" aria-label="Profile">
-      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      Profile
-    </a>
-  </nav>
 </div>
 
 <style>
+.type-gradient {
+  background: linear-gradient(135deg, var(--brand-primary) 0%, #3B82F6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
 .chip {
-  height: 32px;
-  padding: 0 var(--sp-4);
+  height: 38px;
+  padding: 0 var(--sp-6);
   border-radius: var(--radius-pill);
   border: 1.5px solid var(--border-medium);
-  background: var(--grey-0);
-  font-size: var(--text-xs);
-  font-weight: var(--weight-semibold);
-  font-family: var(--font-sans);
+  background: white;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
   color: var(--grey-600);
   cursor: pointer;
   transition: all var(--dur-fast) var(--ease-out);
-  white-space: nowrap;
-}
-.chip:hover {
-  border-color: var(--brand-primary);
-  color: var(--brand-primary);
-  background: var(--brand-primary-subtle);
 }
 .chip--active {
   background: var(--brand-primary);
@@ -236,76 +203,65 @@
   color: white;
   box-shadow: var(--shadow-primary);
 }
+.hover-text-primary:hover { color: var(--brand-primary); }
 </style>
 
 <script src="/static/js/data/products.js"></script>
 <script src="/static/js/components/productGrid.js"></script>
-{# Build a JSON-serializable list of product dicts in Jinja, then emit it once #}
 {% set ns = namespace(arr=[]) %}
 {% for p in products %}
   {% set cp = p.compare_price %}
-  {% set _ = ns.arr.append({
+        {% set _ = ns.arr.append({
     'id': p.id,
     'ref': p.product_ref,
     'product_ref': p.product_ref,
+    'show_sku': (can_view_product_id(p) if can_view_product_id is defined else True),
     'name': p.name,
     'category': p.category,
     'price': (p.price or 0) | float,
     'stock': p.stock,
-    'image': p.image_url or '/static/assets/products/refrigerator.webp',
-    'image_url': p.image_url or '/static/assets/products/refrigerator.webp',
+    'image': p.image_url or '/static/assets/Featured.png',
+    'image_url': p.image_url or '/static/assets/Featured.png',
     'installment_enabled': p.installment_enabled,
+    'seller_name': p.seller and (p.seller.business_name or p.seller.computed_full_name) or 'Unknown Seller',
     'comparePrice': (cp | float) if cp is not none else none,
   }) %}
 {% endfor %}
-
 <script id="__products__" type="application/json">{{ ns.arr | tojson | safe }}</script>
-
 <script>
 (function(){
-  const PAGE_SIZE = 12;
-
-  // BRIDGE: Read products JSON emitted by server into JS safely.
+  const PAGE_SIZE = 15;
   let all = JSON.parse(document.getElementById('__products__').textContent || '[]');
-
   let filtered = all.slice();
   let page = 1;
 
-  // --- KEEP ALL YOUR EXISTING FUNCTIONS BELOW (getFilters, applyFilters, render, etc.) ---
-  
   function getFilters() {
-    const priceMinEl = document.getElementById('price-min');
-    const priceMaxEl = document.getElementById('price-max');
-    const ratingEl = document.querySelector('input[name="rating-filter"]:checked');
-    const inStockEl = document.getElementById('instock-filter');
-    const installmentEl = document.getElementById('installment-filter');
     return {
       category: document.querySelector('#category-chips .chip--active')?.dataset.cat || '',
-      priceMin: parseFloat(priceMinEl?.value || '') || 0,
-      priceMax: parseFloat(priceMaxEl?.value || '') || Infinity,
-      rating:   parseFloat(ratingEl?.value || '') || 0,
-      inStock:  Boolean(inStockEl?.checked),
-      install:  Boolean(installmentEl?.checked),
+      priceMin: parseFloat(document.getElementById('price-min')?.value || '') || 0,
+      priceMax: parseFloat(document.getElementById('price-max')?.value || '') || Infinity,
+      rating:   parseFloat(document.querySelector('input[name="rating-filter"]:checked')?.value || '') || 0,
+      inStock:  Boolean(document.getElementById('instock-filter')?.checked),
+      install:  Boolean(document.getElementById('installment-filter')?.checked),
     };
   }
 
   function applyFilters() {
     const f = getFilters();
     filtered = all.filter(p => {
-      const category = document.querySelector('#category-chips .chip--active')?.dataset.cat || '';
-      if (category && p.category !== category) return false;
-      if (p.price < f.priceMin || p.price > f.priceMax) return false;
+      if (f.category && p.category !== f.category) return false;
+      if (p.price < f.priceMin || (f.priceMax !== Infinity && p.price > f.priceMax)) return false;
       if (f.rating && (p.rating || 0) < f.rating) return false;
       if (f.inStock && p.stock <= 0) return false;
-      // Use your actual DB boolean for installments
       if (f.install && !p.installment_enabled) return false; 
       return true;
     });
 
-    const sort = document.getElementById('sort-select') ? document.getElementById('sort-select').value : 'relevance';
+    const sort = document.getElementById('sort-select')?.value || 'relevance';
     if (sort === 'price-asc')  filtered.sort((a,b) => a.price - b.price);
     else if (sort === 'price-desc') filtered.sort((a,b) => b.price - a.price);
     else if (sort === 'rating')     filtered.sort((a,b) => (b.rating||0) - (a.rating||0));
+    else if (sort === 'newest')     filtered.sort((a,b) => b.id - a.id);
 
     page = 1;
     render();
@@ -320,6 +276,7 @@
     document.getElementById('page-indicator').textContent = `Page ${page} of ${pages}`;
     document.getElementById('page-prev').disabled = page <= 1;
     document.getElementById('page-next').disabled = page >= pages;
+    
     const grid = document.getElementById('products-grid');
     const empty = document.getElementById('empty-state');
     const pager = document.getElementById('pagination-wrap');
@@ -335,28 +292,6 @@
       renderProducts('#products-grid', slice);
     }
   }
-
-  // --- KEEP ALL YOUR EXISTING EVENT LISTENERS BELOW ---
-  
-  document.querySelectorAll('.category-card').forEach(card => {
-    if (card.tagName === 'A') return;
-    card.addEventListener('click', () => {
-      const cat = card.dataset.cat;
-      const chip = document.querySelector(`#category-chips .chip[data-cat="${cat}"]`);
-      if (chip) chip.click();
-      window.scrollTo({ top: document.getElementById('shop-root').offsetTop - 100, behavior: 'smooth' });
-    });
-  });
-
-  const shopRoot = document.getElementById('shop-root');
-  const viewMode = shopRoot?.dataset.viewMode || 'catalog';
-
-  if (viewMode === 'discovery') {
-    all.sort((a,b) => (b.rating || 0) - (a.rating || 0));
-    filtered = all.slice();
-  }
-
-  render();
 
   document.querySelectorAll('#category-chips .chip').forEach(chip => {
     chip.addEventListener('click', () => {
@@ -378,9 +313,6 @@
     if (ratingDefault) ratingDefault.checked = true;
     if (document.getElementById('instock-filter')) document.getElementById('instock-filter').checked = false;
     if (document.getElementById('installment-filter')) document.getElementById('installment-filter').checked = false;
-    if (document.getElementById('sort-select')) document.getElementById('sort-select').value = 'relevance';
-    document.querySelectorAll('#category-chips .chip').forEach(c => c.classList.remove('chip--active'));
-    document.querySelector('#category-chips .chip[data-cat=""]').classList.add('chip--active');
     applyFilters();
   }
 
@@ -390,6 +322,4 @@
   applyFilters();
 })();
 </script>
-  </div>
-</div>
 {% endblock %}

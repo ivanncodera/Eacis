@@ -1,19 +1,23 @@
 {% extends 'base.html' %}
 {% block title %}Privacy Policy — E-ACIS{% endblock %}
 {% block content %}
-<div class="page-center bg-grey-50" style="padding: var(--sp-20) var(--sp-6);">
+<div class="page-center bg-grey-50 policy-print-shell" style="padding: var(--sp-20) var(--sp-6);">
   <div class="stagger-children" style="max-width: 900px; width: 100%;">
-    <div class="text-center mb-16 reveal">
+    <div class="text-center mb-16 reveal policy-screen-hero">
       <div class="type-label mb-4" style="color: var(--brand-primary); letter-spacing: 0.15em; font-weight: 800;">DATA PROTECTION</div>
       <h1 class="type-display-md mb-6">Privacy Policy</h1>
-      <p class="type-body-md text-muted mx-auto" style="max-width: 600px;">How we collect, protect, and manage your personal data in accordance with the Data Privacy Act of 2012.</p>
+      <p class="type-body-md text-muted mx-auto" style="max-width: 1000px;">How we collect, protect, and manage your personal data in accordance with the Data Privacy Act of 2012.</p>
     </div>
 
-    <div class="glass-card p-12 reveal" style="border-radius: var(--radius-3xl);">
+    <div class="glass-card p-12 reveal policy-print-card" style="border-radius: var(--radius-3xl);">
+      <header class="policy-print-head">
+        <h1>E-ACIS Privacy Policy</h1>
+        <p>Document date: April 18, 2026</p>
+      </header>
       <article class="type-body-md" style="line-height: 1.8; color: var(--grey-700);">
         <section class="mb-10">
-          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">1. Data Collection Core Principles</h2>
-          <p>E-ACIS operates on three core principles as mandated by the National Privacy Commission (NPC):</p>
+          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">1. Privacy Principles</h2>
+          <p>E-ACIS processes data according to transparency, legitimate purpose, and proportionality. We collect only what is reasonably necessary to operate marketplace workflows, support requests, return validations, and account security.</p>
           <ul class="mt-4" style="padding-left: var(--sp-6); display: grid; gap: var(--sp-3);">
             <li><strong>Transparency:</strong> We inform you exactly what data is collected.</li>
             <li><strong>Legitimate Purpose:</strong> We only collect data necessary for marketplace functions.</li>
@@ -22,40 +26,82 @@
         </section>
 
         <section class="mb-10">
-          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">2. Personal Information Collected</h2>
-          <p>We collect and process the following types of data:</p>
+          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">2. Data We Collect</h2>
+          <p>Depending on the feature you use, E-ACIS may process the following categories:</p>
           <ul class="mt-4" style="padding-left: var(--sp-6); display: grid; gap: var(--sp-2);">
-            <li><strong>Personal Identity:</strong> Full name, contact number, and email.</li>
-            <li><strong>Merchant Data:</strong> Business names and regulatory permits.</li>
-            <li><strong>Transactional Data:</strong> Order history and delivery addresses.</li>
-            <li><strong>System Logs:</strong> Audit logs for security monitoring and compliance.</li>
+            <li><strong>Account and Profile Data:</strong> name, email, phone, role, and address details.</li>
+            <li><strong>Commerce Data:</strong> cart, orders, payments, refunds, vouchers, and loyalty transactions.</li>
+            <li><strong>Support and Resolution Data:</strong> inquiry tickets, return reasons, descriptions, and evidence links/uploads submitted for claims.</li>
+            <li><strong>Seller Compliance Data:</strong> seller business profile and permit documentation for verification workflows.</li>
+            <li><strong>Security and Audit Data:</strong> access logs, action traces, and other records used for abuse prevention, troubleshooting, and compliance review.</li>
           </ul>
         </section>
 
         <section class="mb-10">
-          <h2 class="type-h4 mb-4" style="color: var(--grey-900);">3. Rights of Data Subjects</h2>
-          <p>Under RA 10173, you have the following rights reaching your personal data:</p>
+          <h2 class="type-h4 mb-4" style="color: var(--grey-900);">3. Why We Process Your Data</h2>
+          <p>We process personal data to operate and secure the platform, including:</p>
           <ul class="mt-4" style="padding-left: var(--sp-6); display: grid; gap: var(--sp-2);">
-            <li>Right to be informed of data processing.</li>
-            <li>Right to access and correction of your data.</li>
-            <li>Right to erasure or blocking (deletion).</li>
-            <li>Right to object to processing.</li>
+            <li>Account authentication, session handling, and role-based access.</li>
+            <li>Order processing, shipping coordination, and seller-customer communication.</li>
+            <li>Installment and eligibility workflows where applicable.</li>
+            <li>Return and refund validation, including fraud and abuse detection controls.</li>
+            <li>Operational reporting, administrative audits, and legal/compliance obligations.</li>
           </ul>
         </section>
 
         <section class="mb-10">
-          <h2 class="type-h4 mb-4" style="color: var(--grey-900);">4. Data Retention & Security</h2>
-          <p>Data is stored in secure, encrypted databases (AES-256). We retain data only for the period necessary to fulfill service requirements or as required by Philippine law. Regular security audits are performed to maintain NPC Circular 16-01 compliance.</p>
+          <h2 class="type-h4 mb-4" style="color: var(--grey-900);">4. Sharing, Retention, and Safeguards</h2>
+          <p>Data may be shared only as needed to deliver services and meet legal obligations, such as with relevant counterparties in a transaction, authorized service providers, or competent authorities when required by law.</p>
+          <ul class="mt-4" style="padding-left: var(--sp-6); display: grid; gap: var(--sp-2);">
+            <li><strong>Retention:</strong> Records are retained only as long as needed for support, transaction integrity, dispute handling, and compliance.</li>
+            <li><strong>Safeguards:</strong> Access controls, security configuration, and auditability are applied to protect system and user data.</li>
+            <li><strong>Evidence Files:</strong> Return evidence is processed for claim verification, fraud prevention, and case resolution workflows.</li>
+          </ul>
+        </section>
+
+        <section class="mb-10">
+          <h2 class="type-h4 mb-4" style="color: var(--grey-900);">5. Data Subject Rights</h2>
+          <p>Subject to applicable law, you may request access, correction, objection, restriction, or deletion of your personal data. You may also request information on how your data is processed and raise privacy concerns through official support channels.</p>
+        </section>
+
+        <section class="mb-10">
+          <h2 class="type-h4 mb-4" style="color: var(--grey-900);">6. Data Protection Officer &amp; Contact</h2>
+          <p>For privacy requests, questions, or complaints, contact our Data Protection Officer (DPO): <a href="mailto:dpo@e-acis.ph" class="text-primary fw-bold">dpo@e-acis.ph</a>. You may also open a ticket in the <a href="/support" class="text-primary fw-bold">Support Center</a>.</p>
+        </section>
+
+        <section class="mb-10">
+          <h2 class="type-h4 mb-4" style="color: var(--grey-900);">7. Breach Notification and Incident Response</h2>
+          <p>We maintain an incident response program. In the event of a personal data breach affecting user data, we will notify affected individuals and the National Privacy Commission when required by law, and take measures to contain and remediate the breach.</p>
+        </section>
+
+        <section class="mb-10">
+          <h2 class="type-h4 mb-4" style="color: var(--grey-900);">8. Retention and Records of Processing</h2>
+          <p>Personal data is retained only for as long as necessary to provide services, comply with legal obligations, resolve disputes, and enforce our agreements. Specific retention periods vary by data category; contact the DPO for the retention schedule and Records of Processing Activities (RoPA).</p>
+        </section>
+
+        <section class="mb-10">
+          <h2 class="type-h4 mb-4" style="color: var(--grey-900);">9. Third-Party Processors &amp; International Transfers</h2>
+          <p>We share data with service providers (payment processors, couriers, analytics). Where data is transferred internationally, we implement appropriate safeguards (contractual clauses, provider assurances). A list of major processors is available from the DPO upon request.</p>
+        </section>
+
+        <section class="mb-10">
+          <h2 class="type-h4 mb-4" style="color: var(--grey-900);">10. Children and Sensitive Data</h2>
+          <p>The platform is not intended for children under 13. We do not knowingly collect personal data from children without parental consent. Sensitive categories of data are processed only when strictly necessary for verification or compliance, and with safeguards.</p>
+        </section>
+
+        <section class="mb-10">
+          <h2 class="type-h4 mb-4" style="color: var(--grey-900);">11. Automated Decisions and Profiling</h2>
+          <p>We use automated systems for fraud detection, eligibility checks, and personalization. Such processing includes human oversight and review; users may request review or object to automated decisions via the Support Center.</p>
         </section>
 
         <section>
-          <h2 class="type-h4 mb-4" style="color: var(--grey-900);">5. Contact Information</h2>
-          <p>For concerns regarding your data privacy, please contact our Data Protection Officer (DPO). You may also refer to the <a href="https://privacy.gov.ph" target="_blank" class="text-primary fw-bold">National Privacy Commission</a> for regulatory guidelines.</p>
+          <h2 class="type-h4 mb-4" style="color: var(--grey-900);">12. Contact and Policy Updates</h2>
+          <p>For privacy concerns, contact E-ACIS support at <a href="mailto:support@e-acis.ph" class="text-primary fw-bold">support@e-acis.ph</a> or the DPO at <a href="mailto:dpo@e-acis.ph" class="text-primary fw-bold">dpo@e-acis.ph</a>. You may also consult the <a href="https://privacy.gov.ph" target="_blank" rel="noopener" class="text-primary fw-bold">National Privacy Commission</a>. We may revise this policy when platform features or legal requirements change.</p>
         </section>
       </article>
 
-      <div class="mt-12 pt-8" style="border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--sp-4);">
-        <div class="type-body-xs text-muted">Last updated: April 14, 2026</div>
+      <div class="mt-12 pt-8 policy-screen-meta" style="border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--sp-4);">
+        <div class="type-body-xs text-muted">Last updated: April 18, 2026</div>
         <div style="display: flex; gap: var(--sp-4);">
           <span class="badge badge--success">NPC Compliant</span>
           <span class="badge badge--primary">ISO 27001 Ready</span>
@@ -64,4 +110,95 @@
     </div>
   </div>
 </div>
+
+<style>
+@media screen {
+  .policy-print-head {
+    display: none;
+  }
+}
+
+@media print {
+  .policy-print-shell {
+    background: #fff !important;
+    padding: 0 !important;
+  }
+
+  .policy-screen-hero,
+  .policy-screen-meta,
+  .progress-bar,
+  .skip-link,
+  .topbar,
+  .sidebar,
+  .footer,
+  .btn,
+  .badge,
+  .reveal {
+    display: none !important;
+  }
+
+  .policy-print-card {
+    background: #fff !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+  }
+
+  .policy-print-head {
+    display: block !important;
+    margin-bottom: 20pt;
+    padding-bottom: 10pt;
+    border-bottom: 1px solid #d9d9d9;
+  }
+
+  .policy-print-head h1 {
+    margin: 0 0 6pt;
+    font-size: 18pt;
+    line-height: 1.25;
+    color: #000;
+  }
+
+  .policy-print-head p {
+    margin: 0;
+    color: #444;
+    font-size: 10pt;
+  }
+
+  article,
+  article p,
+  article li {
+    color: #111 !important;
+    font-size: 11pt !important;
+    line-height: 1.55 !important;
+  }
+
+  article h2 {
+    color: #000 !important;
+    font-size: 13pt !important;
+    margin-top: 12pt;
+    margin-bottom: 7pt;
+  }
+
+  article section {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 10pt !important;
+  }
+
+  article ul {
+    margin-top: 6pt !important;
+  }
+
+  article a {
+    color: #000 !important;
+    text-decoration: underline;
+  }
+
+  @page {
+    size: A4;
+    margin: 16mm;
+  }
+}
+</style>
 {% endblock %}

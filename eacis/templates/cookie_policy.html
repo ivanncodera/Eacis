@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}Cookie Policy — E-ACIS{% endblock %}
+{% block content %}
+<div class="page-center bg-grey-50 policy-print-shell" style="padding: var(--sp-20) var(--sp-6);">
+  <div class="stagger-children" style="max-width: 900px; width: 100%;">
+    <div class="text-center mb-16 reveal policy-screen-hero">
+      <div class="type-label mb-4" style="color: var(--brand-primary); letter-spacing: 0.15em; font-weight: 800;">COOKIES &amp; TRACKING</div>
+      <h1 class="type-display-md mb-6">Cookie Policy</h1>
+      <p class="type-body-md text-muted mx-auto" style="max-width: 1000px;">How E-ACIS uses cookies and similar technologies to operate and improve your experience.</p>
+    </div>
+
+    <div class="glass-card p-12 reveal policy-print-card" style="border-radius: var(--radius-3xl);">
+      <header class="policy-print-head">
+        <h1>E-ACIS Cookie Policy</h1>
+        <p>Document date: April 18, 2026</p>
+      </header>
+      <article class="type-body-md" style="line-height: 1.8; color: var(--grey-700);">
+        <section class="mb-10">
+          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">1. What are Cookies?</h2>
+          <p>Cookies are small text files stored on your device by websites to remember preferences, sessions, and to enable analytics and advertising features. We also use similar technologies like local storage and pixel tags.</p>
+        </section>
+
+        <section class="mb-10">
+          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">2. Types of Cookies We Use</h2>
+          <ul class="mt-4" style="padding-left: var(--sp-6); display: grid; gap: var(--sp-2);">
+            <li><strong>Essential:</strong> Required to support login, session management, shopping cart, and security features.</li>
+            <li><strong>Performance:</strong> Anonymous cookies for analytics and product performance measurement.</li>
+            <li><strong>Functional:</strong> Remember your preferences, language, and UI choices.</li>
+            <li><strong>Advertising:</strong> Third-party cookies used to deliver relevant offers and measure campaign effectiveness.</li>
+          </ul>
+        </section>
+
+        <section class="mb-10">
+          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">3. Managing Cookies</h2>
+          <p>You can control or delete cookies through your browser settings and privacy controls. Note that disabling essential cookies may break core functionality like authentication and checkout. For third-party cookie opt-outs, consult provider privacy notices.</p>
+        </section>
+
+        <section class="mb-10">
+          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">4. Third-Party Cookies</h2>
+          <p>We integrate services (analytics, ads, payment providers, courier tracking) that may set cookies on their domains. These providers control their cookies and you should consult their policies for opt-out choices.</p>
+        </section>
+
+        <section>
+          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">5. Contact</h2>
+          <p>For questions about this Cookie Policy contact <a href="mailto:dpo@e-acis.ph" class="text-primary fw-bold">dpo@e-acis.ph</a> or visit the <a href="/support" class="text-primary fw-bold">Support Center</a>.</p>
+        </section>
+      </article>
+
+      <div class="mt-12 pt-8 policy-screen-meta" style="border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--sp-4);">
+        <div class="type-body-xs text-muted">Last updated: April 18, 2026</div>
+        <div style="display: flex; gap: var(--sp-4);">
+          <span class="badge">Essential Cookies</span>
+          <span class="badge">Performance Cookies</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+@media screen { .policy-print-head { display: none; } }
+@media print { .policy-print-shell { background: #fff !important; padding: 0 !important; } }
+</style>
+{% endblock %}

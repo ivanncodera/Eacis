@@ -10,7 +10,9 @@ with app.test_client() as c:
     csrf = el.get('value') if el else None
     print('CSRF token present?', bool(csrf))
     payload = {'email':'customer@eacis.ph','password':'customer123','csrf_token': csrf}
-    r2 = c.post('/auth/login', data=payload, follow_redirects=False)
+    # Include Referer and Host headers to satisfy CSRF referer check.
+    headers = {'Referer': 'https://localhost:5000/auth/login', 'Host': 'localhost:5000'}
+    r2 = c.post('/auth/login', data=payload, follow_redirects=False, headers=headers)
     print('POST status', r2.status_code)
     print('Location header:', r2.headers.get('Location'))
     print('Response text snippet:', r2.data.decode()[:300])

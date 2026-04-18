@@ -1,59 +1,201 @@
 {% extends 'base.html' %}
 {% block title %}Terms of Service — E-ACIS{% endblock %}
 {% block content %}
-<div class="page-center bg-grey-50" style="padding: var(--sp-20) var(--sp-6);">
+<div class="page-center bg-grey-50 policy-print-shell" style="padding: var(--sp-20) var(--sp-6);">
   <div class="stagger-children" style="max-width: 900px; width: 100%;">
-    <div class="text-center mb-16 reveal">
+    <div class="text-center mb-16 reveal policy-screen-hero">
       <div class="type-label mb-4" style="color: var(--brand-primary); letter-spacing: 0.15em; font-weight: 800;">LEGAL FRAMEWORK</div>
       <h1 class="type-display-md mb-6">Terms & Conditions</h1>
-      <p class="type-body-md text-muted mx-auto" style="max-width: 600px;">Comprehensive usage rules, user rights, and platform responsibilities for the E-ACIS marketplace.</p>
+      <p class="type-body-md text-muted mx-auto" style="max-width: 1000px;">Comprehensive usage rules, user rights, and platform responsibilities for the E-ACIS marketplace.</p>
     </div>
 
-    <div class="glass-card p-12 reveal" style="border-radius: var(--radius-3xl);">
+    <div class="glass-card p-12 reveal policy-print-card" style="border-radius: var(--radius-3xl);">
+      <header class="policy-print-head">
+        <h1>E-ACIS Terms and Conditions</h1>
+        <p>Document date: April 18, 2026</p>
+      </header>
       <article class="type-body-md" style="line-height: 1.8; color: var(--grey-700);">
         <section class="mb-10">
-          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">1. Regulatory Compliance (Philippines)</h2>
-          <p>This agreement is governed by the laws of the Republic of the Philippines. E-ACIS operates in strict accordance with the <strong>Data Privacy Act of 2012 (RA 10173)</strong> as implemented by the National Privacy Commission (NPC).</p>
+          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">1. Scope and Acceptance</h2>
+          <p>These Terms govern use of E-ACIS across customer, seller, and administrator portals. By creating an account, placing orders, opening support inquiries, initiating return requests, or submitting installment and KYC-related data, you agree to these Terms and the Privacy Policy.</p>
         </section>
 
         <section class="mb-10">
-          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">2. User Responsibilities</h2>
-          <p>By creating an account or using our checkout functions, you acknowledge and agree to:</p>
+          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">2. Account and Identity Responsibilities</h2>
+          <p>You agree to provide complete and accurate account information and to keep profile, address, and contact details current. You are responsible for all activity under your credentials and must immediately report suspected unauthorized access.</p>
           <ul class="mt-4" style="padding-left: var(--sp-6); display: grid; gap: var(--sp-2);">
-            <li>Provide accurate personal and business information.</li>
-            <li>Maintain the confidentiality of your account credentials.</li>
-            <li>Use the system only for its intended purpose of appliance commerce.</li>
-            <li>Adhere to the Least Privilege Principle regarding data access.</li>
+            <li>Customers must use valid contact and shipping information for order fulfillment.</li>
+            <li>Sellers must submit valid business details and required permit documentation for onboarding and continued listing eligibility.</li>
+            <li>Users must not share account access or impersonate another person or entity.</li>
           </ul>
         </section>
 
         <section class="mb-10">
-          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">3. Merchant Onboarding & Compliance</h2>
-          <p>Sellers must undergo a mandatory compliance review. You are required to submit valid government-issued permits, including but not limited to:</p>
+          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">3. Marketplace Transactions and Feature Use</h2>
+          <p>E-ACIS provides commerce workflows including shopping, checkout, vouchers, loyalty points, inquiries, and returns. Additional rules apply to selected workflows:</p>
           <ul class="mt-4" style="padding-left: var(--sp-6); display: grid; gap: var(--sp-2);">
-            <li>DTI/SEC Business Permit</li>
-            <li>Barangay Permit</li>
-            <li>Mayor's Permit</li>
+            <li><strong>Installments:</strong> installment availability and terms depend on account eligibility and seller configuration.</li>
+            <li><strong>Loyalty:</strong> points are promotional and may have validity, conversion, or redemption limits shown at checkout.</li>
+            <li><strong>Inquiries:</strong> communications in the inquiry hub must remain factual, respectful, and relevant to orders or products.</li>
           </ul>
-          <p class="mt-4">E-ACIS reserves the right to suspend accounts failing to meet verified compliance standards.</p>
         </section>
 
         <section class="mb-10">
-          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">4. System Usage & Security</h2>
-          <p>Our platform implements Role-Based Access Control (RBAC) and AES-256 encryption for sensitive data. Users must not attempt to circumvent these security measures. Administrators are required to use Multi-Factor Authentication (MFA) where available.</p>
+          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">4. Returns, Evidence, and Consent</h2>
+          <p>Return requests are subject to policy checks, including eligibility windows, order ownership verification, and anti-abuse controls. When submitting a return request, you may be required to provide evidence files or links, and you must acknowledge Terms and Privacy consent before submission.</p>
+          <ul class="mt-4" style="padding-left: var(--sp-6); display: grid; gap: var(--sp-2);">
+            <li>Return eligibility may depend on delivery status and configured return windows.</li>
+            <li>Evidence may be required for specific return categories (for example, defective or damaged claims).</li>
+            <li>Excessive or abusive return behavior may result in temporary restrictions pending review.</li>
+          </ul>
+        </section>
+
+        <section class="mb-10">
+          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">5. Prohibited Conduct and Enforcement</h2>
+          <p>You may not attempt to bypass access controls, inject malicious content, manipulate search or support channels, upload prohibited material, or misuse another user's data. E-ACIS may investigate and take corrective action, including warning, content removal, account limitation, suspension, or termination.</p>
+        </section>
+
+        <section class="mb-10">
+          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">6. Security and Service Integrity</h2>
+          <p>E-ACIS applies role-based permissions, request validation controls, and operational monitoring to protect platform integrity. While reasonable safeguards are implemented, users are expected to maintain secure passwords, trusted devices, and updated contact channels.</p>
+        </section>
+
+        <section class="mb-10">
+          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">7. Governing Law and Dispute Framework</h2>
+          <p>These Terms are governed by the laws of the Republic of the Philippines. Platform operations and data handling are designed to align with applicable Philippine regulations, including RA 10173 (Data Privacy Act of 2012).</p>
+        </section>
+
+        <section class="mb-10">
+          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">8. Payment, Fees and Refunds</h2>
+          <p>Payments on the platform are processed by authorized third-party payment processors. E-ACIS does not store full card data; we rely on tokenization and PCI-compliant providers. Prices shown are exclusive or inclusive of taxes according to checkout visibility; taxes and fees will be displayed before purchase.</p>
+          <ul class="mt-4" style="padding-left: var(--sp-6); display: grid; gap: var(--sp-2);">
+            <li><strong>Payment Processing:</strong> We may share transaction data with payment providers to complete purchases and refunds.</li>
+            <li><strong>Refunds &amp; Returns:</strong> Refund eligibility and timelines vary by seller and product; see our Returns &amp; Refunds workflows in the customer portal for details.</li>
+          </ul>
+        </section>
+
+        <section class="mb-10">
+          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">9. Intellectual Property and DMCA</h2>
+          <p>All content, trademarks, logos, and code on E-ACIS are the property of their respective owners. Users must not upload content that infringes third-party rights. For copyright complaints, follow our support process and provide required takedown information and contact points.</p>
+        </section>
+
+        <section class="mb-10">
+          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">10. Limitation of Liability and Indemnification</h2>
+          <p>To the maximum extent permitted by law, E-ACIS and its affiliates are not liable for indirect, incidental, special, exemplary, or consequential damages arising from your use of the service. You agree to indemnify and hold harmless E-ACIS for claims arising from your breach of these Terms or misuse of the platform.</p>
+        </section>
+
+        <section class="mb-10">
+          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">11. Cookies, Tracking and Third Parties</h2>
+          <p>We use cookies and similar technologies for analytics, session management, personalization, and fraud prevention. Third-party services (analytics, payment gateways, shipping providers) may collect data according to their policies. See the Privacy Policy and Data Compliance page for details on third-party processors and opt-out options.</p>
+        </section>
+
+        <section class="mb-10">
+          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">12. Consumer Rights and Accessibility</h2>
+          <p>Where applicable, consumer protection laws provide specific rights (cooling-off, warranty, product liability). E-ACIS strives to make the platform accessible and will address accessibility concerns raised through Support.</p>
         </section>
 
         <section>
-          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">5. Intellectual Property</h2>
-          <p>All software, design elements, and platform content are protected by intellectual property laws. Usage of the system constitutes an agreement to the End-User License Agreement (EULA).</p>
+          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">13. Policy Updates</h2>
+          <p>E-ACIS may update these Terms to reflect system upgrades, legal requirements, or risk controls. Material updates become effective when published on this page. Continued use after publication constitutes acceptance of the revised Terms. For questions about these Terms contact support@e-acis.ph or use the Support Center.</p>
         </section>
       </article>
 
-      <div class="mt-12 pt-8" style="border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--sp-4);">
-        <div class="type-body-xs text-muted">Last updated: April 14, 2026</div>
+      <div class="mt-12 pt-8 policy-screen-meta" style="border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--sp-4);">
+        <div class="type-body-xs text-muted">Last updated: April 15, 2026</div>
         <a href="javascript:window.print()" class="btn btn--ghost btn--sm">Print Documents</a>
       </div>
     </div>
   </div>
 </div>
+
+<style>
+@media screen {
+  .policy-print-head {
+    display: none;
+  }
+}
+
+@media print {
+  .policy-print-shell {
+    background: #fff !important;
+    padding: 0 !important;
+  }
+
+  .policy-screen-hero,
+  .policy-screen-meta,
+  .progress-bar,
+  .skip-link,
+  .topbar,
+  .sidebar,
+  .footer,
+  .btn,
+  .badge,
+  .reveal {
+    display: none !important;
+  }
+
+  .policy-print-card {
+    background: #fff !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+  }
+
+  .policy-print-head {
+    display: block !important;
+    margin-bottom: 20pt;
+    padding-bottom: 10pt;
+    border-bottom: 1px solid #d9d9d9;
+  }
+
+  .policy-print-head h1 {
+    margin: 0 0 6pt;
+    font-size: 18pt;
+    line-height: 1.25;
+    color: #000;
+  }
+
+  .policy-print-head p {
+    margin: 0;
+    color: #444;
+    font-size: 10pt;
+  }
+
+  article,
+  article p,
+  article li {
+    color: #111 !important;
+    font-size: 11pt !important;
+    line-height: 1.55 !important;
+  }
+
+  article h2 {
+    color: #000 !important;
+    font-size: 13pt !important;
+    margin-top: 12pt;
+    margin-bottom: 7pt;
+  }
+
+  article section {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 10pt !important;
+  }
+
+  article ul {
+    margin-top: 6pt !important;
+  }
+
+  article a {
+    color: #000 !important;
+    text-decoration: underline;
+  }
+
+  @page {
+    size: A4;
+    margin: 16mm;
+  }
+}
+</style>
 {% endblock %}

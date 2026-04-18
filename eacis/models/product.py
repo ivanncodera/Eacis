@@ -9,6 +9,7 @@ from datetime import datetime
 
 class Product(db.Model):
     __tablename__ = 'products'
+    __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True)
     product_ref = db.Column(db.String(30), unique=True, nullable=False)
     seller_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -26,6 +27,8 @@ class Product(db.Model):
     image_url = db.Column(db.String(500))
     specs = db.Column(db.JSON)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # product images are loaded explicitly via queries to avoid import-time mapper issues
 
     def is_low_stock(self):
         return self.stock <= self.low_stock_threshold

@@ -1,313 +1,253 @@
 {% extends 'base.html' %}
-{% block title %}Account Identity — E-ACIS{% endblock %}
+{% block title %}Account Settings — E-ACIS{% endblock %}
 
 {% block content %}
 <div class="main-content">
-  <div class="stagger-children" style="max-width: 1200px;">
-    
-    <!-- Premium Breadcrumb Navigation -->
-    <nav class="mb-12 stagger-item">
-      <div class="breadcrumb-wrap">
-        <a href="/customer/profile" class="breadcrumb-link type-body-sm">Dashboard</a>
-        <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" style="color: var(--grey-300); opacity: 0.5;"><path d="M9 5l7 7-7 7"/></svg>
-        <span class="type-body-sm fw-bold" style="color: var(--grey-900);">Personal Identity</span>
+  <div class="stagger-children" style="max-width: 1100px; margin: 0 auto;">
+    <header class="mb-8">
+      <div class="type-body-sm text-muted mb-2"><a href="/customer/profile" class="text-primary">My Profile</a> / Account Settings</div>
+      <h1 class="type-display-sm" style="margin:0;">Account Settings</h1>
+      <p class="type-body-sm text-muted" style="margin-top: var(--sp-2);">Update your identity and delivery details. For security, your current password is required before saving.</p>
+    </header>
+
+    {% if errors.get('general') %}
+      <div class="form-error mb-6" role="alert">{{ errors.get('general') }}</div>
+    {% endif %}
+
+    <form id="profile-settings-form" method="post" enctype="multipart/form-data" class="glass-card p-8" data-enhance="submit-loading warn-on-exit phone-normalize" style="display:grid; gap: var(--sp-8);">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <!-- Profile Avatar Upload -->
+      <div style="display:flex; align-items:center; gap: var(--sp-4);">
+        <div style="width:72px; height:72px; border-radius:50%; overflow:hidden; background:var(--grey-50); display:flex; align-items:center; justify-content:center; font-weight:800; color:var(--grey-700);">
+          {% set _initial = ((current_user.full_name or current_user.email)[:1]) %}
+          {% if profile_image_url(current_user, 128) %}
+            <img id="profile_avatar_preview" src="{{ profile_image_url(current_user, 128) }}" alt="Profile" style="width:100%; height:100%; object-fit:cover; display:block;" data-initial="{{ _initial|e }}">
+          {% else %}
+            <div id="profile_avatar_preview" data-initial="{{ _initial|e }}" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;">{{ _initial|upper }}</div>
+          {% endif %}
+        </div>
+        <div>
+          <label class="btn btn--ghost btn--sm">
+            Upload profile picture
+            <input type="file" id="profile_image" name="profile_image" accept="image/png,image/jpeg,image/webp" style="display:none;">
+          </label>
+          <input type="hidden" name="remove_profile_image" id="remove_profile_image" value="0">
+          <button type="button" id="remove-avatar-btn" class="btn btn--white btn--sm" style="margin-left:8px; display: none;">Remove</button>
+          <div class="type-body-xs text-muted">Allowed: PNG, JPG, WEBP.</div>
+          {% if errors.get('profile_image') %}<div class="form-error-text" style="color:var(--color-danger);font-size:11px;margin-top:4px;">{{ errors.get('profile_image') }}</div>{% endif %}
+        </div>
       </div>
-    </nav>
 
-    <!-- Settings Hub Core -->
-    <div class="settings-hub" style="position: relative; overflow: hidden; border-radius: var(--radius-2xl);">
-      <div class="profile-header-mesh"></div>
-      
-      <!-- Internal Task Navigation -->
-      <aside class="settings-nav stagger-item" style="position: relative; z-index: 1; padding: var(--sp-6) var(--sp-4);">
-        <div class="settings-nav__header">ACCOUNT HUB</div>
-        
-        <button class="settings-nav__item active" data-tab="general" style="display: flex; align-items: center; border: none; background: none; width: 100%; text-align: left; cursor: pointer; padding: var(--sp-3) var(--sp-4); gap: var(--sp-3);">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-          <span class="btn__label">General Identity</span>
-        </button>
-        
-        <button class="settings-nav__item" data-tab="security" style="display: flex; align-items: center; border: none; background: none; width: 100%; text-align: left; cursor: pointer; padding: var(--sp-3) var(--sp-4); gap: var(--sp-3);">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-          <span class="btn__label">Security & Access</span>
-        </button>
-        
-        <button class="settings-nav__item" data-tab="shipping" style="display: flex; align-items: center; border: none; background: none; width: 100%; text-align: left; cursor: pointer; padding: var(--sp-3) var(--sp-4); gap: var(--sp-3);">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-          <span class="btn__label">Global Delivery</span>
-        </button>
-        
-        <div style="flex: 1;"></div>
-        <div class="sidebar__divider" style="margin: var(--sp-4) 0;"></div>
-      </aside>
-
-      <!-- Adaptive Content Pane -->
-      <div class="settings-pane-wrapper" style="position: relative; z-index: 1;">
-        
-        <!-- Identity Management Section -->
-        <section id="pane-general" class="settings-pane active">
-          <div class="glass-card stagger-item" style="padding: var(--sp-12); border-radius: var(--radius-2xl);">
-            <header style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: var(--sp-12);">
-              <div style="display: flex; align-items: center; gap: var(--sp-8);">
-                <button class="avatar-suite" aria-label="Update Profile Picture" style="width: 120px; height: 120px; border: 4px solid white; box-shadow: 0 15px 35px rgba(0,0,0,0.1); padding: 0; position: relative;">
-                  <div style="width: 100%; height: 100%; background: var(--grey-100); display: flex; align-items: center; justify-content: center; font-size: 42px; font-weight: 900; color: var(--grey-400);">{{ current_user.full_name[:1] }}</div>
-                  <div class="avatar-suite__overlay">
-                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                  </div>
-                </button>
-                <div>
-                  <h1 class="type-display-sm" style="margin-bottom: 4px; letter-spacing: -0.02em;">{{ current_user.full_name }}</h1>
-                  <p class="type-body-sm text-muted">Manage your primary account details and verification.</p>
-                </div>
-              </div>
-              
-              <div class="loyalty-progress-hub">
-                <div class="loyalty-indicator">
-                  <svg width="48" height="48">
-                    <circle class="bg" cx="24" cy="24" r="20" />
-                    <circle class="progress" cx="24" cy="24" r="20" style="stroke-dashoffset: 20;" />
-                  </svg>
-                  <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 900;">80%</div>
-                </div>
-                <div class="loyalty-meta">
-                  <span class="tier-name">Gold Status</span>
-                  <span class="points-label">1,240 pts to Platinum</span>
-                </div>
-              </div>
-            </header>
-
-            <form class="form-stack" id="profile-general-form" method="post" action="/customer/profile/edit" data-enhance="submit-loading">
-              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-              <div class="type-label mb-6" style="color: var(--brand-primary); letter-spacing: 0.1em; font-size: 10px;">PRIVATE ACCOUNT DATA</div>
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-10);">
-                <div class="form-group">
-                  <label for="fullname" class="form-label">Full Legal Name <span class="optional">(ID required)</span></label>
-                  <div class="form-input-group">
-                    <span class="form-input-group__icon"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg></span>
-                    <input type="text" id="fullname" class="form-input" value="{{ current_user.full_name }}">
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label for="email" class="form-label">Account Email <span class="optional">(Verified)</span></label>
-                  <div class="form-input-group">
-                    <span class="form-input-group__icon">@</span>
-                    <input type="email" id="email" class="form-input" value="{{ current_user.email }}" readonly>
-                  </div>
-                </div>
-              </div>
-
-              <div class="divider--horizontal my-10" style="opacity: 0.1;"></div>
-
-              <div class="type-label mb-6" style="color: var(--brand-primary); letter-spacing: 0.1em; font-size: 10px;">PUBLIC IDENTITY</div>
-              <div style="display: grid; grid-template-columns: 1fr 2.5fr; gap: var(--sp-10);">
-                <div class="form-group">
-                  <label for="username" class="form-label">Public Handle</label>
-                  <div class="form-input-group">
-                    <span class="form-input-group__icon">#</span>
-                    <input type="text" id="username" class="form-input" placeholder="Display name" value="{{ current_user.full_name.lower().replace(' ', '_') }}">
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label for="bio" class="form-label">Personal Bio <span class="optional">(Visible to sellers)</span></label>
-                  <textarea id="bio" class="form-input" style="min-height: 80px; resize: none; padding-top: var(--sp-3);" placeholder="Tell us about yourself..."></textarea>
-                </div>
-              </div>
-            </form>
+      <section style="display:grid; gap: var(--sp-4);">
+        <h2 class="type-h4" style="margin:0;">Identity</h2>
+        <div style="display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-4);">
+          <div class="form-group">
+            <label for="first_name" class="form-label">First Name</label>
+            <input type="text" id="first_name" name="first_name" class="form-input" value="{{ form.first_name }}" required>
+            {% if errors.get('first_name') %}<div class="form-error-text" style="color:var(--color-danger);font-size:11px;margin-top:4px;">{{ errors.first_name }}</div>{% endif %}
           </div>
-        </section>
-
-        <!-- Security Intelligence Section -->
-        <section id="pane-security" class="settings-pane" style="display: none;">
-          <div class="glass-card stagger-item" style="padding: var(--sp-12); border-radius: var(--radius-2xl);">
-            <h3 class="type-display-xs mb-10">Access & Security</h3>
-            
-            <div style="background: var(--grey-50); padding: var(--sp-8); border-radius: var(--radius-xl); margin-bottom: var(--sp-10);">
-              <div style="display: flex; justify-content: space-between; margin-bottom: var(--sp-4);">
-                <div class="type-label" style="font-size: 10px; color: var(--grey-500); letter-spacing: 0.1em;">PROTECTION STRENGTH</div>
-                <div class="type-label" style="font-size: 10px; color: var(--color-success); font-weight: 900;">HIGHLY SECURE</div>
-              </div>
-              <div style="height: 6px; background: var(--grey-200); border-radius: 3px;">
-                <div style="width: 85%; height: 100%; background: linear-gradient(90deg, var(--color-success), #1bd68e); border-radius: 3px; box-shadow: 0 0 15px rgba(27, 214, 142, 0.4);"></div>
-              </div>
-            </div>
-
-            <div class="type-label mb-6" style="color: var(--grey-400); letter-spacing: 0.1em; font-size: 10px;">CREDENTIAL MANAGEMENT</div>
-            <div class="form-stack" style="gap: var(--sp-8); margin-bottom: var(--sp-12);">
-              <div class="form-group">
-                <label for="cur-pass" class="form-label">Current Authentication Key</label>
-                <input type="password" id="cur-pass" class="form-input" placeholder="••••••••">
-              </div>
-              <div class="form-group">
-                <label for="new-pass" class="form-label">New Account Password</label>
-                <input type="password" id="new-pass" class="form-input" placeholder="••••••••">
-              </div>
-            </div>
-
-            <div class="type-label mb-6" style="color: var(--grey-400); letter-spacing: 0.1em; font-size: 10px;">RECENT ACTIVITY LOG</div>
-            <table class="premium-table" style="background: rgba(0,0,0,0.02); border-radius: var(--radius-lg); overflow: hidden;">
-              <thead>
-                <tr>
-                  <th>Event</th>
-                  <th>Device / IP</th>
-                  <th>Timestamp</th>
-                </tr>
-              </thead>
-              <tbody style="font-size: 11px;">
-                <tr>
-                  <td><span style="display: flex; align-items: center; gap: 6px;"><div class="pulse-dot pulse-dot--active"></div> Successful Login</span></td>
-                  <td class="type-mono">MacBook Pro (192.168.1.1)</td>
-                  <td class="text-muted">Just now</td>
-                </tr>
-                <tr style="opacity: 0.6;">
-                  <td>Password Updated</td>
-                  <td class="type-mono">iPhone 15 Pro</td>
-                  <td class="text-muted">2 days ago</td>
-                </tr>
-              </tbody>
-            </table>
+          <div class="form-group">
+            <label for="last_name" class="form-label">Last Name</label>
+            <input type="text" id="last_name" name="last_name" class="form-input" value="{{ form.last_name }}" required>
+            {% if errors.get('last_name') %}<div class="form-error-text" style="color:var(--color-danger);font-size:11px;margin-top:4px;">{{ errors.last_name }}</div>{% endif %}
           </div>
-        </section>
-
-        <!-- Global Delivery Section -->
-        <section id="pane-shipping" class="settings-pane" style="display: none;">
-          <div class="glass-card stagger-item" style="padding: var(--sp-12); border-radius: var(--radius-2xl);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--sp-10);">
-              <div>
-                <h3 class="type-display-xs mb-2">Global Delivery Portfolio</h3>
-                <p class="type-body-sm text-muted">Manage your verified shipping locations and primary defaults.</p>
-              </div>
-              <button class="btn btn--white">
-                <span class="btn__label">+ Add New Entry</span>
-              </button>
-            </div>
-
-            <div class="address-card-grid">
-              <div class="address-card address-card--primary">
-                <div class="address-card__badge">PRIMARY</div>
-                <div class="address-card__type">
-                  <div class="address-card__icon">
-                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                  </div>
-                  <span>Main Residential</span>
-                </div>
-                <div class="address-card__details">
-                  123 Extreme Premium Tower, Level 42<br>
-                  Business District, Metro Manila<br>
-                  Philippines, 1200
-                </div>
-              </div>
-
-              <div class="address-card">
-                <div class="address-card__type">
-                  <div class="address-card__icon">
-                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                  </div>
-                  <span>Corporate Office</span>
-                </div>
-                <div class="address-card__details">
-                  Techno Plaza Hub, Suite 808<br>
-                  Innovation Way, Quezon City<br>
-                  Philippines, 1100
-                </div>
-              </div>
-            </div>
+          <div class="form-group">
+            <label for="middle_name" class="form-label">Middle Name</label>
+            <input type="text" id="middle_name" name="middle_name" class="form-input" value="{{ form.middle_name }}">
           </div>
-        </section>
+          <div class="form-group">
+            <label for="suffix" class="form-label">Suffix</label>
+            <input type="text" id="suffix" name="suffix" class="form-input" value="{{ form.suffix }}" placeholder="Jr, Sr, III">
+          </div>
+          <div class="form-group">
+            <label for="phone" class="form-label">Mobile Number</label>
+            <input type="tel" id="phone" name="phone" class="form-input" value="{{ form.phone }}" placeholder="09171234567">
+            {% if errors.get('phone') %}<div class="form-error-text" style="color:var(--color-danger);font-size:11px;margin-top:4px;">{{ errors.phone }}</div>{% endif %}
+          </div>
+          <div class="form-group">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" id="email" name="email" class="form-input" value="{{ form.email or current_user.email }}" required>
+            <div class="type-body-xs text-muted" style="margin-top:4px;">Email updates require one-time verification sent to the new address.</div>
+            {% if session.get('pending_email_change_email') %}
+            <div class="type-body-xs" style="margin-top:4px; color: var(--brand-primary);">Verification pending for {{ session.get('pending_email_change_email') }}.</div>
+            {% endif %}
+            {% if errors.get('email') %}<div class="form-error-text" style="color:var(--color-danger);font-size:11px;margin-top:4px;">{{ errors.email }}</div>{% endif %}
+          </div>
+        </div>
+      </section>
 
+      <section style="display:grid; gap: var(--sp-4);">
+        <h2 class="type-h4" style="margin:0;">Delivery Address</h2>
+        <div class="form-group">
+          <label for="address_line1" class="form-label">Address Line 1</label>
+          <input type="text" id="address_line1" name="address_line1" class="form-input" value="{{ form.address_line1 }}" placeholder="House No., Street, Subdivision">
+          {% if errors.get('address_line1') %}<div class="form-error-text" style="color:var(--color-danger);font-size:11px;margin-top:4px;">{{ errors.address_line1 }}</div>{% endif %}
+        </div>
+        <div class="form-group">
+          <label for="address_line2" class="form-label">Address Line 2</label>
+          <input type="text" id="address_line2" name="address_line2" class="form-input" value="{{ form.address_line2 }}" placeholder="Building, Unit, Landmark (optional)">
+        </div>
+        <div style="display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-4);">
+          <div class="form-group">
+            <label for="barangay" class="form-label">Barangay</label>
+            <input type="text" id="barangay" name="barangay" class="form-input" value="{{ form.barangay }}">
+          </div>
+          <div class="form-group">
+            <label for="city_municipality" class="form-label">City / Municipality</label>
+            <input type="text" id="city_municipality" name="city_municipality" class="form-input" value="{{ form.city_municipality }}">
+          </div>
+          <div class="form-group">
+            <label for="province" class="form-label">Province</label>
+            <input type="text" id="province" name="province" class="form-input" value="{{ form.province }}">
+          </div>
+          <div class="form-group">
+            <label for="postal_code" class="form-label">Postal Code</label>
+            <input type="text" id="postal_code" name="postal_code" class="form-input" value="{{ form.postal_code }}" inputmode="numeric" placeholder="1234">
+            {% if errors.get('postal_code') %}<div class="form-error-text" style="color:var(--color-danger);font-size:11px;margin-top:4px;">{{ errors.postal_code }}</div>{% endif %}
+          </div>
+        </div>
+      </section>
+
+      <section style="display:grid; gap: var(--sp-4);">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:var(--sp-4);">
+          <h2 class="type-h4" style="margin:0;">Security Confirmation</h2>
+          <a href="/customer/security" class="btn btn--ghost btn--sm">Change Password</a>
+        </div>
+        <div class="glass-card" style="padding: var(--sp-4); border: 1px solid var(--border-subtle); background: var(--grey-0);">
+          <label for="current_password" class="form-label">Current Password <abbr class="required" title="required">*</abbr></label>
+          <input type="password" id="current_password" name="current_password" class="form-input" required placeholder="Enter current password to authorize changes" autocomplete="current-password">
+          {% if errors.get('current_password') %}<div class="form-error-text" style="color:var(--color-danger);font-size:11px;margin-top:4px;">{{ errors.current_password }}</div>{% endif %}
+        </div>
+
+        <label class="type-body-sm" style="display:flex; gap:10px; align-items:flex-start; cursor:pointer;">
+          <input type="checkbox" name="terms_consent" value="yes" {% if form.get('terms_consent') %}checked{% endif %} required>
+          <span>I confirm I have reviewed and accept the <a href="/terms" target="_blank" rel="noopener" class="text-primary fw-bold">Terms of Service</a>.</span>
+        </label>
+        {% if errors.get('terms_consent') %}<div class="form-error-text" style="color:var(--color-danger);font-size:11px;">{{ errors.terms_consent }}</div>{% endif %}
+
+        <label class="type-body-sm" style="display:flex; gap:10px; align-items:flex-start; cursor:pointer;">
+          <input type="checkbox" name="privacy_consent" value="yes" {% if form.get('privacy_consent') %}checked{% endif %} required>
+          <span>I confirm I have reviewed and accept the <a href="/privacy" target="_blank" rel="noopener" class="text-primary fw-bold">Privacy Policy</a>.</span>
+        </label>
+        {% if errors.get('privacy_consent') %}<div class="form-error-text" style="color:var(--color-danger);font-size:11px;">{{ errors.privacy_consent }}</div>{% endif %}
+      </section>
+
+      <div style="display:flex; gap: var(--sp-3); justify-content:flex-end; flex-wrap:wrap;">
+        <a href="/customer/profile" class="btn btn--white">Cancel</a>
+        <button type="submit" class="btn btn--primary">Save Account Settings</button>
       </div>
-    </div>
+    </form>
   </div>
-
-  <!-- Persistent Global Action Bar -->
-  <footer class="glass-footer" style="position: fixed; bottom: 0; left: 0; width: 100%; padding: var(--sp-8) var(--sp-12) var(--sp-8) calc(var(--sidebar-width) + var(--sp-12)); background: rgba(255,255,255,0.85); backdrop-filter: blur(25px); border-top: 1px solid var(--border-subtle); display: flex; justify-content: flex-end; gap: var(--sp-4); z-index: 100;">
-    <div id="sync-status" class="type-label" style="margin-right: auto; color: var(--color-success); font-weight: 500; display: none;">
-      <span style="display: inline-block; width: 6px; height: 6px; background: var(--color-success); border-radius: 50%; margin-right: 8px;"></span>
-      Synchronized at <span id="sync-time">12:00 PM</span>
-    </div>
-    <button class="btn btn--white" type="button" onclick="window.history.back()" style="border: 1px solid var(--border-default); font-weight: 600; color: var(--grey-500); background: white;">
-       <span class="btn__label">Discard Changes</span>
-    </button>
-    <button class="btn btn--primary btn--xl" id="save-settings-btn" type="submit" style="min-width: 280px; box-shadow: 0 10px 25px rgba(var(--brand-primary-rgb), 0.3);">
-       <span class="btn__label">Commit Account Updates</span>
-    </button>
-  </footer>
 </div>
-
-<style>
-  .settings-pane { display: none; }
-  .settings-pane.active { display: block !important; }
-  
-  .settings-pane-wrapper { flex: 1; margin-bottom: 120px; }
-  
-  /* Additional Hub Layout */
-  .settings-nav__item svg { flex-shrink: 0; }
-  .settings-nav__item .btn__label { line-height: 1; }
-  .avatar-suite:focus { outline: 2px solid var(--brand-primary); outline-offset: 4px; }
-  
-  .type-mono { font-family: var(--font-mono); }
-</style>
-
-<script>
-  // Advanced Tab Switching with View Transitions
-  const navItems = document.querySelectorAll('.settings-nav__item');
-  const panes = document.querySelectorAll('.settings-pane');
-  const paneWrapper = document.querySelector('.settings-pane-wrapper');
-
-  navItems.forEach(item => {
-    item.addEventListener('click', () => {
-      const tabId = item.getAttribute('data-tab');
-      if (!tabId || item.classList.contains('active')) return;
-
-      const currentPane = document.querySelector('.settings-pane.active');
-      const nextPane = document.getElementById(`pane-${tabId}`);
-
-      // Sequence Animation
-      navItems.forEach(i => i.classList.remove('active'));
-      item.classList.add('active');
-
-      currentPane.classList.add('view-transition-out');
-      
-      setTimeout(() => {
-        currentPane.classList.remove('active', 'view-transition-out');
-        nextPane.classList.add('active', 'view-transition-in');
-        
-        setTimeout(() => {
-          nextPane.classList.remove('view-transition-in');
-        }, 400);
-      }, 250);
+<!-- Avatar preview modal -->
+<div id="avatar-preview-modal" style="display:none; position:fixed; inset:0; z-index:2000; align-items:center; justify-content:center; background:rgba(0,0,0,0.6);">
+  <div style="max-width:90%; max-height:90%; padding:12px; border-radius:12px; display:flex; align-items:center; justify-content:center;">
+    <img id="avatar-preview-modal-img" src="" alt="Avatar preview" style="max-width:100%; max-height:100%; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.5);">
+  </div>
+  <button id="avatar-preview-modal-close" aria-label="Close preview" style="position:absolute; top:20px; right:20px; background:#fff; border-radius:6px; padding:8px 12px; border:none; cursor:pointer;">Close</button>
+</div>
+  <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const input = document.getElementById('profile_image');
+    let preview = document.getElementById('profile_avatar_preview');
+    const removeBtn = document.getElementById('remove-avatar-btn');
+    const removeField = document.getElementById('remove_profile_image');
+    const MAX_BYTES = 2 * 1024 * 1024; // 2MB client-side limit
+    function showRemoveIfPresent() {
+      // show remove button if there is an existing avatar (img with src)
+      if (preview && preview.tagName === 'IMG' && preview.getAttribute('src')) {
+        if (removeBtn) { removeBtn.style.display = 'inline-flex'; removeBtn.style.borderWidth = '1.5px'; }
+      } else {
+        if (removeBtn) removeBtn.style.display = 'none';
+      }
+    }
+    if (input) {
+      input.addEventListener('change', function () {
+        const f = this.files && this.files[0];
+        if (!f) return;
+        if (!/image\/(png|jpeg|webp)/.test(f.type)) {
+          alert('Invalid file type. Allowed: PNG, JPG, WEBP.');
+          this.value = '';
+          return;
+        }
+        if (f.size > MAX_BYTES) {
+          alert('File too large. Maximum 2MB.');
+          this.value = '';
+          return;
+        }
+        const reader = new FileReader();
+      reader.onload = function (ev) {
+        if (preview) {
+          const currentInitial = (preview.getAttribute && preview.getAttribute('data-initial')) ? preview.getAttribute('data-initial') : '';
+          if (preview.tagName !== 'IMG') {
+            const wrapper = document.createElement('img');
+            wrapper.id = 'profile_avatar_preview';
+            wrapper.style.width = '100%';
+            wrapper.style.height = '100%';
+            wrapper.style.objectFit = 'cover';
+            if (currentInitial) wrapper.setAttribute('data-initial', currentInitial);
+            preview.replaceWith(wrapper);
+            preview = document.getElementById('profile_avatar_preview');
+          }
+          if (preview) {
+            preview.src = ev.target.result;
+            // ensure data-initial preserved on the img
+            const cur = preview.getAttribute && preview.getAttribute('data-initial');
+            if (!cur && currentInitial) preview.setAttribute('data-initial', currentInitial);
+          }
+        }
+        removeField.value = '0';
+        showRemoveIfPresent();
+      };
+        reader.readAsDataURL(f);
+      });
+    }
+    if (removeBtn) {
+      removeBtn.addEventListener('click', async function () {
+        const ok = await confirmModal('Remove your profile picture?');
+        if (!ok) return;
+        // clear preview and mark remove flag
+        if (preview) {
+          const initialChar = (preview.getAttribute && preview.getAttribute('data-initial')) ? preview.getAttribute('data-initial') : '';
+          const initials = document.createElement('div');
+          initials.style.width = '100%';
+          initials.style.height = '100%';
+          initials.style.display = 'flex';
+          initials.style.alignItems = 'center';
+          initials.style.justifyContent = 'center';
+          initials.style.fontWeight = '800';
+          initials.textContent = (initialChar || '').toUpperCase();
+          preview.replaceWith(initials);
+        }
+        removeField.value = '1';
+        if (input) input.value = '';
+        showRemoveIfPresent();
+      });
+    }
+    showRemoveIfPresent();
+    // image modal preview handlers
+    const modal = document.getElementById('avatar-preview-modal');
+    const modalImg = document.getElementById('avatar-preview-modal-img');
+    const modalClose = document.getElementById('avatar-preview-modal-close');
+    function closeModal() {
+      if (modal) { modal.style.display = 'none'; if (modalImg) modalImg.src = ''; }
+    }
+    function openModal(src) {
+      if (!modal || !modalImg) return;
+      modalImg.src = src;
+      modal.style.display = 'flex';
+    }
+    document.addEventListener('click', function (e) {
+      const t = e.target.closest && e.target.closest('#profile_avatar_preview');
+      if (!t) return;
+      if (t.tagName === 'IMG' && t.src) openModal(t.src);
     });
+    if (modal) {
+      modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
+    }
+    if (modalClose) modalClose.addEventListener('click', closeModal);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
   });
-
-  // Save Pulse Visual with Sync Indicator
-  const saveBtn = document.getElementById('save-settings-btn');
-  const saveBtnLabel = saveBtn.querySelector('.btn__label');
-  const syncStatus = document.getElementById('sync-status');
-  const syncTime = document.getElementById('sync-time');
-  
-  saveBtn.addEventListener('click', () => {
-    const originalText = saveBtnLabel.textContent;
-    saveBtnLabel.textContent = 'Synchronizing...';
-    saveBtn.style.opacity = '0.7';
-    saveBtn.disabled = true;
-
-    setTimeout(() => {
-      saveBtnLabel.textContent = 'Account Synchronized ✨';
-      saveBtn.style.background = 'var(--color-success)';
-      saveBtn.style.borderColor = 'var(--color-success)';
-      saveBtn.style.opacity = '1';
-      
-      // Update Sync Status
-      const now = new Date();
-      syncTime.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      syncStatus.style.display = 'flex';
-      
-      setTimeout(() => {
-        saveBtnLabel.textContent = originalText;
-        saveBtn.style.background = 'var(--brand-primary)';
-        saveBtn.style.borderColor = 'var(--brand-primary)';
-        saveBtn.disabled = false;
-      }, 2000);
-    }, 1200);
-  });
-</script>
+  </script>
 {% endblock %}

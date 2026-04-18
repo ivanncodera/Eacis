@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% block title %}My Installments — E-ACIS{% endblock %}
+
+{% block content %}
+<div class="page-content page-enter stagger-children" style="padding: var(--sp-10) 0;">
+  <div class="container">
+    <header class="stagger-item" style="margin-bottom: var(--sp-8); display: flex; justify-content: space-between; gap: var(--sp-4); align-items: flex-end; flex-wrap: wrap;">
+      <div>
+        <div class="chip chip--active mb-3">Installment Center</div>
+        <h1 class="type-display-sm">My Installment Plans</h1>
+        <p class="type-body-sm text-muted">Review active plans, upcoming dues, and payment progress.</p>
+      </div>
+      <a href="/customer/orders" class="btn btn--white" style="border: 1.5px solid var(--border-medium);">View Orders</a>
+    </header>
+
+    <section class="kpi-grid mb-8 stagger-item" aria-label="Installment summary" style="grid-template-columns: repeat(4, 1fr);">
+      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label-sm text-muted">Total Plans</div><div class="type-h2 mt-1">{{ stats.total }}</div></div></div>
+      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label-sm text-info">Active</div><div class="type-h2 mt-1">{{ stats.active }}</div></div></div>
+      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label-sm text-warning">Overdue</div><div class="type-h2 mt-1">{{ stats.past_due }}</div></div></div>
+      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label-sm text-muted">Outstanding</div><div class="type-h2 mt-1">PHP {{ '%.2f'|format(stats.outstanding|float) }}</div></div></div>
+    </section>
+
+    <section class="stagger-item" style="display: flex; flex-direction: column; gap: var(--sp-5);">
+      {% for item in installments %}
+      <article class="glass-card" style="padding: 0; overflow: hidden; border: 1px solid var(--border-subtle);">
+        <div style="padding: var(--sp-5); border-bottom: 1px solid var(--border-subtle); background: var(--grey-50); display: flex; justify-content: space-between; gap: var(--sp-3); align-items: center; flex-wrap: wrap;">
+          <div>
+            <div class="type-label-xs text-muted">PLAN FOR ORDER</div>
+            <div class="type-body-sm fw-bold">{{ item.order.order_ref }}</div>
+          </div>
+          <div>
+            <span class="badge badge--dot badge--{{ 'success' if item.plan.status == 'completed' else ('danger' if item.plan.status == 'defaulted' else 'warning') }}">{{ (item.plan.status or 'active')|title }}</span>
+          </div>
+        </div>
+
+        <div style="padding: var(--sp-5); display: grid; grid-template-columns: 1fr auto; gap: var(--sp-5); align-items: center;">
+          <div>
+            <div class="type-body-sm mb-2">{{ item.paid_count }} paid of {{ item.schedules|length }} schedule(s)</div>
+            <div style="height: 8px; background: var(--grey-100); border-radius: 999px; overflow: hidden;">
+              <div style="height: 100%; width: {{ item.progress_pct }}%; background: var(--brand-primary);"></div>
+            </div>
+            {% if item.next_due %}
+            <div class="type-label-xs text-muted mt-2">Next due: {{ item.next_due.due_date.strftime('%b %d, %Y') if item.next_due.due_date else '-' }} • PHP {{ '%.2f'|format(item.next_due.amount|float) }}</div>
+            {% else %}
+            <div class="type-label-xs text-success mt-2">No remaining dues</div>
+            {% endif %}
+            <div style="display:flex; gap:10px; margin-top: var(--sp-3); flex-wrap: wrap;">
+              <a href="/customer/orders/{{ item.order.order_ref }}" class="btn btn--ghost btn--sm" style="border:1px solid var(--border-subtle);">View Order</a>
+              <a href="/customer/inquiries?order_ref={{ item.order.order_ref }}" class="btn btn--ghost btn--sm" style="border:1px solid var(--border-subtle);">Billing Support</a>
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <div class="type-label-xs text-muted">Monthly</div>
+            <div class="type-h4">PHP {{ '%.2f'|format(item.plan.monthly_amount|float if item.plan.monthly_amount else 0) }}</div>
+            <div class="type-label-xs text-muted mt-1">Outstanding: PHP {{ '%.2f'|format(item.outstanding|float) }}</div>
+          </div>
+        </div>
+
+        {% if item.schedules %}
+        <div style="padding: 0 var(--sp-5) var(--sp-5);">
+          <div class="table-responsive">
+            <table class="table--premium" style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr>
+                  <th style="text-align:left; padding: 10px 8px;">Due Date</th>
+                  <th style="text-align:left; padding: 10px 8px;">Status</th>
+                  <th style="text-align:right; padding: 10px 8px;">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for sched in item.schedules %}
+                {% set status = sched.effective_status if sched.effective_status is defined else sched.status %}
+                {% set status_label = 'Settled' if status == 'paid' else ('Overdue' if status == 'past_due' else 'Upcoming') %}
+                <tr>
+                  <td style="padding: 10px 8px;">{{ sched.due_date.strftime('%b %d, %Y') if sched.due_date else '-' }}</td>
+                  <td style="padding: 10px 8px;">
+                    <span class="badge badge--dot badge--{{ 'success' if status == 'paid' else ('danger' if status == 'past_due' else 'warning') }}">{{ status_label }}</span>
+                    {% if status == 'paid' and sched.payment_ref %}
+                    <div class="type-label-xs text-muted" style="margin-top: 4px;">Ref: {{ sched.payment_ref }}</div>
+                    {% endif %}
+                  </td>
+                  <td style="padding: 10px 8px; text-align: right;">PHP {{ '%.2f'|format(sched.amount|float if sched.amount else 0) }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        {% endif %}
+      </article>
+      {% else %}
+      <div class="glass-card p-7 text-center">
+        <h3 class="type-h4 mb-2">No installment plans yet</h3>
+        <p class="type-body-sm text-muted mb-5">When you place an installment order, your monthly schedule will appear here.</p>
+        <a href="/shop" class="btn btn--primary">Browse Appliances</a>
+      </div>
+      {% endfor %}
+    </section>
+  </div>
+</div>
+{% endblock %}

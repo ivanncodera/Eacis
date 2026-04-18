@@ -60,9 +60,62 @@
       .step-node span.is-active {
         color: var(--grey-900);
       }
+      .form-input.error {
+        border-color: var(--color-danger);
+        background: #fffafa;
+      }
+      .password-container {
+        position: relative;
+      }
+      .toggle-password {
+        position: absolute;
+        right: var(--sp-3);
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--grey-400);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        padding: var(--sp-1);
+        z-index: 10;
+      }
+      .toggle-password:hover { color: var(--grey-900); }
+      .strength-bar {
+        height: 6px;
+        background: var(--grey-100);
+        border-radius: var(--radius-full);
+        margin-top: var(--sp-3);
+        overflow: hidden;
+        display: flex;
+        gap: 2px;
+      }
+      .strength-segment {
+        height: 100%;
+        flex: 1;
+        transition: all 0.3s;
+        background: var(--grey-100);
+      }
+      .form-error-text {
+        color: var(--color-danger);
+        font-size: 11px;
+        margin-top: 4px;
+        display: block;
+        font-weight: 500;
+        animation: fadeIn 0.2s ease;
+      }
+      @keyframes fadeIn { from { opacity: 0; transform: translateY(-2px); } to { opacity: 1; transform: translateY(0); } }
+      .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+      @keyframes shake {
+        10%, 90% { transform: translate3d(-1px, 0, 0); }
+        20%, 80% { transform: translate3d(2px, 0, 0); }
+        30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+        40%, 60% { transform: translate3d(4px, 0, 0); }
+      }
     </style>
 
-    <form method="post" action="/auth/register/customer" novalidate id="reg-form" class="glass-card reveal" style="padding: var(--sp-10); border-radius: var(--radius-2xl);">
+    <form method="post" action="/auth/register/customer" novalidate id="reg-form" class="glass-card reveal" data-enhance="submit-loading warn-on-exit phone-normalize" style="padding: var(--sp-10); border-radius: var(--radius-2xl);">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <input type="hidden" name="role" value="customer">
 
@@ -72,21 +125,21 @@
         <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:var(--sp-6);">
           <div class="form-group">
             <label class="form-label">First Name</label>
-            <input class="form-input" name="first_name" placeholder="e.g. Juan" value="{{ form.get('first_name','') }}" required>
+            <input class="form-input" name="first_name" placeholder="e.g. Juan" value="{{ form.get('first_name','') }}" pattern="^[a-zA-Z\s\-]+$" title="Only letters, spaces, and hyphens" required>
           </div>
           <div class="form-group">
             <label class="form-label">Last Name</label>
-            <input class="form-input" name="last_name" placeholder="e.g. Dela Cruz" value="{{ form.get('last_name','') }}" required>
+            <input class="form-input" name="last_name" placeholder="e.g. Dela Cruz" value="{{ form.get('last_name','') }}" pattern="^[a-zA-Z\s\-]+$" title="Only letters, spaces, and hyphens" required>
           </div>
         </div>
         <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:var(--sp-6);">
           <div class="form-group">
             <label class="form-label">Email Address</label>
-            <input class="form-input" type="email" name="email" placeholder="name@example.com" value="{{ form.get('email','') }}" required>
+            <input class="form-input" type="email" name="email" placeholder="name@example.com" value="{{ form.get('email','') }}" pattern="^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$" title="Valid email address" required>
           </div>
           <div class="form-group">
             <label class="form-label">Mobile</label>
-            <input class="form-input" name="phone" placeholder="0917XXXXXXX" value="{{ form.get('phone','') }}">
+            <input class="form-input" type="tel" name="phone" placeholder="0917XXXXXXX" value="{{ form.get('phone','') }}" pattern="^09\d{9}$" title="Must be a valid 11-digit mobile starting with 09 (e.g. 09171234567)" required>
           </div>
         </div>
         <div class="mt-8">
@@ -99,15 +152,15 @@
         <h3 class="type-h4 mb-4">Delivery Address</h3>
         <div class="form-group">
           <label class="form-label">Address Line 1</label>
-          <input class="form-input" name="address_line1" placeholder="House/Bldg No., Street" value="{{ form.get('address_line1','') }}">
+          <input class="form-input" name="address_line1" placeholder="House/Bldg No., Street" value="{{ form.get('address_line1','') }}" required>
         </div>
         <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:var(--sp-6);">
-          <div class="form-group"><label class="form-label">Barangay</label><input class="form-input" name="barangay" value="{{ form.get('barangay','') }}"></div>
-          <div class="form-group"><label class="form-label">City / Municipality</label><input class="form-input" name="city_municipality" id="city_municipality" value="{{ form.get('city_municipality','') }}"></div>
+          <div class="form-group"><label class="form-label">Barangay</label><input class="form-input" name="barangay" value="{{ form.get('barangay','') }}" required></div>
+          <div class="form-group"><label class="form-label">City / Municipality</label><input class="form-input" name="city_municipality" id="city_municipality" value="{{ form.get('city_municipality','') }}" required></div>
         </div>
         <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:var(--sp-6);">
-          <div class="form-group"><label class="form-label">Province</label><input class="form-input" name="province" value="{{ form.get('province','') }}"></div>
-          <div class="form-group"><label class="form-label">Postal Code</label><input class="form-input" name="postal_code" id="postal_code" value="{{ form.get('postal_code','') }}"></div>
+          <div class="form-group"><label class="form-label">Province</label><input class="form-input" name="province" value="{{ form.get('province','') }}" required></div>
+          <div class="form-group"><label class="form-label">Postal Code</label><input class="form-input" name="postal_code" id="postal_code" value="{{ form.get('postal_code','') }}" required></div>
         </div>
         <div class="mt-8" style="display:flex; gap:var(--sp-3);">
           <button type="button" class="btn btn--secondary btn--xl prev-step">Back</button>
@@ -119,30 +172,52 @@
       <div class="form-step" data-step="3" style="display:none;">
         <h3 class="type-h4 mb-4">Secure Your Account</h3>
         
-        {% if errors %}
-        <div class="form-error mb-6" role="alert">
-          <ul class="type-body-xs" style="margin:0; padding-left:14px;">
-            {% for k, m in errors.items() %}<li>{{ m }}</li>{% endfor %}
-          </ul>
-        </div>
-        {% endif %}
+
 
         <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:var(--sp-6);">
           <div class="form-group">
             <label class="form-label">Create Password</label>
-            <input class="form-input" type="password" name="password" id="pw" required>
-            <div id="pw-strength" class="type-label-xs mt-2" style="color: var(--grey-400);">Strength: To be evaluated</div>
+            <div class="password-container">
+              <input class="form-input" type="password" name="password" id="pw" style="padding-right: 40px;" required>
+              <button type="button" class="toggle-password" aria-label="Toggle password visibility">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+            <div class="strength-bar">
+              <div class="strength-segment"></div>
+              <div class="strength-segment"></div>
+              <div class="strength-segment"></div>
+              <div class="strength-segment"></div>
+            </div>
+            <ul id="pw-requirements" style="list-style: none; padding: 0; margin-top: var(--sp-3); display: grid; gap: 4px; font-size: 11px; color: var(--grey-400);">
+              <li id="req-length" style="transition: color 0.2s;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="margin-right:4px; vertical-align:middle; transition: opacity 0.2s;"><path d="M20 6L9 17l-5-5"/></svg>At least 8 characters</li>
+              <li id="req-case" style="transition: color 0.2s;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="margin-right:4px; vertical-align:middle; transition: opacity 0.2s;"><path d="M20 6L9 17l-5-5"/></svg>Uppercase & lowercase letters</li>
+              <li id="req-num" style="transition: color 0.2s;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="margin-right:4px; vertical-align:middle; transition: opacity 0.2s;"><path d="M20 6L9 17l-5-5"/></svg>At least one number</li>
+              <li id="req-sym" style="transition: color 0.2s;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="margin-right:4px; vertical-align:middle; transition: opacity 0.2s;"><path d="M20 6L9 17l-5-5"/></svg>At least one special symbol</li>
+            </ul>
           </div>
           <div class="form-group">
             <label class="form-label">Confirm Password</label>
-            <input class="form-input" type="password" name="confirm_password" required>
+            <div class="password-container">
+              <input class="form-input" type="password" name="confirm_password" style="padding-right: 40px;" required>
+              <button type="button" class="toggle-password" aria-label="Toggle password visibility">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
           </div>
         </div>
 
         <label class="type-body-sm mt-8" style="display:flex; gap:10px; align-items:flex-start; cursor:pointer;">
-          <input type="checkbox" name="agree" value="1" style="margin-top:2px;" {% if form.get('agree') %}checked{% endif %}> 
-          <span>I agree to the <a href="/terms" class="text-primary fw-bold">Terms of Service</a> and <a href="/privacy" class="text-primary fw-bold">Privacy Policy</a>.</span>
+          <input type="checkbox" name="terms_consent" value="yes" style="margin-top:2px;" {% if form.get('terms_consent') %}checked{% endif %} required>
+          <span>I have read and accept the <a href="/terms" target="_blank" rel="noopener" class="text-primary fw-bold">Terms of Service</a>.</span>
         </label>
+        {% if errors.get('terms_consent') %}<div class="form-error-text" style="color:var(--color-danger);font-size:11px;margin-top:4px;">{{ errors.get('terms_consent') }}</div>{% endif %}
+
+        <label class="type-body-sm mt-3" style="display:flex; gap:10px; align-items:flex-start; cursor:pointer;">
+          <input type="checkbox" name="privacy_consent" value="yes" style="margin-top:2px;" {% if form.get('privacy_consent') %}checked{% endif %} required>
+          <span>I have read and accept the <a href="/privacy" target="_blank" rel="noopener" class="text-primary fw-bold">Privacy Policy</a>.</span>
+        </label>
+        {% if errors.get('privacy_consent') %}<div class="form-error-text" style="color:var(--color-danger);font-size:11px;margin-top:4px;">{{ errors.get('privacy_consent') }}</div>{% endif %}
 
         <div class="mt-8" style="display:flex; gap:var(--sp-3);">
           <button type="button" class="btn btn--secondary btn--lg prev-step">Back</button>
@@ -152,7 +227,7 @@
     </form>
     
     <div class="text-center mt-8 reveal" data-delay="100">
-      <p class="type-body-sm text-muted">Registering a business? <a href="/auth/register/seller" class="fw-bold text-primary">Join as a Merchant</a></p>
+      <p class="type-body-sm text-muted">Registering a business? <a href="/auth/register/seller" class="fw-bold text-primary">Join as a Seller</a></p>
     </div>
   </div>
 </div>
@@ -164,10 +239,138 @@ document.addEventListener('DOMContentLoaded', () => {
   const progBar = document.getElementById('prog-bar');
   const nodes = Array.from(document.querySelectorAll('.step-node'));
 
+  let locationFetched = false;
+
+  function getFirstInput(selectors) {
+    for (const selector of selectors) {
+      const el = form.querySelector(selector) || document.querySelector(selector);
+      if (el) return el;
+    }
+    return null;
+  }
+
+  function getAddressFields() {
+    return {
+      address1: getFirstInput(['input[name="address_line1"]', '#address_line1', 'input[name="address1"]', '#address1']),
+      barangay: getFirstInput(['input[name="barangay"]', '#barangay', 'input[name="district"]', '#district']),
+      city: getFirstInput(['#city_municipality', 'input[name="city_municipality"]', 'input[name="city"]', '#city']),
+      province: getFirstInput(['input[name="province"]', '#province', 'input[name="state"]', '#state']),
+      postal: getFirstInput(['#postal_code', 'input[name="postal_code"]', 'input[name="zip_code"]', 'input[name="zipcode"]', '#zip_code', '#zipcode'])
+    };
+  }
+
+  function fillIfEmpty(input, value) {
+    if (!input || !value || input.value.trim()) return;
+    input.value = value;
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
+  function normalizeIPLocation(data) {
+    if (!data) return {};
+    return {
+      city: data.city || data.town || data.municipality || '',
+      province: data.region || data.region_name || data.state || '',
+      postal: data.postal || data.zip || data.zipcode || ''
+    };
+  }
+
+  function showIndicator(type) {
+    const slot = document.querySelector('.form-step[data-step="2"] h3');
+    const existing = slot.querySelector('.badge--loc');
+    if (existing) existing.remove();
+    
+    const badge = document.createElement('span');
+    badge.className = 'badge badge--success type-label-xs badge--loc';
+    badge.style.marginLeft = '10px';
+    badge.textContent = type + ' Pre-filled';
+    slot.appendChild(badge);
+  }
+
+  async function autofillLocationIP() {
+    if (locationFetched) return;
+    try {
+      const resp = await fetch('https://ipapi.co/json/');
+      const data = await resp.json();
+      if (data && !data.error) {
+        const fields = getAddressFields();
+        const normalized = normalizeIPLocation(data);
+        
+        fillIfEmpty(fields.city, normalized.city);
+        fillIfEmpty(fields.province, normalized.province);
+        fillIfEmpty(fields.postal, normalized.postal);
+        
+        locationFetched = true;
+        showIndicator('IP');
+        if (fields.city && fields.city.value) fields.city.dispatchEvent(new Event('blur'));
+      }
+    } catch (e) { console.warn('IP Geo failed', e); }
+  }
+
+  async function autofillLocation() {
+    if (locationFetched) return;
+
+    const fields = getAddressFields();
+
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+        try {
+          const { latitude, longitude } = pos.coords;
+          const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`);
+          const data = await resp.json();
+          if (data && data.address) {
+            const a = data.address;
+            
+            // Philippine-optimized mapping
+            const detectedCity = a.city || a.municipality || a.city_district || a.town || '';
+            const detectedBarangay = a.suburb || a.neighbourhood || a.quarter || a.village || '';
+            const detectedProvince = a.province || a.state || a.region || '';
+            
+            fillIfEmpty(fields.city, detectedCity);
+            fillIfEmpty(fields.province, detectedProvince);
+            fillIfEmpty(fields.postal, a.postcode || '');
+            fillIfEmpty(fields.barangay, detectedBarangay);
+            
+            if (fields.address1 && !fields.address1.value.trim()) {
+              const road = a.road || a.pedestrian || a.path || '';
+              const house = a.house_number || a.building || a.office || '';
+              fields.address1.value = (house ? house + ' ' : '') + road;
+              if (!fields.address1.value && data.display_name) {
+                fields.address1.value = data.display_name.split(',')[0];
+              }
+              fields.address1.dispatchEvent(new Event('input', { bubbles: true }));
+              fields.address1.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            
+            locationFetched = true;
+            showIndicator('GPS');
+            if (fields.city && fields.city.value) fields.city.dispatchEvent(new Event('blur'));
+          } else {
+            autofillLocationIP();
+          }
+        } catch (e) { autofillLocationIP(); }
+      }, (err) => { autofillLocationIP(); }, { 
+        timeout: 10000, 
+        enableHighAccuracy: true 
+      });
+    } else {
+      autofillLocationIP();
+    }
+  }
+
   function updateStep(idx) {
-    steps.forEach((s, i) => s.style.display = i === idx ? 'block' : 'none');
+    steps.forEach((s, i) => {
+      s.style.display = i === idx ? 'block' : 'none';
+      if (i === idx) s.classList.add('active');
+      else s.classList.remove('active');
+    });
     progBar.style.width = ((idx + 1) / steps.length * 100) + '%';
     
+    // Autofill location when reaching Step 2
+    if (idx === 1) {
+      autofillLocation();
+    }
+
     nodes.forEach((node, i) => {
       const circle = node.querySelector('.step-circle');
       const label = node.querySelector('span');
@@ -183,46 +386,174 @@ document.addEventListener('DOMContentLoaded', () => {
         circle.style.background = 'white';
       }
     });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function setError(input, msg) {
+    input.classList.add('error');
+    const group = input.closest('.form-group');
+    if (group) {
+      let err = group.querySelector('.form-error-text');
+      if (!err) {
+        err = document.createElement('span');
+        err.className = 'form-error-text';
+        group.appendChild(err);
+      }
+      err.textContent = msg;
+    }
+  }
+
+  function clearErrors(step) {
+    step.querySelectorAll('.form-input').forEach(i => i.classList.remove('error'));
+    step.querySelectorAll('.form-error-text').forEach(e => e.textContent = '');
+  }
+
+  function validateCurrentStep() {
+    const currentStep = steps.find(s => window.getComputedStyle(s).display !== 'none') || steps[0];
+    clearErrors(currentStep);
+    
+    const requiredInputs = Array.from(currentStep.querySelectorAll('input[required]'));
+    let isValid = true;
+
+    requiredInputs.forEach(input => {
+      if (!input.value.trim()) {
+        setError(input, 'This field is required');
+        isValid = false;
+      }
+      if (input.type === 'checkbox' && !input.checked) {
+        input.classList.add('error'); // Checkbox doesn't have form-group Usually
+        isValid = false;
+      }
+    });
+
+    if (currentStep.dataset.step === '1') {
+      const email = currentStep.querySelector('input[name="email"]');
+      const phone = currentStep.querySelector('input[name="phone"]');
+      if (email && email.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
+        setError(email, 'Enter a valid email address');
+        isValid = false;
+      }
+      if (phone && phone.value && !/^09\d{9}$/.test(phone.value.replace(/\D/g, ''))) {
+        setError(phone, 'Enter a valid 11-digit mobile (09XXXXXXXXX)');
+        isValid = false;
+      }
+    }
+
+    if (currentStep.dataset.step === '3') {
+      const pwField = currentStep.querySelector('input[name="password"]');
+      const confirmField = currentStep.querySelector('input[name="confirm_password"]');
+      const termsConsent = currentStep.querySelector('input[name="terms_consent"]');
+      const privacyConsent = currentStep.querySelector('input[name="privacy_consent"]');
+      
+      if (pwField.value && pwField.value.length < 8) {
+        setError(pwField, 'Password must be at least 8 characters');
+        isValid = false;
+      } else if (pwField.value && getStrength(pwField.value) < 3) {
+        setError(pwField, 'Password is too weak');
+        isValid = false;
+      }
+
+      if (pwField.value && confirmField.value && pwField.value !== confirmField.value) {
+        setError(confirmField, 'Passwords do not match');
+        isValid = false;
+      }
+      
+      if (!termsConsent.checked || !privacyConsent.checked) {
+        isValid = false;
+      }
+    }
+
+    if (!isValid) {
+      currentStep.classList.add('shake');
+      setTimeout(() => currentStep.classList.remove('shake'), 400);
+    }
+    
+    return isValid;
   }
 
   form.querySelectorAll('.next-step').forEach(btn => {
     btn.addEventListener('click', () => {
-      const currentIdx = steps.findIndex(s => s.style.display !== 'none');
+      if (!validateCurrentStep()) return;
+      const currentIdx = steps.findIndex(s => window.getComputedStyle(s).display !== 'none');
       if (currentIdx < steps.length - 1) updateStep(currentIdx + 1);
     });
   });
 
   form.querySelectorAll('.prev-step').forEach(btn => {
     btn.addEventListener('click', () => {
-      const currentIdx = steps.findIndex(s => s.style.display !== 'none');
+      const currentIdx = steps.findIndex(s => window.getComputedStyle(s).display !== 'none');
       if (currentIdx > 0) updateStep(currentIdx - 1);
     });
   });
 
-  // PW Strength
+  form.addEventListener('submit', (e) => {
+    if (!validateCurrentStep()) {
+      e.preventDefault();
+    }
+  });
+
+  // PW Strength & Visibility Toggle
   const pw = document.getElementById('pw');
-  const strengthEl = document.getElementById('pw-strength');
-  pw?.addEventListener('input', () => {
-    const val = pw.value;
-    if (!val) { strengthEl.textContent = 'Strength: To be evaluated'; return; }
+  const reqLength = document.getElementById('req-length');
+  const reqCase = document.getElementById('req-case');
+  const reqNum = document.getElementById('req-num');
+  const reqSym = document.getElementById('req-sym');
+  const segments = document.querySelectorAll('.strength-segment');
+
+  function getStrength(val) {
+    if (!val) return 0;
     let score = 0;
     if (val.length >= 8) score++;
-    if (/[A-Z]/.test(val)) score++;
+    if (/[A-Z]/.test(val) && /[a-z]/.test(val)) score++;
     if (/[0-9]/.test(val)) score++;
     if (/[^A-Za-z0-9]/.test(val)) score++;
+    return score;
+  }
+
+  function updateReqUI(el, met, hasVal) {
+    if (!el) return;
+    const svg = el.querySelector('svg');
+    if (met) {
+      el.style.color = 'var(--color-success)';
+      if(svg) svg.style.opacity = '1';
+    } else {
+      el.style.color = hasVal ? 'var(--color-danger)' : 'var(--grey-400)';
+      if(svg) svg.style.opacity = '0.3';
+    }
+  }
+
+  pw?.addEventListener('input', () => {
+    const val = pw.value;
+    const score = getStrength(val);
+    const colors = ['var(--grey-100)', 'var(--color-danger)', 'var(--color-warning)', 'var(--brand-primary)', 'var(--color-success)'];
     
-    const labels = ['Weak', 'Fair', 'Good', 'Strong'];
-    const colors = ['var(--color-danger)', 'var(--color-warning)', 'var(--brand-primary)', 'var(--color-success)'];
-    strengthEl.textContent = 'Strength: ' + (labels[score-1] || 'Weak');
-    strengthEl.style.color = colors[score-1] || 'var(--color-danger)';
+    updateReqUI(reqLength, val.length >= 8, !!val);
+    updateReqUI(reqCase, /[A-Z]/.test(val) && /[a-z]/.test(val), !!val);
+    updateReqUI(reqNum, /[0-9]/.test(val), !!val);
+    updateReqUI(reqSym, /[^A-Za-z0-9]/.test(val), !!val);
+    
+    segments.forEach((seg, i) => {
+      seg.style.background = i < score ? colors[score] : 'var(--grey-100)';
+    });
+  });
+
+  document.querySelectorAll('.toggle-password').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const input = btn.parentElement.querySelector('input');
+      const type = input.type === 'password' ? 'text' : 'password';
+      input.type = type;
+      btn.innerHTML = type === 'password' ? 
+        '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>' :
+        '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
+    });
   });
 
   // Postal Suggestion
-  const cityInput = document.getElementById('city_municipality');
-  const postalInput = document.getElementById('postal_code');
+  const cityInput = getFirstInput(['#city_municipality', 'input[name="city_municipality"]', 'input[name="city"]', '#city']);
+  const postalInput = getFirstInput(['#postal_code', 'input[name="postal_code"]', 'input[name="zip_code"]', 'input[name="zipcode"]', '#zip_code', '#zipcode']);
   cityInput?.addEventListener('blur', async () => {
     const city = cityInput.value.trim();
-    if (!city || postalInput.value.trim()) return;
+    if (!city || !postalInput || postalInput.value.trim()) return;
     const response = await fetch(`/api/postal/suggest?city=${encodeURIComponent(city)}`);
     const data = await response.json();
     if (data && data.postal_code) postalInput.value = data.postal_code;

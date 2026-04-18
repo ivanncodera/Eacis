@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% block title %}Security - Account{% endblock %}
+{% block content %}
+<div class="page-content" style="max-width:760px; margin:0 auto; padding:var(--sp-8);">
+  <h1 class="type-display-sm" style="margin-bottom:var(--sp-6);">Account Security</h1>
+
+  {% set form = form or {} %}
+  {% set errors = errors or {} %}
+
+  {% if errors.get('general') %}
+    <p class="form-error" role="alert">{{ errors.get('general') }}</p>
+  {% endif %}
+
+  <form id="customer-security-form" method="post" class="glass-card p-6" style="display:grid; gap:var(--sp-6);">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <div class="form-group">
+      <label for="current_password" class="form-label">Current Password</label>
+      <div class="form-input-with-toggle">
+        <input id="current_password" type="password" name="current_password" class="form-input" required autocomplete="current-password">
+        <button type="button" class="btn btn--ghost toggle-password" data-target="current_password" aria-pressed="false" aria-label="Show current password">Show</button>
+      </div>
+      {% if errors.get('current_password') %}
+        <small class="form-error" role="alert">{{ errors.get('current_password') }}</small>
+      {% endif %}
+    </div>
+
+    <div class="form-group">
+      <label for="new_password" class="form-label">New Password</label>
+      <div class="form-input-with-toggle">
+        <input id="new_password" type="password" name="new_password" class="form-input" required minlength="8" autocomplete="new-password">
+        <button type="button" class="btn btn--ghost toggle-password" data-target="new_password" aria-pressed="false" aria-label="Show new password">Show</button>
+      </div>
+      <div class="form-help type-body-xs text-muted">Minimum 8 characters. Use letters, numbers, and symbols for a stronger password.</div>
+      {% if errors.get('new_password') %}
+        <small class="form-error" role="alert">{{ errors.get('new_password') }}</small>
+      {% endif %}
+    </div>
+
+    <div class="form-group">
+      <label for="confirm_password" class="form-label">Confirm New Password</label>
+      <div class="form-input-with-toggle">
+        <input id="confirm_password" type="password" name="confirm_password" class="form-input" required minlength="8" autocomplete="new-password">
+        <button type="button" class="btn btn--ghost toggle-password" data-target="confirm_password" aria-pressed="false" aria-label="Show confirm password">Show</button>
+      </div>
+      <small class="form-error" id="confirm-match-error" role="alert" style="display:none;"></small>
+      {% if errors.get('confirm_password') %}
+        <small class="form-error" role="alert">{{ errors.get('confirm_password') }}</small>
+      {% endif %}
+    </div>
+
+    <div class="type-body-xs text-muted" style="padding:var(--sp-4); background: var(--grey-25); border-radius: var(--radius-md);">
+      <strong>Account lock policy:</strong> After 5 failed attempts the account will be temporarily locked. Use a strong password and keep it confidential.
+    </div>
+
+    <div style="display:flex; justify-content:flex-end; gap:var(--sp-3); margin-top: var(--sp-4);">
+      <button type="button" class="btn btn--white" id="cancel-security-btn">Cancel</button>
+      <button type="submit" class="btn btn--primary" id="update-password-btn" data-saving-text="Updating...">
+        <span class="btn__label">Update Password</span>
+      </button>
+    </div>
+  </form>
+</div>
+
+<style>
+  .form-input-with-toggle { display:flex; align-items:center; gap: calc(var(--sp-3)); }
+  .form-input-with-toggle .form-input { flex: 1; }
+  .toggle-password { height: var(--btn-height-sm); padding: 0 var(--sp-3); font-size: var(--text-xs); }
+  .btn--white { min-width: 120px; }
+  .btn--primary.btn--xl { min-width: 160px; padding: 0 var(--sp-6); }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const toggles = document.querySelectorAll('.toggle-password');
+  toggles.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.dataset.target;
+      const input = document.getElementById(targetId);
+      if (!input) return;
+      if (input.type === 'password') {
+        input.type = 'text';
+        btn.textContent = 'Hide';
+        btn.setAttribute('aria-pressed', 'true');
+      } else {
+        input.type = 'password';
+        btn.textContent = 'Show';
+        btn.setAttribute('aria-pressed', 'false');
+      }
+    });
+  });
+
+  const form = document.getElementById('customer-security-form');
+  const updateBtn = document.getElementById('update-password-btn');
+  const cancelBtn = document.getElementById('cancel-security-btn');
+  const newInput = document.getElementById('new_password');
+  const confirmInput = document.getElementById('confirm_password');
+  const confirmError = document.getElementById('confirm-match-error');
+
+  function matchPasswords() {
+    if (!newInput || !confirmInput) return true;
+    if (confirmInput.value === '') { confirmError.style.display = 'none'; return true; }
+    if (newInput.value !== confirmInput.value) { confirmError.style.display = 'block'; confirmError.textContent = 'Passwords do not match.'; return false; }
+    confirmError.style.display = 'none'; return true;
+  }
+
+  if (newInput) newInput.addEventListener('input', matchPasswords);
+  if (confirmInput) confirmInput.addEventListener('input', matchPasswords);
+
+  form.addEventListener('submit', function (ev) {
+    if (!matchPasswords()) { ev.preventDefault(); confirmInput.focus(); return; }
+    updateBtn.disabled = true;
+    updateBtn.classList.add('btn--loading');
+    const label = updateBtn.querySelector('.btn__label');
+    if (label) label.textContent = updateBtn.getAttribute('data-saving-text') || 'Updating...';
+  });
+
+  cancelBtn.addEventListener('click', function () { window.history.back(); });
+});
+</script>
+
+{% endblock %}

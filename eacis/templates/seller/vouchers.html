@@ -65,7 +65,24 @@
         </div>
       </div>
 
-      <label class="type-body-sm" style="display:flex; align-items:center; gap:var(--sp-2);">
+      <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:var(--sp-4);">
+        <div>
+          <label class="form-label">Target Category (Optional)</label>
+          <input type="text" name="target_category" class="form-input" placeholder="e.g. ELECTRONICS" value="{{ form.target_category if form else '' }}">
+        </div>
+        <div>
+          <label class="form-label">Min Item Count</label>
+          <input type="number" min="1" name="min_item_count" class="form-input" value="{{ form.min_item_count if form else '1' }}">
+        </div>
+        <div style="display:flex; align-items:flex-end; padding-bottom:var(--sp-2);">
+          <label class="type-body-sm" style="display:flex; align-items:center; gap:var(--sp-2); cursor:pointer;">
+            <input type="checkbox" name="new_customer_only" value="true" {% if form and form.get('new_customer_only') %}checked{% endif %}>
+            New Customers Only
+          </label>
+        </div>
+      </div>
+
+      <label class="type-body-sm" style="display:flex; align-items:center; gap:var(--sp-2); cursor:pointer;">
         <input type="checkbox" name="is_active" value="1" {% if not form or form.get('is_active') %}checked{% endif %}>
         Activate this voucher immediately
       </label>
@@ -111,5 +128,29 @@
       </tbody>
     </table>
   </div>
+  {% if pagination and pagination.pages > 1 %}
+  <div class="mt-6 d-flex align-center justify-between">
+    <div class="type-body-sm text-muted">Showing {{ (pagination.page - 1) * pagination.per_page + 1 }} - {{ [pagination.page * pagination.per_page, pagination.total]|min }} of {{ pagination.total }} vouchers</div>
+    <div>
+      {% if pagination.has_prev %}
+      <a href="{{ url_for(request.endpoint, page=pagination.prev_num, per_page=pagination.per_page) }}" class="btn btn--white btn--sm">Previous</a>
+      {% endif %}
+      {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+        {% if p %}
+          {% if p == pagination.page %}
+            <span class="btn btn--primary btn--xs" style="min-width:32px;">{{ p }}</span>
+          {% else %}
+            <a href="{{ url_for(request.endpoint, page=p, per_page=pagination.per_page) }}" class="btn btn--white btn--xs" style="min-width:32px;">{{ p }}</a>
+          {% endif %}
+        {% else %}
+          <span class="text-muted">...</span>
+        {% endif %}
+      {% endfor %}
+      {% if pagination.has_next %}
+      <a href="{{ url_for(request.endpoint, page=pagination.next_num, per_page=pagination.per_page) }}" class="btn btn--white btn--sm">Next</a>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
 </div>
 {% endblock %}

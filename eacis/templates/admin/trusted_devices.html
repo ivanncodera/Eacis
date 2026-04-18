@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}Admin — Trusted Devices{% endblock %}
+{% block content %}
+<div class="main-content">
+  <div class="stagger-children">
+    <header style="display:flex; justify-content:space-between; align-items:flex-end; gap:var(--sp-4); margin-bottom:var(--sp-8);">
+      <div>
+        <h1 class="type-display-sm" style="margin-bottom:var(--sp-2);">Trusted Devices</h1>
+        <p class="type-body-sm text-muted">View and revoke trusted devices issued for user sign-ins.</p>
+      </div>
+      <form method="get" style="display:flex; gap:8px; align-items:center;" data-enhance="submit-loading">
+        <input name="q" value="{{ q or '' }}" placeholder="Search by user email" class="form-input" style="min-width:220px;" />
+        <button class="btn btn--primary btn--sm">Search</button>
+      </form>
+    </header>
+
+    <section class="glass-card p-6">
+      {% if devices %}
+      <div class="table-wrapper" style="overflow-x:auto;">
+        <table class="data-table" style="min-width:900px;">
+          <thead>
+            <tr><th>ID</th><th>User</th><th>Device</th><th>Last Used</th><th>Added</th><th>Expires</th><th>Revoked</th><th></th></tr>
+          </thead>
+          <tbody>
+            {% for row in devices %}
+              {% set d = row.device %}
+            <tr>
+              <td>{{ d.id }}</td>
+              <td>{{ row.user_email or d.user_id }}</td>
+              <td>{{ d.device_name or 'Unknown' }}</td>
+              <td>{{ d.last_used_at.strftime('%b %d, %Y %H:%M') if d.last_used_at else '-' }}</td>
+              <td>{{ d.created_at.strftime('%b %d, %Y %H:%M') if d.created_at else '-' }}</td>
+              <td>{{ d.expires_at.strftime('%b %d, %Y') if d.expires_at else '-' }}</td>
+              <td>{{ 'Yes' if d.revoked else 'No' }}</td>
+              <td style="text-align:right;">
+                {% if not d.revoked %}
+                <form method="post" style="display:inline" data-enhance="submit-loading" data-confirm="Revoke trusted device #{{ d.id }}?">
+                  <input type="hidden" name="revoke_id" value="{{ d.id }}">
+                  <button type="submit" class="btn btn--ghost-danger btn--sm">Revoke</button>
+                </form>
+                {% else %}
+                  <span class="badge badge--ghost">Revoked</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+        <div class="type-body-sm text-muted">No trusted devices found.</div>
+      {% endif %}
+      {% if pagination and pagination.pages > 1 %}
+      <div class="mt-6 d-flex align-center justify-between">
+        <div class="type-body-sm text-muted">Showing {{ (pagination.page - 1) * pagination.per_page + 1 }} - {{ [pagination.page * pagination.per_page, pagination.total]|min }} of {{ pagination.total }} devices</div>
+        <div>
+          {% if pagination.has_prev %}
+          <a href="{{ url_for(request.endpoint, page=pagination.prev_num, per_page=pagination.per_page, q=q) }}" class="btn btn--white btn--sm">Previous</a>
+          {% endif %}
+          {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+            {% if p %}
+              {% if p == pagination.page %}
+                <span class="btn btn--primary btn--xs" style="min-width:32px;">{{ p }}</span>
+              {% else %}
+                <a href="{{ url_for(request.endpoint, page=p, per_page=pagination.per_page, q=q) }}" class="btn btn--white btn--xs" style="min-width:32px;">{{ p }}</a>
+              {% endif %}
+            {% else %}
+              <span class="text-muted">...</span>
+            {% endif %}
+          {% endfor %}
+          {% if pagination.has_next %}
+          <a href="{{ url_for(request.endpoint, page=pagination.next_num, per_page=pagination.per_page, q=q) }}" class="btn btn--white btn--sm">Next</a>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+    </section>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}Admin Profile{% endblock %}
+{% block content %}
+<div class="page-content" style="max-width:760px; margin:0 auto; padding:var(--sp-8);">
+  <h1 class="type-display-sm" style="margin-bottom:var(--sp-6);">Account Profile</h1>
+
+  <form id="admin-profile-form" method="post" class="glass-card p-8" style="display:grid; gap:var(--sp-6);">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <input type="email" class="form-input" value="{{ user.email }}" readonly>
+    </div>
+    <div class="form-group">
+      <label for="full_name" class="form-label">Full Name</label>
+      <input id="full_name" name="full_name" type="text" class="form-input" value="{{ user.full_name or '' }}">
+    </div>
+
+    <hr style="border:none; border-top:1px solid var(--border-subtle); margin:0;">
+
+    <div class="type-label mb-2">Change Password</div>
+    <div class="form-group">
+      <label class="form-label">Current Password</label>
+      <input id="current_password" name="current_password" type="password" class="form-input" autocomplete="current-password">
+    </div>
+    <div class="form-group">
+      <label class="form-label">New Password</label>
+      <input id="new_password" name="new_password" type="password" class="form-input" minlength="8" autocomplete="new-password">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Confirm New Password</label>
+      <input id="confirm_password" name="confirm_password" type="password" class="form-input" minlength="8" autocomplete="new-password">
+      <small id="pwd-match" class="form-error" style="display:none;">Passwords do not match.</small>
+    </div>
+
+    <div style="display:flex; justify-content:flex-end; gap:var(--sp-3);">
+      <a href="/admin" class="btn btn--white">Back</a>
+      <button type="submit" class="btn btn--primary btn--xl" id="save-profile-btn">Save Profile</button>
+    </div>
+  </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const newPwd = document.getElementById('new_password');
+  const confirmPwd = document.getElementById('confirm_password');
+  const matchEl = document.getElementById('pwd-match');
+  const form = document.getElementById('admin-profile-form');
+
+  function checkMatch() {
+    if (!newPwd || !confirmPwd) return true;
+    if (newPwd.value === '' && confirmPwd.value === '') { matchEl.style.display='none'; return true; }
+    if (newPwd.value !== confirmPwd.value) { matchEl.style.display='block'; return false; }
+    matchEl.style.display='none'; return true;
+  }
+
+  if (newPwd) newPwd.addEventListener('input', checkMatch);
+  if (confirmPwd) confirmPwd.addEventListener('input', checkMatch);
+
+  form.addEventListener('submit', function (ev) {
+    if (!checkMatch()) { ev.preventDefault(); confirmPwd.focus(); }
+  });
+});
+</script>
+
+{% endblock %}

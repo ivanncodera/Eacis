@@ -24,12 +24,15 @@
       const action = btn.dataset.action;
       const ref = tr && tr.dataset.ref;
       if (action === 'approve' || action === 'reject') {
-        const confirmed = confirm(`${action.toUpperCase()} seller ${ref}?`);
-        if (!confirmed) return;
-        tr.dataset.status = action === 'approve' ? 'active' : 'rejected';
-        const badge = tr.querySelector('.status-badge'); if (badge) badge.textContent = action === 'approve' ? 'active' : 'rejected';
-        const msg = action === 'approve' ? `Seller ${ref} approved` : `Seller ${ref} rejected`;
-        window.EACIS && window.EACIS.showToast ? window.EACIS.showToast(msg,'info') : alert(msg);
+        e.preventDefault();
+        const prompt = `${action.toUpperCase()} seller ${ref}?`;
+        const run = () => {
+          tr.dataset.status = action === 'approve' ? 'active' : 'rejected';
+          const badge = tr.querySelector('.status-badge'); if (badge) badge.textContent = action === 'approve' ? 'active' : 'rejected';
+          const msg = action === 'approve' ? `Seller ${ref} approved` : `Seller ${ref} rejected`;
+          window.EACIS && window.EACIS.showToast ? window.EACIS.showToast(msg,'info') : alert(msg);
+        };
+        if (window.confirmModal) { confirmModal(prompt).then(ok => { if (!ok) return; run(); }); } else { if (!confirm(prompt)) return; run(); }
       }
     }))
   };

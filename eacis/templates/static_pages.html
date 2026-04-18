@@ -20,21 +20,23 @@
       <aside class="hide-on-mobile" style="position: sticky; top: 100px; align-self: start;">
         <nav style="display: flex; flex-direction: column; gap: var(--sp-4);">
           <div class="type-label-xs" style="color: var(--grey-400); margin-bottom: var(--sp-2);">SECTIONS</div>
-          <a href="#" class="type-link-sm fw-bold active" style="color: var(--brand-primary);">1. Overview</a>
-          <a href="#" class="type-link-sm fw-medium" style="color: var(--grey-500);">2. Core Principles</a>
-          <a href="#" class="type-link-sm fw-medium" style="color: var(--grey-500);">3. Compliance</a>
-          <a href="#" class="type-link-sm fw-medium" style="color: var(--grey-500);">4. Contact Info</a>
+          <a href="#overview" class="type-link-sm fw-bold active" style="color: var(--brand-primary);">1. Overview</a>
+          <a href="#core-principles" class="type-link-sm fw-medium" style="color: var(--grey-500);">2. Core Principles</a>
+          <a href="#compliance" class="type-link-sm fw-medium" style="color: var(--grey-500);">3. Compliance</a>
+          <a href="#contact" class="type-link-sm fw-medium" style="color: var(--grey-500);">4. Contact Info</a>
         </nav>
       </aside>
 
       <!-- Main Text -->
       <article class="stagger-children">
         <div class="glass-card glass-card--interactive" style="background: var(--glass-surface); backdrop-filter: var(--glass-blur-md); border: 1px solid var(--glass-border-strong); padding: var(--sp-12); box-shadow: var(--shadow-sm); border-radius: var(--radius-2xl);">
-          <p class="type-body-lg mb-12" style="color: var(--grey-700); line-height: 1.8; font-weight: 450;">
-            {{ intro }}
-          </p>
+          <section id="overview">
+            <p class="type-body-lg mb-12" style="color: var(--grey-700); line-height: 1.8; font-weight: 450;">
+              {{ intro }}
+            </p>
+          </section>
 
-          <h2 class="type-h3 mb-6" style="border-bottom: 2px solid var(--brand-primary-subtle-2); padding-bottom: var(--sp-2); color: var(--grey-900);">Core Principles</h2>
+          <h2 id="core-principles" class="type-h3 mb-6" style="border-bottom: 2px solid var(--brand-primary-subtle-2); padding-bottom: var(--sp-2); color: var(--grey-900);">Core Principles</h2>
           <div style="background: var(--brand-primary-subtle-2); border: 1px solid var(--brand-primary-subtle); border-radius: var(--radius-xl); padding: var(--sp-8); margin: var(--sp-10) 0;">
             <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: var(--sp-6);">
               {% for item in principles %}
@@ -49,6 +51,15 @@
             </ul>
           </div>
 
+          <section id="compliance" style="margin-top: var(--sp-10);">
+            <h2 class="type-h3 mb-6" style="color: var(--grey-900);">Compliance</h2>
+            <div class="glass-card" style="padding: var(--sp-6); border: 1px solid var(--border-subtle); background: var(--surface-default);">
+              <p class="type-body-sm" style="color: var(--grey-600); line-height:1.6;">
+                Our compliance policies and certifications are maintained centrally. For details, visit the <a href="/support" class="type-link-sm">Support Center</a> or contact our compliance team via the contact section below.
+              </p>
+            </div>
+          </section>
+
           <div style="padding-top: var(--sp-12); margin-top: var(--sp-12); border-top: 1px solid var(--glass-border); color: var(--grey-400);">
             <p class="type-body-xs" style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: var(--sp-4);">
               <span>Last Updated: <strong style="color: var(--grey-500);">{{ updated_at }}</strong></span>
@@ -56,6 +67,13 @@
             </p>
           </div>
         </div>
+
+        <section id="contact" style="margin-top: var(--sp-12);">
+          <div class="glass-card" style="padding: var(--sp-8); border: 1px solid var(--border-subtle);">
+            <h3 class="type-h4 mb-4">Contact Info</h3>
+            <p class="type-body-sm text-muted">For general enquiries, open a ticket at <a href="/support" class="type-link-sm">Support Center</a> or email <a href="mailto:eapplianccommerce@gmail.com" class="type-link-sm">eapplianccommerce@gmail.com</a>.</p>
+          </div>
+        </section>
 
         <div style="margin-top: var(--sp-12); display: flex; align-items: center; justify-content: center; gap: var(--sp-6);">
           <a href="/" class="btn btn--secondary btn--lg">Back to Home</a>

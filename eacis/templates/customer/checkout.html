@@ -7,16 +7,38 @@
 {% block title %}Complete Your Order — E-ACIS{% endblock %}
 
 {% block content %}
-<div class="main-content">
+<div class="main-content"> <!-- This page will have a two-column layout with the checkout form on the left and the order summary on the right. On mobile, it will stack vertically. -->
   <div class="stagger-children">
   <header class="mb-12">
-    <div class="breadcrumb-wrap mb-4">
-      <a href="/cart" class="breadcrumb-link type-body-sm">Shopping Cart</a>
-      <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" style="color: var(--grey-300); opacity: 0.5;"><path d="M9 5l7 7-7 7"/></svg>
-      <span class="type-body-sm fw-bold" style="color: var(--grey-900);">Secure Checkout</span>
+    <div class="step-progress mb-10" style="max-width: 600px; margin: 0 auto var(--sp-12) auto;">
+      <div class="step-progress__item completed">
+        <div class="step-progress__icon"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div>
+        <div class="step-progress__label">Cart</div>
+      </div>
+      <div class="step-progress__item active">
+        <div class="step-progress__icon">2</div>
+        <div class="step-progress__label">Checkout</div>
+      </div>
+      <div class="step-progress__item">
+        <div class="step-progress__icon">3</div>
+        <div class="step-progress__label">Identity (if installment)</div>
+      </div>
+      <div class="step-progress__item">
+        <div class="step-progress__icon">4</div>
+        <div class="step-progress__label">Confirm & Pay</div>
+      </div>
     </div>
-    <h1 class="type-display-md">Complete Your Order</h1>
-    <p class="type-body-sm text-muted">Review your information and secure your doorstep delivery.</p>
+
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: var(--sp-4); flex-wrap: wrap;">
+      <div>
+        <h1 class="type-display-md" style="margin:0;">Secure Checkout</h1>
+        <p class="type-body-sm text-muted" style="margin-top: 4px;">Confirm your details to finalize your appliance acquisition.</p>
+      </div>
+      <div class="glass-card" style="padding: 10px 16px; display: flex; align-items: center; gap: 10px; border-radius: var(--radius-pill); background: var(--grey-0); border: 1.5px solid var(--border-subtle);">
+        <svg width="18" height="18" fill="none" stroke="var(--color-success)" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"></path></svg>
+        <span class="type-label-sm" style="color: var(--grey-800); letter-spacing: 0.05em;">256-BIT ENCRYPTED</span>
+      </div>
+    </div>
   </header>
 
   {% set checkout_form = checkout_form or {} %}
@@ -38,12 +60,49 @@
     current_user.region
   ] | select | join(', ') %}
 
-  <form method="post" action="/checkout" class="checkout-layout" style="display: grid; grid-template-columns: 1fr 400px; gap: var(--sp-10); align-items: start;" data-enhance="submit-loading">
+  <form method="post" action="/checkout" class="checkout-layout" style="display: grid; grid-template-columns: 1fr 400px; gap: var(--sp-10); align-items: start;" data-enhance="submit-loading warn-on-exit phone-normalize">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     
     <!-- Checkout Flow -->
     <div class="form-stack" style="gap: var(--sp-8);">
+      {% set saved_addresses = saved_addresses or [] %}
+      {% if saved_addresses %}
+      <section class="glass-card stagger-item page-enter checkout-section">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:var(--sp-3); margin-bottom: var(--sp-6);">
+          <div style="display:flex; align-items:center; gap:var(--sp-3);">
+            <div style="width:28px; height:28px; border-radius:50%; background:var(--brand-primary); color:white; display:flex; align-items:center; justify-content:center; font-weight:700;">A</div>
+            <h3 class="type-h4" style="margin:0;">Saved Addresses</h3>
+          </div>
+          <div><a href="{{ url_for('customer_addresses') }}" class="text-primary fw-semibold">Manage addresses</a></div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:var(--sp-3);">
+          <label class="saved-address" style="display:flex; align-items:flex-start; gap:var(--sp-3); padding:8px; border-radius:8px; border:1px solid var(--border-medium); background:var(--grey-0);">
+            <input type="radio" name="address_id" value="new" {% if not (saved_addresses|selectattr('is_default')|list) %}checked{% endif %} style="margin-top:6px;">
+            <div>
+              <div class="fw-semibold">Use a new address</div>
+              <div class="type-body-xs text-muted">Enter a new shipping address for this order.</div>
+            </div>
+          </label>
+          {% for addr in saved_addresses %}
+          <label class="saved-address" style="display:flex; align-items:flex-start; gap:var(--sp-3); padding:8px; border-radius:8px; border:1px solid var(--border-medium); background:var(--grey-0);">
+            <input type="radio" name="address_id" value="{{ addr.id }}" {% if addr.is_default %}checked{% endif %} style="margin-top:6px;">
+            <div>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <div class="fw-semibold">{{ addr.label or 'Address' }}</div>
+                {% if addr.is_default %}<div class="type-label-sm" style="background:var(--brand-primary-subtle); padding:2px 6px; border-radius:6px;">Default</div>{% endif %}
+              </div>
+              <div class="type-body-sm">{{ addr.recipient_name }} &middot; {% if addr.phone and addr.phone.startswith('0') %}+63{{ addr.phone[1:] }}{% else %}{{ addr.phone or '' }}{% endif %}</div>
+              <div class="type-body-xs text-muted">{{ [addr.address_line1, addr.address_line2, addr.barangay, addr.city_municipality, addr.province, addr.region] | select | join(', ') }}</div>
+            </div>
+          </label>
+          {% endfor %}
+        </div>
+      </section>
+      {% endif %}
       
+
+
+      <!-- shipping address form and payment options will go here, but we want to show the loyalty section first if they have vouchers or points to redeem -->
       <!-- Step 1: Shipping -->
       <section class="glass-card stagger-item page-enter checkout-section">
         <div style="display: flex; align-items: center; gap: var(--sp-3); margin-bottom: var(--sp-6);">
@@ -52,31 +111,56 @@
         </div>
         
         <div class="form-stack">
-          <div class="form-group">
-             <label class="form-label">Full Recipient Name <abbr class="required" title="required">*</abbr></label>
-             <input type="text" name="recipient_name" class="form-input" placeholder="e.g. Juan Dela Cruz" value="{{ recipient_name }}" required>
+           <div class="form-group">
+             <label class="form-label" for="recipient_name">Full Recipient Name <abbr class="required" title="required">*</abbr></label>
+             <input id="recipient_name" type="text" name="recipient_name" class="form-input" placeholder="e.g. Juan Dela Cruz" value="{{ recipient_name }}" required>
              {% if checkout_errors.get('recipient_name') %}<div class="form-error" role="alert">{{ checkout_errors.get('recipient_name') }}</div>{% endif %}
           </div>
           <div class="form-group">
-             <label class="form-label">Complete Delivery Address <abbr class="required" title="required">*</abbr></label>
-             <textarea name="address_line1" class="form-textarea" style="height: 100px;" placeholder="House No., Street Name, Barangay, Municipality/City..." required>{{ default_address }}</textarea>
+             <label class="form-label" for="address_line1">Complete Delivery Address <abbr class="required" title="required">*</abbr></label>
+             <textarea id="address_line1" name="address_line1" class="form-textarea" style="height: 100px;" placeholder="House No., Street Name, Barangay, Municipality/City..." required>{{ default_address }}</textarea>
              {% if checkout_errors.get('address_line1') %}<div class="form-error" role="alert">{{ checkout_errors.get('address_line1') }}</div>{% endif %}
+          </div>
+          <div class="form-group" style="margin-top: -6px;">
+            <label style="display:flex; gap:8px; align-items:center;"><input type="checkbox" id="save_address" name="save_address" value="1"> Save this address to my account</label>
+            <div id="save_address_fields" style="display:none; margin-top:8px;">
+              <label class="form-label">Label (e.g. Home, Work)</label>
+              <input type="text" name="save_label" class="form-input" placeholder="Home, Work, Office">
+              <label style="display:flex; gap:8px; align-items:center; margin-top:6px;"><input type="checkbox" name="set_default" value="1"> Set as default</label>
+            </div>
+            <script>
+              (function(){
+                document.addEventListener('DOMContentLoaded', function(){
+                  var cb = document.getElementById('save_address');
+                  var fields = document.getElementById('save_address_fields');
+                  if(!cb) return;
+                  cb.addEventListener('change', function(){
+                    fields.style.display = cb.checked ? 'block' : 'none';
+                  });
+                });
+              })();
+            </script>
           </div>
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-4);">
              <div class="form-group">
-               <label class="form-label">Postal / ZIP Code</label>
-               <input type="text" name="postal_code" class="form-input" value="{{ checkout_form.get('postal_code') or current_user.postal_code or '' }}">
+                 <label class="form-label" for="postal_code">Postal / ZIP Code</label>
+                 <input id="postal_code" type="text" name="postal_code" class="form-input"
+                   value="{{ checkout_form.get('postal_code') or current_user.postal_code or '' }}"
+                   pattern="[0-9]{4,6}" placeholder="e.g. 1234" inputmode="numeric">
                {% if checkout_errors.get('postal_code') %}<div class="form-error" role="alert">{{ checkout_errors.get('postal_code') }}</div>{% endif %}
              </div>
              <div class="form-group">
-               <label class="form-label">Primary Mobile Number</label>
+               <label class="form-label" for="checkout-phone">Mobile Number <abbr class="required" title="required">*</abbr></label>
                <div class="form-input-group">
-                 <span class="form-input-group__icon">+63</span>
-                 <input type="text" name="phone" class="form-input" value="{{ default_phone }}">
+                 <span class="form-input-group__icon" style="font-weight:700;">+63</span>
+                 <input id="checkout-phone" type="tel" name="phone" class="form-input" value="{{ default_phone }}"
+                        placeholder="e.g. 9912345678 or 09912345678 or +639912345678" inputmode="tel" maxlength="15" required>
                </div>
+               <div class="form-helper">Enter 10 digits starting with 9. You may include a leading 0 or +63 and separators, we'll normalize it for you.</div>
                {% if checkout_errors.get('phone') %}<div class="form-error" role="alert">{{ checkout_errors.get('phone') }}</div>{% endif %}
              </div>
           </div>
+
         </div>
       </section>
 
@@ -102,13 +186,21 @@
           </label>
 
            <label class="payment-option {% if selected_payment == 'installment' %}checked{% endif %}" id="installment-trigger">
-             <input type="radio" name="payment" value="installment" {% if selected_payment == 'installment' %}checked{% endif %}>
-             <div class="payment-option__info">
-                <strong>0% Interest Installment</strong>
-                <span class="text-primary type-body-sm fw-bold">Up to 24 Months available</span>
+              <input type="radio" name="payment" value="installment" {% if selected_payment == 'installment' %}checked{% endif %}>
+              <div class="payment-option__info">
+                 <strong>0% Interest Installment</strong>
+                 <span class="text-primary type-body-sm fw-bold">6, 12, or 24 Months available</span>
+              </div>
+              <svg width="24" height="24" fill="none" stroke="var(--brand-primary)" stroke-width="1.5" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+           </label>
+
+           <!-- Installment KYC Gate Notice -->
+           <div id="installment-notice" style="display: none; transition: all 0.2s;" {% if selected_payment == 'installment' %}data-visible="1"{% endif %}>
+             <div style="padding: var(--sp-4); background: rgba(10,132,255,0.04); border: 1px solid rgba(10,132,255,0.18); border-radius: 12px; display: flex; gap: var(--sp-3); align-items: flex-start;">
+               <svg width="18" height="18" fill="none" stroke="var(--brand-primary)" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0; margin-top:1px;"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M14 10h4M14 13h3"/><path d="M5 19s1-2 4-2 4 2 4 2"/></svg>
+               <span class="type-body-xs"><strong style="color:var(--brand-primary);">Identity Verification Required</strong> — Installment checkout requires a one-time Gov ID + income declaration step after this. <a href="/privacy" target="_blank" class="text-primary fw-semibold">Privacy Policy</a></span>
              </div>
-             <img src="https://img.icons8.com/ios-filled/50/time-machine.png" width="24" style="opacity: 0.5;"/>
-          </label>
+           </div>
 
           <!-- Hidden Installment Box -->
            <div id="installment-details" class="installment-box {{ 'is-visible' if selected_payment == 'installment' else '' }}">
@@ -228,11 +320,17 @@
          Billed Monthly: <strong>PHP {{ '%.2f'|format((order_total|float) / 12) }}</strong>
        </div>
 
-       <div style="margin-top: var(--sp-6);">
-          <label class="type-body-sm" style="display: flex; gap: var(--sp-2); align-items: flex-start; cursor: pointer;">
-            <input type="checkbox" name="agree_terms" value="1" style="margin-top: 3px;" required>
-            <span>I have read and agree to the <a href="/terms" target="_blank" class="text-primary fw-bold">Terms of Service</a> and <a href="/privacy" target="_blank" class="text-primary fw-bold">Privacy Policy</a>.</span>
+       <div style="margin-top: var(--sp-6); padding: var(--sp-5); border: 1.5px solid rgba(10,132,255,0.2); border-radius: 12px; background: var(--brand-primary-subtle);">
+          <label class="type-body-sm" style="display: flex; gap: var(--sp-3); align-items: flex-start; cursor: pointer;">
+            <input type="checkbox" name="agree_terms" value="1" style="margin-top: 3px; width:18px; height:18px; accent-color: var(--brand-primary); flex-shrink:0;" required>
+            <span>
+              <strong>I confirm I have read and agreed</strong> to the
+              <a href="/terms" target="_blank" class="text-primary fw-bold">Terms of Service</a> and
+              <a href="/privacy" target="_blank" class="text-primary fw-bold">Privacy Policy</a>.
+              <span class="text-danger fw-bold">*</span>
+            </span>
           </label>
+          <div class="type-body-xs text-muted mt-3" style="padding-left: 30px;">Required before placing any order. Protects your buyer rights under E-ACIS Buyer Protection.</div>
        </div>
        <p class="type-body-sm text-muted" style="margin-top:var(--sp-4); font-size: 11px;">By placing an order, you agree to our <a href="/terms" class="text-primary">E-ACIS Buyer Protection</a> and platform usage rules.</p>
     </aside>
@@ -280,7 +378,14 @@
   cursor: pointer;
 }
 .plan-card input {
-  display: none;
+  /* keep the native radio accessible while visually hiding it */
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  left: -9999px;
 }
 .plan-card__inner {
   padding: var(--sp-3);
@@ -363,10 +468,91 @@
 </style>
 
 <script>
+  (function(){
+    // Normalize phone input so server receives 10 digits starting with 9 (no +63, no leading 0)
+    function normalizePhoneRaw(raw){
+      if(!raw) return '';
+      var digits = ('' + raw).replace(/[^0-9]/g, '');
+      // remove leading country code 63 if present
+      if(digits.length >= 11 && digits.indexOf('63') === 0){
+        digits = digits.slice(2);
+      }
+      // remove leading zeros
+      while(digits.length > 0 && digits.charAt(0) === '0'){
+        digits = digits.slice(1);
+      }
+      // if more than 10, take last 10 (defensive)
+      if(digits.length > 10){
+        digits = digits.slice(-10);
+      }
+      return digits;
+    }
+
+    document.addEventListener('DOMContentLoaded', function(){
+      var form = document.querySelector('form.checkout-layout');
+      if(!form) return;
+      var phone = form.querySelector('input[name="phone"]');
+      if(!phone) return;
+
+      // On blur, normalize display value to digits-only (user-friendly)
+      phone.addEventListener('blur', function(){
+        try{
+          var n = normalizePhoneRaw(phone.value);
+          if(n) phone.value = n;
+        }catch(e){}
+      });
+
+      // On submit, normalize and validate before allowing submission
+      form.addEventListener('submit', function(e){
+        try{
+          var n = normalizePhoneRaw(phone.value);
+          phone.value = n;
+          // require exactly 10 digits starting with 9
+          if(!/^9\d{9}$/.test(n)){
+            e.preventDefault();
+            phone.setCustomValidity('Enter a 10-digit mobile number starting with 9 (we normalize +63/0).');
+            phone.reportValidity();
+            phone.focus();
+            return false;
+          } else {
+            phone.setCustomValidity('');
+          }
+        }catch(err){
+          // swallow and allow server to validate
+        }
+      });
+    });
+  })();
+</script>
+
+<script>
 document.addEventListener('DOMContentLoaded', () => {
   const options = document.querySelectorAll('input[name="payment"]');
   const details = document.getElementById('installment-details');
   const subtitle = document.getElementById('billing-subtitle');
+  const planInputs = document.querySelectorAll('input[name="plan"]');
+  const ORDER_TOTAL = parseFloat("{{ order_total|default(0)|float }}") || 0;
+
+  const formatPHP = (n) => {
+    try { return Number(n).toFixed(2); } catch (e) { return '0.00'; }
+  };
+
+  const updateBillingSubtitle = () => {
+    if(!subtitle) return;
+    const sel = document.querySelector('input[name="plan"]:checked');
+    const months = sel ? parseInt(sel.value || '12', 10) : 12;
+    const monthly = months > 0 ? formatPHP(ORDER_TOTAL / months) : formatPHP(ORDER_TOTAL);
+    subtitle.innerHTML = `Billed Monthly: <strong>PHP ${monthly}</strong>`;
+  };
+
+  const syncPlanUI = () => {
+    document.querySelectorAll('.plan-card__inner').forEach(inner => inner.classList.remove('checked'));
+    const sel = document.querySelector('input[name="plan"]:checked');
+    if(sel && sel.closest('.plan-card')) {
+      const inner = sel.closest('.plan-card').querySelector('.plan-card__inner');
+      if(inner) inner.classList.add('checked');
+    }
+  };
 
   const syncPaymentUI = (value) => {
     document.querySelectorAll('.payment-option').forEach(p => p.classList.remove('checked'));
@@ -375,12 +561,18 @@ document.addEventListener('DOMContentLoaded', () => {
       selectedInput.closest('.payment-option').classList.add('checked');
     }
 
+    const notice = document.getElementById('installment-notice');
     if(value === 'installment') {
-      details.style.display = 'block';
-      subtitle.style.display = 'block';
+      if(details) details.style.display = 'block';
+      if(subtitle) subtitle.style.display = 'block';
+      if (notice) notice.style.display = 'block';
+      // ensure billing subtitle matches selected plan
+      syncPlanUI();
+      updateBillingSubtitle();
     } else {
-      details.style.display = 'none';
-      subtitle.style.display = 'none';
+      if(details) details.style.display = 'none';
+      if(subtitle) subtitle.style.display = 'none';
+      if (notice) notice.style.display = 'none';
     }
   };
 
@@ -390,6 +582,13 @@ document.addEventListener('DOMContentLoaded', () => {
   options.forEach(opt => {
     opt.addEventListener('change', (e) => {
       syncPaymentUI(e.target.value);
+    });
+  });
+
+  planInputs.forEach(pi => {
+    pi.addEventListener('change', () => {
+      syncPlanUI();
+      updateBillingSubtitle();
     });
   });
 

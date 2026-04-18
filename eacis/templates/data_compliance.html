@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block title %}Data Compliance — E-ACIS{% endblock %}
+{% block content %}
+<div class="page-center bg-grey-50 policy-print-shell" style="padding: var(--sp-20) var(--sp-6);">
+  <div class="stagger-children" style="max-width: 900px; width: 100%;">
+    <div class="text-center mb-16 reveal policy-screen-hero">
+      <div class="type-label mb-4" style="color: var(--brand-primary); letter-spacing: 0.15em; font-weight: 800;">COMPLIANCE FRAMEWORK</div>
+      <h1 class="type-display-md mb-6">Data Compliance &amp; Security</h1>
+      <p class="type-body-md text-muted mx-auto" style="max-width: 1000px;">Overview of our compliance posture, technical controls, processors, and how we manage personal data in line with applicable law.</p>
+    </div>
+
+    <div class="glass-card p-12 reveal policy-print-card" style="border-radius: var(--radius-3xl);">
+      <header class="policy-print-head">
+        <h1>E-ACIS Data Compliance Summary</h1>
+        <p>Document date: April 18, 2026</p>
+      </header>
+
+      <article class="type-body-md" style="line-height: 1.8; color: var(--grey-700);">
+        <section class="mb-10">
+          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">1. Scope and Objectives</h2>
+          <p>This page describes operational and technical measures used to protect personal data, how we vet processors, and our approach to regulatory compliance. It is informational and does not replace our Privacy Policy or Terms.</p>
+        </section>
+
+        <section class="mb-10">
+          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">2. Governance and Roles</h2>
+          <p>We maintain a Data Protection Officer (DPO) and a compliance team responsible for policies, vendor assessments, incident response, staff training, and responding to data subject rights requests.</p>
+          <p class="mt-4">Contact: <a href="mailto:dpo@e-acis.ph" class="text-primary fw-bold">dpo@e-acis.ph</a></p>
+        </section>
+
+        <section class="mb-10">
+          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">3. Technical Controls</h2>
+          <ul class="mt-4" style="padding-left: var(--sp-6); display: grid; gap: var(--sp-2);">
+            <li><strong>Encryption:</strong> Data in transit is protected via TLS; sensitive persisted data is encrypted or tokenized where applicable.</li>
+            <li><strong>Access Controls:</strong> Role-based access and least-privilege principles for system components and admin tooling.</li>
+            <li><strong>Logging &amp; Monitoring:</strong> Audit logs are retained for security and compliance review; anomaly detection is employed for fraud prevention.</li>
+            <li><strong>Backups:</strong> Regular encrypted backups with tested restore procedures and retention policies.</li>
+          </ul>
+        </section>
+
+        <section class="mb-10">
+          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">4. Processors and Vendor Management</h2>
+          <p>We contractually bind processors (payment gateways, shipping partners, cloud infrastructure, analytics) to limit use and ensure security. New vendors undergo security and privacy assessments, and subprocessors are tracked.</p>
+        </section>
+
+        <section class="mb-10">
+          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">5. Data Protection Impact Assessments (DPIA)</h2>
+          <p>DPIAs are performed for higher-risk features (KYC, biometric-like verification, profiling for credit/installment eligibility). Documentation is retained and reviewed as product features evolve.</p>
+        </section>
+
+        <section class="mb-10">
+          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">6. Incident Response &amp; Reporting</h2>
+          <p>We maintain an incident response playbook with roles, containment, notification to regulators where required, and post-incident reviews. Affected users are notified in alignment with applicable laws.</p>
+        </section>
+
+        <section class="mb-10">
+          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">7. PCI and Payment Security</h2>
+          <p>Payments are processed by PCI-compliant providers. Cardholder data is not stored on E-ACIS unless explicitly tokenized via our payment partners; merchants and sellers must follow payment provider terms.</p>
+        </section>
+
+        <section class="mb-10">
+          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">8. Audits, Certifications and Continuous Improvement</h2>
+          <p>We perform periodic security testing and audits. Where feasible, we pursue recognized standards and certifications; security and compliance activities are part of our product lifecycle and release processes.</p>
+        </section>
+
+        <section class="mb-10">
+          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">9. Requests and Record Access</h2>
+          <p>Data subjects may request copies of records or ask for information about processing. Requests should be sent to the DPO or via the Support Center; identity verification is required before fulfilling requests.</p>
+        </section>
+
+        <section>
+          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">10. Limitations and Legal Advice</h2>
+          <p>This page provides an operational overview and should not be construed as legal advice. For binding guidance about compliance obligations in your jurisdiction, consult qualified counsel or the relevant supervisory authority.</p>
+        </section>
+
+      <div class="mt-12 pt-8 policy-screen-meta" style="border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--sp-4);">
+        <div class="type-body-xs text-muted">Last updated: April 18, 2026</div>
+        <div style="display: flex; gap: var(--sp-4);">
+          <span class="badge badge--success">NPC Compliant</span>
+          <span class="badge">Compliance Overview</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+@media screen { .policy-print-head { display: none; } }
+@media print {
+  .policy-print-shell { background: #fff !important; padding: 0 !important; }
+  .policy-screen-hero, .policy-screen-meta, .progress-bar, .skip-link, .topbar, .sidebar, .footer, .btn, .badge, .reveal { display: none !important; }
+  .policy-print-card { background: #fff !important; border: 0 !important; box-shadow: none !important; border-radius: 0 !important; padding: 0 !important; }
+  @page { size: A4; margin: 16mm; }
+}
+</style>
+{% endblock %}

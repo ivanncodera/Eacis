@@ -12,6 +12,7 @@ from datetime import datetime
 
 class Voucher(db.Model):
     __tablename__ = 'vouchers'
+    __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True)
     voucher_ref = db.Column(db.String(30), unique=True)
     code = db.Column(db.String(50), unique=True)
@@ -26,6 +27,10 @@ class Voucher(db.Model):
     seller_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     is_active = db.Column(db.Boolean, default=True)
     combinable = db.Column(db.Boolean, default=False)
+    # Extended targeting fields (added via migration in Phase 2)
+    # target_category, new_customer_only and min_item_count are
+    # introduced by the planned migration; keep legacy schema here
+    # to avoid runtime errors when the DB hasn't been migrated yet.
 
     def is_valid(self):
         now = datetime.utcnow()

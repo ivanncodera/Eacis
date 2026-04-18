@@ -1,0 +1,278 @@
+{% extends "base.html" %}
+{% block title %}My Inquiries - E-ACIS{% endblock %}
+
+{% block content %}
+<div class="page-content page-enter stagger-children" style="padding: var(--sp-12) 0;">
+  <div class="container" style="max-width: 1000px;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: var(--sp-10);">
+      <div class="stagger-item">
+        <div class="chip chip--active mb-4">Support Hub</div>
+        <h1 class="type-display-sm">My Support Inquiries</h1>
+        <p class="type-body-sm text-muted">Track resolutions and communicate with vendors.</p>
+      </div>
+      <button class="btn btn--primary shadow-primary rounded-pill px-8 stagger-item" id="new-ticket-trigger">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 8px;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        New Ticket
+      </button>
+    </div>
+
+    <!-- Inquiry List -->
+    <div class="glass-card overflow-hidden stagger-item">
+      {% if tickets %}
+        <div class="table-responsive">
+          <table class="table--premium">
+            <thead>
+              <tr style="background: var(--grey-50);">
+                <th style="padding-left: 24px;">Reference</th>
+                <th>Subject & Category</th>
+                <th>Related Order</th>
+                <th>Status</th>
+                <th>Activity</th>
+                <th style="text-align: right; padding-right: 24px;">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for ticket in tickets %}
+              <tr class="interactive-row">
+                <td style="padding-left: 24px;">
+                   <div class="type-label-sm fw-bold text-primary">{{ ticket.ticket_ref }}</div>
+                </td>
+                <td>
+                   <div class="type-body-sm fw-bold">{{ ticket.subject }}</div>
+                </td>
+                <td>
+                  {% if ticket.order %}
+                    <span class="chip chip--outline" style="font-size: 10px;">{{ ticket.order.order_ref }}</span>
+                  {% else %}
+                    <span class="text-muted small">—</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% set status_tone = 'badge--info' if ticket.status == 'open' else ('badge--primary' if ticket.status == 'in_progress' else 'badge--success') %}
+                  <span class="badge rounded-pill {{ status_tone }}" style="padding: 6px 14px;">
+                      {{ ticket.status|replace('_', ' ')|title }}
+                  </span>
+                </td>
+                <td><span class="type-label-xs text-muted">{{ ticket.updated_at.strftime('%b %d') }}</span></td>
+                <td style="text-align: right; padding-right: 24px;">
+                   <a href="{{ url_for('customer_inquiry_detail', ticket_ref=ticket.ticket_ref) }}" class="btn btn--white btn--sm" style="border: 1.5px solid var(--border-medium);">View Case</a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div style="padding: 80px 24px; text-align: center;">
+          <div style="width: 80px; height: 80px; background: var(--grey-50); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;">
+             <svg width="40" height="40" fill="none" stroke="var(--grey-300)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          </div>
+          <h3 class="type-h4 mb-2">No active inquiries</h3>
+          <p class="type-body-sm text-muted mb-8">Need help? Open a ticket to contact our support team.</p>
+          <button class="btn btn--primary btn--sm px-10 rounded-pill" id="empty-state-trigger">Submit First Ticket</button>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Premium New Inquiry Modal -->
+<div id="ticket-modal-overlay" class="modal-overlay" style="display:none; position:fixed; inset:0; background: rgba(0,0,0,0.3); backdrop-filter: blur(12px); z-index:1500; align-items:center; justify-content:center;">
+  <div id="ticket-modal" class="modal glass-card" style="width: 540px; border: none; box-shadow: var(--shadow-2xl); padding: 0; overflow: hidden;" data-has-errors="{{ 'true' if errors else 'false' }}">
+      <div class="p-8 border-bottom" style="background: var(--grey-50); display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h2 class="type-h3 mb-0">Launch Support Inquiry</h2>
+          <p class="type-body-sm text-muted">Get assistance from our dedicated team.</p>
+    <div class="pagination" style="margin-top: var(--sp-12); display:flex; justify-content:space-between; align-items:center; padding-top: var(--sp-6); border-top: 1px solid var(--border-default);">
+      <div class="type-body-sm text-muted">Showing {{ tickets|length }} of {{ pagination.total if pagination else tickets|length }} inquiries</div>
+      {% if pagination and pagination.pages > 1 %}
+      <div style="display:flex; gap: var(--sp-2);">
+        {% if pagination.has_prev %}
+        <a href="{{ url_for(request.endpoint, page=pagination.prev_num, per_page=pagination.per_page) }}" class="btn btn--white btn--sm">Previous</a>
+        {% else %}
+        <button class="btn btn--white btn--sm" disabled>Previous</button>
+        {% endif %}
+
+        <div class="btn btn--white btn--sm" style="pointer-events: none; border: none;">Page {{ pagination.page }} of {{ pagination.pages }}</div>
+
+        {% if pagination.has_next %}
+        <a href="{{ url_for(request.endpoint, page=pagination.next_num, per_page=pagination.per_page) }}" class="btn btn--white btn--sm">Next</a>
+        {% else %}
+        <button class="btn btn--white btn--sm" disabled>Next</button>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+        </div>
+        <button type="button" class="modal__close" id="close-ticket-x" aria-label="Close" title="Close" style="opacity: 0.4;">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <form action="{{ url_for('customer_inquiries') }}" method="POST" class="form-stack p-8">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-group">
+          <label class="form-label">Inquiry Category</label>
+          <select name="category" class="form-select">
+            <option value="ORDER_STATUS" {% if form and form.category == 'ORDER_STATUS' %}selected{% endif %}>Order Status Inquiry</option>
+            <option value="PRODUCT_QUESTION" {% if form and form.category == 'PRODUCT_QUESTION' %}selected{% endif %}>Product Question</option>
+            <option value="DELIVERY" {% if form and form.category == 'DELIVERY' %}selected{% endif %}>Delivery Issues</option>
+            <option value="BILLING" {% if form and form.category == 'BILLING' %}selected{% endif %}>Billing & Payments</option>
+            <option value="DEFECT_CLAIM" {% if form and form.category == 'DEFECT_CLAIM' %}selected{% endif %}>Report a Defect (Pre-return)</option>
+            <option value="OTHER" {% if not form or form.category == 'OTHER' %}selected{% endif %}>Other Support</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Linked Order (Optional)</label>
+          <select name="order_ref" class="form-select">
+            <option value="">No linked order</option>
+            {% for order in orders %}
+            <option value="{{ order.order_ref }}" {% if form and form.order_ref == order.order_ref %}selected{% endif %}>
+              {{ order.order_ref }} (placed {{ order.created_at.strftime('%b %d') }})
+            </option>
+            {% endfor %}
+          </select>
+          {% if errors and errors.order_ref %}
+            <div class="type-label-xs text-danger mt-1">{{ errors.order_ref }}</div>
+          {% endif %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Subject Line</label>
+          <input type="text" name="subject" class="form-input" placeholder="e.g., Warranty coverage for Ref-102" value="{{ form.subject if form else '' }}" required>
+          {% if errors and errors.subject %}
+            <div class="type-label-xs text-danger mt-1">{{ errors.subject }}</div>
+          {% endif %}
+        </div>
+        <div class="form-group mb-8">
+          <label class="form-label">Full Description</label>
+          <textarea name="description" class="form-textarea" rows="5" placeholder="Please provide detailed context for faster resolution..." required>{{ form.description if form else '' }}</textarea>
+          {% if errors and errors.description %}
+            <div class="type-label-xs text-danger mt-1">{{ errors.description }}</div>
+          {% endif %}
+        </div>
+        <div style="display: flex; gap: var(--sp-3);">
+          <button type="button" class="btn btn--white btn--full rounded-pill px-6" id="close-ticket-btn" style="border: 1.5px solid var(--border-medium);">Cancel</button>
+          <button type="submit" class="btn btn--primary btn--full shadow-primary rounded-pill py-4">Transmit Incident Report</button>
+        </div>
+      </form>
+    </div>
+</div>
+
+<style>
+.table--premium { width: 100%; border-collapse: collapse; }
+.table--premium th { padding: 16px 12px; font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em; color: var(--grey-500); background: var(--grey-50); border-bottom: 1.5px solid var(--border-subtle); text-align: left; }
+.table--premium td { padding: 20px 12px; border-bottom: 1px solid var(--border-subtle); vertical-align: middle; }
+.interactive-row:hover { background: rgba(0, 122, 255, 0.02); }
+.modal-overlay { animation: fade-in 0.3s var(--ease-out); }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const triggers = [document.getElementById('new-ticket-trigger'), document.getElementById('empty-state-trigger')];
+    const modal = document.getElementById('ticket-modal');
+    const overlay = document.getElementById('ticket-modal-overlay');
+
+    const forceVisibleStyles = () => {
+      if (!overlay || !modal) return;
+      overlay.style.display = 'flex';
+      overlay.style.opacity = '1';
+      overlay.style.transform = 'none';
+      overlay.style.pointerEvents = 'auto';
+      modal.style.opacity = '1';
+      modal.style.transform = 'none';
+    };
+
+    const clearVisibleStyles = () => {
+      if (!overlay || !modal) return;
+      overlay.style.opacity = '';
+      overlay.style.transform = '';
+      overlay.style.pointerEvents = '';
+      modal.style.opacity = '';
+      modal.style.transform = '';
+    };
+
+    const openModal = (event) => {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      if (!modal || !overlay) return;
+
+      try {
+        if (window.ModalManager && typeof window.ModalManager.open === 'function') {
+          window.ModalManager.open(modal);
+          forceVisibleStyles();
+          return;
+        }
+      } catch (err) {
+        console.warn('[E-ACIS] ModalManager open failed, using fallback', err);
+      }
+
+      forceVisibleStyles();
+      document.body.style.overflow = 'hidden';
+      modal.setAttribute('aria-modal', 'true');
+      modal.setAttribute('role', 'dialog');
+    };
+
+    const closeModal = (event) => {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      if (!modal || !overlay) return;
+
+      try {
+        if (window.ModalManager && typeof window.ModalManager.close === 'function') {
+          clearVisibleStyles();
+          window.ModalManager.close(modal);
+          return;
+        }
+      } catch (err) {
+        console.warn('[E-ACIS] ModalManager close failed, using fallback', err);
+      }
+
+      clearVisibleStyles();
+      overlay.style.display = 'none';
+      document.body.style.overflow = '';
+    };
+
+    triggers.forEach(t => {
+      if (!t) return;
+      t.addEventListener('click', openModal);
+      t.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          openModal(event);
+        }
+      });
+    });
+    
+    document.querySelectorAll('#close-ticket-x, #close-ticket-btn').forEach(b => {
+      b.addEventListener('click', closeModal);
+    });
+
+    if (overlay) {
+      overlay.addEventListener('click', (event) => {
+        if (event.target === overlay) {
+          closeModal(event);
+        }
+      });
+    }
+
+    // Auto-open on server-side errors
+    if (modal && modal.dataset.hasErrors === 'true') {
+      openModal();
+    }
+
+    // Handle URL params for deep-linking (from Order Details)
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('order_ref') && !urlParams.has('from_returns')) {
+      const targetRef = urlParams.get('order_ref');
+      openModal();
+      const select = document.querySelector('select[name="order_ref"]');
+      const subjectInput = document.querySelector('input[name="subject"]');
+      if (select) select.value = targetRef;
+      if (subjectInput && !subjectInput.value) subjectInput.value = `Issue with Order #${targetRef}`;
+    }
+  });
+</script>
+{% endblock %}

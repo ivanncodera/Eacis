@@ -11,29 +11,95 @@
       <a href="/shop" class="btn btn--outline btn--sm">Shop More</a>
     </header>
 
-    <div class="kpi-grid mb-6" style="grid-template-columns: repeat(4, minmax(0, 1fr));">
-      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Points Balance</div><div class="type-display-md mt-2">{{ stats.points_balance }}</div></div></div>
-      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Available Vouchers</div><div class="type-display-md mt-2">{{ stats.available_vouchers }}</div></div></div>
-      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Expiring Soon</div><div class="type-display-md mt-2">{{ stats.expiring_soon }}</div></div></div>
-      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Total Redeemed</div><div class="type-display-md mt-2">{{ stats.total_redeemed }}</div></div></div>
+    <div class="grid mb-10" style="display:grid; grid-template-columns: 1fr 340px; gap:var(--sp-6);">
+      <div class="glass-card p-10 stagger-item" style="display:flex; flex-direction:column; justify-content:center; background: linear-gradient(135deg, var(--grey-0) 0%, var(--brand-primary-subtle-2) 100%);">
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:var(--sp-8);">
+          <div>
+            <div class="type-label-sm text-muted mb-2">Current Standing</div>
+            <div class="type-display-md" style="margin:0;">{{ stats.points_balance }} <span class="type-body-sm fw-medium text-muted">E-Points</span></div>
+          </div>
+          <div style="text-align:right;">
+             {% set next_goal = 1000 if stats.points_balance < 1000 else (5000 if stats.points_balance < 5000 else 10000) %}
+             {% set progress = (stats.points_balance / next_goal * 100) | round | int %}
+             <div class="type-body-sm fw-bold text-primary">{{ 100 - progress }}% to Platinum</div>
+             <div class="type-body-xs text-muted">Next reward at {{ next_goal }} pts</div>
+          </div>
+        </div>
+          <div class="progress-bar shimmer" style="height:12px; background:rgba(10, 132, 255, 0.1);">
+            <div class="progress-bar__fill" data-progress="{{ progress }}" style="width: 0%; box-shadow: 0 0 15px rgba(10, 132, 255, 0.35);"></div>
+        </div>
+        <p class="type-body-sm text-muted mt-6">You've unlocked <strong>{{ stats.available_vouchers }} vouchers</strong>. Keep shopping to reach the next tier!</p>
+      </div>
+
+      <div class="glass-card stagger-item p-6 loyalty-redemption-card" style="background: var(--grey-900); color: white;">
+         <h3 class="type-label-sm" style="color: var(--grey-400); margin-bottom: var(--sp-6);">Redemption Guide</h3>
+         <div class="form-stack" style="gap: var(--sp-4);">
+            <div style="display:flex; gap:var(--sp-4); align-items:center;">
+              <div class="step-number">1</div>
+              <div class="type-body-sm">1 Point = PHP 1.00 Discount</div>
+            </div>
+            <div style="display:flex; gap:var(--sp-4); align-items:center;">
+              <div class="step-number">2</div>
+              <div class="type-body-sm">Redeem pts instantly at checkout</div>
+            </div>
+            <div style="display:flex; gap:var(--sp-4); align-items:center;">
+              <div class="step-number">3</div>
+              <div class="type-body-sm">Vouchers and points can be combined when policy allows</div>
+            </div>
+         </div>
+         <a href="/checkout" class="btn btn--primary btn--full mt-10">Proceed to Checkout</a>
+      </div>
     </div>
+
+    <section class="grid mb-8" style="display:grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-4);">
+      <div class="glass-card p-5">
+        <div class="type-label-xs text-muted">Earned (Lifetime)</div>
+        <div class="type-h3 mt-2">{{ stats.earned_total }}</div>
+      </div>
+      <div class="glass-card p-5">
+        <div class="type-label-xs text-muted">Redeemed (Lifetime)</div>
+        <div class="type-h3 mt-2">{{ stats.redeemed_total }}</div>
+      </div>
+      <div class="glass-card p-5">
+        <div class="type-label-xs text-muted">Active Vouchers</div>
+        <div class="type-h3 mt-2">{{ stats.available_vouchers }}</div>
+      </div>
+      <div class="glass-card p-5">
+        <div class="type-label-xs text-muted">Expiring Soon</div>
+        <div class="type-h3 mt-2">{{ stats.expiring_soon }}</div>
+      </div>
+    </section>
 
     <section class="glass-card p-6 mb-6">
       <h2 class="type-h4" style="margin:0 0 var(--sp-4) 0;">Available Vouchers</h2>
       <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:var(--sp-4);">
-        {% for voucher in voucher_cards %}
+        {% for card in voucher_cards %}
         <article class="glass-card p-4" style="border:1px solid var(--line-soft);">
           <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:var(--sp-3);">
             <div>
-              <div class="type-body-sm fw-semibold">{{ voucher.code }}</div>
-              <div class="type-body-xs text-muted">Min spend: PHP {{ '%.2f'|format(voucher.min_spend or 0) }}</div>
-              <div class="type-body-xs text-muted">Expires: {{ voucher.expires_at.strftime('%b %d, %Y') if voucher.expires_at else 'No expiry' }}</div>
+              <div class="type-body-sm fw-semibold">{{ card.voucher.code }}</div>
+              <div class="type-body-xs text-muted">Min spend: PHP {{ '%.2f'|format(card.voucher.min_order_amount or 0) }}</div>
+              <div class="type-body-xs text-muted">
+                Expires: {{ card.voucher.valid_until.strftime('%b %d, %Y') if card.voucher.valid_until else 'No expiry' }}
+                {% if card.is_expiring and card.days_left is not none and card.days_left >= 0 %}
+                  · <span class="text-warning">{{ card.days_left }} day{% if card.days_left != 1 %}s{% endif %} left</span>
+                {% endif %}
+              </div>
             </div>
-            {% if voucher.is_used %}
+            {% if card.claimed %}
               <span class="badge badge--neutral">Used</span>
             {% else %}
               <span class="badge badge--success">Available</span>
             {% endif %}
+          </div>
+          <div style="display:flex; gap: var(--sp-2); margin-top: var(--sp-4);">
+            <form method="post" action="/cart" style="margin:0; flex:1;" data-enhance="submit-loading">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="action" value="apply_voucher">
+              <input type="hidden" name="voucher_code" value="{{ card.voucher.code }}">
+              <button type="submit" class="btn btn--white btn--sm btn--full" {% if card.claimed %}disabled{% endif %} style="border:1px solid var(--border-medium);">Apply to Cart</button>
+            </form>
+            <a href="/checkout?voucher_code={{ card.voucher.code }}" class="btn btn--primary btn--sm" {% if card.claimed %}aria-disabled="true" style="pointer-events:none; opacity:0.55;"{% endif %}>Checkout</a>
           </div>
         </article>
         {% else %}
@@ -58,9 +124,11 @@
             {% for tx in transactions %}
             <tr>
               <td>{{ tx.created_at.strftime('%b %d, %Y') if tx.created_at else '-' }}</td>
-              <td>{{ tx.transaction_type|replace('_', ' ')|title }}</td>
+              <td>{{ tx.type|replace('_', ' ')|title }}</td>
               <td>{{ tx.description or '-' }}</td>
-              <td style="text-align:right;">{{ tx.points }}</td>
+              <td style="text-align:right;" class="{% if tx.type == 'redeem' %}text-danger{% elif tx.type == 'earn' %}text-success{% endif %}">
+                {% if tx.type == 'redeem' %}-{% elif tx.type == 'earn' %}+{% endif %}{{ tx.points }}
+              </td>
             </tr>
             {% else %}
             <tr><td colspan="4" style="text-align:center;">No transactions yet.</td></tr>
@@ -71,4 +139,13 @@
     </section>
   </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.progress-bar__fill[data-progress]').forEach((el) => {
+    const pct = Number(el.dataset.progress || 0);
+    el.style.width = `${Math.max(0, Math.min(100, pct))}%`;
+  });
+});
+</script>
 {% endblock %}

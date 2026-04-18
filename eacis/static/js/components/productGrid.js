@@ -7,6 +7,9 @@ function getCsrfToken(){
   return '';
 }
 
+const STAR_SVG = '<svg class="icon icon--star" width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77 6.82 21.02 8 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
+const STAR_SVG_HALF = '<svg class="icon icon--star icon--half" width="14" height="14" fill="currentColor" style="opacity:0.55" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77 6.82 21.02 8 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
+
 async function addProductToCart(ref, qty){
   const token = getCsrfToken();
   const body = new URLSearchParams();
@@ -43,7 +46,8 @@ window.renderProducts = function(sel, list){
 
   list.forEach(p => {
     const refValue = p.ref || p.product_ref || '';
-    const imageValue = p.image || p.image_url || '/static/assets/products/refrigerator.webp';
+    const showSku = !!p.show_sku;
+    const imageValue = p.image || p.image_url || '/static/assets/Featured.png';
     const reviewsValue = Number(p.reviews || 0);
     const ratingRaw = p.rating != null && p.rating !== '' ? Number(p.rating) : NaN;
     const ratingValue = Number.isFinite(ratingRaw) && ratingRaw > 0 ? ratingRaw : null;
@@ -105,7 +109,8 @@ window.renderProducts = function(sel, list){
             </div>
             <div class="pq-details">
               <div class="type-label--sm mb-2" style="letter-spacing:0.06em;">${p.category}</div>
-              <h2 class="type-h2 mb-4">${p.name}</h2>
+              <h2 class="type-h2 mb-1">${p.name}</h2>
+              <div class="type-body-sm text-muted mb-4">Sold by <strong style="color:var(--grey-800);">${p.seller_name || 'Unknown Seller'}</strong></div>
               <div class="pq-meta">
                 <div class="rating-badge">
                   <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
@@ -114,13 +119,13 @@ window.renderProducts = function(sel, list){
                 <span class="dot-divider"></span>
                 <span class="type-body-sm">${reviewsValue} reviews</span>
                 <span class="dot-divider"></span>
-                <span class="type-body-sm fw-semibold ${p.stock > 5 ? 'text-success' : 'text-danger'}">${p.stock > 0 ? (p.stock <= 5 ? 'Only '+p.stock+' left' : 'In Stock') : 'Out of Stock'}</span>
+                <span class="type-body-sm fw-semibold text-success">${p.stock > 0 ? 'In Stock' : '<span class="text-danger">Out of Stock</span>'}</span>
               </div>
               <div class="pq-price">${formatPHP(p.price)}</div>
               <div class="pq-actions">
                 <button class="btn btn--primary btn--lg" data-add-ref="${refValue}" ${p.stock <= 0 ? 'disabled' : ''}>
                   <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
-                  ${window.EACIS?.isAuthenticated ? 'Add to Cart' : 'Sign In to Buy'}
+                  ${(document.body.dataset.isAuthenticated === 'true' || window.EACIS?.isAuthenticated) ? 'Add to Cart' : 'Sign In to Buy'}
                 </button>
                 <a href="/products/${refValue}" class="btn btn--secondary btn--square btn--lg" aria-label="View full details" title="View full details">
                   <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -175,14 +180,14 @@ window.renderProducts = function(sel, list){
 
     /* Session-aware cart / sign-in button */
     function attachAuthAction(){
-      const session = window.EACIS;
+      const isAuthUser = document.body.dataset.isAuthenticated === 'true' || (window.EACIS && window.EACIS.isAuthenticated);
       const existing = quickActions.querySelector('.auth-action');
       if(existing) existing.remove();
 
       const btn = document.createElement('button');
       btn.className = 'product-card__action-btn auth-action';
 
-      if(session && session.isAuthenticated && session.userRole === 'customer'){
+      if(isAuthUser){
         btn.setAttribute('aria-label', 'Add to Cart');
         btn.innerHTML = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>';
         btn.addEventListener('click', async (ev) => {
@@ -217,12 +222,22 @@ window.renderProducts = function(sel, list){
 
     const ref = document.createElement('div');
     ref.className = 'product-card__ref';
-    ref.textContent = refValue;
+    if (showSku && refValue) {
+      ref.textContent = refValue;
+    } else {
+      ref.style.display = 'none';
+    }
 
     const title = document.createElement('div');
     title.className = 'product-card__name';
     title.textContent = p.name;
     title.id = titleId;
+
+    const sellerName = document.createElement('div');
+    sellerName.className = 'product-card__ref';
+    sellerName.style.marginTop = '2px';
+    sellerName.style.color = 'var(--grey-500)';
+    sellerName.innerHTML = `by <strong>${p.seller_name || 'Unknown'}</strong>`;
 
     const priceRow = document.createElement('div');
     priceRow.className = 'product-card__price-row';
@@ -250,6 +265,7 @@ window.renderProducts = function(sel, list){
 
     body.appendChild(ref);
     body.appendChild(title);
+    body.appendChild(sellerName);
     if(ratingValue != null || reviewsValue > 0){
       const rating = document.createElement('div');
       rating.className = 'product-card__rating';
@@ -257,8 +273,8 @@ window.renderProducts = function(sel, list){
       if(ratingValue != null){
         const fullStars = Math.floor(ratingValue);
         const halfStar = ratingValue % 1 >= 0.5;
-        for(let i = 0; i < fullStars; i++) starsHTML += '★';
-        if(halfStar) starsHTML += '½';
+        for(let i = 0; i < fullStars; i++) starsHTML += STAR_SVG;
+        if(halfStar) starsHTML += STAR_SVG_HALF;
       }
       starsHTML += '</div>';
       const reviewPart = reviewsValue > 0 ? `<div class="product-card__review-count">(${reviewsValue})</div>` : '';
@@ -272,8 +288,6 @@ window.renderProducts = function(sel, list){
     footer.className = 'product-card__footer';
     if(p.stock <= 0){
       footer.innerHTML = '<span class="badge badge--danger">Out of Stock</span>';
-    } else if(p.stock < 10){
-      footer.innerHTML = `<span class="badge badge--warning">Low Stock: ${p.stock}</span>`;
     }
 
     /* ─── CLICK NAVIGATION ─── */

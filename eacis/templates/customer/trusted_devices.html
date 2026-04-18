@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}Trusted Devices — E-ACIS{% endblock %}
+{% block content %}
+<div class="main-content">
+  <div class="stagger-children">
+    <header style="display:flex; justify-content:space-between; align-items:flex-end; gap:var(--sp-4); margin-bottom:var(--sp-8);">
+      <div>
+        <h1 class="type-display-sm" style="margin-bottom:var(--sp-2);">Trusted Devices</h1>
+        <p class="type-body-sm text-muted">Devices you've chosen to trust for sign-in. Revoking requires OTP next time this device signs in.</p>
+      </div>
+      <a href="/customer/profile" class="btn btn--white btn--sm">Back to Profile</a>
+    </header>
+
+    <section class="glass-card p-6">
+      {% if devices %}
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr><th>Device</th><th>Last Used</th><th>Added</th><th>Expires</th><th></th></tr>
+          </thead>
+          <tbody>
+            {% for d in devices %}
+            <tr>
+              <td>{{ d.device_name or 'Unknown device' }}</td>
+              <td>{{ d.last_used_at.strftime('%b %d, %Y %H:%M') if d.last_used_at else '-' }}</td>
+              <td>{{ d.created_at.strftime('%b %d, %Y %H:%M') if d.created_at else '-' }}</td>
+              <td>{{ d.expires_at.strftime('%b %d, %Y') if d.expires_at else '-' }}</td>
+              <td style="text-align:right;">
+                <form method="post" style="display:inline" data-confirm="Revoke this trusted device?">
+                  <input type="hidden" name="revoke_id" value="{{ d.id }}">
+                  <button type="submit" class="btn btn--white btn--sm">Revoke</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+        <div class="type-body-sm text-muted">No trusted devices registered for your account.</div>
+      {% endif %}
+    </section>
+  </div>
+</div>
+{% endblock %}

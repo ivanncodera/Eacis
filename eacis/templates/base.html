@@ -15,122 +15,115 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300..800;1,14..32,300..800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/css/ui.css">
   <link rel="stylesheet" href="/static/css/utilities.css">
+  <style>
+    .toast-stack { position: fixed; top: 80px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+    .toast { transform: translateX(120%); transition: all 0.4s cubic-bezier(0.16,1,0.3,1); opacity: 0; min-width: 300px; }
+    .toast.reveal-y { transform: translateX(0); opacity: 1; }
+    .toast.hide { transform: translateX(120%); opacity: 0; }
+
+    .logout-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 1600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.22s ease, visibility 0.22s ease;
+    }
+    .logout-modal.is-open {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+    .logout-modal__backdrop { position: absolute; inset: 0; background: rgba(2, 6, 23, 0.78); backdrop-filter: blur(5px); }
+    .logout-modal__panel {
+      position: relative;
+      width: min(460px, 100%);
+      background: #ffffff;
+      color: var(--grey-900);
+      border: 1.5px solid rgba(15, 23, 42, 0.22);
+      border-radius: var(--radius-xl);
+      box-shadow: 0 28px 72px rgba(2, 6, 23, 0.45);
+      padding: var(--sp-8);
+      isolation: isolate;
+      transform: translateY(14px) scale(0.985);
+      transition: transform 0.22s ease;
+    }
+    .logout-modal.is-open .logout-modal__panel { transform: translateY(0) scale(1); }
+    .logout-modal__panel h3,
+    .logout-modal__panel p { color: inherit; }
+    .logout-modal__actions { display: flex; gap: var(--sp-3); justify-content: flex-end; margin-top: var(--sp-8); }
+    
+    .skeleton { background: linear-gradient(90deg, var(--grey-100) 25%, var(--grey-200) 50%, var(--grey-100) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite linear; border-radius: 4px; }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+  </style>
 </head>
 <body
   class="{% if request.path == '/' or request.path.startswith('/landing') %}page-landing landing-portal{% elif request.path.startswith('/auth') %}page-auth auth-portal{% elif request.path.startswith('/seller') %}page-portal portal-seller{% elif request.path.startswith('/admin') %}page-portal portal-admin{% else %}page-portal portal-customer{% endif %} {% if current_user.is_authenticated %}is-authenticated role-{{ current_user.role }}{% else %}is-guest{% endif %}"
   data-is-authenticated="{{ current_user.is_authenticated|tojson }}"
   data-user-role="{{ current_user.role if current_user.is_authenticated else 'guest' }}"
   data-user-id="{{ current_user.id if current_user.is_authenticated else 'null' }}">
-  <div class="progress-bar" id="page-progress"><div class="progress-bar__fill" id="page-progress-fill"></div></div>
+  <div class="progress-bar shimmer" id="page-progress"><div class="progress-bar__fill" id="page-progress-fill"></div></div>
   <a href="#main" class="skip-link">Skip to main content</a>
-  <header class="topbar" role="banner">
+  <header class="topbar shimmer" role="banner" style="backdrop-filter: blur(12px); background: rgba(255,255,255,0.85); border-bottom: 1px solid var(--border-subtle); z-index: 1200;">
     <div class="topbar__logo">
       <a href="/" class="topbar__home-link">
-        <span class="topbar__wordmark">E-ACIS</span>
+        <span class="topbar__wordmark" style="letter-spacing: -0.02em; font-weight: 800;">E-ACIS</span>
         <span class="topbar__portal-chip {% if current_user.is_authenticated %}topbar__portal-chip--{{ current_user.role }}{% else %}topbar__portal-chip--customer{% endif %}">
           {% if current_user.is_authenticated %}{{ current_user.role|capitalize }}{% else %}Guest{% endif %}
         </span>
       </a>
       {% if current_user.is_authenticated and current_user.role in ['customer', 'seller', 'admin'] %}
-      <!-- Sidebar toggle -->
-      <button class="topbar__icon-btn" id="base-sidebar-toggle" aria-label="Toggle sidebar" aria-controls="app-sidebar" aria-expanded="false">
-        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+      <button class="topbar__icon-btn" id="base-sidebar-toggle" aria-label="Toggle sidebar" aria-controls="app-sidebar" aria-expanded="false" style="margin-left: 12px;">
+        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
       </button>
       {% endif %}
     </div>
 
-    <div class="topbar__search">
-      <svg class="topbar__search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-      <input id="topbar-search" class="topbar__search-input" type="search" placeholder="Search appliances, refs, categories..." autocomplete="off" />
-      <div id="topbar-search-results" class="topbar__search-results"></div>
+    <!-- Unified Center Search -->
+    <div class="topbar__search" style="flex: 1; max-width: 600px; margin: 0 var(--sp-8);">
+      <div style="position: relative;">
+        <svg style="position: absolute; left: 16px; top: 12px; color: var(--grey-400);" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input id="topbar-search" class="topbar__search-input" type="search" placeholder="Search appliances, order refs, categories..." autocomplete="off" style="height: 42px; border-radius: var(--radius-pill); border: 1.5px solid var(--border-medium); background: var(--grey-50); padding-left: 48px; width: 100%; transition: all var(--dur-fast);">
+        <div id="topbar-search-results" class="topbar__search-results glass-card" style="position: absolute; top: 48px; left: 0; right: 0; max-height: 400px; overflow-y: auto; display: none;"></div>
+      </div>
     </div>
 
-    <div class="topbar__actions">
-      <!-- Mobile Search Toggle -->
-      <button class="topbar__icon-btn hide-on-desktop" id="base-search-toggle" aria-label="Toggle search" aria-controls="topbar-search" aria-expanded="false">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-      </button>
-
+    <div class="topbar__actions" style="display: flex; align-items: center; gap: var(--sp-2);">
       {% if current_user.is_authenticated %}
-        <!-- Notifications -->
-        <div class="dropdown">
-          <button class="topbar__icon-btn" aria-label="Notifications" data-dropdown-toggle>
-            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-            <span class="notif-dot"></span>
-          </button>
-          <div class="dropdown-menu" style="width: 300px; padding: var(--sp-4);">
-            <div class="dropdown-header">Recent Notifications</div>
-            <div style="padding: var(--sp-6) 0; text-align: center; color: var(--grey-400); font-size: var(--text-sm);">
-              No new notifications
-            </div>
-          </div>
-        </div>
+        
+        <!-- Support Entry -->
+        <a href="/support" class="topbar__icon-btn" title="Support Center" style="color: var(--grey-600);">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </a>
+
+        <!-- Consolidated Notifications Trigger -->
+        <button class="topbar__icon-btn" aria-label="Notifications" id="trigger-notifications-drawer" style="position: relative;">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+          <span id="notif-count-badge" class="badge badge--dot badge--danger" style="position: absolute; right: 4px; top: 4px; border: 2px solid white; display: none;"></span>
+        </button>
 
         {% if current_user.role == 'customer' %}
-          <div class="dropdown cart-dropdown">
-            <button class="topbar__icon-btn cart-icon" aria-label="Cart" data-dropdown-toggle>
-              <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
-              <span class="topbar__cart-badge" id="cart-count">0</span>
-            </button>
-            <div class="dropdown-menu" id="mini-cart-dropdown" style="width: 340px; padding: var(--sp-4);">
-              <div class="dropdown-header">Shopping Cart</div>
-              <div id="mini-cart-items" style="max-height: 300px; overflow-y: auto;">
-                <div style="padding: var(--sp-12) 0; text-align: center; color: var(--grey-400);">
-                  <div class="type-body-sm">Your cart is empty</div>
-                </div>
-              </div>
-              <div class="dropdown-divider"></div>
-              <div style="padding: var(--sp-2) var(--sp-1);">
-                <div style="display:flex; justify-content:space-between; margin-bottom:var(--sp-4);">
-                  <span class="type-body-sm fw-bold">Subtotal</span>
-                  <span class="type-body-sm fw-bold" id="mini-cart-subtotal">PHP 0.00</span>
-                </div>
-                <a href="/cart" class="btn btn--primary btn--full btn--sm">View Full Cart</a>
-              </div>
-            </div>
-          </div>
+        <!-- Premium Cart Trigger -->
+        <button class="topbar__icon-btn" aria-label="Cart" id="trigger-cart-drawer" style="position: relative;">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+          <span id="cart-count-badge" class="badge badge--primary" style="position: absolute; right: -4px; top: -4px; border: 2px solid white; min-width: 18px; height: 18px; display: none; align-items:center; justify-content:center; font-size: 10px;">0</span>
+        </button>
         {% endif %}
 
-        <!-- User Menu Dropdown -->
-        <div class="dropdown" style="margin-left: var(--sp-2);">
-          <button class="topbar__avatar" data-dropdown-toggle aria-label="Account Menu">
-            {{ current_user.email[:2].upper() }}
-          </button>
-          <div class="dropdown-menu">
-            <div class="dropdown-header">Account</div>
-            {% if current_user.role == 'customer' %}
-              <a href="/customer/profile" class="dropdown-item">
-                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-                Overview Dashboard
-              </a>
-              <a href="/customer/orders" class="dropdown-item">
-                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
-                My Orders
-              </a>
-              <a href="/customer/loyalty" class="dropdown-item">
-                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path></svg>
-                Vouchers & Points
-              </a>
-            {% elif current_user.role == 'seller' %}
-              <a href="/seller/dashboard" class="dropdown-item">Dashboard</a>
-              <a href="/seller/inventory" class="dropdown-item">Inventory</a>
-            {% elif current_user.role == 'admin' %}
-              <a href="/admin" class="dropdown-item">Admin Console</a>
-            {% endif %}
-            <div class="dropdown-divider"></div>
-            <a href="/auth/logout" class="dropdown-item" style="color: var(--color-danger);">
-              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-              Sign Out
-            </a>
-          </div>
-        </div>
-
+        <!-- Account Management Dropdown -->
       {% else %}
         <a class="btn btn--ghost btn--sm" href="/auth/login">Sign In</a>
-        <a class="btn btn--primary btn--sm" href="/auth/register" style="margin-left:var(--sp-2);">Register</a>
+        <a class="btn btn--primary btn--sm" href="/auth/register" style="box-shadow: 0 4px 12px rgba(0, 122, 255, 0.2);">Register</a>
       {% endif %}
     </div>
   </header>
+
+
 
   {% if current_user.is_authenticated and current_user.role == 'customer' %}
   <!-- Global Sidebar for Customers -->
@@ -138,7 +131,15 @@
     <div class="sidebar__inner">
        <!-- Account Header (Clickable) -->
        <a href="/customer/profile" class="sidebar__account" style="text-decoration: none; padding: var(--sp-6) var(--sp-4); border-bottom: 1px solid var(--border-subtle); margin-bottom: var(--sp-4); display: flex; align-items: center; gap: var(--sp-3); transition: background var(--dur-fast); border-radius: var(--radius-lg);">
+         {% if profile_image_url(current_user, 32) %}
+         <img src="{{ profile_image_url(current_user, 32) }}" alt="Avatar" class="topbar__avatar" style="width:32px; height:32px; border-radius:50%; object-fit:cover; display:block;">
+        {% if profile_image_url(current_user, 32) %}
+        <img src="{{ profile_image_url(current_user, 32) }}" alt="Avatar" class="topbar__avatar" style="width:32px; height:32px; border-radius:50%; object-fit:cover; display:block;">
+         <img src="{{ profile_image_url(current_user, 32) }}" alt="Avatar" class="topbar__avatar" style="width:32px; height:32px; border-radius:50%; object-fit:cover; display:block;">
+         {% else %}
          <div class="topbar__avatar" style="width: 32px; height: 32px; border-radius: 50%; font-size: 10px; background: var(--grey-100);">{{ (current_user.full_name or current_user.email or '?')[:1].upper() }}</div>
+         {% endif %}
+         {% endif %}
          <div class="sidebar__account-info" style="min-width: 0;">
            <div class="type-body-sm fw-bold" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--grey-900);">{{ current_user.full_name or current_user.email or 'Account' }}</div>
            <div class="type-label-xs" style="color: var(--grey-400);">Customer Portal</div>
@@ -164,6 +165,10 @@
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
         <span class="sidebar__label">My Orders</span>
       </a>
+      <a href="/customer/installments" class="sidebar__item {% if request.path == '/customer/installments' or request.path == '/customer/installment-payments' %}active{% endif %}">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/><path d="M7 15h4"/></svg>
+        <span class="sidebar__label">My Installments</span>
+      </a>
       <a href="/customer/loyalty" class="sidebar__item {% if request.path == '/customer/loyalty' %}active{% endif %}">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path></svg>
         <span class="sidebar__label">Rewards</span>
@@ -171,6 +176,10 @@
       <a href="/customer/returns" class="sidebar__item {% if request.path == '/customer/returns' %}active{% endif %}">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 15L12 19M12 19L8 15M12 19V9M5 13V5a2 2 0 012-2h10a2 2 0 012 2v8"></path></svg>
         <span class="sidebar__label">Returns</span>
+      </a>
+      <a href="/support" class="sidebar__item {% if request.path == '/support' %}active{% endif %}">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span class="sidebar__label">Support Center</span>
       </a>
 
       <!-- Spacer to push logout to bottom -->
@@ -189,7 +198,11 @@
   <aside class="sidebar sidebar--seller" id="app-sidebar">
     <div class="sidebar__inner">
        <a href="/seller/dashboard" class="sidebar__account" style="text-decoration: none; padding: var(--sp-6) var(--sp-4); border-bottom: 1px solid var(--border-subtle); margin-bottom: var(--sp-4); display: flex; align-items: center; gap: var(--sp-3); transition: background var(--dur-fast); border-radius: var(--radius-lg);">
+         {% if profile_image_url(current_user, 32) %}
+         <img src="{{ profile_image_url(current_user, 32) }}" alt="Avatar" class="topbar__avatar" style="width:32px; height:32px; border-radius:50%; object-fit:cover; display:block;">
+         {% else %}
          <div class="topbar__avatar" style="width: 32px; height: 32px; border-radius: 50%; font-size: 10px; background: var(--grey-100);">{{ (current_user.full_name or current_user.email or '?')[:1].upper() }}</div>
+         {% endif %}
          <div class="sidebar__account-info" style="min-width: 0;">
            <div class="type-body-sm fw-bold" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--grey-900);">{{ current_user.full_name or current_user.email or 'Account' }}</div>
            <div class="type-label-xs" style="color: var(--grey-400);">Seller Portal</div>
@@ -223,7 +236,7 @@
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         <span class="sidebar__label">Orders</span>
       </a>
-      <a href="/seller/installment-payments" class="sidebar__item {% if request.path == '/seller/installment-payments' %}active{% endif %}">
+      <a href="/seller/installment-payments" class="sidebar__item {% if request.path == '/seller/installment-payments' or request.path == '/seller/installments' %}active{% endif %}">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/><path d="M7 15h4"/></svg>
         <span class="sidebar__label">Installment Payments</span>
       </a>
@@ -302,7 +315,7 @@
   <!-- Global Sidebar for Admins -->
   <aside class="sidebar sidebar--admin" id="app-sidebar">
     <div class="sidebar__inner">
-       <a href="/admin/dashboard" class="sidebar__account" style="text-decoration: none; padding: var(--sp-6) var(--sp-4); border-bottom: 1px solid var(--border-subtle); margin-bottom: var(--sp-4); display: flex; align-items: center; gap: var(--sp-3); transition: background var(--dur-fast); border-radius: var(--radius-lg);">
+      <a href="/admin/profile" class="sidebar__account" style="text-decoration: none; padding: var(--sp-6) var(--sp-4); border-bottom: 1px solid var(--border-subtle); margin-bottom: var(--sp-4); display: flex; align-items: center; gap: var(--sp-3); transition: background var(--dur-fast); border-radius: var(--radius-lg);">
          <div class="topbar__avatar" style="width: 32px; height: 32px; border-radius: 50%; font-size: 10px; background: var(--grey-100);">{{ (current_user.full_name or current_user.email or '?')[:1].upper() }}</div>
          <div class="sidebar__account-info" style="min-width: 0;">
            <div class="type-body-sm fw-bold" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--grey-900);">{{ current_user.full_name }}</div>
@@ -334,6 +347,11 @@
         <span class="sidebar__label">Audit Logs</span>
       </a>
 
+      <a href="/admin/trusted-devices" class="sidebar__item {% if request.path.startswith('/admin/trusted-devices') %}active{% endif %}">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="12" rx="2"/><path d="M7 7v-2a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2"/></svg>
+        <span class="sidebar__label">Trusted Devices</span>
+      </a>
+
       <div class="sidebar__section">Configuration</div>
       <a href="/admin/settings" class="sidebar__item {% if request.path.startswith('/admin/settings') %}active{% endif %}">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 1.6V21a2 2 0 0 1-4 0v-.06a1.7 1.7 0 0 0-1-1.6A1.7 1.7 0 0 0 7.6 15l-.06.06A2 2 0 1 1 4.71 12.3l.06-.06A1.7 1.7 0 0 0 6.6 11a1.7 1.7 0 0 0-1.6-1H5a2 2 0 0 1 0-4h.06a1.7 1.7 0 0 0 1.6-1A1.7 1.7 0 0 0 8.6 3l.06.06A2 2 0 0 1 12 2.71a2 2 0 0 1 2.83-.65l.06.06A1.7 1.7 0 0 0 16.4 3a1.7 1.7 0 0 0 1 1.6V5a2 2 0 0 1 0 4h-.06a1.7 1.7 0 0 0-1.6 1 1.7 1.7 0 0 0 .06 1.06z"/></svg>
@@ -360,15 +378,24 @@
   <main id="main" class="main-content">
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
-      <div style="padding: var(--sp-4) var(--sp-6);">
-        {% for category, message in messages %}
-          {% set tone = 'badge--success' if category == 'success' else ('badge--warning' if category in ['warning','pending'] else 'badge--danger') %}
-          <div class="glass-card" style="padding: var(--sp-4); margin-bottom: var(--sp-3); display:flex; align-items:center; gap:var(--sp-3);">
-            <span class="badge {{ tone }}">{{ category|capitalize }}</span>
-            <span class="type-body-sm">{{ message }}</span>
-          </div>
-        {% endfor %}
-      </div>
+      <script id="flash-messages-data" type="application/json">{{ messages|tojson }}</script>
+      <script>
+        document.addEventListener('DOMContentLoaded', () => {
+          const payload = document.getElementById('flash-messages-data');
+          if (!payload) return;
+          try {
+            const flashed = JSON.parse(payload.textContent || '[]');
+            flashed.forEach((item) => {
+              if (!Array.isArray(item) || item.length < 2) return;
+              const category = String(item[0] || 'info');
+              const message = String(item[1] || '');
+              if (message) window.EACIS_toast(message, category);
+            });
+          } catch (err) {
+            console.warn('Failed to parse flash message payload', err);
+          }
+        });
+      </script>
       {% endif %}
     {% endwith %}
     <!-- Main Content Output -->
@@ -377,6 +404,19 @@
 
   <!-- Modal root -->
   <div id="modal-root" role="dialog" aria-modal="true" aria-hidden="true" hidden></div>
+
+  <!-- Global Logout Confirmation Modal -->
+  <div id="logout-modal" class="logout-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="logout-modal-title">
+    <div class="logout-modal__backdrop" data-logout-cancel></div>
+    <div class="logout-modal__panel glass-card">
+      <h3 id="logout-modal-title" class="type-h4 mb-2">Sign out of E-ACIS?</h3>
+      <p class="type-body-sm text-muted">You will be signed out from this device and need to log in again to access your account.</p>
+      <div class="logout-modal__actions">
+        <button type="button" id="logout-cancel-btn" class="btn btn--white" data-logout-cancel>Cancel</button>
+        <a href="/auth/logout" id="logout-confirm-btn" class="btn btn--danger">Sign Out</a>
+      </div>
+    </div>
+  </div>
 
   <!-- Toast stack -->
   <div class="toast-stack" aria-live="polite" aria-atomic="true"></div>
@@ -410,7 +450,7 @@
   </nav>
   {% endif %}
 
-  <footer class="footer reveal" style="padding: var(--sp-20) 0; border-top: 1px solid var(--border-subtle); margin-top: var(--sp-20); background: var(--grey-0);">
+  <footer class="footer reveal" style="padding: var(--sp-20) 0; border-top: 1px solid var(--border-subtle); margin-top: var(--sp-20); background: var(--grey-0); position: relative; z-index: 10;">
     <div class="container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--sp-12);">
       <div>
         <div class="topbar__logo mb-4" style="font-size: 1.5rem;">E-ACIS</div>
@@ -429,6 +469,9 @@
         <ul style="list-style: none; padding: 0; display: grid; gap: var(--sp-3);">
           <li><a href="/terms" class="type-body-sm text-muted">Terms of Service</a></li>
           <li><a href="/privacy" class="type-body-sm text-muted">Privacy Policy</a></li>
+          <li><a href="/cookies" class="type-body-sm text-muted">Cookie Policy</a></li>
+          <li><a href="/refunds" class="type-body-sm text-muted">Refunds &amp; Returns</a></li>
+          <li><a href="/data-compliance" class="type-body-sm text-muted">Data Compliance</a></li>
           <li><a href="https://privacy.gov.ph" target="_blank" class="type-body-sm text-muted">National Privacy Commission</a></li>
         </ul>
       </div>
@@ -441,98 +484,496 @@
       </div>
     </div>
   </footer>
-  
-  <script>
-    // Global EACIS Namespace (Moved to end to ensure document.body exists)
-    window.EACIS = {
-      isAuthenticated: document.body.dataset.isAuthenticated === 'true',
-      userRole: document.body.dataset.userRole,
-      userId: document.body.dataset.userId,
-      csrfToken: "{{ csrf_token() }}"
-    };
 
-    (function(){
-      function formatPHP(amount){
-        return 'PHP ' + Number(amount || 0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      }
+  {% if current_user.is_authenticated %}
+  <!-- Drawer Overlay -->
+  <div class="drawer-overlay" id="drawer-overlay"></div>
 
-      function renderMiniCart(summary){
-        const itemsWrap = document.getElementById('mini-cart-items');
-        const subtotalEl = document.getElementById('mini-cart-subtotal');
-        const countEls = document.querySelectorAll('.topbar__cart-badge, .bottom-nav__badge');
-        if (!itemsWrap) return;
+  <!-- Notifications Drawer -->
+  <aside class="drawer drawer--right" id="notifications-drawer">
+    <div class="drawer-header">
+      <h3 class="type-h5 mb-0">Notifications</h3>
+      <button class="btn btn--icon btn--ghost" id="close-notifications" aria-label="Close">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="drawer-content" id="notif-drawer-list">
+       <div class="type-body-sm text-muted text-center" style="padding: 40px 0;">No active alerts</div>
+    </div>
+    <div class="drawer-footer">
+       <div style="display: flex; gap: var(--sp-3);">
+         <button class="btn btn--white btn--sm btn--full" onclick="clearAllNotifications()">Clear All</button>
+         <a href="/{{ current_user.role }}/notifications" class="btn btn--secondary btn--sm btn--full text-center">View History</a>
+       </div>
+    </div>
+  </aside>
 
-        const items = (summary && Array.isArray(summary.items)) ? summary.items : [];
-        const count = Number(summary && summary.count || 0);
-        const subtotal = Number(summary && summary.subtotal || 0);
-
-        countEls.forEach(el => { el.textContent = String(count); });
-        if (subtotalEl) subtotalEl.textContent = formatPHP(subtotal);
-
-        if (!items.length) {
-          itemsWrap.innerHTML = `
-            <div style="padding: var(--sp-12) 0; text-align: center; color: var(--grey-400);">
-              <div class="type-body-sm">Your cart is empty</div>
-            </div>
-          `;
-          return;
-        }
-
-        itemsWrap.innerHTML = items.map(item => {
-          const safeName = String(item.name || 'Product');
-          const safeImage = String(item.image_url || '/static/assets/products/refrigerator.webp');
-          const qty = Number(item.qty || 1);
-          const unit = Number(item.unit_price || 0);
-          const line = Number(item.line_total || 0);
-          return `
-            <div class="mini-cart-item">
-              <img src="${safeImage}" alt="${safeName}" />
-              <div class="mini-cart-info" style="min-width:0;">
-                <span class="mini-cart-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${safeName}</span>
-                <span class="mini-cart-meta">${qty} x ${formatPHP(unit)}</span>
-              </div>
-              <div class="mini-cart-price">${formatPHP(line)}</div>
-            </div>
-          `;
-        }).join('');
-      }
-
-      async function refreshMiniCart(){
-        if (!(window.EACIS && window.EACIS.isAuthenticated && window.EACIS.userRole === 'customer')) return;
-        try {
-          const response = await fetch('/api/cart/summary', {
-            method: 'GET',
-            credentials: 'same-origin',
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-          });
-          if (!response.ok) return;
-          const data = await response.json();
-          renderMiniCart(data || {});
-        } catch (err) {
-          // Keep existing UI if request fails.
-        }
-      }
-
-      document.addEventListener('DOMContentLoaded', function(){
-        refreshMiniCart();
-
-        const cartToggle = document.querySelector('.cart-dropdown [data-dropdown-toggle]');
-        if (cartToggle) {
-          cartToggle.addEventListener('click', function(){
-            setTimeout(refreshMiniCart, 0);
-          });
-        }
-
-        window.EACIS = window.EACIS || {};
-        window.EACIS.refreshMiniCart = refreshMiniCart;
-      });
-    })();
-  </script>
+  {% if current_user.role == 'customer' %}
+  <!-- Cart Drawer -->
+  <aside class="drawer drawer--right" id="cart-drawer">
+    <div class="drawer-header">
+      <h3 class="type-h5 mb-0">Shopping Bag</h3>
+      <button class="btn btn--icon btn--ghost" id="close-cart" aria-label="Close">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="drawer-content" id="cart-drawer-items"></div>
+    <div class="drawer-footer">
+       <div style="display: flex; justify-content: space-between; margin-bottom: var(--sp-6);">
+         <span class="type-body-sm text-muted">Estimated Total</span>
+         <span class="type-h4" id="cart-drawer-subtotal">PHP 0.00</span>
+       </div>
+       <div style="display: flex; flex-direction: column; gap: var(--sp-3);">
+         <a href="/checkout" id="cart-drawer-checkout-btn" class="btn btn--primary btn--full shadow-primary py-4">Secure Checkout</a>
+         <a href="/cart" class="btn btn--white btn--full btn--sm text-center">Modify Bag</a>
+       </div>
+    </div>
+  </aside>
+  {% endif %}
+  {% endif %}
 
   <script src="/static/js/data/products.js"></script>
   <script src="/static/js/main.js"></script>
   <script src="/static/js/ui.js"></script>
   <script src="/static/js/security.js"></script>
   <script src="/static/js/ui/inputMask.js"></script>
+  <script src="/static/js/form-ux.js"></script>
+
+  <script>
+    (function(){
+      // Role-aware context
+      window.EACIS = {
+        isAuthenticated: document.body?.dataset?.isAuthenticated === 'true',
+        userRole: document.body?.dataset?.userRole || 'guest',
+        csrfToken: document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+      };
+
+      // --- QUICK WIN: GLASSMOPRHISM TOASTS ---
+      window.EACIS_toast = function(message, type = 'info') {
+        const stack = document.querySelector('.toast-stack');
+        if (!stack) return;
+        const toast = document.createElement('div');
+        toast.className = `glass-card toast toast--${type} reveal-y`;
+        toast.style.cssText = 'padding:14px 20px; border-left:4px solid var(--brand-primary); pointer-events:auto;';
+        if (type === 'success') toast.style.borderColor = 'var(--color-success)';
+        if (type === 'error' || type === 'danger') toast.style.borderColor = 'var(--color-danger)';
+        
+        toast.innerHTML = `<div class="type-body-sm fw-semibold">${message}</div>`;
+        stack.appendChild(toast);
+        setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 5000);
+      };
+
+      const drawers = {
+        notifications: {
+          trigger: document.getElementById('trigger-notifications-drawer'),
+          drawer: document.getElementById('notifications-drawer'),
+          close: document.getElementById('close-notifications')
+        },
+        cart: {
+          trigger: document.getElementById('trigger-cart-drawer'),
+          drawer: document.getElementById('cart-drawer'),
+          close: document.getElementById('close-cart')
+        }
+      };
+
+      const overlay = document.getElementById('drawer-overlay');
+
+      function openDrawer(id) {
+        if (!drawers[id]?.drawer) return;
+        drawers[id].drawer.classList.add('active');
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        
+        if (id === 'cart' && typeof window.EACIS_refreshMiniCart === 'function') {
+           window.EACIS_refreshMiniCart();
+        }
+      }
+
+      function closeAllDrawers() {
+        Object.values(drawers).forEach(d => d.drawer?.classList.remove('active'));
+        overlay?.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+
+      Object.keys(drawers).forEach(id => {
+        const d = drawers[id];
+        d.trigger?.addEventListener('click', (e) => {
+          e.preventDefault();
+          openDrawer(id);
+        });
+        d.close?.addEventListener('click', closeAllDrawers);
+      });
+
+      overlay?.addEventListener('click', closeAllDrawers);
+
+      // --- Global Cart Refresh Logic ---
+      function formatPHP(val) {
+        return 'PHP ' + Number(val).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      }
+
+      window.EACIS_renderMiniCart = function(data) {
+        const itemsWrap = document.getElementById('cart-drawer-items');
+        const subtotalWrap = document.getElementById('cart-drawer-subtotal');
+        const checkoutBtn = document.getElementById('cart-drawer-checkout-btn');
+        if (!itemsWrap || !subtotalWrap) return;
+
+        const items = data.items || [];
+        const subtotal = data.subtotal || 0;
+        const count = data.count || 0;
+
+        const badge = document.getElementById('cart-count-badge');
+        if (badge) {
+          badge.textContent = count;
+          badge.style.display = count > 0 ? 'flex' : 'none';
+        }
+
+        subtotalWrap.textContent = formatPHP(subtotal);
+
+        if (items.length === 0) {
+          itemsWrap.innerHTML = `
+            <div style="padding: 60px 0; text-align: center; color: var(--grey-400);">
+              <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24" style="margin-bottom: 16px; opacity: 0.3;"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+              <div class="type-body-sm">Your shopping bag is empty</div>
+              <a href="/shop" class="btn btn--ghost btn--sm mt-4">Browse Catalog</a>
+            </div>
+          `;
+          if (checkoutBtn) {
+            checkoutBtn.style.pointerEvents = 'none';
+            checkoutBtn.style.opacity = '0.5';
+            checkoutBtn.setAttribute('aria-disabled', 'true');
+          }
+          return;
+        }
+
+        if (checkoutBtn) {
+          checkoutBtn.style.pointerEvents = 'auto';
+          checkoutBtn.style.opacity = '1';
+          checkoutBtn.removeAttribute('aria-disabled');
+        }
+
+        itemsWrap.innerHTML = items.map(item => `
+          <div class="mini-cart-item" data-product-id="${item.product_id || ''}">
+            <img src="${item.image_url || '/static/assets/Featured.png'}" alt="${item.name}" />
+            <div class="mini-cart-info">
+              <div class="type-body-sm fw-bold mb-1" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px;">${item.name}</div>
+              <div class="type-label-xs text-muted">${item.qty} x ${formatPHP(item.unit_price)}</div>
+              <div class="type-body-sm fw-bold mt-2">${formatPHP(item.line_total)}</div>
+            </div>
+            <div class="mini-cart-actions" style="margin-left:8px;">
+              <button class="btn btn--ghost btn--sm mini-cart-remove" data-product-id="${item.product_id || ''}" aria-label="Remove item">Remove</button>
+            </div>
+          </div>
+        `).join('');
+
+        // Delegate remove click handler (idempotent if handler already attached)
+        if (!itemsWrap._removeHandlerAttached) {
+          itemsWrap.addEventListener('click', async (e) => {
+            const btn = e.target.closest('.mini-cart-remove');
+            if (!btn) return;
+            const pid = btn.dataset.productId;
+            if (!pid) return;
+            try {
+              btn.disabled = true;
+              const payload = new URLSearchParams();
+              payload.append('action', 'remove');
+              payload.append('product_id', pid);
+              // include CSRF token for server-side protection
+              if (window.EACIS && window.EACIS.csrfToken) payload.append('csrf_token', window.EACIS.csrfToken);
+
+              await fetch('/cart', {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                body: payload
+              });
+
+              // refresh mini cart view
+              if (typeof window.EACIS_refreshMiniCart === 'function') window.EACIS_refreshMiniCart();
+              if (typeof window.EACIS_toast === 'function') window.EACIS_toast('Item removed from bag.', 'success');
+            } catch (err) {
+              console.error('Mini-cart remove failed', err);
+              if (typeof window.EACIS_toast === 'function') window.EACIS_toast('Could not remove item.', 'error');
+              btn.disabled = false;
+            }
+          });
+          itemsWrap._removeHandlerAttached = true;
+        }
+      };
+
+      window.EACIS_refreshMiniCart = async function(){
+        if (!(window.EACIS.isAuthenticated && window.EACIS.userRole === 'customer')) return;
+        try {
+          const response = await fetch('/api/cart/summary', {
+            method: 'GET',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            window.EACIS_renderMiniCart(data);
+          }
+        } catch (err) {}
+      };
+
+      document.addEventListener('DOMContentLoaded', () => {
+        if (window.EACIS.isAuthenticated && window.EACIS.userRole === 'customer') {
+          window.EACIS_refreshMiniCart();
+        }
+
+        // Global logout confirmation modal
+        const logoutModal = document.getElementById('logout-modal');
+        const logoutConfirmBtn = document.getElementById('logout-confirm-btn');
+        const logoutCancelTargets = document.querySelectorAll('[data-logout-cancel]');
+        const logoutTriggers = document.querySelectorAll('a[href="/auth/logout"]:not(#logout-confirm-btn)');
+
+        if (logoutModal && logoutConfirmBtn && logoutTriggers.length) {
+          let pendingLogoutHref = '/auth/logout';
+
+          const openLogoutModal = () => {
+            logoutConfirmBtn.setAttribute('href', pendingLogoutHref);
+            logoutModal.classList.add('is-open');
+            logoutModal.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('modal-open');
+          };
+
+          const closeLogoutModal = () => {
+            logoutModal.classList.remove('is-open');
+            logoutModal.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('modal-open');
+          };
+
+          logoutTriggers.forEach((trigger) => {
+            trigger.addEventListener('click', (event) => {
+              event.preventDefault();
+              pendingLogoutHref = trigger.getAttribute('href') || '/auth/logout';
+              openLogoutModal();
+            });
+          });
+
+          logoutCancelTargets.forEach((el) => {
+            el.addEventListener('click', (event) => {
+              event.preventDefault();
+              closeLogoutModal();
+            });
+          });
+
+          document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && logoutModal.classList.contains('is-open')) {
+              closeLogoutModal();
+            }
+          });
+        }
+      });
+    })();
+  </script>
+
+  <!-- Cookie consent banner -->
+  <div id="cookie-consent" aria-hidden="true" style="display:none; position: fixed; bottom: 20px; left: 20px; right: 20px; z-index:2000;">
+    <div class="glass-card" style="display:flex; align-items:center; justify-content:space-between; padding: 12px 16px; gap:12px;">
+      <div class="type-body-sm text-muted" style="flex:1;">We use cookies to enhance your experience. By using E-ACIS you agree to our <a href="/cookies" class="text-primary fw-bold">Cookie Policy</a>.</div>
+      <div style="display:flex; gap:8px; margin-left: 12px;">
+        <a href="/cookies" class="btn btn--white btn--sm">Manage</a>
+        <button id="cookie-consent-accept" class="btn btn--primary btn--sm">Accept</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      try {
+        const key = 'eacis_cookie_consent';
+        function showBanner() {
+          const el = document.getElementById('cookie-consent');
+          if (!el) return;
+          el.style.display = 'block';
+          el.setAttribute('aria-hidden', 'false');
+        }
+        function hideBanner() {
+          const el = document.getElementById('cookie-consent');
+          if (!el) return;
+          el.style.display = 'none';
+          el.setAttribute('aria-hidden', 'true');
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+          if (localStorage.getItem(key)) return;
+          showBanner();
+          const acceptBtn = document.getElementById('cookie-consent-accept');
+          acceptBtn?.addEventListener('click', () => {
+            localStorage.setItem(key, '1');
+            hideBanner();
+          });
+        });
+      } catch (err) { console.warn('cookie-consent init failed', err); }
+    })();
+  </script>
+
+  <!-- Release notes modal (auto-shows once per release) -->
+  <!-- Global confirm & alert modal (replaces native confirm/alert dialogs) -->
+  <style>
+    /* Ensure modals float above app content and are centered */
+    .confirm-modal, .logout-modal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 9999; padding: 20px; }
+    .confirm-modal[aria-hidden="false"], .logout-modal[aria-hidden="false"] { display: flex; }
+    .confirm-modal__backdrop, .logout-modal__backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(2px); }
+    .confirm-modal__panel, .logout-modal__panel { position: relative; z-index: 10000; width: min(520px, 100%); max-width: 100%; box-shadow: 0 20px 50px rgba(0,0,0,0.35); }
+  </style>
+
+  <div id="confirm-modal" class="confirm-modal" aria-hidden="true" role="dialog" aria-modal="true" style="display:none;">
+    <div class="confirm-modal__backdrop" data-action="confirm-backdrop" aria-hidden="true"></div>
+    <div class="logout-modal__panel glass-card confirm-modal__panel" role="document" aria-labelledby="confirm-modal-title" aria-describedby="confirm-modal-message">
+      <h3 id="confirm-modal-title" class="type-h4 mb-2">Confirm</h3>
+      <p id="confirm-modal-message" class="type-body-sm text-muted">Are you sure?</p>
+      <div class="confirm-modal__actions" style="display:flex; gap:8px; justify-content:flex-end; margin-top:12px;">
+        <button id="confirm-modal-cancel" class="btn btn--white btn--sm">Cancel</button>
+        <button id="confirm-modal-ok" class="btn btn--primary btn--sm">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function(){
+    function $(id){ return document.getElementById(id); }
+    const modal = $('confirm-modal');
+    const msgEl = $('confirm-modal-message');
+    const okBtn = $('confirm-modal-ok');
+    const cancelBtn = $('confirm-modal-cancel');
+    const backdrop = modal && modal.querySelector('.confirm-modal__backdrop');
+    let resolver = null;
+    let lastActive = null;
+    let keyTrap = null;
+    const nativeAlert = window.alert;
+    const nativeConfirm = window.confirm;
+
+    function trapFocus(e) {
+      if (e.key !== 'Tab' || !modal || modal.getAttribute('aria-hidden') === 'true') return;
+      const focusable = Array.from(modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')).filter(el=>!el.disabled && el.offsetParent !== null);
+      if (!focusable.length) return;
+      const idx = focusable.indexOf(document.activeElement);
+      let next = 0;
+      if (e.shiftKey) next = (idx - 1 + focusable.length) % focusable.length; else next = (idx + 1) % focusable.length;
+      e.preventDefault();
+      focusable[next].focus();
+    }
+
+    function openModal(message, opts) {
+      if (!modal) return false;
+      try {
+        const type = (opts && opts.type) || 'confirm';
+        msgEl.textContent = message || '';
+        if (type === 'alert') {
+          cancelBtn.style.display = 'none';
+          okBtn.textContent = (opts && opts.okLabel) || 'OK';
+        } else {
+          cancelBtn.style.display = '';
+          okBtn.textContent = (opts && opts.okLabel) || 'Confirm';
+        }
+        modal.setAttribute('aria-hidden','false');
+        modal.style.display = 'flex';
+        lastActive = document.activeElement;
+        setTimeout(()=>{ try { okBtn.focus(); } catch(e){} }, 10);
+        keyTrap = trapFocus;
+        document.addEventListener('keydown', keyTrap);
+        return true;
+      } catch (err) { return false; }
+    }
+
+    function closeModal() {
+      if (!modal) return;
+      modal.style.display = 'none';
+      modal.setAttribute('aria-hidden','true');
+      if (keyTrap) { document.removeEventListener('keydown', keyTrap); keyTrap = null; }
+      if (lastActive && lastActive.focus) try { lastActive.focus(); } catch (e) {}
+    }
+
+    window.confirmModal = function(message, opts){
+      return new Promise(function(resolve){
+        try {
+          if (!modal) return resolve(nativeConfirm(message));
+          const opened = openModal(message, opts);
+          if (!opened) return resolve(nativeConfirm(message));
+          resolver = resolve;
+        } catch (err) { return resolve(nativeConfirm(message)); }
+      });
+    };
+
+    // alert modal wrapper and override
+    window.alertModal = function(message){ return window.confirmModal(message, {type:'alert'}); };
+    window.alert = function(message){ try { if (modal) { window.alertModal(message); } else nativeAlert(message); } catch (e) { nativeAlert(message); } };
+
+    function resolveAndClose(value) { if (resolver) resolver(value); resolver = null; closeModal(); }
+
+    if (okBtn) okBtn.addEventListener('click', function(){ resolveAndClose(true); });
+    if (cancelBtn) cancelBtn.addEventListener('click', function(){ resolveAndClose(false); });
+    if (backdrop) backdrop.addEventListener('click', function(){ resolveAndClose(false); });
+    document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && modal && modal.style.display === 'flex') { resolveAndClose(false); } });
+
+    // Auto-bind data-confirm on clickable elements and forms
+    document.addEventListener('click', function(e){
+      const el = e.target.closest && e.target.closest('[data-confirm]');
+      if (!el) return;
+      e.preventDefault();
+      const message = el.dataset.confirm || '';
+      confirmModal(message).then((ok)=>{
+        if (!ok) return;
+        if (el.tagName === 'A' && el.href) { window.location.href = el.href; return; }
+        if ((el.tagName === 'BUTTON' && (el.type === 'submit' || !el.type)) || (el.tagName === 'INPUT' && el.type === 'submit')) {
+          const form = el.closest('form') || document.getElementById(el.getAttribute('form'));
+          if (form) { delete form.dataset.confirm; form.submit(); return; }
+        }
+        const formParent = el.closest('form');
+        if (formParent && formParent.dataset.confirm) { delete formParent.dataset.confirm; formParent.submit(); return; }
+        el.removeAttribute('data-confirm'); el.click();
+      });
+    }, true);
+
+    document.addEventListener('submit', function(e){
+      const form = e.target;
+      if (!form || !form.dataset || !form.dataset.confirm) return;
+      e.preventDefault();
+      const message = form.dataset.confirm || '';
+      confirmModal(message).then((ok)=>{
+        if (!ok) return;
+        delete form.dataset.confirm;
+        form.submit();
+      });
+    }, true);
+
+    // expose native fallbacks
+    window._nativeAlert = nativeAlert;
+    window._nativeConfirm = nativeConfirm;
+  })();
+  </script>
+
+  <!-- Release notes modal (auto-shows once per release) -->
+  <div id="release-modal-06859d7" class="logout-modal" aria-hidden="true" role="dialog" style="display:none;">
+    <div class="logout-modal__backdrop" onclick="document.getElementById('release-modal-06859d7').style.display='none'"></div>
+    <div class="logout-modal__panel glass-card">
+      <h3 class="type-h4 mb-2">E-ACIS Update — Patch 06859d7</h3>
+      <p class="type-body-sm text-muted">Recent local updates include privacy &amp; compliance pages, UI improvements, pagination updates across seller and admin pages, and backend migrations.</p>
+      <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:12px;">
+        <a href="/whats-new" class="btn btn--secondary btn--sm">Read Details</a>
+        <button id="release-dismiss-btn" class="btn btn--primary btn--sm">Got it</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      try {
+        const releaseKey = 'eacis_seen_release_06859d7';
+        document.addEventListener('DOMContentLoaded', () => {
+          if (localStorage.getItem(releaseKey)) return;
+          // show modal
+          const modal = document.getElementById('release-modal-06859d7');
+          if (!modal) return;
+          modal.style.display = 'flex';
+          modal.setAttribute('aria-hidden', 'false');
+          const dismiss = document.getElementById('release-dismiss-btn');
+          dismiss?.addEventListener('click', () => {
+            try { localStorage.setItem(releaseKey, '1'); } catch (e) {}
+            modal.style.display = 'none';
+            modal.setAttribute('aria-hidden', 'true');
+          });
+        });
+      } catch (err) { console.warn('release modal init failed', err); }
+    })();
+  </script>
 </body>
 </html>

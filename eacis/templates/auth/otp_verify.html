@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Verify Code — E-ACIS{% endblock %}
+{% block content %}
+<div class="page-center" style="padding: var(--sp-12) var(--sp-6);">
+  <div class="glass-card glass-card--interactive" style="max-width: 520px; width: 100%; padding: var(--sp-12) var(--sp-10);">
+    <div class="text-center" style="margin-bottom: var(--sp-8);">
+      <div class="badge badge--primary mb-4">One-Time Verification</div>
+      <h1 class="type-display-md" style="color: var(--grey-900);">Enter the code</h1>
+      <p class="type-body-md text-muted" style="margin-top: var(--sp-3);">{% if message %}{{ message }}{% else %}We sent a verification code to <strong>{{ email }}</strong>.{% endif %}</p>
+    </div>
+
+      {% if debug_code %}
+      <div class="alert alert--info" style="margin-bottom: 1rem;">
+        <strong>Development preview code:</strong> {{ debug_code }}
+      </div>
+      {% endif %}
+
+    {% if error %}
+    <div class="form-error" role="alert" style="margin-bottom: var(--sp-5);">{{ error }}</div>
+    {% endif %}
+
+    <form method="post" action="{{ url_for('auth_otp_verify') }}" class="form-stack" data-enhance="submit-loading" id="otp-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-group">
+        <label class="form-label" for="otp_code">Verification Code</label>
+        <input id="otp_code" name="otp_code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" class="form-input" placeholder="123456" required style="font-size: 1.4rem; letter-spacing: 0.25em; text-align: center; font-weight: 800;" />
+        <div class="form-helper mt-2">Check your inbox and spam folder. The code expires quickly.</div>
+      </div>
+
+      <div class="form-group" style="display:flex; gap: var(--sp-3); flex-wrap: wrap;">
+        <label style="display:flex; align-items:center; gap:8px;">
+          <input type="checkbox" name="remember_device" value="1"> <span class="type-body-sm">Remember this device for 30 days</span>
+        </label>
+        <button type="submit" class="btn btn--primary btn--full">Verify & Continue</button>
+      </div>
+    </form>
+
+    <form method="post" action="{{ url_for('auth_otp_resend') }}" style="margin-top: var(--sp-4);">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="btn btn--white btn--full">Resend Code</button>
+    </form>
+
+    <div class="text-center mt-8">
+      <a href="{{ url_for('auth_login') }}" class="type-body-sm">Back to sign in</a>
+    </div>
+  </div>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('otp_code');
+    if (input) input.focus();
+  });
+</script>
+{% endblock %}

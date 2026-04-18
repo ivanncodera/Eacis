@@ -13,9 +13,10 @@
 
   <div class="glass-card p-6">
     <h2 class="type-h4" style="margin:0 0 var(--sp-4) 0;">Payment Timeline</h2>
+    <p class="type-body-xs text-muted" style="margin: 0 0 var(--sp-4) 0;">Use this panel to post confirmed installment receipts. Overdue values are synchronized each page load.</p>
     <div class="table-wrapper">
       <table class="data-table">
-        <thead><tr><th>Order</th><th>Due Date</th><th style="text-align:right;">Amount</th><th>Status</th></tr></thead>
+        <thead><tr><th>Order</th><th>Due Date</th><th style="text-align:right;">Amount</th><th>Status</th><th>Action</th></tr></thead>
         <tbody>
           {% for row in timeline %}
           <tr>
@@ -31,9 +32,20 @@
               <span class="badge badge--success">Settled</span>
               {% endif %}
             </td>
+            <td>
+              {% if row.schedule.status != 'paid' %}
+              <form method="POST" action="{{ url_for('seller_installment_mark_paid', schedule_id=row.schedule.id) }}" style="display:flex; gap:8px; align-items:center;" data-confirm="Record this installment as paid?">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="text" name="payment_ref" placeholder="Receipt Ref" class="input" style="max-width: 130px; height: 34px;" aria-label="Payment reference for {{ row.order.order_ref if row.order else 'schedule' }}">
+                <button type="submit" class="btn btn--primary btn--sm">Mark Paid</button>
+              </form>
+              {% else %}
+              <div class="type-body-xs text-muted">{{ row.schedule.payment_ref or 'Recorded' }}</div>
+              {% endif %}
+            </td>
           </tr>
           {% else %}
-          <tr><td colspan="4" style="text-align:center;">No installment schedule data yet.</td></tr>
+          <tr><td colspan="5" style="text-align:center;">No installment schedule data yet.</td></tr>
           {% endfor %}
         </tbody>
       </table>

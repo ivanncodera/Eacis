@@ -1,0 +1,379 @@
+{% extends 'base.html' %}
+{% block title %}Support Center - E-ACIS{% endblock %}
+{% block content %}
+<div class="page-content page-enter stagger-children" style="padding: var(--sp-12) 0;">
+  <div class="container">
+    <!-- Hero Section -->
+    <header style="text-align: center; margin-bottom: var(--sp-20);">
+      <div class="chip chip--active mb-4">Customer Care</div>
+      <h1 class="type-display-md mb-4">How can we assist you today?</h1>
+      <p class="type-body-lg text-muted" style="max-width: 600px; margin: 0 auto;">Search our help center or select a category below to get the support you need.</p>
+      
+      <div class="mt-10" style="max-width: 540px; margin-left: auto; margin-right: auto; position: relative;">
+        <input type="text" class="form-input" placeholder="Describe your issue..." style="height: 56px; border-radius: var(--radius-pill); padding-left: 56px;">
+        <div style="position: absolute; left: 20px; top: 16px; color: var(--grey-400);">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </div>
+      </div>
+    </header>
+
+    <!-- Support Categories -->
+    <div class="grid-3 mb-20">
+      <div class="glass-card glass-card--interactive p-10 stagger-item">
+        <div class="mb-6" style="width: 56px; height: 56px; background: linear-gradient(135deg, var(--brand-primary), #6366f1); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+        </div>
+        <h3 class="type-h4 mb-3">Order & Shipping</h3>
+        <p class="type-body-sm text-muted mb-8">Track your delivery, update logistical details, or resolve fulfillment issues.</p>
+        <a href="/customer/orders" class="btn btn--white btn--full" style="border: 1.5px solid var(--border-medium);">Manage Shipments</a>
+      </div>
+
+      <div class="glass-card glass-card--interactive p-10 stagger-item" style="border-top: 3px solid var(--brand-primary);">
+        <div class="mb-6" style="width: 56px; height: 56px; background: var(--brand-primary-subtle); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: var(--brand-primary);">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+        </div>
+        <h3 class="type-h4 mb-3">Product Support</h3>
+        <p class="type-body-sm text-muted mb-8">Connect with vendors regarding product specs, setup assistance, or warranty claims.</p>
+        <a href="/customer/inquiries" class="btn btn--primary btn--full shadow-primary">Launch Inquiry Hub</a>
+      </div>
+
+      <div class="glass-card glass-card--interactive p-10 stagger-item">
+        <div class="mb-6" style="width: 56px; height: 56px; background: var(--color-danger-subtle); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: var(--color-danger);">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 15L12 19M12 19L8 15M12 19V9M5 13V5a2 2 0 012-2h10a2 2 0 012 2v8"></path></svg>
+        </div>
+        <h3 class="type-h4 mb-3">Returns & Refunds</h3>
+        <p class="type-body-sm text-muted mb-8">Initiate a return under our protection policy or check existing refund statuses.</p>
+        <a href="/customer/returns" class="btn btn--white btn--full" style="border: 1.5px solid var(--border-medium);">Resolution Portal</a>
+      </div>
+    </div>
+
+    <!-- Recent Activity Pulse (Dynamic) -->
+    {% if recent_tickets or recent_returns %}
+    <div class="mb-20">
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px;">
+        <div>
+          <h2 class="type-h4 mb-1">Your Active Cases</h2>
+          <p class="type-body-xs text-muted">A live pulse of your open inquiries and resolution claims.</p>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <a href="/customer/inquiries" class="badge badge--outline pointer">View All Inquiries</a>
+          <a href="/customer/returns" class="badge badge--outline pointer">View All Returns</a>
+        </div>
+      </div>
+      
+      <div class="grid-2 gap-6">
+        {% for ticket in recent_tickets %}
+        <div class="glass-card p-6 stagger-item" style="border-left: 4px solid var(--brand-primary);">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+            <span class="type-label-xs fw-bold text-primary">{{ ticket.ticket_ref }}</span>
+            <span class="badge badge--info">{{ ticket.status|replace('_', ' ')|title }}</span>
+          </div>
+          <h4 class="type-body-sm fw-bold mb-2">{{ ticket.subject }}</h4>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span class="type-label-xs text-muted">Updated {{ ticket.updated_at.strftime('%b %d') }}</span>
+            <a href="{{ url_for('customer_inquiry_detail', ticket_ref=ticket.ticket_ref) }}" class="type-label-xs fw-bold" style="text-decoration: none;">Track Case →</a>
+          </div>
+        </div>
+        {% endfor %}
+
+        {% for ret in recent_returns %}
+        <div class="glass-card p-6 stagger-item" style="border-left: 4px solid var(--color-danger);">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+             <span class="type-label-xs fw-bold text-danger">{{ ret.rrt_ref }}</span>
+             <span class="badge badge--warning">{{ ret.status|replace('_', ' ')|title }}</span>
+          </div>
+          <h4 class="type-body-sm fw-bold mb-2">Order Protection Claim</h4>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+             <span class="type-label-xs text-muted">Claimed {{ ret.created_at.strftime('%b %d') }}</span>
+             <a href="/customer/returns" class="type-label-xs fw-bold" style="text-decoration: none;">Track Claim →</a>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- FAQ Preview -->
+    <div class="glass-card p-12 mb-20">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--sp-10);">
+        <h2 class="type-h3">Frequently Asked Questions</h2>
+        <button type="button" id="open-articles-modal" class="type-body-sm fw-bold browse-articles-trigger">Browse All Articles →</button>
+      </div>
+
+      <div class="form-stack faq-container">
+        <details class="faq-item" data-search="return policy refund 7 days package tag">
+          <summary class="faq-summary">What is the E-ACIS return policy?</summary>
+          <div class="faq-content">
+            Our standard return policy allows for returns within 7 days of delivery for eligible items. Items must be in original condition with all packaging and tags intact.
+          </div>
+        </details>
+        
+        <details class="faq-item" data-search="installment payment plan 3 6 12 months checkout">
+          <summary class="faq-summary">How do installment payments work?</summary>
+          <div class="faq-content">
+             E-ACIS offers flexible installment plans for eligible customers. You can pay over 3, 6, or 12 months depending on the seller's configuration. Due dates and plan status are tracked in your Installment Center, and posted payments appear once your seller confirms settlement.
+          </div>
+        </details>
+
+        <details class="faq-item" data-search="loyalty points earn 100 spent discount checkout">
+          <summary class="faq-summary">How do I earn loyalty points?</summary>
+          <div class="faq-content">
+             You earn 1 point for every PHP 100 spent on completed orders. Points can be used to get discounts on your future purchases during checkout.
+          </div>
+        </details>
+
+        <div id="no-faq-results" style="display: none; padding: 40px; text-align: center; border: 1.5px dashed var(--border-medium); border-radius: var(--radius-lg); opacity: 0.7;">
+          <p class="type-body-sm text-muted mb-0">No help articles found matching your query. Try a broader term or contact us.</p>
+        </div>
+      </div>
+
+      <div class="article-preview-strip" aria-label="Popular article topics">
+        <button type="button" class="article-preview-pill" data-open-articles-modal>Order Tracking</button>
+        <button type="button" class="article-preview-pill" data-open-articles-modal>Returns & Refunds</button>
+        <button type="button" class="article-preview-pill" data-open-articles-modal>Installments</button>
+      </div>
+    </div>
+
+    <!-- Contact Support -->
+    <div style="text-align: center;">
+      <p class="type-body-sm text-muted mb-6">Didn't find what you were looking for?</p>
+      <div style="display: flex; gap: var(--sp-4); justify-content: center;">
+        <a href="mailto:support@e-acis.ph" class="btn btn--white rounded-pill px-8" style="border: 1.5px solid var(--border-medium);">
+          Email Specialist
+        </a>
+        <a href="/customer/inquiries" class="btn btn--primary shadow-primary rounded-pill px-8">
+          Launch Support Hub
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="support-articles-modal" class="support-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="support-articles-modal-title">
+  <div class="support-modal__backdrop" data-close-articles-modal></div>
+  <div class="support-modal__panel">
+    <div class="support-modal__header">
+      <div>
+        <h2 id="support-articles-modal-title" class="type-h3 mb-1">Support Articles</h2>
+        <p class="type-body-xs text-muted mb-0">Guides based on your actual E-ACIS customer workflows.</p>
+      </div>
+      <button type="button" class="support-modal__close" aria-label="Close support articles" data-close-articles-modal>×</button>
+    </div>
+
+    <div class="support-modal__helper-row">
+      <span class="type-label-xs text-muted">Popular topics:</span>
+      <span class="chip chip--active">Orders</span>
+      <span class="chip" style="background: var(--color-danger-subtle); color: var(--color-danger);">Returns</span>
+      <span class="chip" style="background: var(--brand-primary-subtle); color: var(--brand-primary);">Inquiries</span>
+      <span class="chip" style="background: var(--grey-100); color: var(--grey-700);">Installments</span>
+    </div>
+
+    <div class="grid-2 gap-6 support-modal__content">
+      <article class="article-card" data-search="order tracking shipping status pending packed shipped delivered customer orders">
+        <div class="article-meta">
+          <span class="chip chip--active">Orders</span>
+          <span class="type-label-xs text-muted">3 min read</span>
+        </div>
+        <h3 class="type-h5 mb-2">Track order status from Pending to Delivered</h3>
+        <p class="type-body-sm text-muted mb-4">Use Customer Orders to monitor lifecycle updates and detect delays before delivery windows are missed.</p>
+        <ul class="type-body-xs text-muted" style="margin:0 0 var(--sp-4) 0; padding-left:18px;">
+          <li><strong>Track stages:</strong> Pending → Packed → Shipped → Out for Delivery → Delivered.</li>
+          <li><strong>When things slow down:</strong> check the courier update first, then contact the seller or open a support inquiry if no progress in 48–72 hours.</li>
+          <li><strong>Pro tip:</strong> save your order reference and delivery window for faster dispute resolution.</li>
+        </ul>
+        <a href="/customer/orders" class="type-label-xs fw-bold" style="text-decoration: none;">Open Order Tracker →</a>
+      </article>
+
+      <article class="article-card" data-search="return refund request rrt reference status accepted refunded protection policy customer returns">
+        <div class="article-meta">
+          <span class="chip" style="background: var(--color-danger-subtle); color: var(--color-danger);">Returns</span>
+          <span class="type-label-xs text-muted">4 min read</span>
+        </div>
+        <h3 class="type-h5 mb-2">Submit returns and monitor refund progression</h3>
+        <p class="type-body-sm text-muted mb-4">Create protection claims, keep your return reference, and follow status changes until final refund completion.</p>
+        <ul class="type-body-xs text-muted" style="margin:0 0 var(--sp-4) 0; padding-left:18px;">
+          <li><strong>Start a claim:</strong> provide order ref, photos of item and packaging, and a short description of the issue.</li>
+          <li><strong>Keep your RRT:</strong> the return reference (RRT) is required for tracking and refund verification.</li>
+          <li><strong>Refund timing:</strong> once approved, refunds may take 3–7 business days depending on payment method.</li>
+        </ul>
+        <a href="/customer/returns" class="type-label-xs fw-bold" style="text-decoration: none;">Go To Returns Portal →</a>
+      </article>
+
+      <article class="article-card" data-search="inquiry ticket support seller conversation issue escalation customer inquiries ticket ref">
+        <div class="article-meta">
+          <span class="chip" style="background: var(--brand-primary-subtle); color: var(--brand-primary);">Inquiry Hub</span>
+          <span class="type-label-xs text-muted">3 min read</span>
+        </div>
+        <h3 class="type-h5 mb-2">Open and manage inquiry tickets effectively</h3>
+        <p class="type-body-sm text-muted mb-4">Create targeted tickets, include complete issue details, and track responses from assigned sellers faster.</p>
+        <ul class="type-body-xs text-muted" style="margin:0 0 var(--sp-4) 0; padding-left:18px;">
+          <li><strong>Provide context:</strong> include order ref, product SKU, screenshots, and the steps you took so we can help faster.</li>
+          <li><strong>Set priority:</strong> flag delivery or safety issues so they are routed to the right team.</li>
+          <li><strong>Track replies:</strong> use the inquiry thread to share additional files and confirm resolution before closing the ticket.</li>
+        </ul>
+        <a href="/customer/inquiries" class="type-label-xs fw-bold" style="text-decoration: none;">Launch Inquiry Hub →</a>
+      </article>
+
+      <article class="article-card" data-search="installment kyc payment due date monthly plan 3 months 6 months 12 months loyalty points">
+        <div class="article-meta">
+          <span class="chip" style="background: var(--grey-100); color: var(--grey-700);">Payments</span>
+          <span class="type-label-xs text-muted">5 min read</span>
+        </div>
+        <h3 class="type-h5 mb-2">Understand installment plans and account readiness</h3>
+        <p class="type-body-sm text-muted mb-4">Review installment cycle expectations, due-date behavior, and profile requirements before checkout.</p>
+        <ul class="type-body-xs text-muted" style="margin:0 0 var(--sp-4) 0; padding-left:18px;">
+          <li><strong>Check eligibility:</strong> ensure your profile is up to date and KYC documents (if required) are submitted.</li>
+          <li><strong>Plan details:</strong> understand term length, monthly due dates, and any applicable fees for late payments.</li>
+          <li><strong>Auto-pay & reminders:</strong> enable payment reminders or auto-pay to avoid missed due dates and penalties.</li>
+        </ul>
+        <a href="/customer/installments" class="type-label-xs fw-bold" style="text-decoration: none;">Review Installments →</a>
+      </article>
+    </div>
+
+    <div id="no-article-results" class="support-modal__empty" style="display: none;">
+      <p class="type-body-sm text-muted mb-0">No articles match your current search. Try keywords like order, return, inquiry, or installment.</p>
+    </div>
+  </div>
+</div>
+
+<style>
+.faq-item { border-bottom: 1px solid var(--border-subtle); }
+.faq-summary { padding: var(--sp-6) 0; cursor: pointer; font-weight: var(--weight-bold); color: var(--grey-800); list-style: none; display: flex; justify-content: space-between; align-items: center; }
+.faq-summary::after { content: '+'; font-family: var(--font-mono); font-size: 20px; color: var(--brand-primary); }
+.faq-item[open] .faq-summary::after { content: '−'; }
+.faq-content { padding-bottom: var(--sp-6); color: var(--grey-600); line-height: var(--leading-relaxed); animation: slide-down-fade 0.3s var(--ease-out); }
+.badge--outline { border: 1.5px solid var(--border-medium); background: transparent; color: var(--grey-600); transition: all 0.2s ease; }
+.badge--outline:hover { background: var(--grey-50); border-color: var(--brand-primary); color: var(--brand-primary); }
+.browse-articles-trigger { color: var(--brand-primary); background: transparent; border: 0; padding: 0; cursor: pointer; position: relative; }
+.browse-articles-trigger::after { content: ''; position: absolute; left: 0; bottom: -3px; width: 100%; height: 1.5px; background: var(--brand-primary); transform: scaleX(0); transform-origin: left center; transition: transform 0.2s ease; }
+.browse-articles-trigger:hover::after,
+.browse-articles-trigger:focus-visible::after { transform: scaleX(1); }
+.browse-articles-trigger:focus-visible { outline: 2px solid var(--brand-primary); outline-offset: 4px; border-radius: 4px; }
+.article-card { border: 1.5px solid var(--border-subtle); border-radius: var(--radius-lg); padding: var(--sp-6); background: var(--surface-1); transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease; }
+.article-card:hover { border-color: var(--brand-primary); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.article-meta { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); margin-bottom: var(--sp-3); }
+.article-preview-strip { display: flex; gap: 10px; flex-wrap: wrap; margin-top: var(--sp-8); padding-top: var(--sp-5); border-top: 1px solid var(--border-subtle); }
+.article-preview-pill { border: 1px solid var(--border-medium); background: var(--surface-1); color: var(--grey-700); border-radius: 999px; padding: 8px 12px; font-size: 12px; font-weight: var(--weight-semibold); cursor: pointer; }
+.article-preview-pill:hover { border-color: var(--brand-primary); color: var(--brand-primary); background: var(--brand-primary-subtle); }
+.support-modal { position: fixed; inset: 0; z-index: 1500; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.2s ease, visibility 0.2s ease; }
+.support-modal.is-open { opacity: 1; visibility: visible; pointer-events: auto; }
+.support-modal__backdrop { position: absolute; inset: 0; background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(3px) saturate(95%); }
+.support-modal__panel { position: relative; max-width: 980px; width: calc(100% - 32px); max-height: calc(100vh - 48px); margin: 24px auto; background: #ffffff; border-radius: var(--radius-xl); border: 1px solid rgba(30, 41, 59, 0.24); box-shadow: 0 34px 90px rgba(2, 6, 23, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.85) inset; overflow: auto; transform: translateY(14px) scale(0.985); transition: transform 0.22s ease; }
+.support-modal__panel::before { content: ''; position: absolute; inset: 0; border-radius: inherit; border: 1px solid rgba(255, 255, 255, 0.8); pointer-events: none; }
+.support-modal.is-open .support-modal__panel { transform: translateY(0) scale(1); }
+.support-modal__header { position: sticky; top: 0; z-index: 2; display: flex; align-items: flex-start; justify-content: space-between; gap: var(--sp-4); padding: var(--sp-8); border-bottom: 1px solid var(--border-subtle); background: var(--surface-1); }
+.support-modal__close { border: 1px solid var(--border-medium); background: var(--surface-1); width: 36px; height: 36px; border-radius: 999px; font-size: 22px; line-height: 1; cursor: pointer; color: var(--grey-700); }
+.support-modal__close:hover { border-color: var(--brand-primary); color: var(--brand-primary); }
+.support-modal__close:focus-visible { outline: 2px solid var(--brand-primary); outline-offset: 3px; }
+.support-modal__helper-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: var(--sp-5) var(--sp-8) 0; }
+.support-modal__content { padding: var(--sp-8); }
+.support-modal .article-card { background: #ffffff; border-color: rgba(148, 163, 184, 0.5); box-shadow: 0 10px 26px rgba(15, 23, 42, 0.12); }
+.support-modal .article-card:hover { box-shadow: 0 14px 30px rgba(15, 23, 42, 0.16); }
+.support-modal__empty { margin: 0 var(--sp-8) var(--sp-8); padding: 24px; text-align: center; border: 1.5px dashed var(--border-medium); border-radius: var(--radius-lg); opacity: 0.85; }
+body.modal-open { overflow: hidden; }
+
+@media (max-width: 768px) {
+  .support-modal__panel { width: calc(100% - 16px); max-height: calc(100vh - 16px); margin: 8px auto; border-radius: var(--radius-lg); }
+  .support-modal__header { padding: var(--sp-6); }
+  .support-modal__helper-row { padding: var(--sp-4) var(--sp-6) 0; }
+  .support-modal__content { padding: var(--sp-6); }
+  .support-modal__content.grid-2 { grid-template-columns: 1fr; }
+}
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.querySelector('input[placeholder="Describe your issue..."]');
+    const openArticlesModalBtn = document.getElementById('open-articles-modal');
+    const inlineOpenArticleButtons = document.querySelectorAll('[data-open-articles-modal]');
+    const articlesModal = document.getElementById('support-articles-modal');
+    const closeArticlesModalTargets = document.querySelectorAll('[data-close-articles-modal]');
+    const closeArticlesModalButton = document.querySelector('.support-modal__close');
+    const faqItems = document.querySelectorAll('.faq-item');
+    const articleItems = document.querySelectorAll('.article-card');
+    const noResults = document.getElementById('no-faq-results');
+    const noArticleResults = document.getElementById('no-article-results');
+    let lastFocusedElement = null;
+
+    const openArticlesModal = () => {
+      if (!articlesModal) {
+        return;
+      }
+      lastFocusedElement = document.activeElement;
+      articlesModal.classList.add('is-open');
+      articlesModal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('modal-open');
+      if (closeArticlesModalButton) {
+        closeArticlesModalButton.focus();
+      }
+    };
+
+    const closeArticlesModal = () => {
+      if (!articlesModal) {
+        return;
+      }
+      articlesModal.classList.remove('is-open');
+      articlesModal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('modal-open');
+      if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
+        lastFocusedElement.focus();
+      }
+    };
+
+    if (openArticlesModalBtn) {
+      openArticlesModalBtn.addEventListener('click', openArticlesModal);
+    }
+
+    inlineOpenArticleButtons.forEach((el) => {
+      el.addEventListener('click', openArticlesModal);
+    });
+
+    closeArticlesModalTargets.forEach((el) => {
+      el.addEventListener('click', closeArticlesModal);
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && articlesModal && articlesModal.classList.contains('is-open')) {
+        closeArticlesModal();
+      }
+    });
+
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        let foundFaq = 0;
+        let foundArticle = 0;
+
+        faqItems.forEach(item => {
+          const searchData = item.getAttribute('data-search') + " " + item.querySelector('.faq-summary').textContent.toLowerCase();
+          if (query === '' || searchData.includes(query)) {
+            item.style.display = 'block';
+            foundFaq++;
+          } else {
+            item.style.display = 'none';
+          }
+        });
+
+        articleItems.forEach(item => {
+          const heading = item.querySelector('h3') ? item.querySelector('h3').textContent.toLowerCase() : '';
+          const searchData = (item.getAttribute('data-search') || '') + " " + heading;
+          if (query === '' || searchData.includes(query)) {
+            item.style.display = 'block';
+            foundArticle++;
+          } else {
+            item.style.display = 'none';
+          }
+        });
+
+        if (noResults) {
+          noResults.style.display = (foundFaq === 0 && query !== '') ? 'block' : 'none';
+        }
+
+        if (noArticleResults) {
+          noArticleResults.style.display = (foundArticle === 0 && query !== '') ? 'block' : 'none';
+        }
+      });
+    }
+  });
+</script>
+{% endblock %}

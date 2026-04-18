@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}{% if ref %}Edit Product — Seller Portal{% else %}Add Product — Seller Portal{% endif %}{% endblock %}
 {% block content %}
-{% set form = form or product or {} %}
+{% set f = form or {} %}
 {% set errors = errors or {} %}
 <div class="stagger-children">
    <div class="page-content bg-grey-50 seller-shell">
@@ -24,7 +24,7 @@
    <p class="form-error" role="alert">{{ errors.get('general') }}</p>
    {% endif %}
 
-      <form id="product-form" method="post" action="{% if ref %}/seller/products/{{ ref }}/edit{% else %}/seller/products/new{% endif %}" data-enhance="submit-loading">
+      <form id="product-form" method="post" action="{% if ref %}/seller/products/{{ ref }}/edit{% else %}/seller/products/new{% endif %}" data-enhance="submit-loading warn-on-exit image-preview">
        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
        <div class="product-form-layout">
         <div class="form-stack">
@@ -45,25 +45,26 @@
               </div>
                <div class="form-group mb-4">
                   <label class="form-label">Product Name <abbr class="required" title="required">*</abbr></label>
-                 <input id="prd-name" name="name" type="text" class="form-input" placeholder="e.g. Smart 2-Door Refrigerator" required value="{{ form.get('name', '') }}">
+                 <input id="prd-name" name="name" type="text" class="form-input" placeholder="e.g. Smart 2-Door Refrigerator" required value="{{ f.get('name', product.name if product else '') }}">
                  {% if errors.get('name') %}
                  <small class="form-error" role="alert">{{ errors.get('name') }}</small>
                  {% endif %}
               </div>
                <div class="form-group mb-4">
                   <label class="form-label">Detailed Description <abbr class="required" title="required">*</abbr></label>
-                 <textarea class="form-textarea" name="description" placeholder="Detailed product description..." style="min-height:160px;" required>{{ form.get('description', '') }}</textarea>
+                 <textarea class="form-textarea" name="description" placeholder="Detailed product description..." style="min-height:160px;" required>{{ f.get('description', product.description if product else '') }}</textarea>
                  <div class="form-helper">Highlight key features, warranty, and installation details.</div>
               </div>
               <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-4);">
                   <div class="form-group">
                      <label class="form-label">Category <abbr class="required" title="required">*</abbr></label>
+                    {% set sel_cat = f.get('category', product.category if product else '') %}
                     <select id="prd-category" name="category" class="form-select" required>
-                       <option value="" {% if not form.get('category') %}selected{% endif %}>Select...</option>
-                       <option value="Kitchen & Cooking" {% if form.get('category') == 'Kitchen & Cooking' %}selected{% endif %}>Kitchen & Cooking</option>
-                       <option value="Cooling & Air Quality" {% if form.get('category') == 'Cooling & Air Quality' %}selected{% endif %}>Cooling & Air Quality</option>
-                       <option value="Laundry & Cleaning" {% if form.get('category') == 'Laundry & Cleaning' %}selected{% endif %}>Laundry & Cleaning</option>
-                       <option value="Home Entertainment" {% if form.get('category') == 'Home Entertainment' %}selected{% endif %}>Home Entertainment</option>
+                       <option value="" {% if not sel_cat %}selected{% endif %}>Select...</option>
+                       <option value="Kitchen & Cooking" {% if sel_cat == 'Kitchen & Cooking' %}selected{% endif %}>Kitchen & Cooking</option>
+                       <option value="Cooling & Air Quality" {% if sel_cat == 'Cooling & Air Quality' %}selected{% endif %}>Cooling & Air Quality</option>
+                       <option value="Laundry & Cleaning" {% if sel_cat == 'Laundry & Cleaning' %}selected{% endif %}>Laundry & Cleaning</option>
+                       <option value="Home Entertainment" {% if sel_cat == 'Home Entertainment' %}selected{% endif %}>Home Entertainment</option>
                     </select>
                     {% if errors.get('category') %}
                     <small class="form-error" role="alert">{{ errors.get('category') }}</small>
@@ -76,10 +77,42 @@
               </div>
            </div>
 
-           <div class="glass-card p-6 product-form-hero reveal" data-delay="120">
-              <h3 class="type-h4 mb-4">Product Images</h3>
-              <div class="type-body-sm text-muted">Image upload can be added later. For now, product information and inventory are fully functional.</div>
-           </div>
+                <div class="glass-card p-6 product-form-hero reveal" data-delay="120">
+                     <h3 class="type-h4 mb-4">Product Images</h3>
+                     <div class="type-body-sm text-muted">Upload up to 3 images. Save the product first if creating a new listing.</div>
+                     {% if ref %}
+                     <div class="type-body-sm text-muted mt-3" style="display:flex; gap:var(--sp-3);">
+                        {% set imgs = images if images is defined else [] %}
+                        {% for img in imgs %}
+                           <div style="width:120px;">
+                              <div style="aspect-ratio: 4 / 3; overflow:hidden; border-radius:6px; border:1px solid var(--border-subtle);">
+                                 <img src="{{ url_for('uploads_products_view', filename=product.product_ref ~ '/' ~ img.filename) }}" alt="Image {{ loop.index }}" style="width:100%; height:100%; object-fit:cover;">
+                              </div>
+                              <form method="post" action="/seller/products/{{ ref }}/images/{{ img.id }}/delete" style="margin-top:6px;" data-confirm="Delete this image?" data-enhance="submit-loading">
+                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                 <button class="btn btn--danger btn--xs btn--full" type="submit">Delete</button>
+                              </form>
+                           </div>
+                        {% endfor %}
+
+                        {% for i in range(3 - (imgs|length)) %}
+                           <div style="width:120px;">
+                                              <form method="post" action="/seller/products/{{ ref }}/images/upload" enctype="multipart/form-data" data-enhance="submit-loading image-preview">
+                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                 <div style="aspect-ratio:4/3; border-radius:6px; border:1px dashed var(--border-subtle); display:flex; align-items:center; justify-content:center;">
+                                    <input type="file" name="image" accept="image/*" required style="width:100%; height:100%; opacity:0; position:relative; z-index:2;">
+                                    <div style="position:absolute; pointer-events:none; text-align:center; color:var(--grey-400);">Choose file</div>
+                                 </div>
+                                                 <div class="upload-hint">Allowed: PNG, JPG, WEBP. Max per product: 3 images.</div>
+                                                 <button class="btn btn--primary btn--xs mt-2 btn--full" type="submit">Upload</button>
+                              </form>
+                           </div>
+                        {% endfor %}
+                     </div>
+                     {% else %}
+                        <div class="type-body-sm text-muted mt-2">Save the product, then open this page again to upload images.</div>
+                     {% endif %}
+                </div>
         </div>
 
         <div class="product-form-side">
@@ -89,7 +122,7 @@
                   <label class="form-label">Base Retail Price <abbr class="required" title="required">*</abbr></label>
                  <div class="form-input-group">
                     <span class="form-input-group__icon">₱</span>
-                    <input id="prd-price" name="price" type="number" class="form-input" placeholder="0.00" min="0" step="0.01" required value="{{ form.get('price', '') }}">
+                    <input id="prd-price" name="price" type="number" class="form-input" placeholder="0.00" min="0" step="0.01" required value="{{ f.get('price', product.price if product else '') }}">
                  </div>
                  {% if errors.get('price') %}
                  <small class="form-error" role="alert">{{ errors.get('price') }}</small>
@@ -105,15 +138,15 @@
               <hr class="mt-4 mb-4" />
               <div class="form-group">
                  <label class="seller-checkline">
-                    <input type="checkbox" name="installment_enabled" {% if form.get('installment_enabled') %}checked{% endif %}>
+                    <input type="checkbox" name="installment_enabled" {% if f.get('installment_enabled', product.installment_enabled if product else False) %}checked{% endif %}>
                     <span class="fw-semibold">Eligible for 0% Installment</span>
                  </label>
               </div>
               <div class="form-group mt-4">
                  <label class="form-label">Listing Status</label>
                  <select class="form-select" name="is_active">
-                    <option value="1" {% if form.get('is_active', True) %}selected{% endif %}>Active</option>
-                    <option value="0" {% if not form.get('is_active', True) %}selected{% endif %}>Inactive</option>
+                    <option value="1" {% if f.get('is_active', product.is_active if product is not none else True) %}selected{% endif %}>Active</option>
+                    <option value="0" {% if not f.get('is_active', product.is_active if product is not none else True) %}selected{% endif %}>Inactive</option>
                  </select>
               </div>
            </div>
@@ -123,18 +156,18 @@
                <div class="form-group mb-4">
                   <label class="form-label">SKU / Warehouse Reference <abbr class="required" title="required">*</abbr></label>
                  <input id="prd-ref-legacy" type="text" class="form-input" placeholder="e.g. EACIS-1002">
-                 <div class="form-helper">This mirrors the visible product reference for merchant use.</div>
+                    <div class="form-helper">This mirrors the visible product reference for seller use.</div>
               </div>
               <div class="form-group">
                  <label class="form-label">Stock Quantity</label>
-                 <input id="prd-stock" name="stock" type="number" class="form-input" value="{{ form.get('stock', 0) }}" min="0">
+                 <input id="prd-stock" name="stock" type="number" class="form-input" value="{{ f.get('stock', product.stock if product else 0) }}" min="0">
                  {% if errors.get('stock') %}
                  <small class="form-error" role="alert">{{ errors.get('stock') }}</small>
                  {% endif %}
               </div>
               <div class="form-group mt-4">
                  <label class="form-label">Warranty (months)</label>
-                 <input id="prd-warranty" name="warranty_months" type="number" class="form-input" value="{{ form.get('warranty_months', 12) }}" min="0">
+                 <input id="prd-warranty" name="warranty_months" type="number" class="form-input" value="{{ f.get('warranty_months', product.warranty_months if product else 12) }}" min="0">
               </div>
            </div>
 
@@ -142,11 +175,11 @@
               <h3 class="type-h4 mb-4">Live Preview</h3>
               <div class="seller-sunken" style="padding:var(--sp-4); border-radius:var(--radius-lg);">
                  <div class="type-label">Listing Snapshot</div>
-                 <div class="type-h4 mt-2" style="color:var(--grey-900);">{{ form.get('name') or (ref or 'New Product') }}</div>
+                 <div class="type-h4 mt-2" style="color:var(--grey-900);">{{ f.get('name') or (product.name if product else (ref or 'New Product')) }}</div>
                  <div class="type-body-sm text-muted mt-2">Your title, price, and eligibility flags will appear here while editing.</div>
               </div>
-              {% if ref %}
-              <form method="post" action="/seller/products/{{ ref }}/delete" class="mt-4" onsubmit="return confirm('Delete {{ ref }}? This action cannot be undone.');">
+                     {% if ref %}
+                     <form method="post" action="/seller/products/{{ ref }}/delete" class="mt-4" data-confirm="Delete {{ ref }}? This action cannot be undone." data-enhance="submit-loading">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button class="btn btn--danger btn--sm btn--full" type="submit">Delete Product</button>
               </form>

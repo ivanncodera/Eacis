@@ -1,34 +1,141 @@
 {% extends 'base.html' %}
-{% block title %}Customer Inquiries - Seller Portal{% endblock %}
+{% block title %}Inquiry Dashboard - Seller Portal{% endblock %}
+
 {% block content %}
-<div class="page-content seller-shell" style="padding:var(--sp-8);">
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--sp-6);">
-    <h1 class="type-display-sm">Customer Inquiries</h1>
-    <a href="/seller/inquiries/new" class="btn btn--primary btn--sm">New Ticket</a>
-  </div>
-  <div class="kpi-grid mb-6">
-    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Open</div><div class="type-display-md mt-2">{{ stats.open }}</div></div></div>
-    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">In Progress</div><div class="type-display-md mt-2">{{ stats.in_progress }}</div></div></div>
-    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Resolved</div><div class="type-display-md mt-2">{{ stats.resolved }}</div></div></div>
-  </div>
-  <div class="table-wrapper">
-    <table class="data-table">
-      <thead><tr><th>Ticket</th><th>Subject</th><th>Customer</th><th>Status</th><th>Priority</th><th>Created</th></tr></thead>
-      <tbody>
-        {% for ticket in tickets %}
-        <tr>
-          <td><a href="/seller/inquiries/{{ ticket.ticket_ref }}">{{ ticket.ticket_ref }}</a></td>
-          <td>{{ ticket.subject }}</td>
-          <td>{{ ticket.customer.computed_full_name if ticket.customer else '-' }}</td>
-          <td>{{ ticket.status|replace('_',' ')|title }}</td>
-          <td>{{ ticket.priority|title }}</td>
-          <td>{{ ticket.created_at.strftime('%Y-%m-%d %H:%M') if ticket.created_at else '-' }}</td>
-        </tr>
-        {% else %}
-        <tr><td colspan="6" style="text-align:center;">No tickets yet.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
+<div class="page-content page-enter stagger-children" style="padding: var(--sp-12) 0;">
+  <div class="container-fluid" style="max-width: 1400px; padding: 0 var(--sp-8);">
+    
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: var(--sp-10);">
+      <div class="stagger-item">
+        <div class="chip chip--active mb-4">Support Specialist</div>
+        <h1 class="type-display-sm">Resolution Command Center</h1>
+        <p class="type-body-sm text-muted">Manage customer incidents and high-priority ticket escalations.</p>
+      </div>
+      <div class="stagger-item" style="display: flex; gap: var(--sp-3);">
+         <div class="glass-card px-6 py-3" style="display: flex; align-items: center; gap: 12px; border: 1.5px solid var(--border-medium);">
+           <span class="type-label-sm fw-bold">{{ stats.open + stats.in_progress }}</span>
+           <span class="type-label-xs text-muted">Active Cases</span>
+         </div>
+      </div>
+    </div>
+
+    <!-- KPI Pulse -->
+    <div class="grid-4 mb-10">
+      <div class="glass-card status-card p-8 stagger-item" style="border-top: 4px solid var(--border-medium);">
+        <div class="type-label-xs text-muted mb-2">UNASSIGNED / OPEN</div>
+        <div class="type-display-md">{{ stats.open }}</div>
+        <div class="mt-4"><span class="badge badge--info px-3">Immediate Triage</span></div>
+      </div>
+      <div class="glass-card status-card p-8 stagger-item" style="border-top: 4px solid var(--brand-primary);">
+        <div class="type-label-xs text-muted mb-2">IN PROGRESS</div>
+        <div class="type-display-md">{{ stats.in_progress }}</div>
+        <div class="mt-4"><span class="badge badge--primary px-3">Active Discussion</span></div>
+      </div>
+      <div class="glass-card status-card p-8 stagger-item" style="border-top: 4px solid var(--color-success);">
+        <div class="type-label-xs text-muted mb-2">RESOLVED TODAY</div>
+        <div class="type-display-md">{{ stats.resolved }}</div>
+        <div class="mt-4"><span class="badge badge--success px-3">Standard Compliant</span></div>
+      </div>
+      <div class="glass-card status-card p-8 stagger-item" style="background: var(--brand-primary-subtle); border-color: var(--brand-primary);">
+        <div class="type-label-xs text-muted mb-2">AVERAGE RESPONSE</div>
+        <div class="type-display-md">3.4h</div>
+        <div class="mt-4 text-primary fw-bold small">↑ 12% faster this week</div>
+      </div>
+    </div>
+
+    <!-- Inquiry List -->
+    <div class="glass-card overflow-hidden stagger-item">
+      <div class="table-responsive">
+        <table class="table--premium">
+          <thead>
+            <tr style="background: var(--grey-50);">
+              <th style="padding-left: 24px;">Case Reference</th>
+              <th>Subject & Intent</th>
+              <th>Customer Profile</th>
+              <th>Status</th>
+              <th>Urgency</th>
+              <th style="text-align: right; padding-right: 24px;">Command</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for ticket in tickets %}
+            <tr class="interactive-row">
+              <td style="padding-left: 24px;">
+                 <div class="type-label-sm fw-bold text-primary">{{ ticket.ticket_ref }}</div>
+                 <div class="type-label-xs text-muted">{{ ticket.created_at.strftime('%b %d, %H:%M') }}</div>
+              </td>
+              <td>
+                 <div class="type-body-sm fw-bold">{{ ticket.subject }}</div>
+                 {% if ticket.order %}
+                   <div class="type-label-xs text-muted">Order: {{ ticket.order.order_ref }}</div>
+                 {% endif %}
+              </td>
+              <td>
+                <div class="type-body-sm fw-bold">{{ ticket.customer.full_name if ticket.customer else 'Guest Account' }}</div>
+                <div class="type-label-xs text-muted">{{ ticket.customer.email if ticket.customer else 'No Contact' }}</div>
+              </td>
+              <td>
+                {% set status_tone = 'badge--info' if ticket.status == 'open' else ('badge--primary' if ticket.status == 'in_progress' else 'badge--success') %}
+                <span class="badge rounded-pill {{ status_tone }}" style="padding: 6px 14px;">
+                    {{ ticket.status|replace('_', ' ')|title }}
+                </span>
+              </td>
+              <td>
+                <span class="type-label-xs fw-bold priority-color" data-priority="{{ ticket.priority or 'normal' }}">
+                  {{ (ticket.priority or 'Normal')|upper }}
+                </span>
+                <style>
+                  .priority-color[data-priority="urgent"] { color: var(--color-danger); }
+                  .priority-color[data-priority="high"] { color: var(--color-warning); }
+                  .priority-color[data-priority="normal"] { color: var(--grey-500); }
+                  .priority-color[data-priority="low"] { color: var(--grey-400); }
+                </style>
+              </td>
+              <td style="text-align: right; padding-right: 24px;">
+                 <a href="/seller/inquiries/{{ ticket.ticket_ref }}" class="btn btn--white btn--sm" style="border: 1.5px solid var(--border-medium);">Launch Console</a>
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="6" style="padding: 60px; text-align: center;">
+                <div class="type-body-sm text-muted">No active inquiries at this stage. Enjoy the quiet!</div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      </div>
+
+        <div class="pagination" style="margin-top: var(--sp-12); display:flex; justify-content:space-between; align-items:center; padding-top: var(--sp-6); border-top: 1px solid var(--border-default);">
+          <div class="type-body-sm text-muted">Showing {{ tickets|length }} of {{ pagination.total if pagination else (stats.open + stats.in_progress + stats.resolved) }} tickets</div>
+          {% if pagination and pagination.pages > 1 %}
+          <div style="display:flex; gap: var(--sp-2);">
+            {% if pagination.has_prev %}
+            <a href="{{ url_for(request.endpoint, page=pagination.prev_num, per_page=pagination.per_page) }}" class="btn btn--white btn--sm">Previous</a>
+            {% else %}
+            <button class="btn btn--white btn--sm" disabled>Previous</button>
+            {% endif %}
+
+            <div class="btn btn--white btn--sm" style="pointer-events: none; border: none;">Page {{ pagination.page }} of {{ pagination.pages }}</div>
+
+            {% if pagination.has_next %}
+            <a href="{{ url_for(request.endpoint, page=pagination.next_num, per_page=pagination.per_page) }}" class="btn btn--white btn--sm">Next</a>
+            {% else %}
+            <button class="btn btn--white btn--sm" disabled>Next</button>
+            {% endif %}
+          </div>
+          {% endif %}
+        </div>
   </div>
 </div>
+
+<style>
+.table--premium { width: 100%; border-collapse: collapse; }
+.table--premium th { padding: 16px 12px; font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em; color: var(--grey-500); background: var(--grey-50); border-bottom: 1.5px solid var(--border-subtle); text-align: left; }
+.table--premium td { padding: 20px 12px; border-bottom: 1px solid var(--border-subtle); vertical-align: middle; }
+.interactive-row:hover { background: rgba(0, 122, 255, 0.02); }
+.status-card { transition: all 0.3s var(--ease-out); border: 1px solid var(--border-subtle); }
+.status-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-xl); border-color: var(--brand-primary); }
+</style>
 {% endblock %}

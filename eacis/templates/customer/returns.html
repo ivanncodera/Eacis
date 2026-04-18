@@ -1,182 +1,908 @@
 {% extends 'base.html' %}
-
-{% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/customer.css') }}">
-{% endblock %}
-
-{% block title %}Returns & Refunds — E-ACIS{% endblock %}
+{% block title %}Return Resolutions — E-ACIS{% endblock %}
 
 {% block content %}
-{% set form = form or {} %}
-{% set errors = errors or {} %}
-{% set pending_count = returns|selectattr('status', 'equalto', 'pending')|list|length %}
-{% set accepted_count = returns|selectattr('status', 'equalto', 'accepted')|list|length %}
-{% set refunded_count = returns|selectattr('status', 'equalto', 'refunded')|list|length %}
-<div class="main-content">
-  <div class="stagger-children">
-    <nav class="mb-6 stagger-item" aria-label="Breadcrumb">
-      <div class="breadcrumb-wrap">
-        <a href="/customer/home" class="breadcrumb-link type-body-sm">Home</a>
-        <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" style="color: var(--grey-300); opacity: 0.5;"><path d="M9 5l7 7-7 7"/></svg>
-        <span class="type-body-sm fw-bold" style="color: var(--grey-900);">Returns & Refunds</span>
-      </div>
-    </nav>
+<div class="page-content page-enter stagger-children" style="padding: var(--sp-10) 0;">
+  <div class="container">
     
-
-    <!-- Main Content Area -->
-    <main style="flex: 1; min-width: 0;">
-      <header class="seller-header" style="margin-bottom: var(--sp-8);">
-         <div class="seller-header__head">
-           <h1 class="type-display-sm">Returns & Refunds</h1>
-           <p class="type-body-sm text-muted">Manage your return requests and track your refund progress.</p>
-         </div>
-         <div class="seller-header__actions">
-           <a class="btn btn--secondary btn--sm" href="/customer/orders">View Orders</a>
-           <button class="btn btn--primary btn--sm" id="new-return-trigger">Start New Return</button>
-         </div>
-      </header>
-
-      <section class="kpi-grid mb-6" aria-label="Return summary">
-        <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Total Requests</div><div class="type-display-md mt-2">{{ returns|length }}</div></div></div>
-        <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Pending</div><div class="type-display-md mt-2">{{ pending_count }}</div></div></div>
-        <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Accepted</div><div class="type-display-md mt-2">{{ accepted_count }}</div></div></div>
-        <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Refunded</div><div class="type-display-md mt-2">{{ refunded_count }}</div></div></div>
-      </section>
-
-      <!-- Return queue summary -->
-      <section class="glass-card stagger-item page-enter" style="margin-bottom: var(--sp-8);">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--sp-6); flex-wrap: wrap; gap: var(--sp-4);">
-          <div>
-            <div class="type-label--sm" style="color: var(--brand-primary); margin-bottom: 4px;">RETURN QUEUE</div>
-            <h3 class="type-h4">Track refund progress</h3>
-            <span class="type-body-sm text-muted">Statuses update as sellers and operations process each request.</span>
-          </div>
-          <span class="badge badge--dot badge--pending">{{ returns|length }} request{% if returns|length != 1 %}s{% endif %}</span>
-        </div>
-        {% if pending_count > 0 %}
-        <div style="background: var(--surface-sunken); border-radius: 8px; padding: var(--sp-4); display: flex; gap: var(--sp-3); align-items: flex-start;" role="status">
-          <div style="color: var(--color-warning); flex-shrink: 0;" aria-hidden="true">
-             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-          </div>
-          <p class="type-body-sm">You have <strong>{{ pending_count }}</strong> request{% if pending_count != 1 %}s{% endif %} awaiting review. Use the history table below for the latest status on each return.</p>
-        </div>
-        {% endif %}
-      </section>
-
-      <!-- Return Request Form (Hidden by default) -->
-      <section id="return-form-section" class="glass-card stagger-item page-enter" style="display: none; margin-bottom: var(--sp-8); border: 2px solid var(--brand-primary-light);">
-         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--sp-6);">
-            <h3 class="type-h4">New Return Request</h3>
-            <button type="button" class="btn btn--sm btn--ghost" id="close-form">Cancel</button>
-         </div>
-          {% if errors.get('order_ref') or errors.get('reason') or errors.get('description') %}
-          <div class="glass-card" style="margin-bottom: var(--sp-4); border:1px solid var(--color-danger);" role="alert" aria-live="polite">
-            <p class="form-error fw-semibold">Please correct the highlighted fields before submitting.</p>
-            <ul class="type-body-sm" style="margin: var(--sp-2) 0 0 var(--sp-5); color: var(--grey-700);">
-              {% if errors.get('order_ref') %}<li><a href="#return-order-ref" class="breadcrumb-link">Order selection is required.</a></li>{% endif %}
-              {% if errors.get('reason') %}<li><a href="#return-reason" class="breadcrumb-link">Return reason is required.</a></li>{% endif %}
-              {% if errors.get('description') %}<li><a href="#return-description" class="breadcrumb-link">Description must be completed.</a></li>{% endif %}
-            </ul>
-          </div>
+    <!-- Hero & Stats -->
+    <header class="return-page__header" style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: var(--sp-12);">
+      <div class="stagger-item">
+        <div class="chip chip--active mb-4">Resolution Center</div>
+        <h1 class="type-display-sm">Returns & Refunds</h1>
+        <p class="type-body-sm text-muted">Manage protection claims and track resolution progress.</p>
+      </div>
+      <div class="stagger-item return-page__header-actions" style="display: flex; gap: var(--sp-3);">
+        <a href="/customer/orders" class="btn btn--white rounded-pill px-6" style="border: 1.5px solid var(--border-medium);">View Orders</a>
+        <button type="button" class="btn btn--primary shadow-primary rounded-pill px-8 return-modal-trigger {% if is_restricted %}btn--disabled{% endif %}" id="new-return-trigger" data-modal-target="return-modal" aria-controls="return-modal" aria-haspopup="dialog" {% if is_restricted %}disabled title="Your account is restricted from new returns"{% endif %}>
+          {% if is_restricted %}
+            Restricted
+          {% else %}
+            Start New Request
           {% endif %}
-          {% if errors.get('general') %}
-          <div class="glass-card" style="margin-bottom: var(--sp-4); border:1px solid var(--color-danger);">
-           <p class="form-error" role="alert">{{ errors.get('general') }}</p>
+        </button>
+      </div>
+    </header>
+
+    <div class="grid" style="display: grid; grid-template-columns: 1fr 340px; gap: var(--sp-8); align-items: start;">
+       <div style="min-width: 0;">
+          <!-- KPI Row -->
+          <div class="kpi-grid mb-10 stagger-item" style="grid-template-columns: repeat(4, 1fr);">
+            <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label-sm text-muted">Total</div><div class="type-h2 mt-1">{{ stats.total }}</div></div></div>
+            <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label-sm text-info">Pending</div><div class="type-h2 mt-1">{{ stats.pending }}</div></div></div>
+            <div class="glass-card glass-card--kpi" style="border-top: 2px solid var(--color-success);"><div class="kpi__content"><div class="type-label-sm text-success">Approved</div><div class="type-h2 mt-1">{{ stats.accepted }}</div></div></div>
+            <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label-sm text-muted">Refunded</div><div class="type-h2 mt-1">{{ stats.refunded }}</div></div></div>
           </div>
-          {% endif %}
-          <form class="form-stack" method="post" action="/customer/returns" data-enhance="submit-loading">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <div class="form-group">
-               <label class="form-label" for="return-order-ref">Select order <abbr class="required" title="required">*</abbr></label>
-            <select id="return-order-ref" class="form-select {% if errors.get('order_ref') %}is-error{% endif %}" name="order_ref" required aria-describedby="return-order-ref-help {% if errors.get('order_ref') %}return-order-ref-error{% endif %}">
-              {% for order in orders %}
-              <option value="{{ order.order_ref }}" {% if form.get('order_ref') == order.order_ref %}selected{% endif %}>{{ order.order_ref }} ({{ order.created_at.strftime('%b %d, %Y') if order.created_at else '' }})</option>
-              {% else %}
-              <option value="">No orders available</option>
-              {% endfor %}
-               </select>
-              <small id="return-order-ref-help" class="form-helper">Choose the order reference you want to return.</small>
-              {% if errors.get('order_ref') %}<small id="return-order-ref-error" class="form-error" role="alert">{{ errors.get('order_ref') }}</small>{% endif %}
+
+          <!-- Active Returns List -->
+          <div class="glass-card overflow-hidden stagger-item">
+            <div class="p-6 border-bottom" style="display: flex; justify-content: space-between; align-items: center;">
+              <h3 class="type-h4">Resolution History</h3>
+              <span class="type-label-xs text-muted">Latest activity: {{ latest_activity.strftime('%b %d') if latest_activity else 'None' }}</span>
             </div>
-            <div class="form-group">
-               <label class="form-label" for="return-reason">Reason for return <abbr class="required" title="required">*</abbr></label>
-            <select id="return-reason" class="form-select {% if errors.get('reason') %}is-error{% endif %}" name="reason" required aria-describedby="return-reason-help {% if errors.get('reason') %}return-reason-error{% endif %}">
-              <option value="Defective / Does not work" {% if form.get('reason') == 'Defective / Does not work' %}selected{% endif %}>Defective / Does not work</option>
-              <option value="Damaged during shipping" {% if form.get('reason') == 'Damaged during shipping' %}selected{% endif %}>Damaged during shipping</option>
-              <option value="Incorrect item received" {% if form.get('reason') == 'Incorrect item received' %}selected{% endif %}>Incorrect item received</option>
-              <option value="Changed my mind" {% if form.get('reason') == 'Changed my mind' %}selected{% endif %}>Changed my mind</option>
-               </select>
-              <small id="return-reason-help" class="form-helper">Select the closest reason to help us route your request quickly.</small>
-              {% if errors.get('reason') %}<small id="return-reason-error" class="form-error" role="alert">{{ errors.get('reason') }}</small>{% endif %}
+            {% if stats.total %}
+            <div class="table-responsive">
+              <table class="table--premium">
+                <thead>
+                  <tr>
+                    <th style="padding-left: 24px;">Case ID</th>
+                    <th>Order & Product</th>
+                    <th>Resolution Status</th>
+                    <th style="text-align: right; padding-right: 24px;">Refund Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for item in returns %}
+                  <tr class="interactive-row">
+                    <td style="padding-left: 24px;">
+                      <span class="type-label-sm fw-bold text-primary">{{ item.rrt_ref }}</span>
+                    </td>
+                    <td>
+                      <div class="type-body-sm fw-bold">{{ item.order.order_ref if item.order else 'Order' }}</div>
+                      <div class="type-label-xs text-muted">{{ (item.reason_category or item.reason or '')|replace('_', ' ')|title }}</div>
+                    </td>
+                    <td>
+                      <span class="badge rounded-pill 
+                          {% if item.status == 'pending' %}badge--warning
+                          {% elif item.status in ['accepted', 'refunded'] %}badge--success
+                          {% else %}badge--danger{% endif %}" style="padding: 6px 14px;">
+                          {{ item.status|replace('_', ' ')|title }}
+                      </span>
+                    </td>
+                    <td style="text-align: right; padding-right: 24px;">
+                      <span class="type-body-sm fw-bold">₱{{ '%.2f'|format(item.refund_amount|float if item.refund_amount else 0) }}</span>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
             </div>
-            <div class="form-group">
-               <label class="form-label" for="return-description">Describe the issue <abbr class="required" title="required">*</abbr></label>
-            <textarea id="return-description" class="form-textarea {% if errors.get('description') %}is-error{% endif %}" name="description" placeholder="Please explain what happened. Be as detailed as possible." aria-describedby="return-description-help {% if errors.get('description') %}return-description-error{% endif %}">{{ form.get('description', '') }}</textarea>
-            <small id="return-description-help" class="form-helper">Include what happened, when it happened, and the product condition.</small>
-            {% if errors.get('description') %}<small id="return-description-error" class="form-error" role="alert">{{ errors.get('description') }}</small>{% endif %}
-            </div>
-            <div class="form-group">
-               <label class="form-label">Upload proof <span class="optional">(optional)</span></label>
-               <div style="border: 2px dashed var(--border-medium); border-radius: var(--radius-lg); padding: var(--sp-8); text-align: center; color: var(--grey-400); cursor: pointer;"
-                    onmouseover="this.style.borderColor='var(--brand-primary)'"
-                    onmouseout="this.style.borderColor='var(--border-medium)'">
-                 <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-bottom: 8px;"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                 <div class="type-body-sm">Click or Drag & Drop items here to upload</div>
+            {% else %}
+            <div style="padding: 80px 24px; text-align: center;">
+               <div style="width: 80px; height: 80px; background: var(--grey-50); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;">
+                  <svg width="40" height="40" fill="none" stroke="var(--grey-300)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M16 15L12 19M12 19L8 15M12 19V9M5 13V5a2 2 0 012-2h10a2 2 0 012 2v8"></path></svg>
                </div>
+               <h3 class="type-h4 mb-2">Clean Return Slate</h3>
+               <p class="type-body-sm text-muted mb-0">No active protection claims detected. We're here for you if anything goes wrong.</p>
             </div>
-            <button type="submit" class="btn btn--primary btn--full"><span class="btn__label">Submit return request</span></button>
-         </form>
-      </section>
+            {% endif %}
+            </div>
 
-      <!-- History Table -->
-      <section class="glass-card" style="padding: 0; overflow: hidden;">
-        <div style="padding: var(--sp-5); border-bottom: 1px solid var(--border-default);">
-          <h3 class="type-h4">Past Return History</h3>
+            <div class="pagination" style="margin-top: var(--sp-12); display:flex; justify-content:space-between; align-items:center; padding-top: var(--sp-6); border-top: 1px solid var(--border-default);">
+              <div class="type-body-sm text-muted">Showing {{ returns|length }} of {{ pagination.total if pagination else stats.total }} returns</div>
+              {% if pagination and pagination.pages > 1 %}
+              <div style="display:flex; gap: var(--sp-2);">
+                {% if pagination.has_prev %}
+                <a href="{{ url_for(request.endpoint, page=pagination.prev_num, per_page=pagination.per_page) }}" class="btn btn--white btn--sm">Previous</a>
+                {% else %}
+                <button class="btn btn--white btn--sm" disabled>Previous</button>
+                {% endif %}
+
+                <div class="btn btn--white btn--sm" style="pointer-events: none; border: none;">Page {{ pagination.page }} of {{ pagination.pages }}</div>
+
+                {% if pagination.has_next %}
+                <a href="{{ url_for(request.endpoint, page=pagination.next_num, per_page=pagination.per_page) }}" class="btn btn--white btn--sm">Next</a>
+                {% else %}
+                <button class="btn btn--white btn--sm" disabled>Next</button>
+                {% endif %}
+              </div>
+              {% endif %}
+            </div>
+       </div>
+
+       <aside class="stagger-item">
+          <!-- Policy Widget -->
+          <div class="glass-card p-8 mb-6" style="background: linear-gradient(135deg, var(--brand-primary, #0f172a), #1e293b); color: white;">
+             <h3 class="type-h4 mb-4" style="color: white;">Resolution Policy</h3>
+             <ul class="form-stack" style="list-style: none; padding: 0;">
+                <li style="display: flex; gap: var(--sp-3); margin-bottom: 12px; font-size: 13px;">
+                  <svg width="18" height="18" fill="none" stroke="var(--color-success)" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+                  7-Day Return Window
+                </li>
+                <li style="display: flex; gap: var(--sp-3); margin-bottom: 12px; font-size: 13px;">
+                  <svg width="18" height="18" fill="none" stroke="var(--color-success)" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+                  Defect Moneyback Guarantee
+                </li>
+                <li style="display: flex; gap: var(--sp-3); font-size: 13px;">
+                  <svg width="18" height="18" fill="none" stroke="var(--color-success)" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+                  24h Support Triage
+                </li>
+             </ul>
+          </div>
+
+          <!-- Abuse Risk Factor -->
+          <div class="glass-card p-6">
+             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 class="type-label--sm fw-bold">RETURN RELIABILITY</h3>
+                <span class="badge {% if abuse_score > 5 %}badge--danger{% elif abuse_score > 2 %}badge--warning{% else %}badge--success{% endif %}">
+                  Score: {{ abuse_score }}
+                </span>
+             </div>
+             <p class="type-body-xs text-muted mb-4">Calculated based on your historical return frequency and verification success rate.</p>
+             <div style="height: 6px; background: var(--grey-100); border-radius: 3px; overflow: hidden; margin-bottom: 8px;">
+                {% set width_pct = [abuse_score * 10, 100]|min %}
+                {% if abuse_score > 5 %}{% set color = 'var(--color-danger)' %}
+                {% elif abuse_score > 2 %}{% set color = 'var(--color-warning)' %}
+                {% else %}{% set color = 'var(--color-success)' %}{% endif %}
+                <div class="progress-bar-fill" data-width="{{ width_pct }}%" data-bg="{{ color }}" style="height: 100%; transition: width 1s ease;"></div>
+             </div>
+             <div class="type-label-xs text-muted text-center">Status: {{ 'Restricted' if is_restricted else ('High Alert' if abuse_score > 5 else 'Protected Tier') }}</div>
+          </div>
+       </aside>
+    </div>
+  </div>
+
+  <!-- Premium New Return Modal -->
+  <div id="return-modal-overlay" class="modal-overlay return-modal-overlay" aria-hidden="true">
+    <div id="return-modal" class="modal glass-card page-enter return-modal" role="dialog" aria-modal="true" aria-labelledby="return-modal-title" tabindex="-1" data-has-errors="{{ 'true' if errors else 'false' }}">
+      <div class="p-8 border-bottom return-modal__header" style="background: var(--grey-0); display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h2 id="return-modal-title" class="type-h3 mb-1 return-modal__title">New Resolution Case</h2>
+          <p class="type-body-sm text-muted return-modal__subtitle">Submit a claim for your recent order.</p>
         </div>
-        <div class="table-wrapper" style="border: none; border-radius: 0;">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Item</th>
-                <th>Status</th>
-                <th style="text-align: right;">Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for item in returns %}
-              <tr>
-                <td class="type-body-sm fw-medium">#{{ item.rrt_ref }}</td>
-                <td>{{ item.order.order_ref if item.order else 'Order' }} - {{ item.reason }}</td>
-                <td><span class="badge badge--dot badge--{{ 'warning' if item.status == 'pending' else ('success' if item.status in ['accepted','refunded'] else 'danger') }}">{{ item.status|replace('_', ' ')|title }}</span></td>
-                <td style="text-align: right; font-weight: 600;">PHP {{ '%.2f'|format(item.refund_amount|float if item.refund_amount else 0) }}</td>
-              </tr>
-              {% else %}
-              <tr>
-                <td colspan="4" class="text-muted" style="text-align:center; padding:var(--sp-6);">
-                  <div class="type-body-sm fw-semibold">No return requests yet.</div>
-                  <div class="type-body-xs mt-1">Select an order above and submit a return request to start refund tracking.</div>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+        <button type="button" class="return-modal__icon-btn" id="close-modal-x" aria-label="Close return form" title="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <form action="/customer/returns" method="POST" enctype="multipart/form-data" class="form-stack p-8 return-modal__form" data-enhance="submit-loading warn-on-exit image-preview">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-group">
+          <label class="form-label">Select Order</label>
+          <select name="order_ref" class="form-select" required>
+            <option value="">Choose order...</option>
+            {% set delivered_count = 0 %}
+            {% for order in orders %}
+              {% if order.status == 'delivered' %}
+                {% set delivered_count = delivered_count + 1 %}
+                <option value="{{ order.order_ref }}" {% if form and form.order_ref == order.order_ref %}selected{% endif %}>
+                  {{ order.order_ref }} (Delivered: {{ order.delivered_at.strftime('%b %d') if order.delivered_at else 'Recent' }})
+                </option>
+              {% endif %}
+            {% endfor %}
+            {% if delivered_count == 0 %}
+              <option value="" disabled>No delivered orders eligible for return</option>
+            {% endif %}
+          </select>
+          {% if errors and errors.order_ref %}
+            <div class="type-label-xs text-danger mt-1">{{ errors.order_ref }}</div>
+          {% endif %}
         </div>
-      </section>
-    </main>
+        <div class="form-group">
+          <label class="form-label">Return Reason</label>
+          <select name="reason_category" id="reason-category-select" class="form-select" required>
+            <option value="DEFECTIVE" {% if form and form.reason_category == 'DEFECTIVE' %}selected{% endif %}>Defective / Non-functional</option>
+            <option value="DAMAGED" {% if form and form.reason_category == 'DAMAGED' %}selected{% endif %}>Damaged in Transit</option>
+            <option value="WRONG_ITEM" {% if form and form.reason_category == 'WRONG_ITEM' %}selected{% endif %}>Wrong Item / Misdescribed</option>
+            <option value="MISSING_PARTS" {% if form and form.reason_category == 'MISSING_PARTS' %}selected{% endif %}>Missing Components</option>
+            <option value="CHANGE_OF_MIND" {% if form and form.reason_category == 'CHANGE_OF_MIND' %}selected{% endif %}>Change of Mind</option>
+            <option value="OTHER" {% if form and form.reason_category == 'OTHER' %}selected{% endif %}>Other (please specify)</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="other-reason-group" style="display: none;">
+          <label class="form-label">Please specify</label>
+          <input type="text" name="other_reason" id="other-reason-input" class="form-input" placeholder="Briefly describe the reason for return" value="{{ form.other_reason if form else '' }}">
+          {% if errors and errors.other_reason %}
+            <div class="type-label-xs text-danger mt-1">{{ errors.other_reason }}</div>
+          {% endif %}
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="evidence-images">Attach Evidence Images</label>
+          <label for="evidence-images" class="return-upload-dropzone" id="evidence-dropzone">
+            <input id="evidence-images" type="file" name="evidence_images" class="return-upload-input" accept="image/png,image/jpeg,image/jpg,image/webp" multiple>
+            <span class="type-body-sm fw-semibold">Drop images here or click to upload</span>
+            <span class="type-label-xs text-muted">Up to 5 files, 5MB each. Formats: PNG, JPG, JPEG, WEBP</span>
+          </label>
+          <div class="return-upload-meta">
+            <div class="upload-hint">Helpful tips: show clear photos of defect areas for faster reviews.</div>
+            <div class="return-upload-count" id="evidence-count">0/5</div>
+          </div>
+          <div id="evidence-file-list" class="return-upload-file-list" aria-live="polite"></div>
+          <div id="evidence-preview-grid" class="return-upload-preview-grid" aria-live="polite"></div>
+
+          <label class="form-label mt-3">Or paste Evidence Link (optional)</label>
+          <input type="url" name="evidence_urls" class="form-input" placeholder="https://imgur.com/gallery/..." value="{{ form.evidence_urls if form else '' }}">
+
+          {% if errors and errors.evidence %}
+            <div class="type-label-xs text-danger mt-1">{{ errors.evidence }}</div>
+          {% else %}
+            <small class="type-label-xs text-info mt-2" style="display: block;">Evidence speeds up approvals and helps the triage team validate your claim faster.</small>
+          {% endif %}
+        </div>
+        <div class="form-group mb-8">
+          <label class="form-label">Describe the Defect</label>
+          <textarea name="description" class="form-textarea return-modal__textarea" rows="4" placeholder="Briefly describe the issue and what happened..." required>{{ form.description if form else '' }}</textarea>
+          {% if errors and errors.description %}
+            <div class="type-label-xs text-danger mt-1">{{ errors.description }}</div>
+          {% endif %}
+        </div>
+
+        <div class="return-consent-card" role="group" aria-labelledby="return-consent-label">
+          <div class="return-consent-head">
+            <span class="return-consent-badge">Policy Consent</span>
+          </div>
+          <label id="return-consent-label" class="return-consent-check">
+            <input type="checkbox" name="terms_consent" value="yes" {% if form and form.terms_consent == 'yes' %}checked{% endif %} required>
+            <span class="type-label-sm">
+              I accept the <a href="/terms" target="_blank" rel="noopener" class="return-consent-link">Terms and Conditions</a>
+              for return and refund processing.
+            </span>
+          </label>
+
+          <label class="return-consent-check">
+            <input type="checkbox" name="privacy_consent" value="yes" {% if form and form.privacy_consent == 'yes' %}checked{% endif %} required>
+            <span class="type-label-sm">
+              I accept the <a href="/privacy" target="_blank" rel="noopener" class="return-consent-link">Privacy Policy</a>
+              covering evidence handling and claim verification.
+            </span>
+          </label>
+          <ul class="return-consent-notes type-label-xs text-muted mb-0">
+            <li>Evidence is used only for claim verification and fraud prevention.</li>
+            <li>Policy links open in a new tab for quick review.</li>
+          </ul>
+          {% if errors and errors.returns_consent %}
+            <div class="type-label-xs text-danger mt-1">{{ errors.returns_consent }}</div>
+          {% endif %}
+        </div>
+
+        <div class="return-modal__actions">
+          <button type="button" class="btn btn--white btn--full rounded-pill px-6 return-modal__btn-secondary" id="close-modal-btn" style="border: 1px solid var(--border-medium);">Cancel</button>
+          <button type="submit" class="btn btn--primary btn--full rounded-pill py-4 return-modal__btn-primary">Submit Protection Claim</button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>
 
+<style>
+.table--premium { width: 100%; border-collapse: collapse; }
+.table--premium th { padding: 16px 12px; font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em; color: var(--grey-500); background: var(--grey-50); border-bottom: 1.5px solid var(--border-subtle); text-align: left; }
+.table--premium td { padding: 20px 12px; border-bottom: 1px solid var(--border-subtle); vertical-align: middle; }
+.interactive-row:hover { background: rgba(220, 53, 69, 0.02); }
+
+.return-page__header-actions {
+  align-items: center;
+}
+
+.return-modal-trigger {
+  min-width: 188px;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.22s var(--ease-out), visibility 0.22s var(--ease-out);
+}
+
+.modal-overlay.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.return-modal-overlay {
+  background: rgba(2, 6, 23, 0.20);
+  backdrop-filter: blur(1px) saturate(95%);
+  -webkit-backdrop-filter: blur(1px) saturate(95%);
+  padding: var(--sp-4);
+}
+
+.return-modal {
+  width: min(640px, 94vw);
+  border: 1.5px solid rgba(15, 23, 42, 0.22);
+  box-shadow: 0 34px 90px rgba(2, 6, 23, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.85) inset;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 18px;
+  max-height: min(88vh, 760px);
+  transform: translateY(18px) scale(0.975);
+  opacity: 0;
+  transition: transform 0.22s var(--ease-out), opacity 0.22s var(--ease-out);
+  background: #ffffff;
+  color: var(--grey-900);
+  isolation: isolate;
+  will-change: transform, opacity;
+}
+
+.modal-overlay.is-open .return-modal {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+.return-modal__header {
+  border-bottom: 1px solid var(--border-subtle);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #ffffff;
+}
+
+.return-modal__title {
+  letter-spacing: -0.01em;
+}
+
+.return-modal__subtitle {
+  margin-bottom: 0;
+  color: var(--grey-500);
+}
+
+.return-modal__icon-btn {
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  background: var(--grey-0);
+  color: var(--grey-600);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: color 0.2s var(--ease-out), border-color 0.2s var(--ease-out), background 0.2s var(--ease-out), transform 0.2s var(--ease-out);
+}
+
+.return-modal__icon-btn:hover {
+  color: var(--grey-800);
+  border-color: var(--border-medium);
+  background: var(--grey-50);
+  transform: scale(1.03);
+}
+
+.return-modal__icon-btn:focus-visible {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 3px;
+}
+
+.return-modal__form {
+  gap: var(--sp-6);
+  max-height: calc(min(88vh, 760px) - 96px);
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
+.return-upload-dropzone {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  border: 1px dashed var(--border-medium);
+  border-radius: 12px;
+  background: var(--grey-50);
+  padding: var(--sp-4);
+  cursor: pointer;
+  transition: border-color 0.18s var(--ease-out), background 0.18s var(--ease-out);
+}
+
+.return-upload-dropzone:hover {
+  border-color: var(--brand-primary);
+  background: rgba(0, 122, 255, 0.03);
+}
+
+.return-upload-dropzone:focus-within {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.14);
+}
+
+.return-upload-input {
+  width: 100%;
+  font-size: var(--text-sm);
+  color: var(--grey-600);
+}
+
+.return-upload-file-list {
+  margin-top: var(--sp-2);
+  min-height: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.return-upload-file-pill {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border-subtle);
+  background: var(--grey-0);
+  color: var(--grey-600);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.return-upload-preview-grid {
+  margin-top: var(--sp-2);
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.return-upload-preview {
+  position: relative;
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--grey-50);
+  aspect-ratio: 1 / 1;
+}
+
+.return-upload-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.return-modal__textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.return-consent-card {
+  border: 1px solid var(--border-medium);
+  border-radius: 12px;
+  background: linear-gradient(180deg, var(--grey-50), var(--grey-0));
+  padding: var(--sp-4);
+}
+
+.return-consent-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-3);
+}
+
+.return-consent-badge {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--grey-600);
+  background: var(--grey-0);
+  text-transform: uppercase;
+}
+
+.return-consent-links {
+  display: inline-flex;
+  gap: 8px;
+}
+
+.return-consent-link-pill {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--grey-700);
+  text-decoration: none;
+  background: var(--grey-0);
+  transition: border-color 0.2s var(--ease-out), color 0.2s var(--ease-out), background 0.2s var(--ease-out);
+}
+
+.return-consent-link-pill:hover {
+  border-color: var(--brand-primary);
+  color: var(--brand-primary);
+  background: rgba(0, 122, 255, 0.05);
+}
+
+.return-consent-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.return-consent-check input[type="checkbox"] {
+  margin-top: 2px;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--brand-primary);
+}
+
+.return-consent-link {
+  color: var(--brand-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.return-consent-notes {
+  padding-left: 16px;
+  margin: 0;
+}
+
+.return-consent-notes li + li {
+  margin-top: 4px;
+}
+
+.return-modal__actions {
+  display: flex;
+  gap: var(--sp-3);
+  padding-top: var(--sp-3);
+  position: sticky;
+  bottom: 0;
+  background: linear-gradient(to top, rgba(255, 255, 255, 0.98) 78%, rgba(255, 255, 255, 0));
+  backdrop-filter: blur(2px);
+}
+
+.return-modal__btn-primary {
+  box-shadow: 0 8px 22px rgba(0, 122, 255, 0.24);
+}
+
+.return-modal__btn-primary[disabled] {
+  opacity: 0.58;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.return-modal__btn-secondary {
+  background: var(--grey-0);
+  border-color: var(--border-medium);
+}
+
+body.modal-open {
+  overflow: hidden;
+}
+
+@keyframes modal-soft-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 640px) {
+  .return-page__header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--sp-4);
+  }
+
+  .return-page__header-actions {
+    width: 100%;
+  }
+
+  .return-modal-trigger {
+    min-width: 0;
+  }
+
+  .return-modal {
+    width: 100% !important;
+    max-height: calc(100vh - 24px);
+  }
+
+  .return-modal__actions {
+    flex-direction: column;
+  }
+
+  .return-upload-preview-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .return-consent-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+</style>
+
 <script>
-  document.getElementById('new-return-trigger').addEventListener('click', () => {
-     document.getElementById('return-form-section').style.display = 'block';
-     window.scrollTo({ top: 300, behavior: 'smooth' });
+  document.addEventListener('DOMContentLoaded', () => {
+    // Apply dynamic progress bar styles from data attributes to avoid IDE syntax conflicts
+    document.querySelectorAll('.progress-bar-fill').forEach(bar => {
+      if (bar.dataset.width) bar.style.width = bar.dataset.width;
+      if (bar.dataset.bg) bar.style.background = bar.dataset.bg;
+    });
+
+    const evidenceInput = document.getElementById('evidence-images');
+    const evidenceFileList = document.getElementById('evidence-file-list');
+    const evidencePreviewGrid = document.getElementById('evidence-preview-grid');
+
+        if (evidenceInput && evidenceFileList && evidencePreviewGrid) {
+      // Maintain internal file list state so we can support remove and drop
+      const maxFiles = 5;
+      const maxBytes = 5 * 1024 * 1024;
+      let evidenceFilesState = [];
+
+      const renderEvidenceUI = () => {
+        evidenceFileList.innerHTML = '';
+        evidencePreviewGrid.innerHTML = '';
+        document.getElementById('evidence-count').textContent = `${evidenceFilesState.length}/${maxFiles}`;
+
+        if (!evidenceFilesState.length) {
+          evidenceFileList.innerHTML = '<span class="type-label-xs text-muted">No images selected yet.</span>';
+          return;
+        }
+
+        evidenceFilesState.forEach((file, idx) => {
+          const kb = Math.max(1, Math.round((file.size || 0) / 1024));
+          const pill = document.createElement('span');
+          pill.className = 'return-upload-file-pill';
+          pill.textContent = `${file.name} (${kb} KB)`;
+          evidenceFileList.appendChild(pill);
+
+          const preview = document.createElement('div');
+          preview.className = 'return-upload-preview';
+          const image = document.createElement('img');
+          image.src = URL.createObjectURL(file);
+          image.alt = `Evidence preview: ${file.name}`;
+          image.addEventListener('load', () => URL.revokeObjectURL(image.src), { once: true });
+
+          const removeBtn = document.createElement('button');
+          removeBtn.type = 'button';
+          removeBtn.className = 'img-remove';
+          removeBtn.setAttribute('aria-label', 'Remove image');
+          removeBtn.innerHTML = '×';
+          removeBtn.addEventListener('click', (ev) => {
+            ev.preventDefault();
+            evidenceFilesState.splice(idx, 1);
+            // Rebuild FileList for input
+            try {
+              const dt = new DataTransfer();
+              evidenceFilesState.forEach(f => dt.items.add(f));
+              evidenceInput.files = dt.files;
+            } catch (e) {
+              // Some environments may not allow DataTransfer; fall back to clearing input
+              try { evidenceInput.value = ''; } catch (e) {}
+            }
+            renderEvidenceUI();
+          });
+
+          preview.appendChild(image);
+          preview.appendChild(removeBtn);
+          evidencePreviewGrid.appendChild(preview);
+        });
+      };
+
+      const updateFromInput = () => {
+        evidenceInput.setCustomValidity('');
+        evidenceFilesState = Array.from(evidenceInput.files || []).slice(0, maxFiles);
+        if (evidenceFilesState.some((file) => file.size > maxBytes)) {
+          evidenceInput.setCustomValidity('Each image must be 5MB or less.');
+          evidenceInput.reportValidity();
+        }
+        renderEvidenceUI();
+      };
+
+      evidenceInput.addEventListener('change', updateFromInput);
+
+      // Drag & drop support on the dropzone
+      const dz = document.getElementById('evidence-dropzone');
+      if (dz) {
+        dz.addEventListener('dragover', (ev) => { ev.preventDefault(); dz.classList.add('dragover'); });
+        dz.addEventListener('dragleave', (ev) => { dz.classList.remove('dragover'); });
+        dz.addEventListener('drop', (ev) => {
+          ev.preventDefault(); dz.classList.remove('dragover');
+          const dt = ev.dataTransfer;
+          if (!dt || !dt.files) return;
+          const dropped = Array.from(dt.files).filter(f => (f.type || '').startsWith('image/'));
+          if (!dropped.length) return;
+          evidenceFilesState = (evidenceFilesState.concat(dropped)).slice(0, maxFiles);
+          try {
+            const newDt = new DataTransfer();
+            evidenceFilesState.forEach(f => newDt.items.add(f));
+            evidenceInput.files = newDt.files;
+          } catch (e) {
+            // If DataTransfer unsupported, clear input and rely on submission to include new files
+          }
+          renderEvidenceUI();
+        });
+      }
+
+      // Initialize with any pre-existing state
+      if (!evidenceFileList.textContent.trim()) {
+        evidenceFileList.innerHTML = '<span class="type-label-xs text-muted">No images selected yet.</span>';
+      }
+      // initial render if input already has files (e.g., server re-render after validation)
+      if ((evidenceInput.files || []).length) updateFromInput();
+    }
+
+      if (!evidenceFileList.textContent.trim()) {
+        evidenceFileList.innerHTML = '<span class="type-label-xs text-muted">No images selected yet.</span>';
+      }
+    }
+
+    const trigger = document.getElementById('new-return-trigger');
+    const modal = document.getElementById('return-modal');
+    const overlay = document.getElementById('return-modal-overlay');
+    const closeButton = document.getElementById('close-modal-x');
+    const returnForm = document.querySelector('.return-modal__form');
+    const termsConsent = returnForm ? returnForm.querySelector('input[name="terms_consent"]') : null;
+    const privacyConsent = returnForm ? returnForm.querySelector('input[name="privacy_consent"]') : null;
+    const submitButton = returnForm ? returnForm.querySelector('.return-modal__btn-primary') : null;
+    let lastFocusedElement = null;
+
+    const hasAllConsents = () => !!(termsConsent && privacyConsent && termsConsent.checked && privacyConsent.checked);
+
+    const updateSubmitState = () => {
+      if (!submitButton) {
+        return;
+      }
+      submitButton.disabled = !hasAllConsents();
+      submitButton.setAttribute('aria-disabled', submitButton.disabled ? 'true' : 'false');
+    };
+
+    const clearConsentValidity = () => {
+      if (termsConsent) termsConsent.setCustomValidity('');
+      if (privacyConsent) privacyConsent.setCustomValidity('');
+    };
+
+    const openModal = (event) => {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      if (!modal || !overlay) return;
+      if (trigger && trigger.disabled) return;
+
+      lastFocusedElement = document.activeElement;
+      overlay.classList.add('is-open');
+      overlay.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('modal-open');
+      if (closeButton) {
+        closeButton.focus();
+      } else {
+        modal.focus();
+      }
+    };
+
+    window.openReturnRequestModal = openModal;
+
+    const closeModal = (event) => {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      if (!modal || !overlay) return;
+
+      overlay.classList.remove('is-open');
+      overlay.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('modal-open');
+      if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
+        lastFocusedElement.focus();
+      }
+    };
+
+    if (trigger) {
+      trigger.addEventListener('click', openModal);
+      trigger.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          openModal(event);
+        }
+      });
+    }
+    
+    // Wire up close buttons for non-ModalManager fallback
+    document.querySelectorAll('#close-modal-x, #close-modal-btn').forEach(b => {
+      b.addEventListener('click', closeModal);
+    });
+
+    if (overlay) {
+      overlay.addEventListener('click', (event) => {
+        if (event.target === overlay) {
+          closeModal(event);
+        }
+      });
+    }
+
+    if (termsConsent && privacyConsent) {
+      [termsConsent, privacyConsent].forEach((field) => {
+        field.addEventListener('change', () => {
+          clearConsentValidity();
+          updateSubmitState();
+        });
+      });
+      updateSubmitState();
+    }
+
+    if (returnForm) {
+      returnForm.addEventListener('submit', (event) => {
+        if (hasAllConsents()) {
+          clearConsentValidity();
+          return;
+        }
+        event.preventDefault();
+        const message = 'Please accept both the Terms and Privacy Policy before submitting your claim.';
+        if (termsConsent && !termsConsent.checked) {
+          termsConsent.setCustomValidity(message);
+          termsConsent.reportValidity();
+          termsConsent.focus();
+        }
+        if (privacyConsent && !privacyConsent.checked) {
+          privacyConsent.setCustomValidity(message);
+          if (!termsConsent || termsConsent.checked) {
+            privacyConsent.reportValidity();
+            privacyConsent.focus();
+          }
+        }
+        updateSubmitState();
+      });
+    }
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && overlay && overlay.classList.contains('is-open')) {
+        closeModal(event);
+      }
+    });
+
+    // Auto-open on server-side errors
+    if (modal && modal.dataset.hasErrors === 'true') {
+      console.log('[E-ACIS] Re-opening modal due to validation errors');
+      openModal();
+    }
+
+    // Handle URL params for auto-open (Escalation path)
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('order_ref')) {
+      const targetRef = urlParams.get('order_ref');
+      console.log('[E-ACIS] Escalation detected for order:', targetRef);
+      openModal();
+      const select = document.querySelector('select[name="order_ref"]');
+      if (select) {
+        select.value = targetRef;
+        // If the value wasn't found in narrowed list, add it as a temporary option
+        if (select.value !== targetRef) {
+          const opt = new Option(targetRef + ' (Escalated)', targetRef, true, true);
+          select.add(opt);
+        }
+      }
+      if (urlParams.has('reason_category')) {
+        const catSelect = document.querySelector('select[name="reason_category"]');
+        if (catSelect) catSelect.value = urlParams.get('reason_category');
+      }
+    }
+
+    // Show/hide the 'Other' reason input when user selects Other
+    (function(){
+      const reasonSelect = document.getElementById('reason-category-select');
+      const otherGroup = document.getElementById('other-reason-group');
+      const otherInput = document.getElementById('other-reason-input');
+      if (!reasonSelect || !otherGroup) return;
+      const toggleOther = () => {
+        const show = (reasonSelect.value || '').toUpperCase() === 'OTHER';
+        otherGroup.style.display = show ? 'block' : 'none';
+        if (!show && otherInput) otherInput.value = '';
+      };
+      reasonSelect.addEventListener('change', toggleOther);
+      // initialize on load (server-side re-render may have selected OTHER)
+      toggleOther();
+    })();
   });
-  document.getElementById('close-form').addEventListener('click', () => {
-     document.getElementById('return-form-section').style.display = 'none';
-  });
-  {% if errors.get('order_ref') or errors.get('reason') or errors.get('description') or errors.get('general') %}
-    document.getElementById('return-form-section').style.display = 'block';
-  {% endif %}
 </script>
 {% endblock %}

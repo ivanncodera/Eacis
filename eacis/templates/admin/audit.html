@@ -24,7 +24,7 @@
       <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Sensitive Access</div><div class="type-display-md mt-2">{{ stats.reveal_actions }}</div></div></div>
     </div>
 
-    <form method="get" class="glass-card p-8 mb-10" style="display: grid; grid-template-columns: 1fr 220px 220px auto; gap: var(--sp-6); align-items: end;" data-enhance="submit-loading">
+    <form method="get" class="glass-card p-8 mb-10" style="display: grid; grid-template-columns: 1fr 220px 140px 120px auto; gap: var(--sp-6); align-items: end;" data-enhance="submit-loading">
       <div class="form-group mb-0">
         <label class="form-label">Global Trace Search</label>
         <div class="form-input-group">
@@ -40,7 +40,7 @@
           <option value="all" {% if filters.action == 'all' %}selected{% endif %}>All System Events</option>
           <option value="create" {% if filters.action == 'create' %}selected{% endif %}>Entity Creation</option>
           <option value="update" {% if filters.action == 'update' %}selected{% endif %}>State Mutation</option>
-          <option value="delete" {% if filters.action == 'delete' %}selected{% endif %}>Deletion/Purge</option>
+          <option value="delete" {% if filters.action == 'delete' %}selected{% endif %}>Deletion</option>
           <option value="security" {% if filters.action == 'security' %}selected{% endif %}>Security/Audit</option>
         </select>
       </div>
@@ -49,8 +49,15 @@
         <select class="form-select" name="module">
           <option value="all" {% if filters.module == 'all' %}selected{% endif %}>All Functional Modules</option>
           <option value="user_management" {% if filters.module == 'user_management' %}selected{% endif %}>User Operations</option>
-          <option value="seller_management" {% if filters.module == 'seller_management' %}selected{% endif %}>Merchant Governance</option>
+          <option value="seller_management" {% if filters.module == 'seller_management' %}selected{% endif %}>Seller Governance</option>
           <option value="security" {% if filters.module == 'security' %}selected{% endif %}>Platform Security</option>
+        </select>
+      </div>
+      <div class="form-group mb-0">
+        <label class="form-label">Per page</label>
+        <select class="form-select" name="per_page" onchange="this.form.submit()">
+          <option value="5" {% if (pagination and pagination.per_page == 5) or request.args.get('per_page') == '5' %}selected{% endif %}>5</option>
+          <option value="10" {% if (pagination and pagination.per_page == 10) or request.args.get('per_page') == '10' %}selected{% endif %}>10</option>
         </select>
       </div>
       <button class="btn btn--secondary btn--lg" type="submit">Execute Trace</button>
@@ -93,8 +100,27 @@
         </tbody>
       </table>
       
-      <div class="p-6 bg-grey-0" style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle);">
-        <span class="type-body-xs text-muted fw-semibold">Trail Depth: {{ logs|length }} entries exposed</span>
+      <div class="p-6 bg-grey-0" style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border-subtle);">
+        <span class="type-body-xs text-muted fw-semibold">Showing {{ (pagination.page - 1) * pagination.per_page + 1 }} - {{ [pagination.page * pagination.per_page, pagination.total]|min }} of {{ pagination.total }} entries</span>
+        <div style="display:flex; gap:8px; align-items:center;">
+          {% if pagination.has_prev %}
+            <a href="{{ url_for(request.endpoint, page=pagination.prev_num, per_page=pagination.per_page, q=filters.q, action=filters.action, module=filters.module) }}" class="btn btn--white btn--sm">Previous</a>
+          {% endif %}
+          {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+            {% if p %}
+              {% if p == pagination.page %}
+                <span class="btn btn--primary btn--xs" style="min-width:32px;">{{ p }}</span>
+              {% else %}
+                <a href="{{ url_for(request.endpoint, page=p, per_page=pagination.per_page, q=filters.q, action=filters.action, module=filters.module) }}" class="btn btn--white btn--xs" style="min-width:32px;">{{ p }}</a>
+              {% endif %}
+            {% else %}
+              <span class="text-muted">...</span>
+            {% endif %}
+          {% endfor %}
+          {% if pagination.has_next %}
+            <a href="{{ url_for(request.endpoint, page=pagination.next_num, per_page=pagination.per_page, q=filters.q, action=filters.action, module=filters.module) }}" class="btn btn--white btn--sm">Next</a>
+          {% endif %}
+        </div>
       </div>
     </div>
   </div>

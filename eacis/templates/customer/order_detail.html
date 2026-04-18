@@ -1,92 +1,387 @@
 {% extends 'base.html' %}
-{% block title %}Order Detail — E-ACIS{% endblock %}
+{% block title %}Order {{ order.order_ref }} — E-ACIS{% endblock %}
 {% block content %}
-<div class="container" style="padding-top: calc(var(--topbar-height) + var(--sp-10)); border-bottom: var(--sp-10) solid transparent;">
-  <div style="margin-bottom: var(--sp-6); display:flex; align-items:center; gap: var(--sp-4);">
-     <a href="/customer/orders" class="btn btn--ghost btn--sm">← Back to Orders</a>
-     <h1 class="type-display-md">Order {{ order.order_ref }}</h1>
-     <span class="badge badge--dot badge--{{ 'success' if order.status == 'delivered' else ('warning' if order.status in ['pending','paid','packed'] else 'danger') }}">{{ order.status|capitalize }}</span>
-  </div>
+<div class="main-content stagger-children" style="padding-top: calc(var(--topbar-height) + var(--sp-8)); padding-bottom: var(--sp-24);">
+  <div class="container" style="max-width: 1080px;">
 
-  <div style="display: grid; grid-template-columns: 1fr 320px; gap: var(--sp-8); align-items: start;">
-     
-     <div class="form-stack">
-        <div class="glass-card p-6">
-           <h3 class="type-h4" style="margin-bottom: var(--sp-4);">Items Summary</h3>
-           
-           <div class="table-wrapper">
-              <table class="data-table">
-                 <thead>
-                    <tr>
-                       <th>Product</th>
-                       <th>Qty</th>
-                       <th style="text-align:right;">Subtotal</th>
-                    </tr>
-                 </thead>
-                 <tbody>
-                    {% for item in order.items.all() %}
-                    <tr>
-                       <td>
-                          <div style="display: flex; gap: var(--sp-3); align-items: center;">
-                             <div style="width: 48px; height: 48px; background:var(--grey-50); border-radius: var(--radius-sm); display:flex; align-items:center; justify-content:center;">{{ item.quantity }}x</div>
-                             <div>
-                                <div class="fw-semibold">{{ item.product.name if item.product else 'Unknown product' }}</div>
-                                <div class="type-body-sm text-muted">{{ item.product.product_ref if item.product else '-' }}</div>
-                             </div>
-                          </div>
-                       </td>
-                       <td>{{ item.quantity }}</td>
-                       <td style="text-align:right;" class="fw-semibold">PHP {{ '%.2f'|format(item.subtotal|float) }}</td>
-                    </tr>
-                    {% endfor %}
-                 </tbody>
-              </table>
-           </div>
+    <!-- Breadcrumb -->
+    <nav class="mb-8 stagger-item" aria-label="Breadcrumb">
+      <div style="display: flex; align-items: center; gap: var(--sp-2); font-size: var(--text-sm);">
+        <a href="/customer/home" class="text-muted" style="text-decoration:none;">Home</a>
+        <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+        <a href="/customer/orders" class="text-muted" style="text-decoration:none;">My Orders</a>
+        <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+        <span class="fw-bold" style="color: var(--grey-900); font-family: var(--font-mono);">{{ order.order_ref }}</span>
+      </div>
+    </nav>
 
-           <div style="display:flex; justify-content:space-between; margin-top: var(--sp-6);">
-              <span class="type-body">Shipping</span><span class="fw-semibold">Free</span>
-           </div>
-           <hr style="border:none; border-top: 1px solid var(--border-default); margin: var(--sp-4) 0;" />
-           <div style="display:flex; justify-content:space-between;">
-              <span class="type-h4">Total Paid</span><span class="type-price-sm">PHP {{ '%.2f'|format(order.total|float) }}</span>
-           </div>
+    <!-- Header -->
+    <div class="stagger-item" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--sp-8); flex-wrap: wrap; gap: var(--sp-4);">
+      <div>
+        <h1 class="type-display-md" style="margin: 0;">Order Detail</h1>
+        <div style="display: flex; align-items: center; gap: var(--sp-3); margin-top: 6px;">
+          <span style="font-family: var(--font-mono); font-size: var(--text-lg); color: var(--grey-500);">{{ order.order_ref }}</span>
+          {% set s = order.status|lower %}
+          {% if s == 'delivered' %}
+            <span class="badge badge--success badge--dot">Delivered</span>
+          {% elif s in ['packed', 'shipped'] %}
+            <span class="badge badge--primary badge--dot">{{ order.status|title }}</span>
+          {% elif s in ['pending', 'paid'] %}
+            <span class="badge badge--warning badge--dot">Processing</span>
+          {% elif s == 'cancelled' %}
+            <span class="badge badge--danger badge--dot">Cancelled</span>
+          {% else %}
+            <span class="badge badge--secondary badge--dot">{{ order.status|title }}</span>
+          {% endif %}
+        </div>
+      </div>
+      <div style="display: flex; gap: var(--sp-3);">
+        {% if order.invoice %}
+        <a href="/customer/invoices/{{ order.order_ref }}" class="btn btn--white btn--sm">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right: 6px;"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Download Invoice
+        </a>
+        {% endif %}
+        <button class="btn btn--ghost btn--sm" onclick="window.print()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right: 6px;"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2m-12 0h12v4H6v-4z"/></svg>
+          Print
+        </button>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 320px; gap: var(--sp-8); align-items: start;">
+
+      <!-- LEFT COLUMN -->
+      <div class="form-stack" style="gap: var(--sp-6);">
+
+        <!-- Delivery Timeline -->
+        <div class="glass-card p-6 stagger-item">
+          <h2 class="type-h4 mb-6">Delivery Timeline</h2>
+          <div class="step-progress">
+            {% set s = order.status|lower %}
+            <div class="step-progress__item {{ 'completed' if s in ['paid','packed','shipped','delivered'] else ('active' if s == 'pending' else '') }}">
+              <div class="step-progress__icon">{% if s in ['paid','packed','shipped','delivered'] %}<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>{% else %}1{% endif %}</div>
+              <div class="step-progress__label">Placed</div>
+              <div class="step-progress__sub">{{ order.created_at.strftime('%b %d, %H:%M') if order.created_at else '—' }}</div>
+            </div>
+            <div class="step-progress__item {{ 'completed' if s in ['packed','shipped','delivered'] else ('active' if s == 'paid' else '') }}">
+              <div class="step-progress__icon">{% if s in ['packed','shipped','delivered'] %}<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>{% else %}2{% endif %}</div>
+              <div class="step-progress__label">Confirmed</div>
+              <div class="step-progress__sub">{{ order.paid_at.strftime('%b %d') if order.paid_at else '—' }}</div>
+            </div>
+            <div class="step-progress__item {{ 'completed' if s in ['shipped','delivered'] else ('active' if s == 'packed' else '') }}">
+              <div class="step-progress__icon">{% if s in ['shipped','delivered'] %}<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>{% else %}3{% endif %}</div>
+              <div class="step-progress__label">Packed</div>
+            </div>
+            <div class="step-progress__item {{ 'completed' if s == 'delivered' else ('active' if s == 'shipped' else '') }}">
+              <div class="step-progress__icon">{% if s == 'delivered' %}<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>{% else %}4{% endif %}</div>
+              <div class="step-progress__label">Shipped</div>
+            </div>
+            <div class="step-progress__item {{ 'completed' if s == 'delivered' else '' }}">
+              <div class="step-progress__icon">{% if s == 'delivered' %}<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>{% else %}5{% endif %}</div>
+              <div class="step-progress__label">Delivered</div>
+            </div>
+          </div>
         </div>
 
-        <div class="glass-card p-6 mt-6">
-           <h3 class="type-h4" style="margin-bottom: var(--sp-4);">Timeline</h3>
-           <div style="display: flex; gap: var(--sp-3);">
-              <div style="width: 12px; height: 12px; background: var(--brand-primary); border-radius: 50%; margin-top: 6px;"></div>
-              <div>
-                 <div class="fw-semibold">Order Placed</div>
-                 <div class="type-body-sm text-muted">{{ order.created_at.strftime('%b %d, %Y %I:%M %p') if order.created_at else 'Just now' }}</div>
+        <!-- Items Summary -->
+        <div class="glass-card p-0 stagger-item" style="overflow: hidden;">
+          <div style="padding: var(--sp-5) var(--sp-6); border-bottom: 1px solid var(--border-subtle); background: var(--grey-25);">
+            <h2 id="order-items" class="type-h4" style="margin: 0;">Items Ordered</h2>
+          </div>
+          <div style="padding: var(--sp-4);">
+            {% for item in order.items.all() %}
+            <div style="display: flex; gap: var(--sp-4); align-items: center; padding: var(--sp-4); {% if not loop.last %}border-bottom: 1px solid var(--border-subtle);{% endif %}">
+              <div style="width: 64px; height: 64px; border-radius: 10px; overflow: hidden; background: var(--grey-50); border: 1px solid var(--border-subtle); flex-shrink: 0;">
+                {% if item.product and item.product.image_url %}
+                  <img src="{{ item.product.image_url }}" alt="{{ item.product.name }}" style="width:100%;height:100%;object-fit:cover;" loading="lazy">
+                {% else %}
+                  <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
+                    <svg width="24" height="24" fill="none" stroke="var(--grey-300)" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+                  </div>
+                {% endif %}
               </div>
-           </div>
+              <div style="flex: 1; min-width: 0;">
+                <div class="fw-bold type-body-sm">{{ item.product.name if item.product else 'Unknown Product' }}</div>
+                <div class="type-body-xs text-muted">{{ item.product.product_ref if item.product else '—' }}</div>
+                <div class="type-body-xs text-muted">Qty: {{ item.quantity }} × PHP {{ '%.2f'|format(item.unit_price|float) }}</div>
+              </div>
+              <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
+                <div class="fw-bold type-body-sm">PHP {{ '%.2f'|format(item.subtotal|float) }}</div>
+                {% if item.product %}
+                <div>
+                  <button type="button" class="btn btn--ghost order-star-btn" data-ref="{{ item.product.product_ref }}" aria-pressed="{{ 'true' if (starred_by_user_map.get(item.product.id) if starred_by_user_map else False) else 'false' }}" {% if not (can_review_map and can_review_map.get(item.product.id)) %}disabled title="Only customers who received this product may star it"{% endif %}>{% if starred_by_user_map and starred_by_user_map.get(item.product.id) %}★{% else %}☆{% endif %} <span class="order-star-count" data-pid="{{ item.product.product_ref }}">{{ (star_counts.get(item.product.id) if star_counts else 0) }}</span></button>
+                </div>
+                {% if order.status == 'delivered' %}
+                  <div>
+                    {% set pid = item.product.product_ref %}
+                    {% if can_review_map and can_review_map.get(item.product.id) %}
+                      {% if user_reviews_map and user_reviews_map.get(item.product.id) %}
+                        <a href="/products/{{ item.product.product_ref }}#reviews-list" class="btn btn--white btn--sm">Edit Review</a>
+                      {% else %}
+                        <button type="button" class="btn btn--primary btn--sm order-review-toggle" data-pid="{{ pid }}" data-ref="{{ item.product.product_ref }}">Write Review</button>
+                        <form method="post" action="/products/{{ item.product.product_ref }}/reviews" class="inline-review-form" data-pid="{{ pid }}" style="display:none; margin-top:8px;">
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                          <div class="form-group" style="margin:0;">
+                            <select name="rating" class="form-select" required style="width:120px;">
+                              <option value="5">5</option>
+                              <option value="4">4</option>
+                              <option value="3">3</option>
+                              <option value="2">2</option>
+                              <option value="1">1</option>
+                            </select>
+                          </div>
+                          <div class="form-group" style="margin:8px 0;">
+                            <textarea name="body" rows="2" class="form-textarea" placeholder="Write a short review"></textarea>
+                          </div>
+                          <div style="display:flex; gap:8px;">
+                            <button type="submit" class="btn btn--primary btn--sm">Submit</button>
+                            <button type="button" class="btn btn--white btn--sm order-review-cancel">Cancel</button>
+                          </div>
+                        </form>
+                      {% endif %}
+                    {% else %}
+                      <div class="type-body-xs text-muted">You can review this after delivery.</div>
+                    {% endif %}
+                  </div>
+                {% endif %}
+                {% endif %}
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          <!-- Totals -->
+          <div style="padding: var(--sp-4) var(--sp-6) var(--sp-5); border-top: 1px solid var(--border-default); background: var(--grey-25);">
+            <div style="display: flex; justify-content: space-between; margin-bottom: var(--sp-2);" class="type-body-sm">
+              <span class="text-muted">Shipping</span><span class="fw-bold text-success">FREE</span>
+            </div>
+            {% if order.discount and order.discount > 0 %}
+            <div style="display: flex; justify-content: space-between; margin-bottom: var(--sp-2);" class="type-body-sm">
+              <span class="text-muted">Discount</span><span class="fw-semibold text-success">— PHP {{ '%.2f'|format(order.discount|float) }}</span>
+            </div>
+            {% endif %}
+            <div style="display: flex; justify-content: space-between; margin-top: var(--sp-3); padding-top: var(--sp-3); border-top: 1px solid var(--border-subtle);" class="type-body-base">
+              <span class="fw-bold">Total Paid</span>
+              <span style="font-size: 1.15rem; font-weight: 800; color: var(--brand-primary);">PHP {{ '%.2f'|format(order.total|float) }}</span>
+            </div>
+            {% if order.payment_method == 'installment' and order.installment_plan %}
+            <div class="type-body-xs text-muted mt-2" style="text-align: right;">
+              Installment: PHP {{ '%.2f'|format(order.installment_plan.monthly_amount|float) }}/month × {{ order.installment_plan.months }} months
+            </div>
+            {% endif %}
+          </div>
         </div>
 
-     </div>
-
-     <aside class="glass-card p-6">
-        <h3 class="type-h4" style="margin-bottom: var(--sp-4);">Customer Details</h3>
-        <p class="type-body-sm"><strong class="type-body">Name:</strong> {{ order.customer.full_name if order.customer else current_user.full_name }}</p>
-        <p class="type-body-sm"><strong class="type-body">Email:</strong> {{ order.customer.email if order.customer else current_user.email }}</p>
-        <hr style="border:none; border-top: 1px solid var(--border-subtle); margin: var(--sp-3) 0;" />
-        <h3 class="type-h4" style="margin-bottom: var(--sp-4); margin-top: var(--sp-4);">Shipping Address</h3>
-        <p class="type-body-sm text-muted" style="line-height: var(--leading-relaxed);">
-           {{ order.shipping_address.get('address_line1') if order.shipping_address else 'No shipping address saved' }}<br>
-           {{ order.shipping_address.get('address_line2') if order.shipping_address and order.shipping_address.get('address_line2') else '' }}<br>
-           {{ order.shipping_address.get('city_municipality') if order.shipping_address else '' }}, {{ order.shipping_address.get('province') if order.shipping_address else '' }}<br>
-           {{ order.shipping_address.get('country') if order.shipping_address else 'Philippines' }}
-        </p>
-
-        <div class="mt-6">
-           {% if not existing_return %}
-           <a href="/customer/returns" class="btn btn--secondary btn--full">Request Return</a>
-           {% else %}
-           <span class="badge badge--warning">Return: {{ existing_return.status|replace('_', ' ')|title }}</span>
-           {% endif %}
+        <!-- Installment Schedule (if applicable) -->
+        {% if order.payment_method == 'installment' and order.installment_plan %}
+        <div class="glass-card p-0 stagger-item" style="overflow: hidden;">
+          <div style="padding: var(--sp-5) var(--sp-6); border-bottom: 1px solid var(--border-subtle); background: var(--brand-primary-subtle);">
+            <h2 class="type-h4" style="margin: 0; color: var(--brand-primary);">Installment Schedule</h2>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead><tr><th>Month</th><th>Due Date</th><th>Status</th><th style="text-align:right;">Amount</th></tr></thead>
+              <tbody>
+                {% for schedule in order.installment_plan.schedules.all() %}
+                <tr>
+                  <td class="fw-bold">Month {{ loop.index }}</td>
+                  <td>{{ schedule.due_date.strftime('%B %d, %Y') }}</td>
+                  <td>
+                    {% set is_overdue = schedule.status == 'past_due' or (schedule.status == 'pending' and schedule.due_date and schedule.due_date < today) %}
+                    {% if schedule.status == 'paid' %}
+                      <span class="badge badge--success badge--dot">Settled</span>
+                      {% if schedule.payment_ref %}<div class="type-label-xs text-muted mt-1">Ref: {{ schedule.payment_ref }}</div>{% endif %}
+                    {% elif is_overdue %}
+                      <span class="badge badge--danger badge--dot">Overdue</span>
+                    {% else %}
+                      <span class="badge badge--warning badge--dot">Upcoming</span>
+                    {% endif %}
+                  </td>
+                  <td style="text-align:right;" class="fw-bold">PHP {{ '%.2f'|format(schedule.amount|float) }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
         </div>
-     </aside>
+        {% endif %}
+      </div>
 
+      <!-- RIGHT SIDEBAR -->
+      <aside class="form-stack stagger-item" style="gap: var(--sp-5);">
+
+        <!-- Customer & Shipping -->
+        <div class="glass-card p-6">
+          <h3 class="type-h4 mb-4">Customer Details</h3>
+          <div class="type-body-sm mb-1 fw-semibold">{{ order.customer.full_name if order.customer else current_user.full_name }}</div>
+          <div class="type-body-xs text-muted mb-4">{{ order.customer.email if order.customer else current_user.email }}</div>
+
+          <hr style="border: none; border-top: 1px solid var(--border-subtle); margin: var(--sp-3) 0;">
+
+          <h3 class="type-h4 mb-3 mt-3">Shipping Address</h3>
+          <div class="type-body-sm text-muted" style="line-height: 1.8;">
+            {% set addr = order.shipping_address %}
+            {% if addr %}
+              {{ addr.get('recipient_name', '') }}<br>
+              {{ addr.get('address_line1', '') }}<br>
+              {% if addr.get('address_line2') %}{{ addr.get('address_line2') }}<br>{% endif %}
+              {{ addr.get('city_municipality', '') }}{% if addr.get('province') %}, {{ addr.get('province') }}{% endif %} {{ addr.get('postal_code', '') }}<br>
+              {{ addr.get('country', 'Philippines') }}
+              {% if addr.get('phone') %}<br><strong>📞</strong> +63{{ addr.get('phone', '') }}{% endif %}
+            {% else %}
+              <span class="text-muted">No shipping address recorded.</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Payment Info -->
+        <div class="glass-card p-6">
+          <h3 class="type-h4 mb-4">Payment</h3>
+          <div style="display: flex; align-items: center; gap: var(--sp-3);">
+            <div style="width: 40px; height: 40px; background: var(--brand-primary-subtle); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--brand-primary); flex-shrink: 0;">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            </div>
+            <div>
+              <div class="type-body-sm fw-bold">{{ 'Installment Plan' if order.payment_method == 'installment' else 'Full Payment' }}</div>
+              {% if order.payment_method == 'installment' and order.installment_plan %}
+              <div class="type-body-xs text-muted">PHP {{ '%.2f'|format(order.installment_plan.monthly_amount|float) }}/mo × {{ order.installment_plan.months }} months</div>
+              {% else %}
+              <div class="type-body-xs text-muted">Paid in full on {{ order.paid_at.strftime('%b %d, %Y') if order.paid_at else 'order date' }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+            <!-- Cashflow -->
+            <div class="glass-card p-6">
+              <h3 class="type-h4 mb-4">Cashflow</h3>
+              {% if cashflow and cashflow|length > 0 %}
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                {% for ev in cashflow %}
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border-subtle);">
+                  <div>
+                    <div class="type-body-sm fw-semibold">{{ ev.label }}</div>
+                    <div class="type-body-xs text-muted">
+                      {% if ev.ts %}{{ ev.ts.strftime('%b %d, %Y %H:%M') }}{% else %}—{% endif %}
+                      {% if ev.method %} • {{ ev.method }}{% endif %}
+                      {% if ev.ref %} • Ref: {{ ev.ref }}{% endif %}
+                      {% if ev.status %} • {{ ev.status|replace('_',' ')|title }}{% endif %}
+                    </div>
+                  </div>
+                  <div style="text-align:right; min-width:110px;">
+                    {% if ev.kind == 'voucher' %}
+                      <div class="text-success">Saved PHP {{ '%.2f'|format(ev.amount|float) }}</div>
+                    {% elif ev.kind == 'refund' %}
+                      <div class="text-success">PHP {{ '%.2f'|format(ev.amount|float) }} refunded</div>
+                    {% elif ev.kind in ['payment','installment','downpayment'] %}
+                      <div class="text-danger">PHP {{ '%.2f'|format((-ev.amount)|float) }} paid</div>
+                    {% else %}
+                      <div class="type-body-xs text-muted">PHP {{ '%.2f'|format(ev.amount|float) }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+              {% else %}
+                <div class="type-body-xs text-muted">No payment or refund activity recorded.</div>
+              {% endif %}
+            </div>
+        </div>
+
+        <!-- Actions Card -->
+        <div class="glass-card p-6">
+          <h3 class="type-h4 mb-4">Actions</h3>
+          {% if not existing_return %}
+            {% if order.status == 'pending' %}
+            <form action="{{ url_for('customer_order_cancel', order_ref=order.order_ref) }}" method="POST"
+              data-confirm="Cancel this order? Item stock and any vouchers used will be restored.">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn btn--danger btn--full btn--sm mb-3">Cancel Order</button>
+            </form>
+            {% elif order.status == 'paid' %}
+            <form action="{{ url_for('customer_order_cancel', order_ref=order.order_ref) }}" method="POST"
+              data-confirm="Note: Cancellations for paid orders require seller approval. Proceed?">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn btn--full btn--sm mb-3" style="border: 1.5px solid var(--color-danger); color: var(--color-danger); background: white;">Request Cancellation</button>
+            </form>
+            {% endif %}
+
+            {% if order.status == 'delivered' %}
+            <a href="/customer/returns?order_ref={{ order.order_ref }}" class="btn btn--secondary btn--full btn--sm mb-3">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right: 6px;"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.75"/></svg>
+              Request Return / Refund
+            </a>
+            {% endif %}
+
+            <a href="/customer/inquiries?order_ref={{ order.order_ref }}" class="btn btn--ghost btn--full btn--sm" style="border: 1.5px solid var(--border-subtle);">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right: 6px;"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+              Contact Support
+            </a>
+          {% else %}
+            <div style="padding: var(--sp-4); background: var(--color-warning-subtle); border-radius: 10px; border: 1px solid rgba(245,158,11,0.2);">
+              <div class="type-body-xs fw-bold" style="color: var(--color-warning);">Return Request Active</div>
+              <div class="type-body-xs text-muted mt-1">Status: {{ existing_return.status|replace('_', ' ')|title }}</div>
+            </div>
+          {% endif %}
+        </div>
+      </aside>
+    </div>
   </div>
 </div>
 {% endblock %}
+  {% block scripts %}
+  <script>
+  document.addEventListener('DOMContentLoaded', function(){
+    // Star toggle handler for order items on order detail
+    document.querySelectorAll('.order-star-btn').forEach(function(btn){
+      btn.addEventListener('click', async function(e){
+        e.preventDefault();
+        const ref = this.dataset.ref;
+        if (!ref) return;
+        this.disabled = true;
+        try {
+          const resp = await fetch(`/products/${ref}/star`, {
+            method: 'POST',
+            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+            credentials: 'same-origin'
+          });
+          if (!resp.ok) throw new Error('Network response not ok');
+          const data = await resp.json();
+          if (data && typeof data.starred !== 'undefined') {
+            const icon = data.starred ? '★' : '☆';
+            const count = data.stars_count || 0;
+            // Update this button's content and all counters for the same product id
+            const pidSpan = this.querySelector('.order-star-count');
+            const pid = pidSpan ? pidSpan.dataset.pid : null;
+            this.innerHTML = `${icon} <span class="order-star-count" data-pid="${pid || ''}">${count}</span>`;
+            if (pid) {
+              document.querySelectorAll('.order-star-count[data-pid="'+pid+'"]').forEach(function(n){ n.textContent = count; });
+            }
+            this.setAttribute('aria-pressed', data.starred ? 'true' : 'false');
+          }
+        } catch (err) {
+          console.error('Could not toggle star', err);
+        } finally {
+          this.disabled = false;
+        }
+      });
+    });
+
+    // Toggle inline review form
+    document.querySelectorAll('.order-review-toggle').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        const pid = this.dataset.pid;
+        const form = document.querySelector('.inline-review-form[data-pid="'+pid+'"]');
+        if (form) form.style.display = (form.style.display === 'none' || !form.style.display) ? 'block' : 'none';
+      });
+    });
+
+    // Cancel inline review
+    document.querySelectorAll('.order-review-cancel').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        const form = this.closest('.inline-review-form');
+        if (form) form.style.display = 'none';
+      });
+    });
+  });
+  </script>
+  {% endblock %}

@@ -1,125 +1,165 @@
 {% extends 'base.html' %}
-{% block title %}{{ page_title or 'Returns & MRM' }} — Seller Portal{% endblock %}
+{% block title %}Resolution Hub - Seller Portal{% endblock %}
+
 {% block content %}
-<div class="stagger-children">
-    <div class="page-content bg-grey-50 seller-shell">
-          <nav class="mb-6" aria-label="Breadcrumb">
-             <div class="breadcrumb-wrap">
-                <a href="/seller/dashboard" class="breadcrumb-link type-body-sm">Dashboard</a>
-                <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" style="color: var(--grey-300); opacity: 0.5;"><path d="M9 5l7 7-7 7"/></svg>
-                <span class="type-body-sm fw-bold" style="color: var(--grey-900);">{{ page_title or 'Returns & Merchant RMA' }}</span>
-             </div>
-          </nav>
-       <div class="seller-header" style="align-items:flex-start; margin-bottom:var(--sp-8);">
-                  <div class="seller-header__head">
-                      <div class="seller-header__meta">
-                         <span class="badge seller-header__chip seller-header__chip--danger">Sales</span>
-                 <span class="type-label" style="color:var(--grey-500);">{{ page_title or 'Returns & Merchant RMA' }}</span>
-               </div>
-                      <h1 class="type-display-md" style="color:var(--grey-900); margin:0;">{{ page_title or 'Returns & Merchant RMA' }}</h1>
-                                 <p class="type-body-sm mt-2" style="color:var(--grey-600);">{{ page_subtitle or 'Review return requests, capture seller notes, and complete refund updates.' }}</p>
-            </div>
-     </div>
-
-     <div class="table-wrapper">
-        <form method="get" action="/seller/returns" class="table-toolbar" style="display:flex; gap:var(--sp-3); flex-wrap:wrap; align-items:end;" data-enhance="submit-loading" aria-label="Filter returns">
-           <div class="form-group" style="margin:0; width:320px;">
-              <label class="form-label" for="seller-returns-q">Search</label>
-              <div class="form-input-group">
-                    <span class="form-input-group__icon" style="color: var(--grey-400);" aria-hidden="true">
-                      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                    </span>
-              <input id="seller-returns-q" type="search" class="form-input" name="q" value="{{ filters.q if filters else '' }}" placeholder="RMA or reason" autocomplete="off" aria-describedby="seller-returns-q-help" />
-              </div>
-              <small id="seller-returns-q-help" class="form-helper">Narrow the queue by keyword.</small>
-           </div>
-           <div class="form-group" style="margin:0; min-width:170px;">
-              <label class="form-label" for="seller-returns-status">Status</label>
-              <select id="seller-returns-status" class="form-select" name="status" aria-describedby="seller-returns-status-help">
-              <option value="all" {% if not filters or filters.status == 'all' %}selected{% endif %}>All statuses</option>
-              <option value="pending" {% if filters and filters.status == 'pending' %}selected{% endif %}>Pending</option>
-              <option value="accepted" {% if filters and filters.status == 'accepted' %}selected{% endif %}>Accepted</option>
-              <option value="rejected" {% if filters and filters.status == 'rejected' %}selected{% endif %}>Rejected</option>
-              <option value="refund_requested" {% if filters and filters.status == 'refund_requested' %}selected{% endif %}>Refund Requested</option>
-              <option value="refunded" {% if filters and filters.status == 'refunded' %}selected{% endif %}>Refunded</option>
-           </select>
-              <small id="seller-returns-status-help" class="form-helper">Optional</small>
-           </div>
-           <button class="btn btn--secondary btn--sm" type="submit"><span class="btn__label">Apply filters</span></button>
-        </form>
-
-        <div class="kpi-grid mb-6">
-          <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Total</div><div class="type-display-md mt-2">{{ stats.total if stats else 0 }}</div></div></div>
-          <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Pending</div><div class="type-display-md mt-2">{{ stats.pending if stats else 0 }}</div></div></div>
-          <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Accepted</div><div class="type-display-md mt-2">{{ stats.accepted if stats else 0 }}</div></div></div>
-          <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Refunded</div><div class="type-display-md mt-2">{{ stats.refunded if stats else 0 }}</div></div></div>
+<div class="page-content page-enter stagger-children" style="padding: var(--sp-12) 0;">
+  <div class="container-fluid" style="max-width: 1400px; padding: 0 var(--sp-8);">
+    
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: var(--sp-10);">
+      <div class="stagger-item">
+        <div class="chip chip--active mb-4">Logistics Compliance</div>
+        <h1 class="type-display-sm">Resolution Hub</h1>
+        <p class="type-body-sm text-muted">Acknowledge, dispute, or process protection claims and return requests.</p>
+      </div>
+      <div class="stagger-item">
+          <div class="glass-card px-6 py-3" style="border: 1.5px solid var(--border-medium); display: flex; align-items: center; gap: 12px;">
+          <span class="type-label-sm fw-bold">{{ stats.total }}</span>
+          <span class="type-label-xs text-muted">Pending Decisions</span>
         </div>
+      </div>
+    </div>
 
-        <table class="data-table">
-           <thead>
-              <tr>
-                 <th>RMA ID</th>
-                 <th>Date Requested</th>
-                 <th>Order ID</th>
-                 <th>Reason</th>
-                 <th>Status</th>
-                 <th style="text-align:right;">Actions</th>
-              </tr>
-           </thead>
-           <tbody>
-              {% for item in returns %}
-              <tr>
-                 <td><div class="fw-semibold text-primary">{{ item.rrt_ref }}</div></td>
-                 <td><div>{{ item.created_at.strftime('%b %d, %Y %I:%M %p') if item.created_at else '-' }}</div></td>
-                 <td><a href="/seller/orders/{{ item.order.order_ref if item.order else '' }}">#{{ item.order.order_ref if item.order else '-' }}</a></td>
-                 <td>{{ item.reason }}</td>
-                 <td>
-                   <span class="badge badge--{{ 'warning' if item.status == 'pending' else ('success' if item.status in ['accepted','refunded'] else 'danger') }}">{{ item.status|replace('_', ' ')|title }}</span>
-                 </td>
-                 <td style="text-align:right;">
-                    <button class="btn btn--secondary btn--sm" onclick="document.getElementById('rma-{{ item.rrt_ref }}').showModal(); return false;">Review</button>
-                 </td>
-              </tr>
-              {% else %}
-              <tr>
-                        <td colspan="6" class="text-muted" style="text-align:center; padding:var(--sp-6);">
-                           <div class="type-body-sm fw-semibold">No return requests found for the selected filters.</div>
-                           <div class="type-body-xs mt-1">When customers file returns, requests will appear here for approval, denial, or refund processing.</div>
-                        </td>
-              </tr>
-              {% endfor %}
-           </tbody>
+    <!-- Claim List -->
+    <div class="glass-card overflow-hidden stagger-item">
+      {% if stats.total %}
+      <div class="table-responsive">
+        <table class="table--premium">
+          <thead>
+            <tr style="background: var(--grey-50);">
+              <th style="padding-left: 24px;">Claim ID</th>
+              <th>Order & Reason</th>
+              <th>Customer</th>
+              <th>Status</th>
+              <th>Resolution Window</th>
+              <th style="text-align: right; padding-right: 24px;">Decision</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for ret in returns %}
+            <tr class="interactive-row">
+              <td style="padding-left: 24px;">
+                 <div class="type-label-sm fw-bold text-danger">{{ ret.rrt_ref }}</div>
+                 <div class="type-label-xs text-muted">{{ ret.created_at.strftime('%b %d') }}</div>
+              </td>
+              <td>
+                 <div class="type-body-sm fw-bold">{{ (ret.reason_category or ret.reason)|replace('_', ' ')|title }}</div>
+                 <div class="type-label-xs text-muted">Order: {{ ret.order.order_ref if ret.order else 'Unknown' }}</div>
+              </td>
+              <td>
+                <div class="type-body-sm fw-bold">{{ ret.order.customer.full_name if ret.order and ret.order.customer else 'Guest Account' }}</div>
+                <div class="type-label-xs text-muted">Verified Buyer</div>
+              </td>
+              <td>
+                 {% set status_tone = 'badge--warning' if ret.status == 'pending' else ('badge--primary' if ret.status == 'approved' else 'badge--success') %}
+                 <span class="badge rounded-pill {{ status_tone }}" style="padding: 6px 14px;">
+                    {{ ret.status|replace('_', ' ')|title }}
+                 </span>
+              </td>
+              <td>
+                 <div class="type-label-xs fw-bold text-muted">Response Required</div>
+                 <div style="width: 100px; height: 4px; background: var(--grey-100); border-radius: 2px; margin-top: 4px; overflow: hidden;">
+                   <div style="width: 70%; height: 100%; background: var(--color-warning);"></div>
+                 </div>
+              </td>
+              <td style="text-align: right; padding-right: 24px;">
+                 <button class="btn btn--white btn--sm" style="border: 1.5px solid var(--border-medium);" onclick="document.getElementById('rma-{{ ret.rrt_ref }}').showModal();">Review Claim</button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
         </table>
-     </div>
-   </div>
+      </div>
+      {% else %}
+      <div style="padding: 100px 24px; text-align: center;">
+        <div style="width: 80px; height: 80px; background: var(--grey-50); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;">
+            <svg width="40" height="40" fill="none" stroke="var(--grey-300)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        </div>
+        <h3 class="type-h4 mb-2">Maximum Compliance Reached</h3>
+        <p class="type-body-sm text-muted mb-0">No pending return requests require your attention.</p>
+      </div>
+      {% endif %}
+
+      <div class="pagination" style="margin-top: var(--sp-12); display:flex; justify-content:space-between; align-items:center; padding-top: var(--sp-6); border-top: 1px solid var(--border-default);">
+        <div class="type-body-sm text-muted">Showing {{ returns|length }} of {{ pagination.total if pagination else stats.total }} claims</div>
+        {% if pagination and pagination.pages > 1 %}
+        <div style="display:flex; gap: var(--sp-2);">
+          {% if pagination.has_prev %}
+          <a href="{{ url_for(request.endpoint, page=pagination.prev_num, per_page=pagination.per_page) }}" class="btn btn--white btn--sm">Previous</a>
+          {% else %}
+          <button class="btn btn--white btn--sm" disabled>Previous</button>
+          {% endif %}
+
+          <div class="btn btn--white btn--sm" style="pointer-events: none; border: none;">Page {{ pagination.page }} of {{ pagination.pages }}</div>
+
+          {% if pagination.has_next %}
+          <a href="{{ url_for(request.endpoint, page=pagination.next_num, per_page=pagination.per_page) }}" class="btn btn--white btn--sm">Next</a>
+          {% else %}
+          <button class="btn btn--white btn--sm" disabled>Next</button>
+          {% endif %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
 </div>
 
-{% for item in returns %}
-<dialog id="rma-{{ item.rrt_ref }}" style="border:none; border-radius:var(--radius-xl); max-width:640px; width:calc(100% - 2rem); box-shadow:var(--shadow-xl);">
-   <form method="post" action="/seller/returns/{{ item.rrt_ref }}" style="padding:var(--sp-6);" data-enhance="submit-loading">
+<!-- Premium Resolution Modals -->
+{% for ret in returns %}
+<dialog id="rma-{{ ret.rrt_ref }}" class="glass-card p-0" style="border: none; max-width: 600px; width: 90%; box-shadow: var(--shadow-2xl); border-radius: var(--radius-xl); overflow: hidden;">
+  <div class="p-8 border-bottom" style="background: var(--grey-50); display: flex; justify-content: space-between; align-items: center;">
+    <div>
+      <h2 class="type-h3 mb-0">Review Resolution Claim</h2>
+      <p class="type-body-sm text-muted">Analyze incident data for <strong>{{ ret.rrt_ref }}</strong></p>
+    </div>
+    <button type="button" class="modal__close" aria-label="Close" title="Close" onclick="this.closest('dialog').close()" style="opacity: 0.4;">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <form action="/seller/returns/{{ ret.rrt_ref }}" method="POST" class="form-stack p-8">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <div class="modal__header" style="display:flex; justify-content:space-between; align-items:flex-start; gap:var(--sp-4);">
-      <div class="modal__title-group">
-        <div class="modal__title">Review {{ item.rrt_ref }}</div>
-        <div class="modal__subtitle">Order #{{ item.order.order_ref if item.order else '-' }}</div>
+    
+    <div class="grid-2 gap-6 mb-8">
+      <div>
+        <label class="type-label-xs text-muted mb-1 d-block">REASON CATEGORY</label>
+        <div class="type-body-sm fw-bold">{{ (ret.reason_category or ret.reason)|replace('_', ' ')|title }}</div>
       </div>
-      <button type="button" class="modal__close" onclick="this.closest('dialog').close()">✕</button>
-    </div>
-    <div class="modal__body" style="padding:var(--sp-4) 0;">
-      <p><strong>Reason for return:</strong> {{ item.reason }}</p>
-      <p class="mt-2 text-muted">{{ item.description }}</p>
-      <div class="mt-4 form-group">
-         <label class="form-label" for="seller-notes-{{ item.rrt_ref }}">Seller notes <span class="optional">(optional)</span></label>
-         <textarea id="seller-notes-{{ item.rrt_ref }}" class="form-textarea" name="seller_notes" placeholder="Visible to operations and the customer when shared." aria-describedby="seller-notes-{{ item.rrt_ref }}-help">{{ item.seller_notes or '' }}</textarea>
-         <small id="seller-notes-{{ item.rrt_ref }}-help" class="form-helper">Add context for approval, denial, or refund decisions.</small>
+      <div>
+        <label class="type-label-xs text-muted mb-1 d-block">CLAIM DATE</label>
+        <div class="type-body-sm fw-bold">{{ ret.created_at.strftime('%B %d, %Y') }}</div>
       </div>
     </div>
-    <div class="modal__footer" style="display:flex; gap:var(--sp-3); justify-content:flex-end; flex-wrap:wrap;">
-         <button class="btn btn--danger" type="submit" name="action" value="deny" onclick="return confirm('Deny this return request? This action updates the request status.');"><span class="btn__label">Deny request</span></button>
-         <button class="btn btn--secondary" type="submit" name="action" value="refund" onclick="return confirm('Mark this return as refunded? Ensure refund amount is correct before confirming.');"><span class="btn__label">Confirm refunded</span></button>
-      <button class="btn btn--primary" type="submit" name="action" value="approve"><span class="btn__label">Approve return</span></button>
+
+    <div class="form-group mb-8">
+      <label class="form-label">Customer Explanation</label>
+      <div class="p-4 rounded-3 text-muted" style="background: var(--grey-50); border: 1px solid var(--border-subtle); font-size: 13px;">
+        {{ ret.description or 'No description provided.' }}
+      </div>
     </div>
+
+    <div class="form-group mb-10">
+      <label class="form-label">Resolution Decision Notes</label>
+      <textarea name="seller_notes" class="form-textarea" rows="4" placeholder="Briefly document your decision rationale..." required>{{ ret.seller_notes or '' }}</textarea>
+      <p class="type-label-xs text-muted mt-2">These notes are visible to the customer and the operations team.</p>
+    </div>
+
+    <div style="display: flex; gap: var(--sp-3);">
+       <button type="submit" name="action" value="deny" class="btn btn--white btn--full" style="border: 1.5px solid var(--border-medium); color: var(--color-danger);">Dispute Claim</button>
+       <button type="submit" name="action" value="approve" class="btn btn--primary btn--full shadow-primary">Approve & Inspect</button>
+    </div>
+    {% if ret.status == 'approved' %}
+    <div class="mt-4">
+       <button type="submit" name="action" value="refund" class="btn btn--secondary btn--full py-4 text-primary" style="background: var(--brand-primary-subtle); border: none;">Authorize Final Refund</button>
+    </div>
+    {% endif %}
   </form>
 </dialog>
 {% endfor %}
+
+<style>
+.table--premium { width: 100%; border-collapse: collapse; }
+.table--premium th { padding: 16px 12px; font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em; color: var(--grey-500); background: var(--grey-50); border-bottom: 1.5px solid var(--border-subtle); text-align: left; }
+.table--premium td { padding: 20px 12px; border-bottom: 1px solid var(--border-subtle); vertical-align: middle; }
+.interactive-row:hover { background: rgba(0, 122, 255, 0.02); }
+dialog::backdrop { background: rgba(0,0,0,0.3); backdrop-filter: blur(8px); }
+</style>
 {% endblock %}

@@ -8,7 +8,7 @@ Structure created:
 - `eacis/templates/base.html` — base Jinja2 template
 - `eacis/static/css/tokens.css` — design tokens
 - `eacis/static/css/base.css` — base styles
-- `eacis/static/js/main.js` — minimal JS bootstrap
+- `eacis/static/js/main.js` — minimal JS setup
 - `eacis/static/assets/placeholder-manifest.json` — product image manifest (starter)
 
 Next recommended steps:

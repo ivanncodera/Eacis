@@ -24,31 +24,36 @@
           <span class="form-input-group__icon" aria-hidden="true" style="font-size: 14px; font-weight: 600; color: var(--grey-400);">@</span>
           <input id="email" name="email" type="email" placeholder="you@example.com" autocomplete="email" required class="form-input" aria-describedby="email-hint" />
         </div>
-        <div id="email-hint" class="form-helper" style="margin-top: var(--sp-2);">One account for all E-ACIS portals.</div>
+        <div id="email-hint" class="form-helper" style="margin-top: var(--sp-2);">Use the email linked to your E-ACIS account.</div>
       </div>
 
       <div class="form-group">
         <label for="password" class="form-label">Password <abbr class="required" title="required">*</abbr></label>
         <div class="form-input-group" style="position:relative;">
-          <input id="password" name="password" type="password" placeholder="••••••••" autocomplete="current-password" required class="form-input" />
+          <input id="password" name="password" type="password" placeholder="••••••••" autocomplete="current-password" required class="form-input" style="padding-right: 40px;" aria-describedby="password-hint" />
           <button type="button" id="password-toggle" aria-label="Show password" aria-pressed="false" class="password-toggle" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;padding:5px;cursor:pointer;color:var(--grey-400);transition:color var(--dur-fast);">
             <svg class="icon icon-eye" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
           </button>
         </div>
+        <div id="password-hint" class="form-helper" style="margin-top: var(--sp-2);">Minimum 6 characters.</div>
       </div>
 
-      <div class="form-group" style="display:flex;align-items:center;gap:12px;">
+      <div class="form-group auth-actions" style="display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:12px;flex-wrap:nowrap;">
         <label class="form-label" for="remember" style="display:inline-flex;align-items:center;gap:8px;font-weight:var(--weight-regular);">
           <input id="remember" type="checkbox" name="remember" style="width:18px;height:18px;" />
           <span class="type-body-sm">Remember me</span>
         </label>
-        <a href="#" class="type-body-sm" style="margin-left:auto;">Forgot password?</a>
+        <a href="mailto:support@eacis.support?subject=E-ACIS%20Login%20Help" class="type-body-sm" style="margin-left:auto;">Need sign-in help?</a>
       </div>
 
       <div style="margin-top:var(--sp-8);">
-        <button id="signin-btn" class="btn btn--primary btn--full btn--xl" type="submit" disabled aria-disabled="true">
+        <button id="signin-btn" class="btn btn--primary btn--full btn--xl" type="submit" aria-disabled="false">
           <span class="btn__label">Sign In</span>
         </button>
+      </div>
+
+      <div class="text-center" style="margin-top: var(--sp-4);">
+        <a href="/auth/forgot-password" class="type-body-sm text-primary fw-semibold">Forgot your password?</a>
       </div>
 
       <div class="form-footer" style="margin-top:var(--sp-10); border-top: 1px solid var(--border-subtle); padding-top: var(--sp-6); text-align: center;">
@@ -62,9 +67,21 @@
   </div>
 </div>
 
+<style>
+  .auth-actions { flex-direction: row !important; }
+  .auth-actions .form-label { margin-bottom: 0; }
+  .password-toggle:hover { color: var(--grey-700) !important; }
+  .password-toggle:focus-visible {
+    border-radius: var(--radius-sm);
+    outline: 2px solid var(--brand-primary);
+    outline-offset: 2px;
+  }
+
+</style>
+
     <script>
     // mark page as auth to reduce chrome clutter
-    document.body.classList.add('auth-page');
+    document.body.classList.add('page-auth');
     (function(){
       // Elements are present because script is placed after the form
       const form = document.getElementById('login-form');
@@ -83,6 +100,13 @@
         el.style.display = ok ? 'none' : 'block';
       }
 
+      function setFieldState(input, valid){
+        if (!input) return;
+        input.classList.toggle('is-error', !valid);
+        input.classList.toggle('is-success', valid && input.value.trim().length > 0);
+        input.setAttribute('aria-invalid', String(!valid));
+      }
+
       function setSubmitState(enabled){
         btn.disabled = !enabled;
         btn.setAttribute('aria-disabled', String(!enabled));
@@ -91,9 +115,18 @@
       function validate(){
         const eok = validEmail(email.value.trim());
         const pok = pwd.value.length >= 6;
-        updateHelper(emailHint, eok);
-        updateHelper(pwdHint, pok);
+        setFieldState(email, eok);
+        setFieldState(pwd, pok);
+        if (emailHint) {
+          emailHint.textContent = eok ? 'Email looks good.' : 'Enter a valid email address.';
+          updateHelper(emailHint, eok);
+        }
+        if (pwdHint) {
+          pwdHint.textContent = pok ? 'Password format is valid.' : 'Minimum 6 characters.';
+          updateHelper(pwdHint, pok);
+        }
         setSubmitState(eok && pok && !isLocked);
+        return eok && pok;
       }
 
       let isLocked = false;
@@ -105,6 +138,7 @@
         pwd.type = isVisible ? 'password' : 'text';
         toggle.setAttribute('aria-pressed', String(!isVisible));
         toggle.setAttribute('title', !isVisible ? 'Hide password' : 'Show password');
+        toggle.setAttribute('aria-label', !isVisible ? 'Hide password' : 'Show password');
         
         // Update SVG icon
         const svg = toggle.querySelector('svg');
@@ -144,10 +178,22 @@
       if(err && err.textContent && err.textContent.trim().length){
         try{ err.hidden = false; err.setAttribute('tabindex','-1'); err.focus(); }catch(e){}
       }
+
+      // Browser autofill may not send input events immediately.
       validate();
+      requestAnimationFrame(validate);
+      setTimeout(validate, 200);
 
       // Progressive enhancement: intercept submission to show loading state and disable inputs
       form.addEventListener('submit', (e)=>{
+        if(!validate()){
+          e.preventDefault();
+          if (err) {
+            err.hidden = false;
+            err.textContent = 'Please provide a valid email and password before signing in.';
+          }
+          return;
+        }
         // show inline loading affordance and mark busy for accessibility
         btn.classList.add('btn--loading');
         btn.setAttribute('aria-busy','true');

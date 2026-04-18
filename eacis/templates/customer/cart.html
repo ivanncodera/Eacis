@@ -1,106 +1,254 @@
 {% extends 'base.html' %}
-{% block title %}Cart — E-ACIS{% endblock %}
+{% from '_icons.html' import icon_check %}
+{% block title %}Shopping Cart — E-ACIS{% endblock %}
 {% block content %}
-<div class="main-content">
-   <div class="stagger-children">
-      <header style="margin-bottom: var(--sp-8);">
-         <h1 class="type-display-lg">Your Cart</h1>
-      </header>
+<div class="main-content stagger-children" style="padding-top: calc(var(--topbar-height) + var(--sp-8)); padding-bottom: var(--sp-24);">
+  <div class="container" style="max-width: 1100px;">
 
-      <div style="display: grid; grid-template-columns: 1fr 340px; gap: var(--sp-8); align-items: start;">
-         <div class="glass-card">
-            <div style="display: flex; flex-direction: column; gap: var(--sp-4);">
-               {% for line in cart_lines %}
-               <div style="display: flex; gap: var(--sp-4); padding-bottom: var(--sp-4); border-bottom: 1px solid var(--border-subtle); align-items:flex-start;">
-                  <div style="width: 100px; height: 100px; background: var(--grey-50); border-radius: var(--radius-md); overflow: hidden; display:flex; align-items:center; justify-content:center;">
-                     <span class="type-body-xs text-muted">Item</span>
-                  </div>
-                  <div style="flex: 1;">
-                     <h3 class="type-h4" style="margin-bottom: var(--sp-1);">{{ line.product.name }}</h3>
-                     <div class="type-ref" style="margin-bottom: var(--sp-2);">{{ line.product.product_ref }}</div>
-                     <div class="type-price-sm">PHP {{ '%.2f'|format(line.product.price|float) }}</div>
-                  </div>
-                  <form method="post" action="/cart" class="form-group" style="width: 90px; margin:0;" data-enhance="submit-loading">
-                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                     <input type="hidden" name="action" value="update">
-                     <input type="hidden" name="product_id" value="{{ line.product.id }}">
-                     <label class="sr-only">Quantity</label>
-                     <input type="number" name="qty" value="{{ line.qty }}" min="1" class="form-input" style="height: var(--input-height-sm);" onchange="this.form.submit()">
-                  </form>
-                  <form method="post" action="/cart" style="margin:0;" data-enhance="submit-loading">
-                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                     <input type="hidden" name="action" value="remove">
-                     <input type="hidden" name="product_id" value="{{ line.product.id }}">
-                     <button type="submit" class="btn btn-ghost" style="padding: 0 var(--sp-2); color: var(--color-danger);">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-                     </button>
-                  </form>
-               </div>
-               {% else %}
-               <div class="empty-state" style="padding: var(--sp-12) 0; text-align: center;">
-                  <h3 class="type-h3" style="color: var(--grey-400);">Your cart is empty.</h3>
-               </div>
-               {% endfor %}
-            </div>
-         </div>
+    <!-- Breadcrumb -->
+    <nav class="mb-8" aria-label="Breadcrumb">
+      <div style="display: flex; align-items: center; gap: var(--sp-2); font-size: var(--text-sm);">
+        <a href="/customer/home" class="text-muted" style="text-decoration:none;">Shop</a>
+        <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+        <span class="fw-bold" style="color: var(--grey-900);">Your Cart</span>
+        {% if cart_lines %}
+        <span class="badge badge--primary" style="margin-left: 4px;">{{ cart_lines|length }} item{% if cart_lines|length != 1 %}s{% endif %}</span>
+        {% endif %}
+      </div>
+    </nav>
 
-         <aside class="glass-card glass-card--strong" style="position: sticky; top: calc(var(--topbar-height) + var(--sp-6));">
-            <h3 class="type-h3" style="margin-bottom: var(--sp-6);">Order Summary</h3>
+    {% if cart_lines %}
+    <div style="display: grid; grid-template-columns: 1fr 360px; gap: var(--sp-10); align-items: start;">
 
-            <div style="display:flex; justify-content:space-between; margin-bottom: var(--sp-3);">
-               <span class="type-body-sm text-muted">Subtotal</span>
-               <span class="type-body-sm fw-semibold">PHP {{ '%.2f'|format(subtotal|float) }}</span>
+      <!-- Cart Items -->
+      <div class="form-stack" style="gap: var(--sp-4);">
+        <div class="glass-card p-0" style="overflow: hidden;">
+
+          <!-- Cart Header -->
+          <div style="padding: var(--sp-5) var(--sp-6); border-bottom: 1px solid var(--border-subtle); background: var(--grey-25); display: flex; justify-content: space-between; align-items: center;">
+            <h1 class="type-h4" style="margin: 0;">Shopping Cart</h1>
+            <div style="display:flex; align-items:center; gap: var(--sp-3);">
+              <label style="display:inline-flex; align-items:center; gap:8px; color: var(--grey-700); font-size: 13px;">
+                <input type="checkbox" id="cart_select_all" aria-label="Select all items" style="width:16px; height:16px;">
+                <span style="line-height:1;">Select all</span>
+              </label>
+              <form method="post" action="/cart" style="margin:0;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="action" value="clear">
+                <button type="submit" class="btn btn--ghost btn--sm" style="color: var(--grey-400); font-size: var(--text-xs);">Clear All</button>
+              </form>
             </div>
-            <div style="display:flex; justify-content:space-between; margin-bottom: var(--sp-3);">
-               <span class="type-body-sm text-muted">Shipping</span>
-               <span class="type-body-sm fw-semibold text-success">Free</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; margin-bottom: var(--sp-3);">
-               <span class="type-body-sm text-muted">Voucher Discount</span>
-               <span class="type-body-sm fw-semibold">- PHP {{ '%.2f'|format(voucher_discount|default(0)|float) }}</span>
+          </div>
+
+          <!-- Cart Items List -->
+          {% for line in cart_lines %}
+          <div class="cart-item stagger-item" style="padding: var(--sp-5) var(--sp-6); {% if not loop.last %}border-bottom: 1px solid var(--border-subtle);{% endif %} display: flex; gap: var(--sp-5); align-items: flex-start;">
+
+            <!-- Selection Checkbox -->
+            <div style="flex-shrink: 0; display:flex; align-items:center;">
+              <input type="checkbox" class="cart-item__checkbox" name="selected_item" value="{{ line.product.product_ref }}" checked aria-label="Include {{ line.product.name }} for checkout" style="width:18px; height:18px;">
             </div>
 
-            <form method="post" action="/cart" style="margin-bottom: var(--sp-4);" data-enhance="submit-loading">
-               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-               <input type="hidden" name="action" value="apply_voucher">
-               <div class="form-input-group">
-                  <input type="text" name="voucher_code" class="form-input" placeholder="Enter voucher code" value="{{ voucher_code|default('') }}">
-                  <button type="submit" class="btn btn--secondary btn--lg">Apply</button>
-               </div>
-            </form>
-            {% if applied_voucher %}
-            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: var(--sp-4); gap: var(--sp-2);">
-               <span class="type-body-xs text-muted">Applied: <strong>{{ applied_voucher.code }}</strong></span>
-               <form method="post" action="/cart" style="margin:0;" data-enhance="submit-loading">
+            <!-- Product Image -->
+            <a href="/products/{{ line.product.product_ref }}" style="flex-shrink: 0; display: block; width: 88px; height: 88px; border-radius: 12px; overflow: hidden; border: 1px solid var(--border-subtle); background: var(--grey-50);">
+              {% if line.product.image_url %}
+                <img src="{{ line.product.image_url }}" alt="{{ line.product.name }}" style="width:100%; height:100%; object-fit:cover;" loading="lazy">
+              {% else %}
+                <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
+                  <svg width="32" height="32" fill="none" stroke="var(--grey-300)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M4 9h16M9 4v16"/></svg>
+                </div>
+              {% endif %}
+            </a>
+
+            <!-- Product Info -->
+            <div style="flex: 1; min-width: 0;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: var(--sp-4);">
+                <div>
+                  <a href="/products/{{ line.product.product_ref }}" class="fw-bold type-body-base" style="color: var(--grey-900); text-decoration: none; display:block; margin-bottom: 4px; line-height: 1.3;">{{ line.product.name }}</a>
+                  <div class="type-body-xs text-muted mb-2">SKU: {{ line.product.product_ref }}</div>
+                  {% if line.product.seller %}
+                  <div class="type-body-xs text-muted">Sold by <strong>{{ line.product.seller.business_name or line.product.seller.computed_full_name or 'Unknown' }}</strong></div>
+                  {% endif %}
+                </div>
+                <!-- Remove -->
+                  <form method="post" action="/cart" style="margin:0; flex-shrink:0;">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                  <input type="hidden" name="action" value="remove_voucher">
-                  <button type="submit" class="btn btn--ghost" style="padding: 0 var(--sp-2);">Remove</button>
-               </form>
+                  <input type="hidden" name="action" value="remove">
+                  <input type="hidden" name="product_ref" value="{{ line.product.product_ref }}">
+                  <button type="submit" class="btn btn--icon btn--ghost" aria-label="Remove item" style="color: var(--grey-400); padding: 4px; width:32px; height:32px;" title="Remove">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                  </button>
+                </form>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: var(--sp-4);">
+                <!-- Qty + Stock Warning -->
+                <div style="display: flex; align-items: center; gap: var(--sp-3);">
+                  <form method="post" action="/cart" style="margin:0;" data-enhance="submit-loading">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="action" value="update">
+                    <input type="hidden" name="product_ref" value="{{ line.product.product_ref }}">
+                    <div style="display: flex; align-items: center; border: 1.5px solid var(--border-medium); border-radius: 10px; overflow: hidden;">
+                      <label class="sr-only">Quantity for {{ line.product.name }}</label>
+                      <input type="number" name="qty" value="{{ line.qty }}" min="1" max="{{ line.product.stock }}"
+                             class="form-input" style="height: 38px; width: 64px; border: none; border-radius: 0; text-align: center; font-weight: 700;"
+                             onchange="this.form.submit()">
+                    </div>
+                  </form>
+                  {% if line.product.stock <= 5 and line.product.stock > 0 %}
+                  <span class="badge badge--warning" style="font-size: 10px;">Only {{ line.product.stock }} left</span>
+                  {% elif line.product.stock <= 0 %}
+                  <span class="badge badge--danger" style="font-size: 10px;">Out of Stock</span>
+                  {% endif %}
+                  {% if line.product.installment_enabled %}
+                  <span class="badge badge--white" style="border: 1px solid var(--border-subtle); font-size: 9px; color: var(--brand-primary);">0% Install.</span>
+                  {% endif %}
+                </div>
+                <!-- Line Total -->
+                <div class="fw-bold type-price-sm" style="color: var(--brand-primary);">PHP {{ '%.2f'|format((line.product.price * line.qty)|float) }}</div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Continue Shopping -->
+        <a href="/customer/home" class="btn btn--ghost btn--sm" style="width: fit-content;">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="margin-right: 6px;"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+          Continue Shopping
+        </a>
+      </div>
+
+      <!-- Order Summary Sidebar -->
+      <aside style="position: sticky; top: calc(var(--topbar-height) + var(--sp-6));">
+        <div class="glass-card p-8" style="border: 1.5px solid var(--border-default);">
+          <h2 class="type-h4" style="margin-bottom: var(--sp-6);">Order Summary</h2>
+
+          <!-- Price Breakdown -->
+          <div class="form-stack" style="gap: var(--sp-3); margin-bottom: var(--sp-5);">
+            <div style="display:flex; justify-content:space-between;" class="type-body-sm">
+              <span class="text-muted">Subtotal ({{ cart_lines|length }} item{% if cart_lines|length != 1 %}s{% endif %})</span>
+              <span class="fw-semibold">PHP {{ '%.2f'|format(subtotal|float) }}</span>
+            </div>
+            <div style="display:flex; justify-content:space-between;" class="type-body-sm">
+              <span class="text-muted">Shipping</span>
+              <span class="fw-bold text-success">FREE</span>
+            </div>
+            {% if voucher_discount and voucher_discount > 0 %}
+            <div style="display:flex; justify-content:space-between;" class="type-body-sm">
+              <span class="text-muted">Voucher Discount</span>
+              <span class="fw-semibold text-success">− PHP {{ '%.2f'|format(voucher_discount|float) }}</span>
             </div>
             {% endif %}
+          </div>
 
-            <hr style="border:none; border-top: 1px solid var(--border-default); margin: var(--sp-4) 0;" />
-
-            <div style="display:flex; justify-content:space-between; margin-bottom: var(--sp-6);">
-               <span class="type-h4">Total</span>
-               <span class="type-price-sm">PHP {{ '%.2f'|format(grand_total|default(subtotal)|float) }}</span>
+          <!-- Voucher Code -->
+          <form method="post" action="/cart" style="margin-bottom: var(--sp-5);" data-enhance="submit-loading">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="apply_voucher">
+            <div style="display: flex; gap: var(--sp-2);">
+              <input type="text" name="voucher_code" class="form-input" placeholder="Voucher / Promo Code"
+                     value="{{ voucher_code|default('') }}" style="flex:1; height: 42px; border-radius: 10px;">
+              <button type="submit" class="btn btn--secondary" style="height: 42px; border-radius: 10px; white-space: nowrap;">Apply</button>
             </div>
+          </form>
 
-            <div class="form-stack">
-               {% if has_items %}
-               <a id="checkout-link" href="/checkout" class="btn btn--primary btn--full btn--xl">Proceed to Checkout</a>
-               {% else %}
-               <button class="btn btn--primary btn--full btn--xl" disabled>Proceed to Checkout</button>
-               {% endif %}
-               <form method="post" action="/cart" style="margin:0;">
-                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                  <input type="hidden" name="action" value="clear">
-                  <button type="submit" class="btn btn--ghost btn--full">Clear Cart</button>
-               </form>
-               <a href="/shop" class="btn btn--ghost btn--full">Continue Shopping</a>
+          {% if applied_voucher %}
+          <div style="display:flex; align-items:center; justify-content:space-between; padding: 10px 14px; background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.2); border-radius: 10px; margin-bottom: var(--sp-5);">
+            <div>
+              <span class="type-body-xs fw-bold text-success">{{ icon_check(14) | safe }} Applied: {{ applied_voucher.code }}</span>
+              <div class="type-label-xs text-muted">{{ applied_voucher.description or 'Discount applied' }}</div>
             </div>
-         </aside>
+            <form method="post" action="/cart" style="margin:0;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="action" value="remove_voucher">
+              <button type="submit" class="btn btn--ghost btn--xs" style="color: var(--grey-400); font-size: 10px;">Remove</button>
+            </form>
+          </div>
+          {% endif %}
+
+          <hr style="border: none; border-top: 1px dashed var(--border-default); margin: var(--sp-5) 0;">
+
+          <!-- Grand Total -->
+          <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom: var(--sp-6);">
+            <span class="type-h4" style="margin:0;">Total</span>
+            <span style="font-size: 1.5rem; font-weight: 800; color: var(--brand-primary); letter-spacing: -0.02em;">PHP {{ '%.2f'|format(grand_total|default(subtotal)|float) }}</span>
+          </div>
+
+          <!-- CTA -->
+          {% if has_items %}
+          <a href="/checkout" id="cart_secure_checkout_btn" class="btn btn--primary btn--full btn--xl shadow-primary" style="font-size: var(--text-base); font-weight: 700; letter-spacing: 0.01em;">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right: 8px;"><path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"/></svg>
+            Secure Checkout
+          </a>
+          {% else %}
+          <button class="btn btn--primary btn--full btn--xl" disabled>Secure Checkout</button>
+          {% endif %}
+
+          <!-- Trust Signals -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); margin-top: var(--sp-5);">
+            <div style="text-align: center; padding: var(--sp-3); background: var(--grey-25); border-radius: 10px;">
+              <div style="font-size: 10px; font-weight: 700; color: var(--grey-500); text-transform: uppercase; letter-spacing: 0.05em;">Free Returns</div>
+              <div style="font-size: 9px; color: var(--grey-400);">Within 7 days</div>
+            </div>
+            <div style="text-align: center; padding: var(--sp-3); background: var(--grey-25); border-radius: 10px;">
+              <div style="font-size: 10px; font-weight: 700; color: var(--grey-500); text-transform: uppercase; letter-spacing: 0.05em;">Encrypted</div>
+              <div style="font-size: 9px; color: var(--grey-400);">256-bit SSL</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    {% else %}
+    <!-- Empty State -->
+    <div class="glass-card reveal" style="padding: var(--sp-24); text-align: center; max-width: 500px; margin: 0 auto;">
+      <div style="width: 80px; height: 80px; background: var(--grey-50); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--sp-8);">
+        <svg width="36" height="36" fill="none" stroke="var(--grey-300)" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
       </div>
-   </div>
+      <h2 class="type-h3 mb-2">Your cart is empty</h2>
+      <p class="type-body-sm text-muted mb-10">Looks like you haven't added any appliances yet. Browse our curated catalog to get started.</p>
+      <a href="/customer/home" class="btn btn--primary btn--lg shadow-primary">Browse Catalog</a>
+    </div>
+    {% endif %}
+  </div>
 </div>
+  <script>
+    (function(){
+      function getSelected() {
+        return Array.from(document.querySelectorAll('.cart-item__checkbox:checked')).map(function(cb){ return cb.value; });
+      }
+      var selectAll = document.getElementById('cart_select_all');
+      if (selectAll) {
+        selectAll.addEventListener('change', function(){
+          document.querySelectorAll('.cart-item__checkbox').forEach(function(cb){ cb.checked = selectAll.checked; });
+        });
+      }
+
+      function goToCheckoutWithSelection(selected){
+        if (!selected || !selected.length) {
+          window.location.href = '/checkout';
+          return;
+        }
+        var qs = selected.map(function(s){ return 'selected=' + encodeURIComponent(s); }).join('&');
+        window.location.href = '/checkout?' + qs;
+      }
+
+      var checkoutBtn = document.getElementById('cart_secure_checkout_btn');
+      if (checkoutBtn) {
+        checkoutBtn.addEventListener('click', function(e){
+          e.preventDefault();
+          goToCheckoutWithSelection(getSelected());
+        });
+      }
+
+      var drawerBtn = document.getElementById('cart-drawer-checkout-btn');
+      if (drawerBtn) {
+        drawerBtn.addEventListener('click', function(e){
+          e.preventDefault();
+          goToCheckoutWithSelection(getSelected());
+        });
+      }
+    })();
+  </script>
 {% endblock %}

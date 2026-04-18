@@ -113,7 +113,7 @@ Consistency rules:
 2. /auth/login:
 	- lockout/rate limit consistency
 3. /customer/profile and /seller/profile:
-	- safe partial updates + normalized persistence
+	- safe partial updates + normalized saving
 
 ### 5.2 Shopping + Checkout
 
@@ -174,7 +174,7 @@ Exit criteria:
 
 ## Phase C: End-to-End Data Consistency
 
-1. Reconcile cart totals with checkout totals and order totals.
+1. Resolve cart totals with checkout totals and order totals.
 2. Validate invoice generation and role-restricted invoice access.
 3. Validate return->refund trace with deterministic amounts.
 

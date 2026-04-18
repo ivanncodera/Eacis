@@ -56,6 +56,11 @@
               </select>
                  <small id="seller-orders-status-help" class="form-helper">Optional</small>
               </div>
+              <div class="form-group" style="margin:0; min-width:170px;">
+                 <label class="form-label" for="seller-orders-date">Filter by Date</label>
+                 <input id="seller-orders-date" type="date" class="form-input" name="date_filter" value="{{ filters.date_filter if filters else '' }}" />
+                 <small id="seller-orders-date-help" class="form-helper">Optional date match</small>
+              </div>
                <button class="btn btn--secondary btn--lg" type="submit"><span class="btn__label">Apply filters</span></button>
            </form>
         <table class="data-table">
@@ -79,7 +84,7 @@
                     <td>{{ order.customer.full_name if order.customer else 'Unknown Customer' }}</td>
                     <td class="fw-semibold">PHP {{ '%.2f'|format(order.total|float) }}</td>
                     <td>
-                       <span class="badge badge--dot badge--{{ 'success' if order.status == 'delivered' else ('warning' if order.status in ['pending','paid','packed'] else 'danger') }}">{{ order.status|capitalize }}</span>
+                       <span class="badge badge--dot badge--{{ 'success' if order.status == 'delivered' else ('yellow' if order.status == 'shipped' else ('info' if order.status == 'paid' else ('warning' if order.status in ['pending','packed'] else 'danger'))) }}">{{ order.status|capitalize }}</span>
                     </td>
                     <td style="text-align:right;">
                        <a href="/seller/orders/{{ order.order_ref }}" class="btn btn--secondary btn--sm">Manage</a>
@@ -95,9 +100,29 @@
                  {% endfor %}
            </tbody>
         </table>
+        <!-- Pagination Footer -->
+        {% if pagination and pagination.pages > 1 %}
+        <div class="mt-8 pt-6 border-t" style="display:flex; justify-content:space-between; align-items:center; gap:var(--sp-4);">
+          <span class="type-body-xs text-muted">Showing {{ (pagination.page - 1) * pagination.per_page + 1 }} - {{ [pagination.page * pagination.per_page, pagination.total]|min }} of {{ pagination.total }} records</span>
+          <div style="display:flex; justify-content:center; gap:var(--sp-2);">
+            {% for page in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+              {% if page %}
+                {% if page == pagination.page %}
+                <span class="btn btn--primary btn--xs" style="min-width:32px;">{{ page }}</span>
+                {% else %}
+                <a href="{{ url_for('seller_orders', page=page, q=filters.q, status=filters.status, date_filter=filters.date_filter, per_page=pagination.per_page) }}" class="btn btn--white btn--xs" style="min-width:32px;">{{ page }}</a>
+                {% endif %}
+              {% else %}
+                <span class="text-muted">...</span>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+        {% else %}
         <div class="table-footer">
               <div class="table-footer__info">Showing {{ orders|length }} of {{ stats.total if stats else orders|length }} orders</div>
         </div>
+        {% endif %}
      </div>
    </div>
 </div>

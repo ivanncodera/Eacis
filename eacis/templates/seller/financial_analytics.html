@@ -10,29 +10,65 @@
     </div>
   </div>
 
-  <div class="kpi-grid mb-6">
-    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Gross Sales</div><div class="type-display-md mt-2">PHP {{ '%.2f'|format(stats.gross_sales or 0) }}</div></div></div>
-    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Net Margin Rate</div><div class="type-display-md mt-2">{{ '%.1f'|format(stats.net_margin_rate or 0) }}%</div></div></div>
-    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Pending Settlement</div><div class="type-display-md mt-2">PHP {{ '%.2f'|format(stats.pending_settlement or 0) }}</div></div></div>
-    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Refund Exposure</div><div class="type-display-md mt-2">PHP {{ '%.2f'|format(stats.refund_exposure or 0) }}</div></div></div>
+  <div class="kpi-grid mb-10">
+    <div class="glass-card glass-card--kpi">
+      <div class="kpi__content">
+        <div class="type-label type-label--sm text-muted">Net Revenue (30d)</div>
+        <div class="type-display-md mt-2" style="color:var(--color-success);">PHP {{ "%.2f"|format(stats.net_revenue|float) }}</div>
+      </div>
+    </div>
+    <div class="glass-card glass-card--kpi">
+      <div class="kpi__content">
+        <div class="type-label type-label--sm text-muted">AOV (30d)</div>
+        <div class="type-display-md mt-2">PHP {{ "%.2f"|format(stats.avg_order_value|float) }}</div>
+      </div>
+    </div>
+    <div class="glass-card glass-card--kpi">
+      <div class="kpi__content">
+        <div class="type-label type-label--sm text-muted">Order Volume</div>
+        <div class="type-display-md mt-2">{{ stats.total_orders }}</div>
+      </div>
+    </div>
+    <div class="glass-card glass-card--kpi">
+      <div class="kpi__content">
+        <div class="type-label type-label--sm text-muted">Refund Rate</div>
+        <div class="type-display-md mt-2" style="color:var(--color-danger);">{{ "%.1f"|format(stats.refund_rate|float) }}%</div>
+      </div>
+    </div>
   </div>
 
-  <div class="glass-card p-6">
-    <h2 class="type-h4" style="margin:0 0 var(--sp-4) 0;">Settlement Batches</h2>
-    <div class="table-wrapper">
-      <table class="data-table">
-        <thead><tr><th>Date</th><th style="text-align:right;">Amount</th></tr></thead>
-        <tbody>
-          {% for batch in batches %}
-          <tr>
-            <td>{{ batch.date }}</td>
-            <td style="text-align:right;">PHP {{ '%.2f'|format(batch.amount or 0) }}</td>
-          </tr>
-          {% else %}
-          <tr><td colspan="2" style="text-align:center;">No settlement records yet.</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
+  <div class="grid" style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--sp-8);">
+    <div class="glass-card p-6">
+      <h2 class="type-h4 mb-4">Daily Revenue Trend</h2>
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead><tr><th>Date</th><th style="text-align:right;">Orders</th><th style="text-align:right;">Revenue</th></tr></thead>
+          <tbody>
+            {% for item in batches %}
+            <tr>
+              <td>{{ item.date }}</td>
+              <td style="text-align:right;">{{ item.count }}</td>
+              <td style="text-align:right; font-weight:700;">PHP {{ "%.2f"|format(item.revenue|float) }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="3" class="text-center py-4">No data available for this period.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="glass-card p-6">
+      <h2 class="type-h4 mb-4">Payment Health</h2>
+      <div class="p-4 bg-light rounded-4 mb-4 border shadow-sm">
+        <div class="type-label--sm text-muted mb-1">UNSETTLED BALANCE</div>
+        <div class="h3 fw-bold mb-0">PHP {{ "%.2f"|format(stats.pending_settlement|float) }}</div>
+        <small class="text-muted">Funds from <strong>{{ stats.pending_order_count }}</strong> active orders</small>
+      </div>
+      
+      <div class="alert alert-info py-2 px-3 rounded-3 small border-0 shadow-xs mb-0">
+        <i class="fas fa-info-circle me-1"></i> Funds are typically settled 3-7 days after delivery confirmation.
+      </div>
     </div>
   </div>
 </div>

@@ -3,18 +3,33 @@
 {% block content %}
 <div class="page-content seller-shell" style="padding:var(--sp-8);">
   <h1 class="type-display-sm" style="margin-bottom:var(--sp-6);">Payouts</h1>
-
-  <div class="kpi-grid mb-6">
+  <div class="kpi-grid mb-4">
     <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Available Balance</div><div class="type-display-md mt-2">PHP {{ '%.2f'|format(stats.available_balance or 0) }}</div></div></div>
     <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Pending Clearance</div><div class="type-display-md mt-2">PHP {{ '%.2f'|format(stats.pending_clearance or 0) }}</div></div></div>
     <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Next Transfer</div><div class="type-display-md mt-2">{{ stats.next_transfer.strftime('%Y-%m-%d') if stats.next_transfer else '-' }}</div></div></div>
     <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Payout Entries</div><div class="type-display-md mt-2">{{ stats.payout_count }}</div></div></div>
   </div>
 
+  <div class="d-flex align-center justify-between mb-4">
+    <h2 class="type-h4" style="margin:0;">Payout History</h2>
+    <div class="controls" style="display:flex;gap:8px;align-items:center;">
+      <form method="get" style="display:inline-block;margin:0;">
+        <label class="type-label type-label--sm text-muted" for="per_page_select">Per page</label>
+        <select id="per_page_select" name="per_page" onchange="this.form.submit()" style="margin-left:8px;padding:6px 8px;border-radius:4px;border:1px solid var(--muted);">
+          <option value="5" {% if (pagination and pagination.per_page == 5) or request.args.get('per_page') == '5' %}selected{% endif %}>5</option>
+          <option value="10" {% if (pagination and pagination.per_page == 10) or request.args.get('per_page') == '10' %}selected{% endif %}>10</option>
+        </select>
+      </form>
+
+      <a href="{{ url_for('seller_payouts', format='csv', per_page=(pagination.per_page if pagination else request.args.get('per_page', 10))) }}" class="btn btn--white btn--sm">Export CSV</a>
+      <a href="#" class="btn btn--primary btn--sm {% if not stats.available_balance %}disabled{% endif %}" role="button">Request Transfer</a>
+    </div>
+  </div>
+
   <div class="glass-card p-6">
-    <h2 class="type-h4" style="margin:0 0 var(--sp-4) 0;">Payout History</h2>
     <div class="table-wrapper">
-      <table class="data-table">
+      <table class="data-table" aria-describedby="payouts-desc">
+        <caption id="payouts-desc" class="sr-only">Recent payout entries for delivered and refunded orders</caption>
         <thead><tr><th>Order</th><th>Date</th><th>Status</th><th style="text-align:right;">Amount</th></tr></thead>
         <tbody>
           {% for order in history %}
@@ -28,8 +43,35 @@
           <tr><td colspan="4" style="text-align:center;">No payout records yet.</td></tr>
           {% endfor %}
         </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="3" style="text-align:right;color:var(--muted);">Page subtotal</td>
+            <td style="text-align:right;font-weight:600;">PHP {{ '%.2f'|format(page_total or 0) }}</td>
+          </tr>
+          <tr>
+            <td colspan="3" style="text-align:right;color:var(--muted);">Available balance</td>
+            <td style="text-align:right;font-weight:700;">PHP {{ '%.2f'|format(stats.available_balance or 0) }}</td>
+          </tr>
+        </tfoot>
       </table>
     </div>
+
+    {% if pagination and pagination.pages > 1 %}
+    <div class="d-flex align-center justify-between mt-4">
+      <div class="type-body-sm text-muted">Showing {{ (pagination.page - 1) * pagination.per_page + 1 }}–{{ ((pagination.page - 1) * pagination.per_page) + (pagination.per_page if pagination.page < pagination.pages else pagination.total) }} of {{ pagination.total }} entries</div>
+      <div class="pagination-controls">
+        {% if pagination.has_prev %}
+        <a href="{{ url_for('seller_payouts', page=pagination.prev_num, per_page=pagination.per_page) }}" class="btn btn--white btn--sm">Previous</a>
+        {% endif %}
+        {% for page_num in range(1, pagination.pages + 1) %}
+        <a href="{{ url_for('seller_payouts', page=page_num, per_page=pagination.per_page) }}" class="btn btn--white btn--xs {% if page_num == pagination.page %}active{% endif %}" style="min-width:32px;">{{ page_num }}</a>
+        {% endfor %}
+        {% if pagination.has_next %}
+        <a href="{{ url_for('seller_payouts', page=pagination.next_num, per_page=pagination.per_page) }}" class="btn btn--white btn--sm">Next</a>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

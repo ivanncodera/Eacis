@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Case {{ ticket.ticket_ref }} - E-ACIS{% endblock %}
+
+{% block content %}
+<div class="page-content page-enter stagger-children" style="padding: var(--sp-12) 0;">
+  <div class="container" style="max-width: 1000px;">
+    
+    <!-- Header -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--sp-10);">
+      <div class="stagger-item">
+        <a href="{{ url_for('customer_inquiries') }}" class="type-label-sm text-primary mb-2 d-inline-block" style="text-decoration: none;">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="vertical-align: middle; margin-right: 4px;"><path d="M19 12H5m7 7l-7-7 7-7"></path></svg>
+          Back to Support Hub
+        </a>
+        <h1 class="type-display-sm mb-2">{{ ticket.subject }}</h1>
+        <div style="display: flex; gap: var(--sp-3); align-items: center;">
+          <span class="type-label-xs text-muted">Reference: <span class="fw-bold">{{ ticket.ticket_ref }}</span></span>
+          <span class="badge rounded-pill 
+              {% if ticket.status == 'open' %}badge--info
+              {% elif ticket.status == 'in_progress' %}badge--primary
+              {% elif ticket.status in ('resolved', 'closed') %}badge--success
+              {% else %}badge--secondary{% endif %}" style="padding: 4px 12px;">
+              {{ ticket.status|replace('_', ' ')|title }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-12 gap-8">
+      <!-- Conversation Column -->
+      <div class="col-8">
+        <!-- Original Request -->
+        <div class="glass-card p-8 mb-8 stagger-item" style="background: var(--grey-50); border: 1px solid var(--border-medium);">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+            <span class="type-label-xs fw-bold">Original Incident Report</span>
+            <span class="type-label-xs text-muted">{{ ticket.created_at.strftime('%B %d at %H:%M %p') }}</span>
+          </div>
+          <p class="type-body-sm">{{ ticket.description }}</p>
+        </div>
+
+        <!-- Thread -->
+        <div class="form-stack mb-8">
+          {% for reply in ticket.replies %}
+            {% if not reply.is_internal %}
+              <div class="stagger-item" style="display: flex; flex-direction: column; align-items: {% if reply.author_id == ticket.customer_id %}flex-end{% else %}flex-start{% endif %};">
+                <div class="glass-card p-6" style="max-width: 85%; {% if reply.author_id == ticket.customer_id %}background: var(--brand-primary); color: white; border: none; box-shadow: var(--shadow-lg);{% else %}background: white; border: 1px solid var(--border-medium);{% endif %}">
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 8px; gap: 24px;">
+                    <span class="type-label-xs fw-bold" style="{% if reply.author_id == ticket.customer_id %}opacity: 0.9;{% else %}color: var(--brand-primary);{% endif %}">
+                      {{ 'Me' if reply.author_id == ticket.customer_id else 'Support Specialist' }}
+                    </span>
+                    <span class="type-label-xs" style="opacity: 0.6;">{{ reply.created_at.strftime('%H:%M') }}</span>
+                  </div>
+                  <p class="type-body-sm mb-0">{{ reply.body }}</p>
+                </div>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        <!-- Reply Entry -->
+        {% if ticket.status not in ('resolved', 'closed') %}
+        <div class="glass-card p-6 stagger-item">
+          <form action="{{ url_for('customer_inquiry_detail', ticket_ref=ticket.ticket_ref) }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <textarea name="body" class="form-textarea mb-4" rows="4" placeholder="Update the conversation..." required style="border: none; background: var(--grey-50);"></textarea>
+            <div style="display: flex; justify-content: flex-end;">
+              <button type="submit" class="btn btn--primary rounded-pill px-8">Dispatch Response</button>
+            </div>
+          </form>
+        </div>
+        {% else %}
+        <div class="glass-card p-6 text-center shadow-none stagger-item" style="background: var(--grey-50); border: 1.5px dashed var(--border-medium); opacity: 0.7;">
+          <p class="type-label-xs text-muted mb-0">
+             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="vertical-align: middle; margin-right: 6px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0110 0v4"></path></svg>
+             This case has been documented and closed.
+          </p>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Side Details Column -->
+      <div class="col-4">
+        <div class="glass-card p-8 stagger-item">
+          <h3 class="type-label-sm fw-bold mb-6">Case Context</h3>
+          
+          <div class="mb-6">
+            <div class="type-label-xs text-muted mb-1">Created On</div>
+            <div class="type-body-sm">{{ ticket.created_at.strftime('%b %d, %Y') }}</div>
+          </div>
+
+          <div class="mb-6">
+            <div class="type-label-xs text-muted mb-1">Assigned Vendor</div>
+            <div class="type-body-sm fw-bold">E-ACIS Fulfillment Center</div>
+          </div>
+
+          {% if ticket.order %}
+          <div class="mb-8">
+            <div class="type-label-xs text-muted mb-2">Linked Logistics</div>
+            <div class="p-4 rounded-3" style="background: var(--grey-50); border: 1px solid var(--border-subtle);">
+               <div class="type-label-sm fw-bold mb-1">{{ ticket.order.order_ref }}</div>
+               <div class="type-label-xs text-muted mb-3">{{ ticket.order.status|title }} • ₱{{ "{:,.2f}".format(ticket.order.total) }}</div>
+               <a href="{{ url_for('customer_order_detail', order_ref=ticket.order.order_ref) }}" class="btn btn--white btn--xs btn--full" style="border: 1px solid var(--border-medium);">Track Order Details</a>
+            </div>
+          </div>
+          {% endif %}
+
+          <div class="p-6 rounded-3" style="background: var(--brand-primary-subtle); color: var(--brand-primary);">
+            <p class="type-label-xs mb-0">Our specialists aim for a <br><strong>24-hour resolution window.</strong></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

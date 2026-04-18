@@ -1,14 +1,20 @@
 {% extends 'base.html' %}
 {% block title %}Dashboard - Seller Portal{% endblock %}
 {% block content %}
-<div class="page-content seller-shell" style="padding:var(--sp-12);">
+<div class="page-content seller-shell stagger-children" style="padding:var(--sp-12);">
   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--sp-10);">
     <div>
-      <h1 class="type-display-md" style="margin:0;">Seller Hub</h1>
+      <div style="display:flex; align-items:center; gap:var(--sp-3);">
+        <h1 class="type-display-md" style="margin:0;">Seller Hub</h1>
+        <div class="system-status-indicator pulse-glow" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); padding: 4px 12px; border-radius: 20px; display: flex; align-items: center; gap: 6px;">
+          <div class="pulse-dot pulse-dot--active" style="width: 6px; height: 6px; background: var(--color-success); border-radius: 50%;"></div>
+          <span class="type-label-xs fw-bold" style="color: var(--color-success); font-size: 9px; letter-spacing: 0.1em;">BUSINESS LIVE</span>
+        </div>
+      </div>
       <p class="type-body-sm text-muted" style="margin:var(--sp-2) 0 0 0;">Command center for your store and inventory.</p>
     </div>
     <div style="display:flex; gap:var(--sp-4);">
-      <a href="/seller/products/new" class="btn btn--primary btn--lg">New Product Listing</a>
+      <a href="/seller/products/new" class="btn btn--primary btn--lg shadow-primary">New Product Listing</a>
       <a href="/seller/orders" class="btn btn--secondary btn--lg">View Active Orders</a>
     </div>
   </div>
@@ -26,43 +32,63 @@
   {% endif %}
 
   <div class="kpi-grid mb-10">
-    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Revenue Today</div><div class="type-display-md mt-2">PHP {{ '%.2f'|format(kpis.revenue_today or 0) }}</div></div></div>
-    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Pending Orders</div><div class="type-display-md mt-2">{{ kpis.pending_orders }}</div></div></div>
-    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Active Products</div><div class="type-display-md mt-2">{{ kpis.active_products }}</div></div></div>
-    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Low Stock</div><div class="type-display-md mt-2" style="color: var(--color-danger);">{{ kpis.low_stock }}</div></div></div>
-    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Open Inquiries</div><div class="type-display-md mt-2" style="color: var(--brand-primary);">{{ kpis.open_inquiries }}</div></div></div>
+    <div class="glass-card status-card p-6 stagger-item" style="border-top: 4px solid var(--brand-primary);">
+      <div class="type-label-xs text-muted mb-2">REVENUE TODAY</div>
+      <div class="type-display-md">₱{{ '%.2f'|format(kpis.revenue_today or 0) }}</div>
+      <div class="mt-4"><span class="badge badge--primary px-2">Live Gains</span></div>
+    </div>
+    <div class="glass-card status-card p-6 stagger-item" style="border-top: 4px solid var(--color-warning);">
+      <div class="type-label-xs text-muted mb-2">PENDING ORDERS</div>
+      <div class="type-display-md">{{ kpis.pending_orders }}</div>
+      <div class="mt-4"><span class="badge badge--warning px-2">Action Required</span></div>
+    </div>
+    <div class="glass-card status-card p-6 stagger-item" style="border-top: 3px solid var(--grey-200);">
+      <div class="type-label-xs text-muted mb-2">ACTIVE LISTINGS</div>
+      <div class="type-display-md">{{ kpis.active_products }}</div>
+      <div class="mt-4"><span class="badge badge--white px-2">Operational</span></div>
+    </div>
+    <div class="glass-card status-card p-6 stagger-item" style="border-top: 4px solid var(--color-danger);">
+      <div class="type-label-xs text-muted mb-2">LOW STOCK</div>
+      <div class="type-display-md" style="color: var(--color-danger);">{{ kpis.low_stock }}</div>
+      <div class="mt-4"><span class="badge badge--danger px-2">Immediate Risk</span></div>
+    </div>
+    <div class="glass-card status-card p-6 stagger-item" style="background: var(--brand-primary-subtle); border-top: 4px solid var(--brand-primary);">
+      <div class="type-label-xs text-muted mb-2">OPEN INQUIRIES</div>
+      <div class="type-display-md" style="color: var(--brand-primary);">{{ kpis.open_inquiries }}</div>
+      <div class="mt-4"><span class="badge badge--primary px-2">Reply SLA Pending</span></div>
+    </div>
   </div>
 
-  <div class="glass-card p-10">
+  <div class="glass-card p-10 reveal-y">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--sp-6);">
-      <h2 class="type-h4" style="margin:0;">Recent Activity</h2>
-      <a href="/seller/orders" class="type-body-sm fw-semibold" style="color: var(--brand-primary); text-decoration: none; display: flex; align-items: center; gap: 4px;">View all orders <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      <h2 class="type-h4" style="margin:0;">Fulfillment Stream</h2>
+      <a href="/seller/orders" class="type-body-sm fw-semibold" style="color: var(--brand-primary); text-decoration: none; display: flex; align-items: center; gap: 4px;">Explore Full History <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
     </div>
     
     <div class="table-wrapper">
       <table class="data-table">
-        <thead>
+        <thead style="background:var(--grey-25);">
           <tr>
-            <th>Order Ref</th>
-            <th>Placed Date</th>
-            <th>Fulfillment Status</th>
-            <th style="text-align:right;">Total Amount</th>
+            <th style="padding-left:24px;">Order Object</th>
+            <th>Recorded Date</th>
+            <th>Fulfillment State</th>
+            <th style="text-align:right; padding-right:24px;">Total Transaction</th>
           </tr>
         </thead>
         <tbody>
           {% for order in recent_orders %}
-          <tr>
-            <td><a href="/seller/orders/{{ order.order_ref }}" class="fw-semibold">{{ order.order_ref }}</a></td>
-            <td class="text-muted">{{ order.created_at.strftime('%b %d, %Y %I:%M %p') if order.created_at else '-' }}</td>
+          <tr class="hover-bg-light transition-base">
+            <td style="padding-left:24px;"><a href="/seller/orders/{{ order.order_ref }}" class="fw-bold text-primary">{{ order.order_ref }}</a></td>
+            <td class="text-muted">{{ order.created_at.strftime('%b %d, %H:%M') if order.created_at else '-' }}</td>
             <td>
-              <span class="badge {% if order.status == 'delivered' %}badge--success{% elif order.status == 'pending' %}badge--warning{% else %}badge--secondary{% endif %}">
+              <span class="badge badge--dot {% if order.status == 'delivered' %}badge--success{% elif order.status == 'pending' %}badge--warning{% else %}badge--secondary{% endif %}">
                 {{ order.status|title }}
               </span>
             </td>
-            <td style="text-align:right;" class="fw-bold">PHP {{ '%.2f'|format(order.total or 0) }}</td>
+            <td style="text-align:right; padding-right:24px;" class="fw-bold">PHP {{ '%.2f'|format(order.total or 0) }}</td>
           </tr>
           {% else %}
-          <tr><td colspan="4" style="text-align:center; padding: var(--sp-12);" class="text-muted">No recent orders to display.</td></tr>
+          <tr><td colspan="4" style="text-align:center; padding: var(--sp-12);" class="text-muted">No recent transaction activity detected.</td></tr>
           {% endfor %}
         </tbody>
       </table>

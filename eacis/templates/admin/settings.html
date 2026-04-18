@@ -6,7 +6,7 @@
       <div style="display:flex; justify-content:space-between; align-items:center; gap:var(--sp-4); margin-bottom:var(--sp-10);">
          <div>
            <h1 class="type-display-md">Global Configuration</h1>
-           <p class="type-body-sm text-muted mt-1">Maintain database security posture and orchestrate core platform parameters.</p>
+           <p class="type-body-sm text-muted mt-1">Maintain database security posture and manage core platform parameters.</p>
          </div>
          <div style="display:flex; gap:var(--sp-3); align-items:center; flex-wrap:wrap;">
            <span class="badge badge--success" style="padding: 8px 16px; font-weight: 700;">Synchronized Nexus</span>
@@ -17,12 +17,12 @@
            <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Service State</div><div class="type-display-md mt-2">{{ settings_state.maintenance_mode }}</div></div></div>
            <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Session TTL</div><div class="type-display-md mt-2">{{ settings_state.admin_timeout_minutes }} min</div></div></div>
            <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Data Retention</div><div class="type-display-md mt-2">{{ settings_state.audit_retention_days }} days</div></div></div>
-           <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Persistence Cycle</div><div class="type-display-md mt-2">{{ settings_state.backup_frequency }}</div></div></div>
+           <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Save Cycle</div><div class="type-display-md mt-2">{{ settings_state.backup_frequency }}</div></div></div>
       </div>
 
       <div style="max-width: 960px;" class="form-stack">
          <div class="glass-card mb-10 p-10">
-            <h3 class="type-h4 mb-6">Storefront Orchestration</h3>
+            <h3 class="type-h4 mb-6">Storefront Management</h3>
             <div class="form-stack">
                <div class="form-group">
                   <label class="form-label">Canonical Platform Name</label>
@@ -47,24 +47,58 @@
                   <input type="number" class="form-input" value="{{ settings_state.admin_timeout_minutes }}" readonly>
                </div>
                <div class="form-group">
-                  <label class="form-label">Audit Persistence Duration</label>
+                  <label class="form-label">Audit Save Duration</label>
                   <select class="form-select"><option {% if settings_state.audit_retention_days == 90 %}selected{% endif %}>90 Iterations</option><option {% if settings_state.audit_retention_days == 365 %}selected{% endif %}>365 Iterations</option><option {% if settings_state.audit_retention_days == 730 %}selected{% endif %}>730 Iterations</option></select>
                </div>
                <div class="form-group">
-                  <label class="form-label">Persistence Backup Cadence</label>
+                  <label class="form-label">Save Backup Cadence</label>
                   <select class="form-select"><option {% if settings_state.backup_frequency == 'Every 6 hours' %}selected{% endif %}>Quadratic Daily (6h)</option><option {% if settings_state.backup_frequency == 'Daily' %}selected{% endif %}>Singular Daily</option><option {% if settings_state.backup_frequency == 'Weekly' %}selected{% endif %}>Standard Weekly</option></select>
                </div>
                <div class="form-group">
-                  <label class="form-label">Latest Persistence Event</label>
+                  <label class="form-label">Latest Save Event</label>
                   <input type="text" class="form-input fw-bold" value="{{ settings_state.latest_backup }}" readonly>
                </div>
             </div>
          </div>
 
-         <div style="display: flex; justify-content: flex-end; gap: var(--sp-4);">
-            <button class="btn btn--white btn--lg">Discard Draft</button>
-            <button class="btn btn--primary btn--xl" style="min-width: 280px;">Commit Global Changes</button>
+             <div style="display: flex; justify-content: flex-end; gap: var(--sp-4);">
+                  <button id="discard-settings" class="btn btn--white btn--lg">Discard Draft</button>
+                  <button id="commit-settings" class="btn btn--primary btn--lg" data-confirm="Are you sure you want to commit global changes?">Commit Global Changes</button>
+             </div>
          </div>
+   </div>
+</div>
+
+<style>
+   /* Minor compacting for admin settings page */
+   .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-4); }
+   @media (max-width: 900px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+   const commit = document.getElementById('commit-settings');
+   const discard = document.getElementById('discard-settings');
+   if (commit) {
+      commit.addEventListener('click', function (ev) {
+         ev.preventDefault();
+         const msg = this.dataset.confirm || 'Proceed?';
+         const run = () => {
+           this.disabled = true;
+           this.textContent = 'Committing...';
+           // In this UI-only change, we show confirmation and a loading affordance.
+           // Real submission should be wired to a POST endpoint.
+           setTimeout(() => { this.textContent = 'Committed'; }, 600);
+         };
+         if (window.confirmModal) { confirmModal(msg).then(ok => { if (!ok) return; run(); }); } else { if (!confirm(msg)) return; run(); }
+      });
+   }
+   if (discard) discard.addEventListener('click', function(){
+     const prompt = 'Discard local changes?';
+     if (window.confirmModal) { confirmModal(prompt).then(ok => { if (ok) window.history.back(); }); } else { if (confirm(prompt)) window.history.back(); }
+   });
+});
+</script>
       </div>
   </div>
 </div>

@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}Verify Your Email{% endblock %}
+{% block content %}
+<div class="page-content" style="padding: var(--sp-12);">
+  <div class="glass-card p-10" style="max-width:680px; margin: 0 auto;">
+    <h2 class="type-h4">Verify Your Email</h2>
+    <p class="type-body-sm text-muted">To activate your account we sent a verification message to <strong>{{ email }}</strong>. Click the link in that email to verify and sign in.</p>
+
+    <div style="margin-top: var(--sp-6); display:flex; gap:var(--sp-4); align-items:center;">
+      <form method="post" action="{{ url_for('auth_otp_send') }}" style="display:inline;">
+        <input type="hidden" name="email" value="{{ email }}">
+        <input type="hidden" name="purpose" value="register_verify">
+        <button type="submit" class="btn btn--primary">Resend Verification Email</button>
+      </form>
+      <a href="{{ url_for('auth_login') }}" class="btn btn--link">Back to Sign In</a>
+    </div>
+
+    <div class="type-body-xs text-muted" style="margin-top:var(--sp-6);">If you don't receive the email, check spam folders or try again later. For assistance contact support.</div>
+  </div>
+</div>
+{% endblock %}

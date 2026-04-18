@@ -10,7 +10,7 @@
   border-radius: 0 var(--radius-md) var(--radius-md) 0 !important;
   margin: var(--sp-4) 0 var(--sp-3) 0;
   padding-left: var(--sp-3) !important;
-  transition: all var(--dur-fast) var(--ease-out));
+  transition: all var(--dur-fast) var(--ease-out);
 }
 
 .sidebar--seller .sidebar__logout:hover {
@@ -30,7 +30,7 @@
 
 /* Smooth transitions for sidebar items */
 .sidebar--seller .sidebar__item svg {
-  transition: all var(--dur-fast) var(--ease-out));
+  transition: all var(--dur-fast) var(--ease-out);
 }
 
 .sidebar--seller .sidebar__item.active svg,
@@ -46,7 +46,7 @@
   border-radius: 0 var(--radius-md) var(--radius-md) 0 !important;
   margin: var(--sp-4) 0 var(--sp-3) 0;
   padding-left: var(--sp-3) !important;
-  transition: all var(--dur-fast) var(--ease-out));
+  transition: all var(--dur-fast) var(--ease-out);
 }
 
 .sidebar--admin .sidebar__logout:hover {

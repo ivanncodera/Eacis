@@ -1,10 +1,15 @@
 import re
+import unicodedata
 
 
 NAME_PATTERN = re.compile(r"^[a-zA-Z\s'\-\.]+$")
 EMAIL_PATTERN = re.compile(r'^[^\s@]+@[^\s@]+\.[^\s@]+$')
 POSTAL_PATTERN = re.compile(r'^\d{4}$')
 PHONE_PATTERN = re.compile(r'^09\d{9}$')
+SEARCH_MAX_LENGTH = 80
+SEARCH_MIN_LENGTH = 2
+CODE_LIKE_PATTERN = re.compile(r'^[a-zA-Z0-9][a-zA-Z0-9\-#/]{3,}$')
+NUMERIC_PATTERN = re.compile(r'^\d{4,}$')
 
 
 def split_name(full_name):
@@ -68,6 +73,8 @@ def validate_registration_payload(payload, role, postal_lookup, email_exists):
     password = payload.get('password') or ''
     confirm = payload.get('confirm_password') or ''
     agree = payload.get('agree')
+    terms_consent = payload.get('terms_consent')
+    privacy_consent = payload.get('privacy_consent')
 
     # Identity Validation
     if not first_name:
@@ -75,10 +82,16 @@ def validate_registration_payload(payload, role, postal_lookup, email_exists):
     elif not NAME_PATTERN.match(first_name):
         errors['first_name'] = 'First name contains invalid characters.'
 
+    if middle_name and not NAME_PATTERN.match(middle_name):
+        errors['middle_name'] = 'Middle name contains invalid characters.'
+
     if not last_name:
         errors['last_name'] = 'Last name is required.'
     elif not NAME_PATTERN.match(last_name):
         errors['last_name'] = 'Last name contains invalid characters.'
+
+    if suffix and not NAME_PATTERN.match(suffix):
+        errors['suffix'] = 'Suffix contains invalid characters.'
 
     normalized_full_name = join_name(first_name, middle_name, last_name, suffix)
 
@@ -93,6 +106,19 @@ def validate_registration_payload(payload, role, postal_lookup, email_exists):
     phone, phone_error = validate_phone(payload.get('phone'), required=True)
     if phone_error:
         errors['phone'] = phone_error
+
+    # Location Validation (Stronger for Customer)
+    if role == 'customer':
+        if not address_line1:
+            errors['address_line1'] = 'Address Line 1 is required.'
+        if not barangay:
+            errors['barangay'] = 'Barangay is required.'
+        if not city_municipality:
+            errors['city_municipality'] = 'City/Municipality is required.'
+        if not province:
+            errors['province'] = 'Province is required.'
+        if not postal_code:
+            errors['postal_code'] = 'Postal code is required.'
 
     # Security Validation
     if len(password) < 8:
@@ -111,8 +137,12 @@ def validate_registration_payload(payload, role, postal_lookup, email_exists):
     if password != confirm:
         errors['confirm_password'] = 'Passwords do not match.'
 
-    if not agree:
-        errors['agree'] = 'You must accept the terms to continue.'
+    terms_accepted = bool(terms_consent or agree)
+    privacy_accepted = bool(privacy_consent or agree)
+    if not terms_accepted:
+        errors['terms_consent'] = 'You must accept the Terms of Service to continue.'
+    if not privacy_accepted:
+        errors['privacy_consent'] = 'You must accept the Privacy Policy to continue.'
 
     # Role-Specific Validation (Seller)
     business_name = ''
@@ -147,7 +177,9 @@ def validate_registration_payload(payload, role, postal_lookup, email_exists):
         'password': password,
         'business_name': business_name,
         'role': role,
-        'agree': bool(agree),
+        'agree': bool(terms_accepted and privacy_accepted),
+        'terms_consent': bool(terms_accepted),
+        'privacy_consent': bool(privacy_accepted),
     }
     return errors, normalized
 
@@ -250,20 +282,25 @@ def validate_checkout_payload(payload):
 
 def validate_return_payload(payload):
     order_ref = (payload.get('order_ref') or '').strip()
-    reason = (payload.get('reason') or '').strip()
+    reason_category = (payload.get('reason_category') or '').strip()
+    other_reason = (payload.get('other_reason') or '').strip()
     description = (payload.get('description') or '').strip()
     errors = {}
 
     if not order_ref:
         errors['order_ref'] = 'Order reference is required.'
-    if not reason:
-        errors['reason'] = 'Reason is required.'
+    if not reason_category:
+        errors['reason_category'] = 'Return reason is required.'
+    # If the user selected 'OTHER', require an explanatory text
+    if reason_category and reason_category.upper() == 'OTHER' and not other_reason:
+        errors['other_reason'] = 'Please specify the reason for return.'
     if not description:
         errors['description'] = 'Description is required.'
 
     normalized = {
         'order_ref': order_ref,
-        'reason': reason,
+        'reason_category': reason_category,
+        'other_reason': other_reason,
         'description': description,
     }
     return errors, normalized
@@ -465,3 +502,50 @@ def validate_seller_product_payload(payload):
         'installment_enabled': installment_enabled,
     }
     return errors, normalized
+
+
+def collapse_whitespace(value):
+    """Collapse multiple spaces and normalize whitespace."""
+    return re.sub(r'\s+', ' ', str(value or '').strip())
+
+
+def sanitize_search_query(value):
+    """Remove unsafe characters from search query.
+    
+    Strips unsupported Unicode characters, SQL-like tokens, 
+    and keeps only alphanumerics, spaces, and common punctuation.
+    """
+    collapsed = collapse_whitespace(value)
+    # Remove characters that are not:
+    # Alphanumeric letters, numbers, spaces, and common punctuation: & . / , ' ( ) - + #
+    sanitized = re.sub(r"[^a-zA-Z0-9\s&/.,\'()\-+#]", '', collapsed)
+    return sanitized.strip()[:SEARCH_MAX_LENGTH]
+
+
+def validate_search_query(value):
+    """Validate a search query for ecommerce searches.
+    
+    Returns: (is_valid, cleaned_query, message)
+    - is_valid: boolean indicating if query passed validation
+    - cleaned_query: the sanitized query string
+    - message: descriptive message about what was normalized or rejected
+    """
+    normalized = collapse_whitespace(value)
+    cleaned = sanitize_search_query(value)
+    
+    if not cleaned:
+        return False, '', 'Search query cannot be empty.'
+    
+    if len(cleaned) < SEARCH_MIN_LENGTH:
+        return False, cleaned, f'Search must be at least {SEARCH_MIN_LENGTH} characters.'
+    
+    if cleaned != normalized:
+        return True, cleaned, 'Unsupported characters were removed from your search.'
+    
+    if NUMERIC_PATTERN.match(cleaned):
+        return True, cleaned, 'Numeric searches are treated as reference lookups.'
+    
+    if CODE_LIKE_PATTERN.match(cleaned):
+        return True, cleaned, 'Structured code search enabled.'
+    
+    return True, cleaned, ''

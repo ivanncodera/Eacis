@@ -1,41 +1,87 @@
 {% extends 'base.html' %}
 {% block title %}Inventory Analytics - Seller Portal{% endblock %}
 {% block content %}
-<div class="page-content seller-shell" style="padding:var(--sp-8);">
-  <h1 class="type-display-sm" style="margin-bottom:var(--sp-6);">Inventory Analytics</h1>
-
-  <div class="kpi-grid mb-6">
-    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Sell-through Rate</div><div class="type-display-md mt-2">{{ '%.1f'|format(stats.sell_through_rate or 0) }}%</div></div></div>
-    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Aging SKUs</div><div class="type-display-md mt-2">{{ stats.aging_skus }}</div></div></div>
-    <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Stockout Incidents</div><div class="type-display-md mt-2">{{ stats.stockout_incidents }}</div></div></div>
+<div class="page-content seller-shell stagger-children" style="padding:var(--sp-8);">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--sp-6);">
+     <h1 class="type-display-sm" style="margin:0;">Inventory Analytics</h1>
+     <span class="badge badge--primary" style="padding: 6px 14px; background: var(--brand-primary-subtle); color: var(--brand-primary); font-weight: 700;">
+        <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24" style="margin-right:4px;"><path d="m11 19-7-7 7-7 1.41 1.41L7.83 11H20v2H7.83l4.58 4.59L11 19z"/></svg> 
+        Predictive Analytics Enabled
+     </span>
   </div>
 
-  <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-6);">
-    <div class="glass-card p-6">
-      <h2 class="type-h4" style="margin:0 0 var(--sp-4) 0;">Fast Movers</h2>
+  <div class="kpi-grid mb-10">
+    <div class="glass-card glass-card--kpi glass-card--interactive" data-tooltip="Estimated days until inventory is depleted based on 30-day velocity.">
+      <div class="kpi__content">
+        <div class="type-label type-label--sm text-muted">Stock Coverage (Avg Days)</div>
+        <div class="type-display-md mt-2" style="color:var(--brand-primary);">{{ stats.avg_coverage_days|round(1) if stats.avg_coverage_days else 'N/A' }}</div>
+      </div>
+    </div>
+    <div class="glass-card glass-card--kpi glass-card--interactive" data-tooltip="Percentage of received inventory that has been sold to customers.">
+      <div class="kpi__content">
+        <div class="type-label type-label--sm text-muted">Sell-through Rate</div>
+        <div class="type-display-md mt-2">{{ "%.1f"|format(stats.sell_through_rate|float) }}%</div>
+      </div>
+    </div>
+    <div class="glass-card glass-card--kpi glass-card--interactive" data-tooltip="Total number of unique items that have not moved in over 90 days.">
+      <div class="kpi__content">
+        <div class="type-label type-label--sm text-muted">Aging SKUs (>90d)</div>
+        <div class="type-display-md mt-2">{{ stats.aging_skus_count }}</div>
+      </div>
+    </div>
+    <div class="glass-card glass-card--kpi glass-card--interactive" data-tooltip="Total times a product reached zero stock in the last 30 days.">
+      <div class="kpi__content">
+        <div class="type-label type-label--sm text-muted">Stockout Incidents</div>
+        <div class="type-display-md mt-2" style="color:var(--color-danger);">{{ stats.out_of_stock_count }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-8);">
+    <div class="glass-card glass-card--interactive p-6">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="type-h4">Top Performing SKUs</h3>
+        <span class="type-label--sm text-muted">By Sales Velocity</span>
+      </div>
       <div class="table-wrapper">
         <table class="data-table">
-          <thead><tr><th>Product</th><th style="text-align:right;">Velocity</th><th style="text-align:right;">On Hand</th></tr></thead>
+          <thead><tr><th>Product</th><th style="text-align:right;">30d Sold</th><th style="text-align:right;">Coverage</th></tr></thead>
           <tbody>
-            {% for row in fast_movers %}
-            <tr><td>{{ row.product.name }}</td><td style="text-align:right;">{{ row.velocity }}</td><td style="text-align:right;">{{ row.on_hand }}</td></tr>
+            {% for item in stats.top_products[:5] %}
+            <tr>
+              <td><div class="fw-semibold">{{ item.product.name }}</div><div class="type-body-xs text-muted">{{ item.product.product_ref }}</div></td>
+              <td style="text-align:right;">{{ item.total_sold }}</td>
+              <td style="text-align:right;">
+                <span class="badge {% if (item.coverage_days or 999) < 7 %}badge--danger{% elif (item.coverage_days or 999) < 14 %}badge--warning{% else %}badge--success{% endif %}">
+                  {{ item.coverage_days|round|int if item.coverage_days else '∞' }}d
+                </span>
+              </td>
+            </tr>
             {% else %}
-            <tr><td colspan="3" style="text-align:center;">No data yet.</td></tr>
+            <tr><td colspan="3" class="text-center py-4">No velocity data available.</td></tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
     </div>
+
     <div class="glass-card p-6">
-      <h2 class="type-h4" style="margin:0 0 var(--sp-4) 0;">Slow Movers</h2>
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="type-h4">Restock Priority</h3>
+        <span class="type-label--sm text-muted">Urgent Action Items</span>
+      </div>
       <div class="table-wrapper">
         <table class="data-table">
-          <thead><tr><th>Product</th><th style="text-align:right;">Velocity</th><th style="text-align:right;">On Hand</th></tr></thead>
+          <thead><tr><th>Sku</th><th style="text-align:right;">Current</th><th style="text-align:right;">Min</th></tr></thead>
           <tbody>
-            {% for row in slow_movers %}
-            <tr><td>{{ row.product.name }}</td><td style="text-align:right;">{{ row.velocity }}</td><td style="text-align:right;">{{ row.on_hand }}</td></tr>
+            {% for item in stats.low_stock_items[:5] %}
+            <tr>
+              <td>{{ item.name }}</td>
+              <td style="text-align:right; font-weight:700;">{{ item.stock }}</td>
+              <td style="text-align:right;">{{ item.low_stock_threshold }}</td>
+            </tr>
             {% else %}
-            <tr><td colspan="3" style="text-align:center;">No data yet.</td></tr>
+            <tr><td colspan="3" class="text-center py-4 text-muted">All stocks healthy.</td></tr>
             {% endfor %}
           </tbody>
         </table>

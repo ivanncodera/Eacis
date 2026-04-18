@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}Refunds & Returns — E-ACIS{% endblock %}
+{% block content %}
+<div class="page-center bg-grey-50 policy-print-shell" style="padding: var(--sp-20) var(--sp-6);">
+  <div class="stagger-children" style="max-width: 900px; width: 100%;">
+    <div class="text-center mb-16 reveal policy-screen-hero">
+      <div class="type-label mb-4" style="color: var(--brand-primary); letter-spacing: 0.15em; font-weight: 800;">REFUNDS &amp; RETURNS</div>
+      <h1 class="type-display-md mb-6">Refunds &amp; Returns Policy</h1>
+      <p class="type-body-md text-muted mx-auto" style="max-width: 1000px;">Guidelines for returns, evidence, and refund timelines on E-ACIS.</p>
+    </div>
+
+    <div class="glass-card p-12 reveal policy-print-card" style="border-radius: var(--radius-3xl);">
+      <header class="policy-print-head">
+        <h1>Refunds &amp; Returns</h1>
+        <p>Document date: April 18, 2026</p>
+      </header>
+      <article class="type-body-md" style="line-height: 1.8; color: var(--grey-700);">
+        <section class="mb-10">
+          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">1. Eligibility</h2>
+          <p>Return eligibility depends on the seller's configured return window, product condition, delivery confirmation, and the reason for return. Some items (e.g., custom, hazardous) may be non-returnable. Check product listing for seller-specific terms.</p>
+        </section>
+
+        <section class="mb-10">
+          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">2. How to Request a Return</h2>
+          <p>Open a return request from your orders page, provide required evidence (photos, descriptions), and follow instructions for pickup or drop-off. Sellers and couriers coordinate the return logistics.</p>
+        </section>
+
+        <section class="mb-10">
+          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">3. Evidence and Fraud Prevention</h2>
+          <p>We may require photos, video, or other evidence to verify claims. Excessive or fraudulent return behavior may result in account restrictions. Evidence is processed for claim verification and fraud prevention.</p>
+        </section>
+
+        <section class="mb-10">
+          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">4. Refund Timing and Methods</h2>
+          <p>Refunds are processed once return acceptance is confirmed. Timing depends on payment provider and may take several business days. Refunds are made to the original payment method unless otherwise agreed.</p>
+        </section>
+
+        <section>
+          <h2 class="type-h3 mb-4" style="color: var(--grey-900);">5. Contact and Escalation</h2>
+          <p>If you have questions or disputes about returns or refunds, contact Support via the <a href="/support" class="text-primary fw-bold">Support Center</a>. Escalations can be directed to <a href="mailto:support@e-acis.ph" class="text-primary fw-bold">support@e-acis.ph</a>.</p>
+        </section>
+      </article>
+
+      <div class="mt-12 pt-8 policy-screen-meta" style="border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--sp-4);">
+        <div class="type-body-xs text-muted">Last updated: April 18, 2026</div>
+        <div style="display: flex; gap: var(--sp-4);">
+          <span class="badge">Return Guidelines</span>
+          <span class="badge">Seller Policies</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+@media screen { .policy-print-head { display: none; } }
+@media print { .policy-print-shell { background: #fff !important; padding: 0 !important; } }
+</style>
+{% endblock %}

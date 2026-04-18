@@ -1,160 +1,158 @@
 {% extends 'base.html' %}
 {% block title %}E-ACIS — Smart Appliances for Modern Homes{% endblock %}
 {% block content %}
-<div class="landing">
-  <section class="hero" role="region" aria-labelledby="hero-heading">
-    <div class="hero__glow"></div>
-    <div class="reveal">
-      <span class="hero__eyebrow">{% if hero and hero.category %}{{ hero.category }}{% else %}Marketplace{% endif %}</span>
-      <h1 id="hero-heading" class="hero__headline">{% if hero %}{{ hero.name }}{% else %}Discover appliances from verified sellers{% endif %}</h1>
-      <p class="hero__subhead">
-        {% if hero %}
-        <a href="{{ url_for('product_detail', ref=hero.product_ref) }}" class="breadcrumb-link">View details</a>
-        <span class="text-muted"> · PHP {{ '%.2f'|format(hero.price) }}</span>
-        {% else %}
-        Browse the catalog, compare listings, and check out when you are ready.
-        {% endif %}
-      </p>
-      <div class="hero__ctas">
-        <a href="{{ url_for('shop') }}" class="btn btn--shop-cta btn--xl">Shop catalog</a>
-        {% if not current_user.is_authenticated %}
-        <a href="{{ url_for('auth_register_seller') }}" class="btn btn--ghost btn--xl">Become a seller</a>
-        {% endif %}
-      </div>
-    </div>
-    <div class="hero__image-wrap reveal" data-delay="200">
-      <img src="{% if hero %}{{ hero.image_url }}{% else %}/static/assets/products/refrigerator.webp{% endif %}" alt="{% if hero %}{{ hero.name }}{% else %}Featured appliance{% endif %}" class="hero__image" loading="lazy">
-
-      {% if hero %}
-      <div class="hero__stat-card hero__stat-card--left" style="background: var(--glass-ultra); backdrop-filter: var(--glass-blur-md); border: 1px solid var(--glass-border-strong); box-shadow: var(--shadow-lg);">
-        <div class="type-label" style="color: var(--grey-600);">Energy label</div>
-        <div class="type-price-sm type-gradient" style="color: var(--brand-primary);">{% if hero.energy_rating %}{{ hero.energy_rating }}{% else %}—{% endif %}</div>
-      </div>
-      <div class="hero__stat-card hero__stat-card--right" style="background: var(--glass-ultra); backdrop-filter: var(--glass-blur-md); border: 1px solid var(--glass-border-strong); box-shadow: var(--shadow-lg);">
-        <div class="type-label" style="color: var(--grey-600);">Warranty</div>
-        <div class="type-price-sm" style="color: var(--color-success);">{% if hero.warranty_months %}{{ hero.warranty_months }} mo{% else %}—{% endif %}</div>
-      </div>
-      {% endif %}
-    </div>
-  </section>
-
-  {% if shop_categories %}
-  <section class="container reveal" aria-label="Browse by category">
-    <div style="display:flex; gap:var(--sp-2); flex-wrap:wrap; justify-content:center;">
-      {% for cat in shop_categories %}
-      <a class="btn btn--secondary btn--sm" href="{{ url_for('shop', category=cat) }}">{{ cat }}</a>
-      {% endfor %}
-    </div>
-  </section>
-  {% endif %}
-
-  <section class="container reveal" style="margin-top: var(--sp-20);" aria-label="Marketplace snapshot">
-    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--sp-8); text-align: center;">
-      <div class="reveal">
-        <div style="width:52px; height:52px; background:var(--brand-primary-subtle-2); border:1px solid rgba(0,122,255,0.16); color:var(--brand-primary); border-radius:var(--radius-lg); display:flex; align-items:center; justify-content:center; margin:0 auto var(--sp-5);">
-          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"></path></svg>
-        </div>
-        <div class="type-body-sm fw-bold">Active listings</div>
-        <div class="type-body-xs text-muted">{{ platform_stats.active_products }} products live</div>
-      </div>
-      <div class="reveal" data-delay="100">
-        <div style="width:52px; height:52px; background:var(--brand-primary-subtle-2); border:1px solid rgba(0,122,255,0.16); color:var(--brand-primary); border-radius:var(--radius-lg); display:flex; align-items:center; justify-content:center; margin:0 auto var(--sp-5);">
-          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"></path></svg>
-        </div>
-        <div class="type-body-sm fw-bold">Seller partners</div>
-        <div class="type-body-xs text-muted">{{ platform_stats.sellers }} registered sellers</div>
-      </div>
-      <div class="reveal" data-delay="200">
-        <div style="width:52px; height:52px; background:var(--brand-primary-subtle-2); border:1px solid rgba(0,122,255,0.16); color:var(--brand-primary); border-radius:var(--radius-lg); display:flex; align-items:center; justify-content:center; margin:0 auto var(--sp-5);">
-          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h7"></path></svg>
-        </div>
-        <div class="type-body-sm fw-bold">Categories</div>
-        <div class="type-body-xs text-muted">{{ platform_stats.categories }} in catalog</div>
-      </div>
-      <div class="reveal" data-delay="300">
-        <div style="width:52px; height:52px; background:var(--brand-primary-subtle-2); border:1px solid rgba(0,122,255,0.16); color:var(--brand-primary); border-radius:var(--radius-lg); display:flex; align-items:center; justify-content:center; margin:0 auto var(--sp-5);">
-          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-        </div>
-        <div class="type-body-sm fw-bold">Return window</div>
-        <div class="type-body-xs text-muted">Up to {{ platform_stats.return_window_days }} days on eligible orders</div>
-      </div>
-    </div>
-  </section>
-
-  {% if spotlight_deals %}
-  <section class="container reveal" style="margin-top: var(--sp-24);" aria-label="Compare-at savings">
-    <h2 class="type-h2">Listings below compare-at price</h2>
-    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--sp-6); margin-top: var(--sp-8);" class="stagger-children">
-      {% for deal in spotlight_deals %}
-      <a href="{{ url_for('product_detail', ref=deal.product_ref) }}" class="glass-card glass-card--interactive glass-card--accented reveal" style="padding: var(--sp-6); border: 1px solid var(--border-default); text-decoration: none; color: inherit;">
-        <h3 class="type-h4" style="color: var(--grey-900);">{{ deal.name }}</h3>
-        <p class="type-body-sm mt-3" style="color: var(--grey-600);">
-          Save PHP {{ '%.2f'|format(deal.save_amount) }} vs compare-at PHP {{ '%.2f'|format(deal.compare_price) }} — now PHP {{ '%.2f'|format(deal.price) }}.
-        </p>
-      </a>
-      {% endfor %}
-    </div>
-  </section>
-  {% endif %}
-
-  <section class="container reveal" style="margin-top: var(--sp-24); margin-bottom: var(--sp-32);">
-    <div style="display:flex; justify-content:space-between; align-items:flex-end; gap: var(--sp-6); flex-wrap: wrap;">
-      <h2 class="type-h2" style="color: var(--grey-900);">Newest listings</h2>
-    </div>
-    <div id="featured-products" class="product-grid stagger-children" style="margin-top: var(--sp-6);"></div>
-    {% if not featured_products %}
-    <div class="glass-card p-6 text-muted" role="status">
-      <div class="type-body-sm fw-semibold">No products yet.</div>
-      <div class="type-body-xs mt-1">Check back after sellers publish inventory.</div>
-    </div>
-    {% endif %}
-  </section>
-
-  <section class="container reveal" style="margin-top: var(--sp-24); margin-bottom: var(--sp-32);">
-    <div class="glass-card glass-card--hero glass-card--interactive reveal" style="padding: var(--sp-16); text-align: center; background: linear-gradient(135deg, var(--grey-0) 0%, var(--brand-primary-subtle-2) 100%); border: 1px solid var(--border-default); overflow: hidden; position: relative;">
-      <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: var(--brand-primary); opacity: 0.05; border-radius: 50%; filter: blur(60px);"></div>
-      <div style="position: relative; z-index: 1;">
-        <h2 class="type-display-sm mb-4" style="color: var(--grey-900);">Ready to upgrade your home?</h2>
-        <p class="type-body-md text-muted mb-10" style="max-width: 600px; margin-left: auto; margin-right: auto; color: var(--grey-600);">Join thousands of households using E-ACIS to discover and manage energy-efficient appliances.</p>
-        <div style="display:flex; gap: var(--sp-4); flex-wrap: wrap; justify-content: center;">
-          {% if current_user.is_authenticated %}
-            {% if current_user.role == 'customer' %}
-              <a href="/customer/home" class="btn btn--primary btn--xl">Go to Dashboard</a>
-            {% elif current_user.role == 'seller' %}
-              <a href="/seller/dashboard" class="btn btn--primary btn--xl">Open Seller Hub</a>
-            {% elif current_user.role == 'admin' %}
-              <a href="/admin" class="btn btn--primary btn--xl">Enter Admin Console</a>
-            {% endif %}
+<div class="landing stagger-children">
+  <!-- Immersive Hero Section -->
+  <section class="hero reveal" style="padding-top: var(--topbar-height); min-height: 85vh; display: flex; align-items: center; position: relative; overflow: hidden;">
+    <div class="hero__glow" style="position: absolute; top: -10%; right: -10%; width: 60%; height: 60%; background: radial-gradient(circle, rgba(10, 132, 255, 0.1) 0%, transparent 70%); filter: blur(80px); z-index: 0;"></div>
+    <div class="container" style="display: grid; grid-template-columns: 1.2fr 1fr; gap: var(--sp-12); align-items: center; position: relative; z-index: 1;">
+      
+      <div class="hero__text-content">
+        <span class="hero__eyebrow" style="display: inline-flex; align-items: center; gap: 8px; background: rgba(10, 132, 255, 0.08); border: 1px solid rgba(10, 132, 255, 0.15); color: var(--brand-primary); padding: 6px 16px; border-radius: 20px; font-size: 11px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 24px;">
+           {% if hero and hero.category %}{{ hero.category }}{% else %}Marketplace 2.0{% endif %}
+           <span style="width: 6px; height: 6px; background: var(--brand-primary); border-radius: 50%; display: inline-block;"></span>
+        </span>
+        
+        <h1 class="type-display-lg" style="letter-spacing: -0.04em; line-height: 1.1; margin-bottom: 24px; color: var(--grey-900);">
+          {% if hero %}{{ hero.name }}{% else %}Precision Engineered <br><span class="type-gradient">Home Intelligence</span>{% endif %}
+        </h1>
+        
+        <p class="type-body-lg text-muted" style="max-width: 520px; line-height: 1.6; margin-bottom: 40px; font-size: 1.1rem;">
+          {% if hero %}
+             Experience the future of domestic efficiency. PHP {{ '%.2f'|format(hero.price) }} for a limited time.
           {% else %}
-            <a href="{{ url_for('auth_login') }}" class="btn btn--primary btn--xl">Sign in to Account</a>
-            <a href="{{ url_for('auth_register') }}" class="btn btn--secondary btn--xl">Join the Marketplace</a>
+             E-ACIS connects households with the next generation of energy-efficient appliances from verified, high-performance vendors.
+          {% endif %}
+        </p>
+        
+        <div class="hero__ctas" style="display: flex; gap: var(--sp-4); flex-wrap: wrap;">
+          <a href="{{ url_for('shop') }}" class="btn btn--primary btn--xl shadow-primary px-8" style="height: 58px;">Shop the Collection</a>
+          {% if not current_user.is_authenticated %}
+          <a href="{{ url_for('auth_register_seller') }}" class="btn btn--white btn--xl px-8" style="height: 58px;">Become a Partner</a>
           {% endif %}
         </div>
+
+        <div class="hero__trust mt-12" style="display: flex; align-items: center; gap: 24px; opacity: 0.7;">
+           <div style="font-size: 10px; font-weight: 800; letter-spacing: 1px; color: var(--grey-400); text-transform: uppercase;">VERIFIED TECH</div>
+           <div style="display: flex; gap: 20px;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 21a9 9 0 110-18 9 9 0 010 18z"/><path d="M12 7v5l3 3"/></svg>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+           </div>
+        </div>
+      </div>
+
+      <div class="hero__media-box" style="position: relative; display: flex; justify-content: center;">
+        <div class="hero__image-ring" style="position: absolute; width: 120%; height: 120%; border: 1px dashed rgba(10, 132, 255, 0.15); border-radius: 50%; opacity: 0.5; z-index: 0; animation: rotate-slow 20s linear infinite;"></div>
+        <img src="{% if hero %}{{ hero.image_url }}{% else %}/static/assets/Featured.png{% endif %}" alt="Featured" class="hero__image reveal" style="width: 100%; max-width: 500px; z-index: 1; filter: drop-shadow(0 40px 80px rgba(0,0,0,0.15));">
+
+        {% if hero %}
+        <div class="glass-card hero__stat-card hero__stat-card--left pulse-glow" style="position: absolute; bottom: 10%; left: -20px; z-index: 2; padding: 16px; border-radius: 16px;">
+           <div class="type-label" style="font-size: 9px; margin-bottom: 4px;">ENERGY STAR</div>
+           <div class="type-h4 mb-0" style="color: var(--brand-primary);">{{ hero.energy_rating or 'A+++' }}</div>
+        </div>
+        <div class="glass-card hero__stat-card hero__stat-card--right" style="position: absolute; top: 10%; right: -20px; z-index: 2; padding: 16px; border-radius: 16px;">
+           <div class="type-label" style="font-size: 9px; margin-bottom: 4px;">GLOBAL WARRANTY</div>
+           <div class="type-h4 mb-0" style="color: var(--color-success);">{{ hero.warranty_months or '24' }} MO</div>
+        </div>
+        {% endif %}
       </div>
     </div>
   </section>
+
+  <!-- Value Propositions section -->
+  <section class="container" style="margin-top: var(--sp-32);">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--sp-8);">
+       <div class="glass-card p-8 stagger-item">
+          <div style="width: 48px; height: 48px; background: var(--brand-primary-subtle); color: var(--brand-primary); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px;">
+             <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          </div>
+          <h3 class="type-h4 mb-2">Verified Integrity</h3>
+          <p class="type-body-sm text-muted">Every seller undergoes a 12-point authentication process before listing.</p>
+       </div>
+       <div class="glass-card p-8 stagger-item">
+          <div style="width: 48px; height: 48px; background: var(--brand-primary-subtle); color: var(--brand-primary); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px;">
+             <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </div>
+          <h3 class="type-h4 mb-2">Smart Financing</h3>
+          <p class="type-body-sm text-muted">0% interest installments up to 24 months through partner banking networks.</p>
+       </div>
+       <div class="glass-card p-8 stagger-item">
+          <div style="width: 48px; height: 48px; background: var(--brand-primary-subtle); color: var(--brand-primary); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px;">
+             <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          </div>
+          <h3 class="type-h4 mb-2">Rapid Fulfillment</h3>
+          <p class="type-body-sm text-muted">Direct warehouse shipping ensures delivery within 48-72 hours nationwide.</p>
+       </div>
+    </div>
+  </section>
+
+  <!-- Trending / Newest with refined cards -->
+  <section class="container" style="margin-top: var(--sp-32); margin-bottom: var(--sp-32);">
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom: var(--sp-12);">
+       <div>
+         <h2 class="type-display-sm" style="margin:0;">The Current Pulse</h2>
+         <p class="type-body-md text-muted mt-2">Discover what’s trending in precision engineering.</p>
+       </div>
+       <a href="/shop" class="btn btn--secondary">Explore All Listings</a>
+    </div>
+    
+    <div id="featured-products" class="product-grid stagger-children">
+       <!-- Skeletons will show if loading -->
+       <div class="skeleton" style="height: 400px; border-radius: 12px;"></div>
+       <div class="skeleton" style="height: 400px; border-radius: 12px;"></div>
+       <div class="skeleton" style="height: 400px; border-radius: 12px;"></div>
+       <div class="skeleton" style="height: 400px; border-radius: 12px;"></div>
+    </div>
+  </section>
+
+  <section class="container mb-32">
+     <div class="glass-card p-20 reveal" style="text-align: center; background: radial-gradient(circle at top right, var(--brand-primary-subtle-2), transparent); border: 1px solid var(--border-default); overflow: hidden;">
+        <h2 class="type-display-sm mb-6">Designed for Modern Living</h2>
+        <p class="type-body-lg text-muted mb-12" style="max-width: 600px; margin: 0 auto;">Join a marketplace where identity security and appliance quality converge.</p>
+        <a href="/auth/register" class="btn btn--primary btn--xl shadow-primary">Create Your Account</a>
+     </div>
+  </section>
 </div>
+
+<style>
+@keyframes rotate-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.type-gradient {
+  background: linear-gradient(135deg, var(--brand-primary) 0%, #3B82F6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+</style>
 
 <script src="/static/js/components/productGrid.js"></script>
 {% set ns = namespace(arr=[]) %}
 {% for p in featured_products %}
-  {% set _ = ns.arr.append({
-    'ref': p.ref,
-    'product_ref': p.product_ref,
-    'name': p.name,
-    'category': p.category,
-    'price': p.price,
-    'stock': p.stock,
-    'image_url': p.image_url,
-    'installment_enabled': p.installment_enabled,
-    'comparePrice': p.comparePrice,
-  }) %}
+   {% set _ = ns.arr.append({
+      'ref': p.ref,
+      'product_ref': p.product_ref,
+      'show_sku': (can_view_product_id(p) if can_view_product_id is defined else True),
+      'name': p.name,
+      'category': p.category,
+      'price': p.price,
+      'stock': p.stock,
+      'image_url': p.image_url,
+      'installment_enabled': p.installment_enabled,
+      'comparePrice': p.comparePrice,
+   }) %}
 {% endfor %}
 <script id="__featured_products__" type="application/json">{{ ns.arr | tojson | safe }}</script>
 <script>
 document.addEventListener('DOMContentLoaded', ()=>{
   const raw = document.getElementById('__featured_products__');
+  const grid = document.getElementById('featured-products');
   if (!raw || !window.renderProducts) return;
+  
+  // Clear skeletons
+  grid.innerHTML = '';
+  
   let products = [];
   try { products = JSON.parse(raw.textContent || '[]'); } catch (e) { products = []; }
   renderProducts('#featured-products', products.slice(0,4));

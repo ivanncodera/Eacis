@@ -20,7 +20,7 @@
         </div>
      </div>
 
-     <div class="catalog-layout">
+     <div class="catalog-layout" style="display:block;">
         <div class="catalog-hero reveal" data-delay="80">
            <div class="catalog-meter">
               <div class="catalog-meter__item">
@@ -40,7 +40,7 @@
               </div>
            </div>
 
-           <div class="table-wrapper mt-6">
+           <div class="table-wrapper mt-6" style="overflow:visible; min-height: 400px;">
               <div class="table-toolbar p-4 bg-grey-25 border-b">
                   <form method="get" action="/seller/products" style="display:flex; gap:var(--sp-4); width:100%; flex-wrap:wrap; align-items:end;" data-enhance="submit-loading">
                     <div class="form-input-group" style="width:360px;">
@@ -96,12 +96,22 @@
                        <span class="badge badge--success">Active</span>
                        {% endif %}
                      </td>
-                     <td style="text-align:right; display:flex; gap:var(--sp-2); justify-content:flex-end;">
-                        <a href="/seller/products/{{ product.product_ref }}/edit" class="btn btn--secondary btn--sm">Edit</a>
-                         <form method="post" action="/seller/products/{{ product.product_ref }}/delete" onsubmit="return confirm('Delete {{ product.product_ref }}?');" data-enhance="submit-loading">
-                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                          <button class="btn btn--ghost btn--sm" type="submit" style="color:var(--color-danger);">Delete</button>
-                        </form>
+                     <td style="text-align:right;">
+                        <div style="display:flex; justify-content:flex-end; align-items:center;">
+                          <div class="dropdown" style="display:inline-block; text-align:left;">
+                            <button type="button" class="btn btn--white btn--sm" data-dropdown-toggle style="padding:4px 8px; border-radius:8px;">
+                              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="12" cy="19" r="2"></circle></svg>
+                            </button>
+                            <div class="dropdown-menu" style="right: 0; min-width: 140px; margin-top:4px;">
+                              <a class="dropdown-item fw-semibold" href="/seller/products/{{ product.product_ref }}/edit">Edit Product</a>
+                              <div class="dropdown-divider"></div>
+                                             <form method="post" action="/seller/products/{{ product.product_ref }}/delete" style="margin:0;" data-confirm="Delete {{ product.product_ref }}?" data-enhance="submit-loading">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button class="dropdown-item" type="submit" style="color:var(--color-danger); width:100%; text-align:left; background:transparent; border:none; cursor:pointer; font-size:inherit;">Delete</button>
+                              </form>
+                            </div>
+                          </div>
+                        </div>
                      </td>
                    </tr>
                    {% else %}
@@ -111,40 +121,28 @@
                    {% endfor %}
                  </tbody>
               </table>
-              <div class="table-footer">
-                 <div class="table-footer__info">Showing {{ products|length }} of {{ stats.total }} products</div>
-              </div>
-           </div>
-        </div>
-
-        <div class="catalog-side">
-           <div class="glass-card reveal" data-delay="120">
-              <h3 class="type-h4">Catalog Health</h3>
-              <p class="type-body-sm text-muted mt-1">What needs attention right now.</p>
-              <div class="ops-list mt-4">
-                <div class="ops-list-item">
-                           <div class="type-body-sm fw-semibold">{{ stats.low_stock }} products near low stock</div>
-                           <div class="type-body-xs text-muted mt-1">Restock these listings to avoid missed orders.</div>
-                </div>
-                <div class="ops-list-item">
-                           <div class="type-body-sm fw-semibold">{{ stats.active }} active storefront listings</div>
-                           <div class="type-body-xs text-muted mt-1">These are currently visible to customers.</div>
-                </div>
-                <div class="ops-list-item">
-                           <div class="type-body-sm fw-semibold">{{ stats.installment_enabled }} products qualify for installment</div>
-                  <div class="type-body-xs text-muted mt-1">Promote these first in campaigns.</div>
+              {% if pagination and pagination.pages > 1 %}
+              <div class="mt-8 pt-6 border-t" style="display:flex; justify-content:space-between; align-items:center; gap:var(--sp-4);">
+                <span class="type-body-xs text-muted">Showing {{ (pagination.page - 1) * pagination.per_page + 1 }} - {{ [pagination.page * pagination.per_page, pagination.total]|min }} of {{ pagination.total }} records</span>
+                <div style="display:flex; justify-content:center; gap:var(--sp-2);">
+                  {% for page in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                    {% if page %}
+                      {% if page == pagination.page %}
+                      <span class="btn btn--primary btn--xs" style="min-width:32px;">{{ page }}</span>
+                      {% else %}
+                      <a href="{{ url_for('seller_products', page=page, q=filters.q, status=filters.status, per_page=pagination.per_page) }}" class="btn btn--white btn--xs" style="min-width:32px;">{{ page }}</a>
+                      {% endif %}
+                    {% else %}
+                      <span class="text-muted">...</span>
+                    {% endif %}
+                  {% endfor %}
                 </div>
               </div>
-           </div>
-
-           <div class="glass-card reveal" data-delay="160">
-              <h3 class="type-h4">Quick Filters</h3>
-              <div style="display:flex; flex-direction:column; gap:var(--sp-2); margin-top:var(--sp-4);">
-                        <a class="btn btn--secondary btn--sm btn--full" href="/seller/products?status=low_stock">Near out of stock</a>
-                        <a class="btn btn--secondary btn--sm btn--full" href="/seller/products?status=active">Active listings</a>
-                        <a class="btn btn--secondary btn--sm btn--full" href="/seller/products?status=inactive">Inactive listings</a>
-                        <a class="btn btn--secondary btn--sm btn--full" href="/seller/products">Reset filters</a>
+              {% else %}
+              <div class="table-footer" style="padding-top: var(--sp-4);">
+                 <div class="table-footer__info">Showing {{ products|length }} listings</div>
               </div>
+              {% endif %}
            </div>
         </div>
      </div>

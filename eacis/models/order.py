@@ -9,6 +9,7 @@ from datetime import datetime
 
 class Order(db.Model):
     __tablename__ = 'orders'
+    __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True)
     order_ref = db.Column(db.String(30), unique=True)
     customer_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -31,12 +32,14 @@ class Order(db.Model):
     delivered_at = db.Column(db.DateTime)
 
     items = db.relationship('OrderItem', backref='order', lazy='dynamic')
+    installment_plan = db.relationship('InstallmentPlan', back_populates='order', uselist=False, lazy='select')
 
     def __repr__(self):
         return f"<Order {self.order_ref} - {self.status}>"
 
 class OrderItem(db.Model):
     __tablename__ = 'order_items'
+    __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True)
     order_id = db.Column(db.Integer, db.ForeignKey('orders.id'))
     product_id = db.Column(db.Integer, db.ForeignKey('products.id'))

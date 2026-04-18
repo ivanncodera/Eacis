@@ -20,6 +20,9 @@ class InstallmentPlan(db.Model):
     total_interest = db.Column(db.Numeric(12,2), default=0)
     status = db.Column(db.Enum('active','completed','defaulted', name='installment_status'))
 
+    order = db.relationship('Order', back_populates='installment_plan', lazy='select')
+    schedules = db.relationship('InstallmentSchedule', back_populates='plan', lazy='dynamic', cascade='all, delete-orphan')
+
 class InstallmentSchedule(db.Model):
     __tablename__ = 'installment_schedule'
     id = db.Column(db.Integer, primary_key=True)
@@ -29,3 +32,5 @@ class InstallmentSchedule(db.Model):
     status = db.Column(db.Enum('pending','paid','past_due', name='schedule_status'))
     paid_at = db.Column(db.DateTime)
     payment_ref = db.Column(db.String(100))
+
+    plan = db.relationship('InstallmentPlan', back_populates='schedules', lazy='select')

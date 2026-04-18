@@ -205,3 +205,28 @@
 .installment-table tr:not(:last-child) {
   border-bottom: 1px solid rgba(0, 122, 255, 0.1);
 }
+
+/* Order review & star UI tweaks */
+.order-star-btn {
+  border: 1px solid var(--border-subtle);
+  background: white;
+  padding: 6px 8px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.order-star-btn[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.inline-review-form {
+  background: var(--grey-0);
+  border: 1px solid var(--border-subtle);
+  padding: 10px;
+  border-radius: 8px;
+}
+.order-review-toggle {
+  padding: 6px 10px;
+}

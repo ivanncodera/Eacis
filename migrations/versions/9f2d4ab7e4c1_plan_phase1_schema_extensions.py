@@ -23,17 +23,33 @@ refund_status = sa.Enum('requested', 'processed', 'failed', name='refund_status'
 
 
 def upgrade():
-    op.add_column('users', sa.Column('first_name', sa.String(length=100), nullable=True))
-    op.add_column('users', sa.Column('middle_name', sa.String(length=100), nullable=True))
-    op.add_column('users', sa.Column('last_name', sa.String(length=100), nullable=True))
-    op.add_column('users', sa.Column('suffix', sa.String(length=20), nullable=True))
-    op.add_column('users', sa.Column('address_line1', sa.String(length=255), nullable=True))
-    op.add_column('users', sa.Column('address_line2', sa.String(length=255), nullable=True))
-    op.add_column('users', sa.Column('barangay', sa.String(length=120), nullable=True))
-    op.add_column('users', sa.Column('city_municipality', sa.String(length=120), nullable=True))
-    op.add_column('users', sa.Column('province', sa.String(length=120), nullable=True))
-    op.add_column('users', sa.Column('region', sa.String(length=120), nullable=True))
-    op.add_column('users', sa.Column('postal_code', sa.String(length=20), nullable=True))
+    # Avoid duplicate-column errors when parallel branches added the same fields.
+    conn = op.get_bind()
+    inspector = sa.inspect(conn)
+    existing_cols = [c['name'] for c in inspector.get_columns('users')] if 'users' in inspector.get_table_names() else []
+
+    if 'first_name' not in existing_cols:
+        op.add_column('users', sa.Column('first_name', sa.String(length=100), nullable=True))
+    if 'middle_name' not in existing_cols:
+        op.add_column('users', sa.Column('middle_name', sa.String(length=100), nullable=True))
+    if 'last_name' not in existing_cols:
+        op.add_column('users', sa.Column('last_name', sa.String(length=100), nullable=True))
+    if 'suffix' not in existing_cols:
+        op.add_column('users', sa.Column('suffix', sa.String(length=20), nullable=True))
+    if 'address_line1' not in existing_cols:
+        op.add_column('users', sa.Column('address_line1', sa.String(length=255), nullable=True))
+    if 'address_line2' not in existing_cols:
+        op.add_column('users', sa.Column('address_line2', sa.String(length=255), nullable=True))
+    if 'barangay' not in existing_cols:
+        op.add_column('users', sa.Column('barangay', sa.String(length=120), nullable=True))
+    if 'city_municipality' not in existing_cols:
+        op.add_column('users', sa.Column('city_municipality', sa.String(length=120), nullable=True))
+    if 'province' not in existing_cols:
+        op.add_column('users', sa.Column('province', sa.String(length=120), nullable=True))
+    if 'region' not in existing_cols:
+        op.add_column('users', sa.Column('region', sa.String(length=120), nullable=True))
+    if 'postal_code' not in existing_cols:
+        op.add_column('users', sa.Column('postal_code', sa.String(length=20), nullable=True))
 
     inquiry_priority.create(op.get_bind(), checkfirst=True)
     inquiry_status.create(op.get_bind(), checkfirst=True)

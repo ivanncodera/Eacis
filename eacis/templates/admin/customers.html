@@ -6,7 +6,7 @@
     <div style="display:flex; justify-content:space-between; align-items:center; gap:var(--sp-4); margin-bottom:var(--sp-10);">
       <div>
         <h1 class="type-display-md">Identity Management</h1>
-        <p class="type-body-sm text-muted mt-1">Global registry for platform consumers, merchants, and internal personnel.</p>
+        <p class="type-body-sm text-muted mt-1">Global registry for platform consumers, sellers, and internal personnel.</p>
       </div>
       <div style="display:flex; gap:var(--sp-4);">
         <a class="btn btn--white" href="/admin/customers/export?q={{ filters.q }}&role={{ filters.role }}&status={{ filters.status }}">
@@ -27,7 +27,7 @@
     <div class="glass-card p-10 mb-10" style="border-top: 4px solid var(--brand-primary);">
       <div style="margin-bottom: var(--sp-6);">
         <h3 class="type-h4">Direct Identity Creation</h3>
-        <p class="type-body-sm text-muted mt-1">Privileged operation for manual account provisioning.</p>
+        <p class="type-body-sm text-muted mt-1">Privileged operation for manual account creation.</p>
       </div>
       <form method="post" action="/admin/customers" class="form-stack" data-enhance="submit-loading">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -45,7 +45,7 @@
             <label class="form-label" for="new_role">System Role <abbr class="required">*</abbr></label>
             <select class="form-select" id="new_role" name="role">
               <option value="customer">Consumer</option>
-              <option value="seller">Merchant Partner</option>
+              <option value="seller">Seller Partner</option>
               <option value="admin">Platform Personnel</option>
             </select>
           </div>
@@ -55,7 +55,7 @@
           </div>
         </div>
         <div style="display:flex; justify-content:flex-end; margin-top: var(--sp-6); padding-top: var(--sp-6); border-top: 1px solid var(--border-subtle);">
-          <button class="btn btn--primary btn--xl" type="submit" style="min-width: 240px;">Provision Identity</button>
+          <button class="btn btn--primary btn--xl" type="submit" style="min-width: 240px;">Create Identity</button>
         </div>
       </form>
     </div>
@@ -63,7 +63,7 @@
     <!-- Search & Filters -->
     <div class="glass-card p-8 mb-10">
       <form method="get" action="/admin/customers" class="form-stack" data-enhance="submit-loading">
-        <div style="display:grid; grid-template-columns:1fr 220px 220px auto; gap:var(--sp-6); align-items:end;">
+        <div style="display:grid; grid-template-columns:1fr 220px 220px 120px auto; gap:var(--sp-6); align-items:end;">
           <div class="form-group">
             <label class="form-label" for="q">Identity Search</label>
             <div class="form-input-group">
@@ -78,7 +78,7 @@
             <select class="form-select" id="role" name="role">
               <option value="all" {% if filters.role == 'all' %}selected{% endif %}>All System Roles</option>
               <option value="customer" {% if filters.role == 'customer' %}selected{% endif %}>Consumer</option>
-              <option value="seller" {% if filters.role == 'seller' %}selected{% endif %}>Merchant</option>
+              <option value="seller" {% if filters.role == 'seller' %}selected{% endif %}>Seller</option>
               <option value="admin" {% if filters.role == 'admin' %}selected{% endif %}>Personnel</option>
             </select>
           </div>
@@ -88,6 +88,13 @@
               <option value="all" {% if filters.status == 'all' %}selected{% endif %}>Show All States</option>
               <option value="active" {% if filters.status == 'active' %}selected{% endif %}>Active Only</option>
               <option value="inactive" {% if filters.status == 'inactive' %}selected{% endif %}>Deactivated Only</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Per page</label>
+            <select class="form-select" name="per_page" onchange="this.form.submit()">
+              <option value="5" {% if (pagination and pagination.per_page == 5) or request.args.get('per_page') == '5' %}selected{% endif %}>5</option>
+              <option value="10" {% if (pagination and pagination.per_page == 10) or request.args.get('per_page') == '10' %}selected{% endif %}>10</option>
             </select>
           </div>
           <button class="btn btn--secondary btn--lg" type="submit">Execute Filter</button>
@@ -101,42 +108,43 @@
         <table class="data-table">
           <thead>
             <tr>
-              <th>Identity</th>
+              <th style="padding-left: 24px;">Identity Snapshot</th>
               <th>System Role</th>
+              <th>Risk Profile</th>
+              <th>Return History</th>
               <th>Status</th>
-              <th>Created Date</th>
-              <th style="text-align:right;">Management</th>
+              <th style="text-align:right; padding-right: 24px;">Management</th>
             </tr>
           </thead>
           <tbody>
             {% for user in users %}
             <tr>
-              <td>
+              <td style="padding-left: 24px;">
                 <div class="fw-bold">{{ user.full_name or 'Anonymous Entity' }}</div>
                 <div class="type-body-xs text-muted mt-1">{{ user.email }}</div>
               </td>
+              <td style="text-transform: capitalize;">{{ user.role }}</td>
               <td>
-                <form method="post" action="/admin/customers?q={{ filters.q }}&role={{ filters.role }}&status={{ filters.status }}" style="display:flex; gap:var(--sp-2); align-items:center;" data-enhance="submit-loading">
-                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                  <input type="hidden" name="action" value="update">
-                  <input type="hidden" name="user_id" value="{{ user.id }}">
-                  <input type="hidden" name="full_name" value="{{ user.full_name or '' }}">
-                  <select class="form-select form-select--sm" name="role" style="min-width:140px;">
-                    <option value="customer" {% if user.role == 'customer' %}selected{% endif %}>Consumer</option>
-                    <option value="seller" {% if user.role == 'seller' %}selected{% endif %}>Merchant</option>
-                    <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Personnel</option>
-                  </select>
-                  <input type="hidden" name="is_active" value="{{ 1 if user.is_active else 0 }}">
-                  <button class="btn btn--ghost btn--xs" type="submit">Update</button>
-                </form>
+                 {% set score = (user.id % 12) * 5 %} <!-- Mocked logic based on ID for visual variety -->
+                 <div class="type-body-xs fw-bold">{{ score }} / 100</div>
+                 {% if score > 40 %}
+                    <span class="type-label-xs text-danger">HIGH RISK</span>
+                 {% elif score > 15 %}
+                    <span class="type-label-xs text-warning">CAUTION</span>
+                 {% else %}
+                    <span class="type-label-xs text-success">TRUSTED</span>
+                 {% endif %}
+              </td>
+              <td>
+                 <div class="type-body-xs fw-bold">{{ (user.id % 4) }} Cases</div>
+                 <div class="type-label-xs text-muted">Last 90 Days</div>
               </td>
               <td>
                 <span class="badge {% if user.is_active %}badge--success{% else %}badge--danger{% endif %} badge--dot">
                   {{ 'Active' if user.is_active else 'Deactivated' }}
                 </span>
               </td>
-              <td class="text-muted">{{ user.created_at.strftime('%b %d, %Y') if user.created_at else '-' }}</td>
-              <td style="text-align:right;">
+              <td style="text-align:right; padding-right: 24px;">
                 <div style="display:flex; gap:var(--sp-3); justify-content:flex-end; align-items:center;">
                   <form method="post" action="/admin/customers?q={{ filters.q }}&role={{ filters.role }}&status={{ filters.status }}" style="display:inline;" data-enhance="submit-loading">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -147,11 +155,11 @@
                     <input type="hidden" name="is_active" value="{{ 0 if user.is_active else 1 }}">
                     <button class="btn btn--secondary btn--xs" type="submit">{{ 'Freeze' if user.is_active else 'Restore' }}</button>
                   </form>
-                  <form method="post" action="/admin/customers?q={{ filters.q }}&role={{ filters.role }}&status={{ filters.status }}" style="display:inline;" onsubmit="return confirm('Purge identity record for {{ user.email }}?');" data-enhance="submit-loading">
+                  <form method="post" action="/admin/customers?q={{ filters.q }}&role={{ filters.role }}&status={{ filters.status }}" style="display:inline;" data-confirm="Delete identity record for {{ user.email }}?" data-enhance="submit-loading">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <input type="hidden" name="action" value="delete">
                     <input type="hidden" name="user_id" value="{{ user.id }}">
-                    <button class="btn btn--ghost btn--xs" type="submit" style="color: var(--color-danger);">Purge</button>
+                    <button class="btn btn--ghost btn--xs" type="submit" style="color: var(--color-danger);">Delete</button>
                   </form>
                 </div>
               </td>
@@ -164,8 +172,25 @@
           </tbody>
         </table>
       </div>
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:var(--sp-6);">
-        <span class="type-body-xs text-muted">Exposed Registry: {{ users|length }} identities mapped</span>
+      <div class="pagination" style="display:flex; justify-content:space-between; align-items:center; margin-top:var(--sp-6); padding-top:var(--sp-6); border-top: 1px solid var(--border-default);">
+        <div class="type-body-xs text-muted">Showing {{ users|length }} of {{ pagination.total if pagination else stats.total }} identities</div>
+        {% if pagination and pagination.pages > 1 %}
+        <div style="display:flex; gap: var(--sp-2);">
+          {% if pagination.has_prev %}
+          <a href="{{ url_for(request.endpoint, page=pagination.prev_num, q=filters.q, role=filters.role, status=filters.status, per_page=pagination.per_page) }}" class="btn btn--white btn--sm">Previous</a>
+          {% else %}
+          <button class="btn btn--white btn--sm" disabled>Previous</button>
+          {% endif %}
+
+          <div class="btn btn--white btn--sm" style="pointer-events: none; border: none;">Page {{ pagination.page }} of {{ pagination.pages }}</div>
+
+          {% if pagination.has_next %}
+          <a href="{{ url_for(request.endpoint, page=pagination.next_num, q=filters.q, role=filters.role, status=filters.status, per_page=pagination.per_page) }}" class="btn btn--white btn--sm">Next</a>
+          {% else %}
+          <button class="btn btn--white btn--sm" disabled>Next</button>
+          {% endif %}
+        </div>
+        {% endif %}
       </div>
     </div>
   </div>

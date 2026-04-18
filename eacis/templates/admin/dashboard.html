@@ -2,111 +2,71 @@
 {% block title %}Dashboard — Admin Portal{% endblock %}
 {% block content %}
 <div class="stagger-children">
-   <div class="page-content bg-grey-50" style="padding: var(--sp-12);">
-        <div style="display:flex; justify-content:space-between; align-items:center; gap:var(--sp-4); margin-bottom:var(--sp-10);">
-           <div>
-              <h1 class="type-display-md">Platform Nexus</h1>
-              <p class="type-body-sm text-muted mt-1">Real-time supervision of users, inventory, and system security.</p>
-           </div>
-           <div style="display:flex; gap:var(--sp-3); flex-wrap:wrap; align-items:center;">
-              <div class="system-status-indicator">
-                 <div class="pulse-dot pulse-dot--active"></div>
-                 <span class="type-label" style="font-size: 11px;">System Health: Optimal</span>
-              </div>
-           </div>
-        </div>
-
-      <div class="kpi-grid mb-10">
-        <div class="glass-card glass-card--kpi">
-           <div class="type-label type-label--sm text-muted">Platform GMV (Today)</div>
-           <div class="type-display-md mt-2">PHP {{ '%.2f'|format(stats.gmv_today or 0) }}</div>
-           <div class="type-body-xs text-muted mt-1">From confirmed customer orders</div>
-        </div>
-        <div class="glass-card glass-card--kpi">
-           <div class="type-label type-label--sm text-muted">Active Sellers</div>
-           <div class="type-display-md mt-2" style="color: var(--brand-primary);">{{ stats.active_sellers }}</div>
-           <div class="type-body-xs text-muted mt-1">Approved merchant accounts</div>
-        </div>
-        <div class="glass-card glass-card--kpi">
-           <div class="type-label type-label--sm text-muted">System Errors</div>
-           <div class="type-display-md mt-2 {% if stats.system_errors > 0 %}text-danger{% endif %}">{{ stats.system_errors }}</div>
-           <div class="type-body-xs {% if stats.system_errors > 0 %}text-warning{% else %}text-success{% endif %} mt-1">
-             {% if stats.system_errors > 0 %}Investigate failed actions{% else %}All services operational{% endif %}
-           </div>
-        </div>
-        <div class="glass-card glass-card--kpi">
-           <div class="type-label type-label--sm text-muted">Compliance Alerts</div>
-           <div class="type-display-md mt-2" style="color: var(--color-warning);">{{ stats.compliance_alerts }}</div>
-           <div class="type-body-xs text-muted mt-1">Review pending validation flags</div>
-        </div>
-      </div>
-
-      <div class="glass-card p-10 mb-10">
-           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--sp-6); gap:var(--sp-4);">
-              <div>
-                 <h3 class="type-h4">Administrative Hub</h3>
-                 <p class="type-body-sm text-muted mt-1">Navigate to core platform governance modules.</p>
-              </div>
-              <span class="badge badge--warning" style="padding: 6px 12px;">{{ alerts|length }} unresolved issues</span>
-           </div>
-           <div style="display:flex; gap:var(--sp-4); flex-wrap:wrap;">
-              <a href="/admin/reports" class="btn btn--secondary btn--lg">Business Intelligence</a>
-              <a href="/admin/sellers" class="btn btn--secondary btn--lg">Merchant Registry</a>
-              <a href="/admin/customers" class="btn btn--secondary btn--lg">Consumer Directory</a>
-              <a href="/admin/audit" class="btn btn--secondary btn--lg">Security Audit</a>
-              <a href="/admin/settings" class="btn btn--secondary btn--lg">Control Panel</a>
-           </div>
-      </div>
-
-      <div style="display:grid; grid-template-columns: 2.2fr 1fr; gap:var(--sp-8);">
-         <div class="glass-card p-10">
-                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--sp-6);">
-                    <div>
-                       <h3 class="type-h4">Sales Trend Monitor</h3>
-                       <p class="type-body-sm text-muted mt-1">Platform-wide sales movement visualization.</p>
-                    </div>
-                    <span class="badge badge--success">Live Sync</span>
-                 </div>
-                 <div class="table-wrapper">
-                    <table class="data-table">
-                       <thead><tr><th>Timeline</th><th style="text-align:right;">Recorded Sales</th></tr></thead>
-                       <tbody>
-                          {% for point in sales_points %}
-                          <tr>
-                             <td class="fw-semibold">{{ point.label }}</td>
-                             <td style="text-align:right;" class="fw-bold">PHP {{ '%.2f'|format(point.value or 0) }}</td>
-                          </tr>
-                          {% else %}
-                          <tr><td colspan="2" style="text-align:center; padding: var(--sp-10);" class="text-muted">No sales activity tracked in this period.</td></tr>
-                          {% endfor %}
-                       </tbody>
-                    </table>
-                 </div>
+   <div class="page-content" style="padding: var(--sp-12); max-width: 1200px; margin: 0 auto;">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:var(--sp-4); margin-bottom:var(--sp-8);">
+         <div>
+            <h1 class="type-display-md">Admin Dashboard</h1>
+            <p class="type-body-sm text-muted mt-1">Overview of escalations, alerts, and platform health (no direct access to transactions).</p>
          </div>
-         
-         <!-- Alerts -->
-         <div class="glass-card p-0" style="overflow: hidden;">
-            <div class="p-6 border-b" style="display:flex; justify-content:space-between; align-items:center; gap:var(--sp-4); background: var(--grey-25);">
-               <div>
-                 <h3 class="type-h4">System Alerts</h3>
-                 <p class="type-body-xs text-muted mt-1">Recent operational events.</p>
-               </div>
-               <span class="badge badge--warning">Attention</span>
-            </div>
-            <div class="alert-feed">
-               {% for alert in alerts %}
-               <div class="p-6 border-b hover-bg-light cursor-pointer transition-base">
-                  <div class="fw-bold type-body-sm {% if 'Pending' in alert.title or 'Open' in alert.title %}text-danger{% endif %}">{{ alert.title }}</div>
-                  <div class="type-body-xs text-muted mt-1">{{ alert.message }}</div>
-                  <div class="type-body-xs text-muted mt-3" style="font-size: 10px; opacity: 0.7;">{{ alert.time }}</div>
-               </div>
-               {% endfor %}
-            </div>
-            <div class="p-6 text-center">
-               <a href="/admin/audit" class="type-body-sm fw-bold text-primary" style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 4px;">Explore Full Audit Trail <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      </div>
+
+      <div class="kpi-grid mb-8" style="display:grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-4);">
+         <div class="glass-card p-6">
+            <div class="type-label-xs text-muted">Active Sellers</div>
+            <div class="type-display-md">{{ stats and stats.active_sellers or 0 }}</div>
+         </div>
+         <div class="glass-card p-6">
+            <div class="type-label-xs text-muted">Open Tickets</div>
+            <div class="type-display-md">{{ stats and stats.open_tickets or 0 }}</div>
+         </div>
+         <div class="glass-card p-6">
+            <div class="type-label-xs text-muted">Customers</div>
+            <div class="type-display-md">{{ stats and stats.total_customers or 0 }}</div>
+         </div>
+         <div class="glass-card p-6">
+            <div class="type-label-xs text-muted">Products</div>
+            <div class="type-display-md">{{ stats and stats.total_products or 0 }}</div>
+         </div>
+      </div>
+
+      <div class="glass-card p-8 mb-8">
+         <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3 class="type-h4">Quick Actions</h3>
+            <div style="display:flex; gap:var(--sp-3);">
+               <a href="/admin/products" class="btn btn--secondary">Manage Products</a>
+               <a href="/admin/customers" class="btn btn--secondary">Manage Customers</a>
+               <a href="/admin/sellers" class="btn btn--secondary">Manage Sellers</a>
+               <a href="/admin/trusted-devices" class="btn btn--secondary">Trusted Devices</a>
             </div>
          </div>
       </div>
+
+      <div style="display:grid; grid-template-columns: 2fr 1fr; gap:var(--sp-6);">
+         <div class="glass-card p-8">
+            <h3 class="type-h4">Recent Escalations & Alerts</h3>
+            <div style="display:flex; flex-direction:column; gap:var(--sp-3);">
+              {% for a in alerts[:10] %}
+                <div style="padding: var(--sp-3); border-bottom:1px solid var(--border-subtle);">
+                  <div class="fw-bold">{{ a.title }}</div>
+                  <div class="type-body-xs text-muted" style="margin-top:4px;">{{ a.message }}</div>
+                  <div class="type-body-xs text-muted" style="margin-top:6px; font-size:11px; opacity:0.7;">{{ a.time }}</div>
+                </div>
+              {% else %}
+                <div class="text-muted">No escalations recorded.</div>
+              {% endfor %}
+            </div>
+         </div>
+
+         <div class="glass-card p-8">
+            <h3 class="type-h4">Pending Items</h3>
+            <ul style="list-style:none; padding:0; margin:0;">
+               <li style="padding: var(--sp-3) 0; border-bottom: 1px solid var(--border-subtle);">Pending returns: <strong>{{ stats and stats.pending_returns or 0 }}</strong></li>
+               <li style="padding: var(--sp-3) 0; border-bottom: 1px solid var(--border-subtle);">Open tickets: <strong>{{ stats and stats.open_tickets or 0 }}</strong></li>
+               <li style="padding: var(--sp-3) 0;">Low stock products: <strong>{{ stats and stats.low_stock_count or 0 }}</strong></li>
+            </ul>
+         </div>
+      </div>
+
    </div>
 </div>
 {% endblock %}
