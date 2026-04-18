@@ -5,7 +5,7 @@ except Exception:
         from ..extensions import db
     except Exception:
         from extensions import db
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class RefundTransaction(db.Model):
@@ -17,7 +17,7 @@ class RefundTransaction(db.Model):
     amount = db.Column(db.Numeric(12, 2), nullable=False, default=0)
     status = db.Column(db.Enum('requested', 'processed', 'failed', name='refund_status'), default='requested')
     method = db.Column(db.String(50), default='original_payment_method')
-    processed_at = db.Column(db.DateTime, default=datetime.utcnow)
+    processed_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     return_request = db.relationship('ReturnRequest', backref='refund_transactions')
 

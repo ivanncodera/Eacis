@@ -8,7 +8,7 @@ Every public function:
 
 Never modify Product.stock directly in a route — always go through here.
 """
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 try:
     from eacis.extensions import db
@@ -121,7 +121,7 @@ def adjust_stock(product, quantity, note, actor_id=None):
 
 def get_movement_history(product_id, days=30):
     """Return recent stock movements for a product."""
-    cutoff = datetime.utcnow() - timedelta(days=days)
+    cutoff = datetime.now(timezone.utc) - timedelta(days=days)
     return (
         StockMovement.query
         .filter(
@@ -146,7 +146,7 @@ def get_inventory_summary(seller_id, days=30):
     out_of_stock = [p for p in products if (p.stock or 0) <= 0]
     low_stock = [p for p in products if 0 < (p.stock or 0) <= (p.low_stock_threshold or 5)]
 
-    cutoff = datetime.utcnow() - timedelta(days=days)
+    cutoff = datetime.now(timezone.utc) - timedelta(days=days)
     product_ids = [p.id for p in products]
 
     movement_count = 0
@@ -190,8 +190,8 @@ def compute_turnover_rate(product_id, days=30):
     Turnover rate = units_sold / average_stock_on_hand over the period.
     Returns a float (higher = faster-moving).
     """
-    cutoff = datetime.utcnow() - timedelta(days=days)
-    product = Product.query.get(product_id)
+    cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+    product = db.session.get(Product, product_id)
     if not product:
         return 0.0
 

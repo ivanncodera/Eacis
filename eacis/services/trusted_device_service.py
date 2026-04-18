@@ -1,7 +1,7 @@
 """
 Trusted device helpers: create tokens, verify, revoke, touch.
 """
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import hashlib
 import secrets
 
@@ -41,13 +41,13 @@ def _hash_token(token):
 def create_trusted_device(user_id, device_name=None, days_valid=30):
     token = secrets.token_urlsafe(32)
     token_hash = _hash_token(token)
-    expires_at = datetime.utcnow() + timedelta(days=days_valid)
+    expires_at = datetime.now(timezone.utc) + timedelta(days=days_valid)
     td = TrustedDevice(
         user_id=user_id,
         token_hash=token_hash,
         device_name=(device_name or '')[:255],
-        created_at=datetime.utcnow(),
-        last_used_at=datetime.utcnow(),
+        created_at=datetime.now(timezone.utc),
+        last_used_at=datetime.now(timezone.utc),
         expires_at=expires_at,
         revoked=False,
     )
@@ -61,13 +61,17 @@ def find_by_token(token):
     td = TrustedDevice.query.filter_by(token_hash=token_hash, revoked=False).first()
     if not td:
         return None
-    if td.expires_at and td.expires_at < datetime.utcnow():
-        return None
+    if td.expires_at:
+        exp = td.expires_at
+        if exp.tzinfo is None:
+            exp = exp.replace(tzinfo=timezone.utc)
+        if exp < datetime.now(timezone.utc):
+            return None
     return td
 
 
 def touch(td):
-    td.last_used_at = datetime.utcnow()
+    td.last_used_at = datetime.now(timezone.utc)
     db.session.commit()
 
 
@@ -111,7 +115,7 @@ def list_all_trusted_devices(search_email=None, limit=200):
 
 def revoke_admin_by_id(td_id):
     try:
-        td = TrustedDevice.query.get(int(td_id))
+        td = db.session.get(TrustedDevice, int(td_id))
     except Exception:
         return False
     if not td:

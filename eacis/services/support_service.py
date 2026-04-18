@@ -1,7 +1,7 @@
 """
 Support Service — Triage engine and Inquiry lifecycle management.
 """
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
 
 try:
@@ -56,7 +56,7 @@ def add_reply(ticket_id, author_id, body, is_internal=False):
     """
     Adds a reply to a ticket and updates ticket state.
     """
-    ticket = InquiryTicket.query.get(ticket_id)
+    ticket = db.session.get(InquiryTicket, ticket_id)
     if not ticket:
         return None, "Ticket not found."
 
@@ -69,7 +69,7 @@ def add_reply(ticket_id, author_id, body, is_internal=False):
     
     # Logic: If seller/admin replies, set status to in_progress
     from eacis.models.user import User
-    author = User.query.get(author_id)
+    author = db.session.get(User, author_id)
     if author and author.role in ['seller', 'admin']:
         ticket.status = 'in_progress'
     else:
@@ -84,11 +84,11 @@ def resolve_ticket(ticket_id, resolver_id):
     """
     Marks a ticket as resolved.
     """
-    ticket = InquiryTicket.query.get(ticket_id)
+    ticket = db.session.get(InquiryTicket, ticket_id)
     if not ticket:
         return False, "Ticket not found."
     
     ticket.status = 'resolved'
-    ticket.resolved_at = datetime.utcnow()
+    ticket.resolved_at = datetime.now(timezone.utc)
     db.session.commit()
     return True, "Ticket resolved."

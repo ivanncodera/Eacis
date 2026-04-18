@@ -1,7 +1,7 @@
 """
 OTP service primitives for challenge creation and verification.
 """
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import hashlib
 import secrets
 
@@ -57,7 +57,7 @@ def can_issue_otp(email, purpose, ip_address=None):
 
     Returns (allowed: bool, message: str)
     """
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     cooldown = int(current_app.config.get('OTP_RESEND_COOLDOWN_SECONDS') or 60)
     per_hour_limit = int(current_app.config.get('OTP_REQUESTS_PER_HOUR') or 8)
 
@@ -67,9 +67,19 @@ def can_issue_otp(email, purpose, ip_address=None):
         .order_by(OtpChallenge.created_at.desc())
         .first()
     )
-    if latest and (now - latest.created_at).total_seconds() < cooldown:
-        wait_for = cooldown - int((now - latest.created_at).total_seconds())
-        return False, f'Resend cooldown active. Try again in {wait_for}s.'
+    if latest:
+        latest_created = latest.created_at
+        # Guard against naive datetimes coming from older rows or DBs that don't store tzinfo
+        if latest_created is None:
+            # no timestamp, allow issuance
+            latest_created = now - timedelta(days=365 * 100)
+        elif latest_created.tzinfo is None:
+            latest_created = latest_created.replace(tzinfo=timezone.utc)
+
+        delta_seconds = (now - latest_created).total_seconds()
+        if delta_seconds < cooldown:
+            wait_for = cooldown - int(delta_seconds)
+            return False, f'Resend cooldown active. Try again in {wait_for}s.'
 
     hour_start = now - timedelta(hours=1)
     q = OtpChallenge.query.filter(
@@ -154,7 +164,7 @@ def create_and_send_otp(email, purpose, user_id=None, ip_address=None, user_agen
         .all()
     )
     for old_challenge in active_challenges:
-        old_challenge.consumed_at = datetime.utcnow()
+        old_challenge.consumed_at = datetime.now(timezone.utc)
         old_challenge.failure_reason = 'superseded'
 
     code = _generate_code(length)
@@ -164,7 +174,7 @@ def create_and_send_otp(email, purpose, user_id=None, ip_address=None, user_agen
         email=email,
         purpose=purpose,
         code_hash=_hash_code(code),
-        expires_at=datetime.utcnow() + timedelta(seconds=ttl_seconds),
+        expires_at=datetime.now(timezone.utc) + timedelta(seconds=ttl_seconds),
         max_attempts=max_attempts,
         ip_address=ip_address,
         user_agent=(user_agent or '')[:255] if user_agent else None,
@@ -285,7 +295,7 @@ def verify_activation_token(token):
 
             if chal.is_expired:
                 try:
-                    chal.consumed_at = datetime.utcnow()
+                    chal.consumed_at = datetime.now(timezone.utc)
                     chal.failure_reason = 'expired'
                     db.session.add(chal)
                     al = AuditLog(action='otp_expired', module='otp', target_ref=chal.email, meta={'challenge_id': chal.id})
@@ -296,8 +306,8 @@ def verify_activation_token(token):
                 return False, 'Verification link has expired.', None
 
             # mark as verified
-            chal.verified_at = datetime.utcnow()
-            chal.consumed_at = datetime.utcnow()
+            chal.verified_at = datetime.now(timezone.utc)
+            chal.consumed_at = datetime.now(timezone.utc)
             chal.failure_reason = None
             db.session.add(chal)
             try:
@@ -321,7 +331,7 @@ def verify_activation_token(token):
 
 
 def verify_otp(challenge_id, code_input):
-    challenge = OtpChallenge.query.get(challenge_id)
+    challenge = db.session.get(OtpChallenge, challenge_id)
     if not challenge:
         try:
             al = AuditLog(action='otp_verify_missing', module='otp', target_ref=str(challenge_id))
@@ -344,7 +354,7 @@ def verify_otp(challenge_id, code_input):
         try:
             challenge.failure_reason = 'expired'
             if not challenge.consumed_at:
-                challenge.consumed_at = datetime.utcnow()
+                challenge.consumed_at = datetime.now(timezone.utc)
             db.session.commit()
         except Exception:
             current_app.logger.exception('Failed to mark expired challenge')
@@ -360,7 +370,7 @@ def verify_otp(challenge_id, code_input):
         try:
             challenge.failure_reason = 'max_attempts'
             if not challenge.consumed_at:
-                challenge.consumed_at = datetime.utcnow()
+                challenge.consumed_at = datetime.now(timezone.utc)
             db.session.commit()
         except Exception:
             current_app.logger.exception('Failed to mark max-attempts challenge')
@@ -379,7 +389,7 @@ def verify_otp(challenge_id, code_input):
         try:
             if challenge.attempt_count >= int(challenge.max_attempts or 5):
                 challenge.failure_reason = 'max_attempts'
-                challenge.consumed_at = datetime.utcnow()
+                challenge.consumed_at = datetime.now(timezone.utc)
                 db.session.commit()
                 try:
                     al = AuditLog(action='otp_locked', module='otp', target_ref=challenge.email, meta={'challenge_id': challenge.id, 'attempt_count': challenge.attempt_count})
@@ -403,8 +413,8 @@ def verify_otp(challenge_id, code_input):
             return False, 'Invalid OTP code.'
 
     # success
-    challenge.verified_at = datetime.utcnow()
-    challenge.consumed_at = datetime.utcnow()
+    challenge.verified_at = datetime.now(timezone.utc)
+    challenge.consumed_at = datetime.now(timezone.utc)
     challenge.failure_reason = None
     try:
         db.session.commit()

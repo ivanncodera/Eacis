@@ -127,19 +127,17 @@
           <!-- Price Breakdown -->
           <div class="form-stack" style="gap: var(--sp-3); margin-bottom: var(--sp-5);">
             <div style="display:flex; justify-content:space-between;" class="type-body-sm">
-              <span class="text-muted">Subtotal ({{ cart_lines|length }} item{% if cart_lines|length != 1 %}s{% endif %})</span>
-              <span class="fw-semibold">PHP {{ '%.2f'|format(subtotal|float) }}</span>
-            </div>
+                <span class="text-muted" id="cart-subtotal-label">Subtotal ({{ cart_lines|length }} item{% if cart_lines|length != 1 %}s{% endif %})</span>
+                <span class="fw-semibold" id="cart-subtotal-value">PHP {{ '%.2f'|format(subtotal|float) }}</span>
+              </div>
             <div style="display:flex; justify-content:space-between;" class="type-body-sm">
               <span class="text-muted">Shipping</span>
               <span class="fw-bold text-success">FREE</span>
             </div>
-            {% if voucher_discount and voucher_discount > 0 %}
-            <div style="display:flex; justify-content:space-between;" class="type-body-sm">
+            <div id="cart-voucher-row" style="{% if voucher_discount and voucher_discount > 0 %}display:flex;{% else %}display:none;{% endif %} justify-content:space-between;" class="type-body-sm">
               <span class="text-muted">Voucher Discount</span>
-              <span class="fw-semibold text-success">− PHP {{ '%.2f'|format(voucher_discount|float) }}</span>
+              <span class="fw-semibold text-success" id="cart-voucher-discount-value">− PHP {{ '%.2f'|format(voucher_discount|float) }}</span>
             </div>
-            {% endif %}
           </div>
 
           <!-- Voucher Code -->
@@ -172,7 +170,7 @@
           <!-- Grand Total -->
           <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom: var(--sp-6);">
             <span class="type-h4" style="margin:0;">Total</span>
-            <span style="font-size: 1.5rem; font-weight: 800; color: var(--brand-primary); letter-spacing: -0.02em;">PHP {{ '%.2f'|format(grand_total|default(subtotal)|float) }}</span>
+            <span id="cart-grand-total" style="font-size: 1.5rem; font-weight: 800; color: var(--brand-primary); letter-spacing: -0.02em;">PHP {{ '%.2f'|format(grand_total|default(subtotal)|float) }}</span>
           </div>
 
           <!-- CTA -->
@@ -218,12 +216,60 @@
       function getSelected() {
         return Array.from(document.querySelectorAll('.cart-item__checkbox:checked')).map(function(cb){ return cb.value; });
       }
+
+      // server-provided voucher code (if any)
+      var serverVoucherCode = {{ (voucher_code|default(''))|tojson }};
+
+      async function refreshCartSummary(){
+        try {
+          var selected = getSelected();
+          var params = new URLSearchParams();
+          selected.forEach(function(s){ params.append('selected', s); });
+          if (serverVoucherCode) params.append('voucher_code', serverVoucherCode);
+          var url = '/api/cart/summary' + (params.toString() ? ('?' + params.toString()) : '');
+          var res = await fetch(url, { credentials: 'same-origin' });
+          if (!res.ok) return;
+          var data = await res.json();
+          var subtotal = (parseFloat(data.subtotal || 0) || 0).toFixed(2);
+          var count = parseInt(data.count || 0, 10) || 0;
+          var voucher_discount = (parseFloat(data.voucher_discount || 0) || 0).toFixed(2);
+          var grand_total = (parseFloat(data.grand_total || subtotal) || 0).toFixed(2);
+
+          var label = document.getElementById('cart-subtotal-label');
+          if (label) label.innerText = 'Subtotal (' + count + ' item' + (count !== 1 ? 's' : '') + ')';
+          var subtotalSpan = document.getElementById('cart-subtotal-value');
+          if (subtotalSpan) subtotalSpan.innerText = 'PHP ' + subtotal;
+
+          var voucherRow = document.getElementById('cart-voucher-row');
+          var voucherSpan = document.getElementById('cart-voucher-discount-value');
+          if (voucherRow && voucherSpan) {
+            if (parseFloat(voucher_discount) > 0) {
+              voucherRow.style.display = 'flex';
+              voucherSpan.innerText = '− PHP ' + (parseFloat(voucher_discount).toFixed(2));
+            } else {
+              voucherRow.style.display = 'none';
+            }
+          }
+
+          var grandSpan = document.getElementById('cart-grand-total');
+          if (grandSpan) grandSpan.innerText = 'PHP ' + grand_total;
+        } catch (err) {
+          console.error('Could not refresh cart summary', err);
+        }
+      }
+
       var selectAll = document.getElementById('cart_select_all');
       if (selectAll) {
         selectAll.addEventListener('change', function(){
           document.querySelectorAll('.cart-item__checkbox').forEach(function(cb){ cb.checked = selectAll.checked; });
+          refreshCartSummary();
         });
       }
+
+      // listen to individual checkbox changes
+      document.querySelectorAll('.cart-item__checkbox').forEach(function(cb){
+        cb.addEventListener('change', function(){ refreshCartSummary(); });
+      });
 
       function goToCheckoutWithSelection(selected){
         if (!selected || !selected.length) {
@@ -249,6 +295,9 @@
           goToCheckoutWithSelection(getSelected());
         });
       }
+
+      // initial refresh on load
+      refreshCartSummary();
     })();
   </script>
 {% endblock %}

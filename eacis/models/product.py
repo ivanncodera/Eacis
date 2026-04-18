@@ -5,7 +5,7 @@ except Exception:
         from ..extensions import db
     except Exception:
         from extensions import db
-from datetime import datetime
+from datetime import datetime, timezone
 
 class Product(db.Model):
     __tablename__ = 'products'
@@ -26,7 +26,7 @@ class Product(db.Model):
     weight_kg = db.Column(db.Numeric(6,2))
     image_url = db.Column(db.String(500))
     specs = db.Column(db.JSON)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     # product images are loaded explicitly via queries to avoid import-time mapper issues
 

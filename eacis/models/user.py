@@ -6,7 +6,7 @@ except Exception:
     except Exception:
         from extensions import db
 from flask_login import UserMixin
-from datetime import datetime
+from datetime import datetime, timezone
 from werkzeug.security import generate_password_hash, check_password_hash
 
 class User(UserMixin, db.Model):
@@ -38,7 +38,7 @@ class User(UserMixin, db.Model):
     phone = db.Column(db.String(20))
     is_active = db.Column(db.Boolean, default=True)
     email_verified_at = db.Column(db.DateTime, nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     loyalty_points = db.Column(db.Integer, default=0)
     seller_code = db.Column(db.String(10), unique=True, nullable=True)
 

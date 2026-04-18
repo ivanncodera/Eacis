@@ -58,15 +58,17 @@ def validate_postal_code(raw_postal):
 def validate_registration_payload(payload, role, postal_lookup, email_exists):
     errors = {}
 
-    first_name = (payload.get('first_name') or '').strip()
-    middle_name = (payload.get('middle_name') or '').strip()
-    last_name = (payload.get('last_name') or '').strip()
-    suffix = (payload.get('suffix') or '').strip()
+    # Normalize and collapse whitespace on textual inputs
+    first_name = collapse_whitespace((payload.get('first_name') or '').strip())
+    middle_name = collapse_whitespace((payload.get('middle_name') or '').strip())
+    last_name = collapse_whitespace((payload.get('last_name') or '').strip())
+    suffix = collapse_whitespace((payload.get('suffix') or '').strip())
 
-    address_line1 = (payload.get('address_line1') or '').strip()
-    barangay = (payload.get('barangay') or '').strip()
-    city_municipality = (payload.get('city_municipality') or '').strip()
-    province = (payload.get('province') or '').strip()
+    address_line1 = collapse_whitespace((payload.get('address_line1') or '').strip())
+    address_line2 = collapse_whitespace((payload.get('address_line2') or '').strip())
+    barangay = collapse_whitespace((payload.get('barangay') or '').strip())
+    city_municipality = collapse_whitespace((payload.get('city_municipality') or '').strip())
+    province = collapse_whitespace((payload.get('province') or '').strip())
     postal_code = (payload.get('postal_code') or '').strip()
 
     email = (payload.get('email') or '').strip().lower()
@@ -111,18 +113,35 @@ def validate_registration_payload(payload, role, postal_lookup, email_exists):
     if role == 'customer':
         if not address_line1:
             errors['address_line1'] = 'Address Line 1 is required.'
+        elif len(address_line1) < 5:
+            errors['address_line1'] = 'Address Line 1 must be at least 5 characters.'
+        elif len(address_line1) > 200:
+            errors['address_line1'] = 'Address Line 1 must be at most 200 characters.'
+
         if not barangay:
             errors['barangay'] = 'Barangay is required.'
+        elif len(barangay) < 2:
+            errors['barangay'] = 'Barangay must be at least 2 characters.'
+        elif len(barangay) > 100:
+            errors['barangay'] = 'Barangay must be at most 100 characters.'
+
         if not city_municipality:
             errors['city_municipality'] = 'City/Municipality is required.'
+        elif len(city_municipality) < 2:
+            errors['city_municipality'] = 'City/Municipality must be at least 2 characters.'
+
         if not province:
             errors['province'] = 'Province is required.'
+        elif len(province) < 2:
+            errors['province'] = 'Province must be at least 2 characters.'
+
         if not postal_code:
             errors['postal_code'] = 'Postal code is required.'
 
     # Security Validation
+    password_errors = []
     if len(password) < 8:
-        errors['password'] = 'Password must be at least 8 characters long.'
+        password_errors.append('Password must be at least 8 characters long.')
     else:
         checks = {
             r'[A-Z]': 'at least one uppercase letter',
@@ -132,7 +151,20 @@ def validate_registration_payload(payload, role, postal_lookup, email_exists):
         }
         missing = [desc for reg, desc in checks.items() if not re.search(reg, password)]
         if missing:
-            errors['password'] = f"Password must contain {', '.join(missing)}."
+            password_errors.append(f"Password must contain {', '.join(missing)}.")
+
+    # Ensure password does not contain user-identifying tokens
+    email_local = email.split('@', 1)[0] if email else ''
+    lower_password = password.lower()
+    if email_local and email_local in lower_password:
+        password_errors.append('Password must not contain your email address.')
+    if first_name and first_name.lower() in lower_password:
+        password_errors.append('Password must not contain your name.')
+    if last_name and last_name.lower() in lower_password:
+        password_errors.append('Password must not contain your name.')
+
+    if password_errors:
+        errors['password'] = ' '.join(password_errors)
 
     if password != confirm:
         errors['confirm_password'] = 'Passwords do not match.'
@@ -166,7 +198,7 @@ def validate_registration_payload(payload, role, postal_lookup, email_exists):
         'suffix': suffix,
         'full_name': normalized_full_name,
         'address_line1': address_line1,
-        'address_line2': (payload.get('address_line2') or '').strip(),
+        'address_line2': address_line2,
         'barangay': barangay,
         'city_municipality': city_municipality,
         'province': province,

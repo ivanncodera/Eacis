@@ -1,7 +1,7 @@
 """
 Review service: create/update/delete reviews and toggle stars.
 """
-from datetime import datetime
+from datetime import datetime, timezone
 
 try:
     from eacis.extensions import db
@@ -61,11 +61,11 @@ def create_or_update_review(user_id, product_id, rating, title=None, body=None, 
                 from ..models.user import User
             except Exception:
                 from models.user import User
-            user = User.query.get(user_id)
+            user = db.session.get(User, user_id)
             existing.reviewer_name = (getattr(user, 'computed_full_name', None) or getattr(user, 'full_name', None) or getattr(user, 'email', None)) if user else existing.reviewer_name
         else:
             existing.reviewer_name = None
-        existing.updated_at = datetime.utcnow()
+        existing.updated_at = datetime.now(timezone.utc)
         try:
             db.session.commit()
             return existing, None
@@ -81,7 +81,7 @@ def create_or_update_review(user_id, product_id, rating, title=None, body=None, 
             from ..models.user import User
         except Exception:
             from models.user import User
-        user = User.query.get(user_id)
+        user = db.session.get(User, user_id)
         reviewer_name = (getattr(user, 'computed_full_name', None) or getattr(user, 'full_name', None) or getattr(user, 'email', None)) if user else None
 
     rv = Review(
@@ -92,8 +92,8 @@ def create_or_update_review(user_id, product_id, rating, title=None, body=None, 
         body=body,
         is_anonymous=bool(is_anonymous),
         reviewer_name=reviewer_name,
-        created_at=datetime.utcnow(),
-        updated_at=datetime.utcnow(),
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc),
     )
     try:
         db.session.add(rv)
@@ -105,7 +105,7 @@ def create_or_update_review(user_id, product_id, rating, title=None, body=None, 
 
 
 def delete_review(user_id, review_id):
-    r = Review.query.get(review_id)
+    r = db.session.get(Review, review_id)
     if not r or int(r.user_id or 0) != int(user_id):
         return False, 'Not authorized or review not found.'
     try:

@@ -5,7 +5,7 @@ except Exception:
         from ..extensions import db
     except Exception:
         from extensions import db
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class Address(db.Model):
@@ -24,8 +24,8 @@ class Address(db.Model):
     region = db.Column(db.String(120), nullable=True)
     postal_code = db.Column(db.String(20), nullable=True)
     is_default = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     def summary(self):
         parts = [self.address_line1, self.address_line2, self.barangay, self.city_municipality, self.province, self.region]

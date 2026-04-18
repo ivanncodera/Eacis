@@ -60,6 +60,15 @@
     
     .skeleton { background: linear-gradient(90deg, var(--grey-100) 25%, var(--grey-200) 50%, var(--grey-100) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite linear; border-radius: 4px; }
     @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    /* Small currency code used next to large numeric displays */
+    .currency-code {
+      font-size: 0.65em;
+      vertical-align: middle;
+      color: var(--grey-600);
+      display: inline-block;
+      line-height: 1;
+      margin-right: 6px;
+    }
   </style>
 </head>
 <body
@@ -131,15 +140,11 @@
     <div class="sidebar__inner">
        <!-- Account Header (Clickable) -->
        <a href="/customer/profile" class="sidebar__account" style="text-decoration: none; padding: var(--sp-6) var(--sp-4); border-bottom: 1px solid var(--border-subtle); margin-bottom: var(--sp-4); display: flex; align-items: center; gap: var(--sp-3); transition: background var(--dur-fast); border-radius: var(--radius-lg);">
-         {% if profile_image_url(current_user, 32) %}
-         <img src="{{ profile_image_url(current_user, 32) }}" alt="Avatar" class="topbar__avatar" style="width:32px; height:32px; border-radius:50%; object-fit:cover; display:block;">
         {% if profile_image_url(current_user, 32) %}
-        <img src="{{ profile_image_url(current_user, 32) }}" alt="Avatar" class="topbar__avatar" style="width:32px; height:32px; border-radius:50%; object-fit:cover; display:block;">
-         <img src="{{ profile_image_url(current_user, 32) }}" alt="Avatar" class="topbar__avatar" style="width:32px; height:32px; border-radius:50%; object-fit:cover; display:block;">
-         {% else %}
-         <div class="topbar__avatar" style="width: 32px; height: 32px; border-radius: 50%; font-size: 10px; background: var(--grey-100);">{{ (current_user.full_name or current_user.email or '?')[:1].upper() }}</div>
-         {% endif %}
-         {% endif %}
+          <img src="{{ profile_image_url(current_user, 32) }}" alt="Avatar" class="topbar__avatar" style="width:32px; height:32px; border-radius:50%; object-fit:cover; display:block;">
+        {% else %}
+          <div class="topbar__avatar" style="width: 32px; height: 32px; border-radius: 50%; font-size: 10px; background: var(--grey-100);">{{ (current_user.full_name or current_user.email or '?')[:1].upper() }}</div>
+        {% endif %}
          <div class="sidebar__account-info" style="min-width: 0;">
            <div class="type-body-sm fw-bold" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--grey-900);">{{ current_user.full_name or current_user.email or 'Account' }}</div>
            <div class="type-label-xs" style="color: var(--grey-400);">Customer Portal</div>
@@ -521,11 +526,10 @@
     <div class="drawer-footer">
        <div style="display: flex; justify-content: space-between; margin-bottom: var(--sp-6);">
          <span class="type-body-sm text-muted">Estimated Total</span>
-         <span class="type-h4" id="cart-drawer-subtotal">PHP 0.00</span>
+         <span class="type-h4" id="cart-drawer-subtotal"><span class="currency-code">PHP</span>0.00</span>
        </div>
        <div style="display: flex; flex-direction: column; gap: var(--sp-3);">
-         <a href="/checkout" id="cart-drawer-checkout-btn" class="btn btn--primary btn--full shadow-primary py-4">Secure Checkout</a>
-         <a href="/cart" class="btn btn--white btn--full btn--sm text-center">Modify Bag</a>
+         <a href="/cart" class="btn btn--primary btn--full shadow-primary py-4">View Bag</a>
        </div>
     </div>
   </aside>
@@ -627,7 +631,8 @@
           badge.style.display = count > 0 ? 'flex' : 'none';
         }
 
-        subtotalWrap.textContent = formatPHP(subtotal);
+        const formatted = formatPHP(subtotal);
+        subtotalWrap.innerHTML = formatted.replace(/^PHP\s+/, '<span class="currency-code">PHP</span>');
 
         if (items.length === 0) {
           itemsWrap.innerHTML = `
@@ -809,6 +814,7 @@
   <!-- Global confirm & alert modal (replaces native confirm/alert dialogs) -->
   <style>
     /* Ensure modals float above app content and are centered */
+    /* Reuse styles for both confirm and logout modals for CONSISTENCY */
     .confirm-modal, .logout-modal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 9999; padding: 20px; }
     .confirm-modal[aria-hidden="false"], .logout-modal[aria-hidden="false"] { display: flex; }
     .confirm-modal__backdrop, .logout-modal__backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(2px); }

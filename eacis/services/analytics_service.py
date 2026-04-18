@@ -4,7 +4,7 @@ Analytics Service — single source of truth for financial and inventory metrics
 Both seller dashboard and admin reports call these functions,
 ensuring the numbers never diverge.
 """
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 try:
     from eacis.extensions import db
@@ -42,7 +42,7 @@ def get_financial_metrics(seller_id=None, days=30):
     """
     Returns a dict with financial KPIs for dashboards.
     """
-    cutoff = datetime.utcnow() - timedelta(days=days)
+    cutoff = datetime.now(timezone.utc) - timedelta(days=days)
 
     # ── Base order query ───────────────────────────────────────────────────
     order_q = Order.query.filter(Order.created_at >= cutoff)
@@ -200,7 +200,7 @@ def get_inventory_metrics(seller_id):
     out_of_stock_count = sum(1 for p in products_q.all() if (p.stock or 0) <= 0)
 
     # 30d Movements
-    cutoff_30d = datetime.utcnow() - timedelta(days=30)
+    cutoff_30d = datetime.now(timezone.utc) - timedelta(days=30)
     movements_q = (
         StockMovement.query.join(Product)
         .filter(Product.seller_id == seller_id, StockMovement.created_at >= cutoff_30d)
@@ -224,7 +224,7 @@ def get_inventory_metrics(seller_id):
     avg_coverage_days = (remaining_stock / avg_daily_velocity) if avg_daily_velocity > 0 else None
 
     # Aging SKUs: Products with NO sales in 90 days but have stock
-    cutoff_90d = datetime.utcnow() - timedelta(days=90)
+    cutoff_90d = datetime.now(timezone.utc) - timedelta(days=90)
     sold_sku_ids_90d = (
         db.session.query(Product.id)
         .join(OrderItem, OrderItem.product_id == Product.id)
@@ -249,7 +249,7 @@ def get_inventory_metrics(seller_id):
     
     top_products_with_coverage = []
     for p_id, total_sold in top_velocity_rows:
-        prod = Product.query.get(p_id)
+        prod = db.session.get(Product, p_id)
         velocity = float(total_sold) / 30.0
         coverage = (prod.stock / velocity) if velocity > 0 else None
         top_products_with_coverage.append({

@@ -6,7 +6,7 @@ The return flow:
   2. seller_returns_update  → approve/deny/refund
   3. After any event        → compute_abuse_score(customer_id)
 """
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 try:
     from eacis.extensions import db
@@ -81,7 +81,7 @@ def validate_return_eligibility(order, customer_id):
 
     window_days = int(getattr(Config, 'RETURN_WINDOW_DAYS', 7))
     deadline = order.delivered_at.date() + timedelta(days=window_days)
-    today = datetime.utcnow().date()
+    today = datetime.now(timezone.utc).date()
     if today > deadline:
         return False, f'Return window expired. You had until {deadline.strftime("%b %d, %Y")} ({window_days} days from delivery).'
 
@@ -121,7 +121,7 @@ def compute_abuse_score(customer_id):
     window_days = int(getattr(Config, 'RETURN_ABUSE_WINDOW_DAYS', 90))
     flag_threshold = int(getattr(Config, 'RETURN_ABUSE_FLAG_THRESHOLD', 10))
     restrict_threshold = int(getattr(Config, 'RETURN_ABUSE_RESTRICT_THRESHOLD', 20))
-    cutoff = datetime.utcnow() - timedelta(days=window_days)
+    cutoff = datetime.now(timezone.utc) - timedelta(days=window_days)
 
     # Returns in window
     returns_in_window = ReturnRequest.query.filter(
@@ -205,7 +205,7 @@ def compute_abuse_score(customer_id):
     if is_restricted:
         log.is_restricted = True
     log.flag_reason = flag_reason
-    log.last_computed = datetime.utcnow()
+    log.last_computed = datetime.now(timezone.utc)
 
     try:
         db.session.commit()
@@ -241,7 +241,7 @@ import string
 def generate_rrt_ref():
     """Generate a unique reference for the return request."""
     prefix = "RRT"
-    timestamp = datetime.utcnow().strftime("%y%m%d")
+    timestamp = datetime.now(timezone.utc).strftime("%y%m%d")
     random_str = ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
     return f"{prefix}-{timestamp}-{random_str}"
 
@@ -253,7 +253,7 @@ def create_return_request(customer_id, order_id, reason_category, description, e
     """
     Creates a new return request after validating eligibility.
     """
-    order = Order.query.get(order_id)
+    order = db.session.get(Order, order_id)
     is_eligible, reason = validate_return_eligibility(order, customer_id)
     if not is_eligible:
         return None, reason
@@ -295,7 +295,7 @@ def update_return_status(rrt_id, status, seller_notes=None):
     """
     Transitions a return request through its lifecycle.
     """
-    rrt = ReturnRequest.query.get(rrt_id)
+    rrt = db.session.get(ReturnRequest, rrt_id)
     if not rrt:
         return False, "Return request not found."
 
@@ -315,7 +315,7 @@ def update_return_status(rrt_id, status, seller_notes=None):
         rrt.seller_notes = seller_notes
     
     if status in ['accepted', 'refunded']:
-        rrt.resolved_at = datetime.utcnow()
+        rrt.resolved_at = datetime.now(timezone.utc)
 
     db.session.commit()
     compute_abuse_score(rrt.customer_id)
@@ -327,7 +327,7 @@ def process_refund(rrt_id, seller_id=None, amount=None, method='original_payment
     Correctly handles points deduction and stock restoration.
     """
     # Reload the request inside a DB-controlled transaction and use a savepoint
-    rrt = ReturnRequest.query.get(rrt_id)
+    rrt = db.session.get(ReturnRequest, rrt_id)
     if not rrt:
         return False, "Return request not found."
 
@@ -368,7 +368,7 @@ def process_refund(rrt_id, seller_id=None, amount=None, method='original_payment
                 locked_rrt = db.session.query(ReturnRequest).filter_by(id=rrt.id).with_for_update(nowait=False).first()
             except Exception:
                 # DB may not support FOR UPDATE; fallback to the already-loaded rrt
-                locked_rrt = ReturnRequest.query.get(rrt.id)
+                locked_rrt = db.session.get(ReturnRequest, rrt.id)
 
             # Re-check for an existing processed refund for idempotency.
             existing_refund = db.session.query(RefundTransaction).filter_by(return_request_id=rrt.id).with_for_update(read=True).first() if hasattr(db.session.query(RefundTransaction), 'with_for_update') else RefundTransaction.query.filter_by(return_request_id=rrt.id).first()
@@ -407,7 +407,7 @@ def process_refund(rrt_id, seller_id=None, amount=None, method='original_payment
                 existing_refund.amount = refund_val
                 existing_refund.method = method
                 existing_refund.status = 'processed'
-                existing_refund.processed_at = datetime.utcnow()
+                existing_refund.processed_at = datetime.now(timezone.utc)
                 refund_tx = existing_refund
             else:
                 refund_tx = RefundTransaction(

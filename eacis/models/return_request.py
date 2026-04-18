@@ -8,7 +8,7 @@ except Exception:
             from ..extensions import db
         except Exception:
             from extensions import db
-from datetime import datetime
+from datetime import datetime, timezone
 
 class ReturnRequest(db.Model):
     __tablename__ = 'return_requests'
@@ -32,6 +32,6 @@ class ReturnRequest(db.Model):
     refund_amount = db.Column(db.Numeric(12,2))
     admin_notes = db.Column(db.Text)
     paymongo_refund_id = db.Column(db.String(100))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
     resolved_at = db.Column(db.DateTime)

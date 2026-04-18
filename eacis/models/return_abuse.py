@@ -5,7 +5,7 @@ except Exception:
         from ..extensions import db
     except Exception:
         from extensions import db
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class ReturnAbuseLog(db.Model):
@@ -34,7 +34,7 @@ class ReturnAbuseLog(db.Model):
     flag_reason   = db.Column(db.Text)           # human-readable summary for admin
     is_flagged    = db.Column(db.Boolean, default=False, nullable=False)
     is_restricted = db.Column(db.Boolean, default=False, nullable=False)  # blocks submissions
-    last_computed = db.Column(db.DateTime, default=datetime.utcnow)
+    last_computed = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     # Admin review fields
     reviewed_by   = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     reviewed_at   = db.Column(db.DateTime, nullable=True)

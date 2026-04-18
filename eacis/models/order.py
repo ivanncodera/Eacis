@@ -5,7 +5,7 @@ except Exception:
         from ..extensions import db
     except Exception:
         from extensions import db
-from datetime import datetime
+from datetime import datetime, timezone
 
 class Order(db.Model):
     __tablename__ = 'orders'
@@ -26,7 +26,7 @@ class Order(db.Model):
     shipping_address = db.Column(db.JSON)
     tracking_number = db.Column(db.String(100))
     notes = db.Column(db.Text)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     paid_at = db.Column(db.DateTime)
     shipped_at = db.Column(db.DateTime)
     delivered_at = db.Column(db.DateTime)

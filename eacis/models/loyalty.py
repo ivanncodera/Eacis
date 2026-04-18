@@ -8,7 +8,7 @@ except Exception:
             from ..extensions import db
         except Exception:
             from extensions import db
-from datetime import datetime
+from datetime import datetime, timezone
 
 class LoyaltyTransaction(db.Model):
     __tablename__ = 'loyalty_transactions'
@@ -18,4 +18,4 @@ class LoyaltyTransaction(db.Model):
     points = db.Column(db.Integer)
     reference = db.Column(db.String(100))
     note = db.Column(db.String(255))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))

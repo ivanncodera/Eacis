@@ -25,7 +25,7 @@
       <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Pending</div><div class="type-display-md mt-2">{{ profile_stats.pending_orders }}</div></div></div>
       <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Delivered</div><div class="type-display-md mt-2">{{ profile_stats.delivered_orders }}</div></div></div>
       <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Returns</div><div class="type-display-md mt-2">{{ profile_stats.returns }}</div></div></div>
-      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Total Spend</div><div class="type-display-md mt-2">PHP {{ '%.2f'|format(profile_stats.total_spent or 0) }}</div></div></div>
+      <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Total Spend</div><div class="type-display-md mt-2"><span class="currency-code">PHP</span>{{ '%.2f'|format(profile_stats.total_spent or 0) }}</div></div></div>
     </div>
 
     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:var(--sp-6); align-items:start;">
@@ -74,7 +74,7 @@
               <tr>
                 <td><a href="/customer/orders/{{ order.order_ref }}">{{ order.order_ref }}</a></td>
                 <td>{{ order.status|title }}</td>
-                <td style="text-align:right;">PHP {{ '%.2f'|format(order.total or 0) }}</td>
+                <td style="text-align:right;"><span class="currency-code">PHP</span>{{ '%.2f'|format(order.total or 0) }}</td>
               </tr>
               {% else %}
               <tr><td colspan="3" style="text-align:center;">No orders yet.</td></tr>

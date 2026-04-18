@@ -5,7 +5,7 @@ except Exception:
         from ..extensions import db
     except Exception:
         from extensions import db
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class StockMovement(db.Model):
@@ -34,7 +34,7 @@ class StockMovement(db.Model):
     )
     reference   = db.Column(db.String(80))    # order_ref, rrt_ref, 'MANUAL', etc.
     note        = db.Column(db.String(255))
-    created_at  = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    created_at  = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     created_by  = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
 
     product     = db.relationship('Product', backref=db.backref('stock_movements', lazy='dynamic'))

@@ -5,7 +5,7 @@ except Exception:
         from ..extensions import db
     except Exception:
         from extensions import db
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class OtpChallenge(db.Model):
@@ -27,7 +27,7 @@ class OtpChallenge(db.Model):
     user_agent = db.Column(db.String(255), nullable=True)
     sent_to = db.Column(db.String(255), nullable=True)
 
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     verified_at = db.Column(db.DateTime, nullable=True)
     failure_reason = db.Column(db.String(100), nullable=True)
     meta = db.Column(db.JSON, nullable=True)
@@ -38,7 +38,13 @@ class OtpChallenge(db.Model):
 
     @property
     def is_expired(self):
-        return datetime.utcnow() > (self.expires_at or datetime.utcnow())
+        now = datetime.now(timezone.utc)
+        expires = self.expires_at
+        if not expires:
+            return False
+        if expires.tzinfo is None:
+            expires = expires.replace(tzinfo=timezone.utc)
+        return now > expires
 
     def __repr__(self):
         return f"<OtpChallenge {self.id} {self.purpose} {self.email}>"

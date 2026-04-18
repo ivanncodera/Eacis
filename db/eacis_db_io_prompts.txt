@@ -1,0 +1,115 @@
+E-ACIS Database I/O Prompt Templates
+====================================
+
+Purpose
+-------
+This text file contains sample natural-language prompts and corresponding SQL templates you can use to interact with the E-ACIS Postgres schema (provided in `eacis_db_full_postgres.sql`). Use these prompts as a basis for ad-hoc reporting, auditing, or as input to an LLM that generates SQL for your database.
+
+Usage guidance
+--------------
+- Replace placeholders like `<USER_ID>`, `<START_DATE>`, `<END_DATE>`, `<VOUCHER_CODE>`, etc.
+- Run the generated SQL in a safe environment (e.g., a read-replica) before applying to production.
+
+Prompts and SQL templates
+-------------------------
+
+1) Prompt: "List the top 20 customers by total spend in the last 12 months."
+SQL:
+SELECT u.id, u.email, COALESCE(SUM(o.total),0)::numeric(18,2) AS total_spent
+FROM users u
+JOIN orders o ON o.customer_id = u.id AND o.status IN ('paid','delivered')
+WHERE o.created_at >= (now() - INTERVAL '12 months')
+GROUP BY u.id, u.email
+ORDER BY total_spent DESC
+LIMIT 20;
+
+2) Prompt: "Show all low-stock products with seller contact info."
+SQL:
+SELECT p.id, p.product_ref, p.name, p.stock, p.low_stock_threshold, u.id AS seller_id, u.email AS seller_email, u.phone AS seller_phone
+FROM products p
+LEFT JOIN users u ON u.id = p.seller_id
+WHERE p.stock <= p.low_stock_threshold
+ORDER BY (p.stock - p.low_stock_threshold) ASC;
+
+3) Prompt: "Get orders for customer <USER_ID> including items and invoice if issued."
+SQL:
+SELECT o.id, o.order_ref, o.status, o.total, o.created_at, json_agg(json_build_object('product_id', oi.product_id, 'qty', oi.quantity, 'unit_price', oi.unit_price, 'subtotal', oi.subtotal)) AS items,
+       i.invoice_ref, i.status AS invoice_status, i.grand_total
+FROM orders o
+LEFT JOIN order_items oi ON oi.order_id = o.id
+LEFT JOIN invoices i ON i.order_id = o.id
+WHERE o.customer_id = <USER_ID>
+GROUP BY o.id, i.invoice_ref, i.status, i.grand_total
+ORDER BY o.created_at DESC;
+
+4) Prompt: "Find all voucher uses for code <VOUCHER_CODE> and total discount given."
+SQL:
+SELECT v.id AS voucher_id, v.code, COUNT(vul.id) AS uses_count, COALESCE(SUM(vul.discount_applied),0)::numeric(18,2) AS total_discount
+FROM vouchers v
+LEFT JOIN voucher_usage_logs vul ON vul.voucher_id = v.id
+WHERE v.code = '<VOUCHER_CODE>'
+GROUP BY v.id, v.code;
+
+5) Prompt: "Audit trail: get last 100 audit log entries for actions containing 'refund' or 'return'."
+SQL:
+SELECT id, actor_id, actor_name, role, action, module, target_ref, meta, ip_address, created_at
+FROM audit_logs
+WHERE action ILIKE '%refund%' OR action ILIKE '%return%'
+ORDER BY created_at DESC
+LIMIT 100;
+
+6) Prompt: "Generate a daily sales report between <START_DATE> and <END_DATE> grouped per day."
+SQL:
+SELECT DATE(created_at) AS day, COUNT(*) AS orders_count, COALESCE(SUM(total),0)::numeric(18,2) AS total_value
+FROM orders
+WHERE created_at BETWEEN '<START_DATE>'::timestamptz AND '<END_DATE>'::timestamptz
+AND status IN ('paid','delivered')
+GROUP BY DATE(created_at)
+ORDER BY DATE(created_at);
+
+7) Prompt: "Identify customers with more than 3 returns in the last 90 days."
+SQL:
+SELECT rr.customer_id, u.email, COUNT(rr.id) as return_count
+FROM return_requests rr
+JOIN users u ON u.id = rr.customer_id
+WHERE rr.created_at >= (now() - INTERVAL '90 days')
+GROUP BY rr.customer_id, u.email
+HAVING COUNT(rr.id) > 3
+ORDER BY return_count DESC;
+
+8) Prompt: "List open support tickets assigned to sellers, with last reply timestamp."
+SQL:
+SELECT t.id, t.ticket_ref, t.subject, t.priority, t.status, t.assigned_to, u.email as assignee_email, MAX(r.created_at) AS last_reply_at
+FROM inquiry_tickets t
+LEFT JOIN inquiry_replies r ON r.ticket_id = t.id
+LEFT JOIN users u ON u.id = t.assigned_to
+WHERE t.status = 'open'
+GROUP BY t.id, t.ticket_ref, t.subject, t.priority, t.status, t.assigned_to, u.email
+ORDER BY last_reply_at NULLS FIRST;
+
+9) Prompt: "Reconcile product stock cache: find products where cached products.stock differs from SUM(stock_movements)."
+SQL:
+SELECT p.id, p.product_ref, p.stock AS cached_stock, COALESCE(sm.sum_qty,0) AS computed_stock
+FROM products p
+LEFT JOIN (SELECT product_id, SUM(quantity) AS sum_qty FROM stock_movements GROUP BY product_id) sm ON sm.product_id = p.id
+WHERE COALESCE(p.stock,0) <> COALESCE(sm.sum_qty,0);
+
+10) Prompt: "Export orders and related items for a date range in CSV-ready format."
+SQL (example for psql COPY):
+COPY (
+  SELECT o.order_ref, o.created_at, o.status, o.total, u.email AS customer_email,
+         json_agg(json_build_object('product_id', oi.product_id, 'qty', oi.quantity, 'unit_price', oi.unit_price)) AS items
+  FROM orders o
+  LEFT JOIN users u ON u.id = o.customer_id
+  LEFT JOIN order_items oi ON oi.order_id = o.id
+  WHERE o.created_at BETWEEN '<START_DATE>'::timestamptz AND '<END_DATE>'::timestamptz
+  GROUP BY o.id, u.email
+) TO '/tmp/eacis_orders_export.csv' WITH (FORMAT csv, HEADER true);
+
+Additional advice
+-----------------
+- Use read-only connections for reporting to avoid locking production rows.
+- Materialize expensive aggregations as materialized views for periodic refresh.
+- Use parameterized queries in your application or BI tool to avoid SQL injection.
+
+EOF

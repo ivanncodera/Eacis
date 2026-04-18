@@ -5,7 +5,7 @@ except Exception:
         from ..extensions import db
     except Exception:
         from extensions import db
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class VoucherUsageLog(db.Model):
@@ -30,7 +30,7 @@ class VoucherUsageLog(db.Model):
     customer_id       = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
     order_id          = db.Column(db.Integer, db.ForeignKey('orders.id'), nullable=False)
     discount_applied  = db.Column(db.Numeric(12, 2), nullable=False, default=0)
-    used_at           = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    used_at           = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
 
     voucher  = db.relationship('Voucher', backref=db.backref('usage_logs', lazy='dynamic'))
     customer = db.relationship('User', foreign_keys=[customer_id])

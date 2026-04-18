@@ -5,7 +5,7 @@ except Exception:
         from ..extensions import db
     except Exception:
         from extensions import db
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 
 class Invoice(db.Model):
@@ -24,8 +24,8 @@ class Invoice(db.Model):
     grand_total = db.Column(db.Numeric(12, 2), default=0)
 
     status = db.Column(db.Enum('issued', 'paid', 'void', name='invoice_status'), default='issued')
-    issued_at = db.Column(db.DateTime, default=datetime.utcnow)
-    due_at = db.Column(db.DateTime, default=lambda: datetime.utcnow() + timedelta(days=7))
+    issued_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    due_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc) + timedelta(days=7))
 
     order = db.relationship('Order', backref='invoices')
     customer = db.relationship('User', foreign_keys=[customer_id])

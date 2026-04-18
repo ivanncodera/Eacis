@@ -53,7 +53,7 @@ def static_page_payload(page_id, title):
         'page_id': page_id,
         'page_title': title,
         'content_title': title.upper(),
-        'last_updated': datetime.utcnow().strftime('%B %Y')
+        'last_updated': datetime.now(timezone.utc).strftime('%B %Y')
     }
 
 def money(value):
@@ -84,9 +84,17 @@ def create_app(config_class=Config):
                     try:
                         os.remove(os.path.join(base, fn))
                     except Exception:
-                        pass
+                        try:
+                            app.logger.exception('Failed to remove avatar file %s', fn)
+                        except Exception:
+                            import logging
+                            logging.getLogger(__name__).exception('Failed to remove avatar file')
         except Exception:
-            pass
+            try:
+                app.logger.exception('Error while removing avatar files for role %s uid %s', role, uid)
+            except Exception:
+                import logging
+                logging.getLogger(__name__).exception('Error while removing avatar files')
 
     def _save_avatar(upload, role, uid):
         if not upload or not getattr(upload, 'filename', None):
@@ -158,25 +166,51 @@ def create_app(config_class=Config):
 
     db.init_app(app)
     # Ensure SQLAlchemy registers an engine bound to this app instance.
-    # Some environments lazily create the engine without an app, which
-    # leaves it keyed under None; proactively request the engine so it
-    # is registered to the current app object.
+    # Access engine operations inside an application context so Flask-SQLAlchemy
+    # does not attempt to use `current_app` while it's unavailable.
     try:
-        if hasattr(db, 'get_engine'):
-            db.get_engine(app)
-        else:
-            # older/newer versions may expose `engine` property lazily
-            _ = getattr(db, 'engine', None)
+        with app.app_context():
+            try:
+                # Access engine to force initialization for this app instance.
+                _ = getattr(db, 'engine', None)
+                if not _:
+                    app.logger.warning('DB engine not available via db.engine; engine may be lazily created')
+            except Exception:
+                app.logger.exception('Unexpected error while initializing DB engine')
+
+            # Ensure the SQLAlchemy engines mapping contains an engine entry
+            # that the session can use for both the current app and the
+            # default (None) bind. Some Flask-SQLAlchemy versions store
+            # engines keyed by app objects or by None; normalize both so
+            # session.get_bind() can always find a usable engine.
+            try:
+                engines = getattr(db, 'engines', None)
+                if isinstance(engines, dict):
+                    engine = None
+                    try:
+                        engine = engines.get(app)
+                    except Exception:
+                        engine = None
+                    if engine is None and None in engines:
+                        engine = engines.get(None)
+                    # As a last resort, ask SQLAlchemy to produce the engine
+                    if engine is None:
+                        try:
+                            engine = db.get_engine(app)  # type: ignore[attr-defined]
+                        except Exception:
+                            engine = getattr(db, 'engine', None)
+                    if engine:
+                        engines[app] = engine
+                        if None not in engines:
+                            engines[None] = engine
+            except Exception:
+                app.logger.exception('Failed to normalize sqlalchemy engines dict')
     except Exception:
-        pass
-    # If an engine was created earlier without an app (keyed by None),
-    # associate it with this app instance so session.get_bind() finds it.
-    try:
-        engines = getattr(db, 'engines', None)
-        if isinstance(engines, dict) and None in engines:
-            engines[app] = engines.pop(None)
-    except Exception:
-        pass
+        try:
+            app.logger.exception('Failed to initialize DB engine within app context')
+        except Exception:
+            import logging
+            logging.getLogger(__name__).exception('Failed to initialize DB engine within app context')
     csrf.init_app(app)
     login_manager.init_app(app)
     migrate.init_app(app, db)
@@ -258,13 +292,16 @@ def create_app(config_class=Config):
         if app.config.get('USE_DEV_SEEDS'):
             ensure_dev_users()
     except Exception:
-        # if config unreadable or missing, skip seeding
-        pass
+        try:
+            app.logger.exception('Failed to run dev seed initialization')
+        except Exception:
+            import logging
+            logging.getLogger(__name__).exception('Failed to run dev seed initialization')
 
     @login_manager.user_loader
     def load_user(user_id):
         try:
-            return User.query.get(int(user_id))
+            return db.session.get(User, int(user_id))
         except Exception:
             return None
 
@@ -292,7 +329,7 @@ def create_app(config_class=Config):
 
         seller_totals = {}
         for item in order_items:
-            product = Product.query.get(item.product_id) if item and item.product_id else None
+            product = db.session.get(Product, item.product_id) if item and item.product_id else None
             seller_id = getattr(product, 'seller_id', None)
             if not seller_id:
                 continue
@@ -373,7 +410,7 @@ def create_app(config_class=Config):
             if seller_id is None:
                 scoped_items_subtotal += line_total
             else:
-                product = Product.query.get(item.product_id) if item.product_id else None
+                product = db.session.get(Product, item.product_id) if item.product_id else None
                 if product and int(product.seller_id or 0) == int(seller_id):
                     scoped_items_subtotal += line_total
 
@@ -461,7 +498,11 @@ def create_app(config_class=Config):
                 # seller may see IDs for their own products
                 return int(getattr(product, 'seller_id', 0) or 0) == int(getattr(user, 'id', 0) or 0)
         except Exception:
-            pass
+            try:
+                app.logger.exception('Error checking seller ownership for product')
+            except Exception:
+                import logging
+                logging.getLogger(__name__).exception('Error checking seller ownership for product')
 
         if role == 'customer':
             try:
@@ -503,13 +544,21 @@ def create_app(config_class=Config):
                             if os.path.exists(os.path.join(base, fn)):
                                 return url_for('serve_avatar', role=role, user_id=uid, size=s)
                     except Exception:
-                        pass
+                        try:
+                            app.logger.exception('Failed while resolving profile thumbnail for user %s size=%s', uid, size)
+                        except Exception:
+                            import logging
+                            logging.getLogger(__name__).exception('Failed while resolving profile thumbnail')
                 for ext in ALLOWED_AVATAR_EXT + ('jpg',):
                     fn = f"{uid}.{ext}"
                     if os.path.exists(os.path.join(base, fn)):
                         return url_for('serve_avatar', role=role, user_id=uid)
             except Exception:
-                pass
+                try:
+                    app.logger.exception('Error generating profile image URL')
+                except Exception:
+                    import logging
+                    logging.getLogger(__name__).exception('Error generating profile image URL')
             return None
 
         return {'can_view_product_id': _can_view, 'profile_image_url': profile_image_url}
@@ -544,7 +593,11 @@ def create_app(config_class=Config):
                         if os.path.exists(os.path.join(base, fn)):
                             return send_from_directory(base, fn)
                 except Exception:
-                    pass
+                    try:
+                        app.logger.exception('Error while serving avatar thumbnail for %s size=%s', user_id, size)
+                    except Exception:
+                        import logging
+                        logging.getLogger(__name__).exception('Error while serving avatar thumbnail')
 
             # fallback to base file
             for ext in ALLOWED_AVATAR_EXT + ('jpg',):
@@ -552,7 +605,11 @@ def create_app(config_class=Config):
                 if os.path.exists(os.path.join(base, fn)):
                     return send_from_directory(base, fn)
         except Exception:
-            pass
+            try:
+                app.logger.exception('Error while serving avatar for role=%s user=%s', role, user_id)
+            except Exception:
+                import logging
+                logging.getLogger(__name__).exception('Error while serving avatar')
         abort(404)
 
     @app.route('/api/postal/suggest')
@@ -574,13 +631,25 @@ def create_app(config_class=Config):
         cart = Cart.query.filter_by(user_id=current_user.id).first()
         raw_items = list(getattr(cart, 'items', None) or [])
 
+        # allow clients to request only a subset of selected product refs/ids
+        selected = request.args.getlist('selected')
+        # support comma-separated single param as well
+        if not selected and request.args.get('selected'):
+            selected = [s for s in (request.args.get('selected') or '').split(',') if s]
+
         items = []
         subtotal = 0.0
         count = 0
         for entry in raw_items:
-            product = Product.query.get(entry.get('product_id'))
+            product = db.session.get(Product, entry.get('product_id'))
             if not product:
                 continue
+            # filter by selected if provided (support refs or ids)
+            if selected:
+                sid = set(str(s) for s in selected)
+                if not (str(product.product_ref) in sid or str(product.id) in sid):
+                    continue
+
             qty = max(int(entry.get('qty') or 1), 1)
             unit_price = float(product.price or 0)
             line_total = unit_price * qty
@@ -596,7 +665,38 @@ def create_app(config_class=Config):
                 'image_url': product.image_url or '/static/assets/Featured.png',
             })
 
-        return jsonify({'items': items, 'count': count, 'subtotal': subtotal})
+        # voucher preview: allow passing voucher_code in query to preview discount
+        voucher_discount = 0.0
+        try:
+            voucher_code = (request.args.get('voucher_code') or (getattr(cart, 'voucher_code', None) or '')).strip()
+            if voucher_code:
+                # build preview lines from the items we've included (respecting selected filter)
+                preview_lines = []
+                for it in items:
+                    try:
+                        prod = db.session.get(Product, it.get('product_id'))
+                        preview_lines.append({'product': prod, 'qty': int(it.get('qty') or 1), 'line_total': float(it.get('line_total') or 0)})
+                    except Exception:
+                        continue
+
+                voucher, normalized_code, discount_value, error_message = validate_voucher_for_cart(
+                    voucher_code=voucher_code,
+                    cart_items=preview_lines,
+                    subtotal=subtotal,
+                    customer_id=current_user.id,
+                    VoucherModel=Voucher,
+                    OrderModel=Order,
+                )
+                if discount_value:
+                    voucher_discount = float(discount_value or 0.0)
+        except Exception:
+            try:
+                app.logger.exception('Error computing voucher preview in API cart summary')
+            except Exception:
+                pass
+
+        grand_total = max(subtotal - float(voucher_discount or 0.0), 0.0)
+        return jsonify({'items': items, 'count': count, 'subtotal': subtotal, 'voucher_discount': voucher_discount, 'grand_total': grand_total})
 
     # Global route guard for portal prefixes
     @app.before_request
@@ -960,13 +1060,33 @@ def create_app(config_class=Config):
         if ext not in allowed:
             return None, 'Permit files must be PDF, PNG, JPG, or JPEG.'
 
+        # Basic size check (configurable)
+        max_bytes = int(app.config.get('MAX_PERMIT_UPLOAD_BYTES', 5 * 1024 * 1024))
+        try:
+            upload_file.stream.seek(0, os.SEEK_END)
+            file_size = upload_file.stream.tell()
+            upload_file.stream.seek(0)
+        except Exception:
+            file_size = None
+
+        if file_size is not None and file_size > max_bytes:
+            return None, f'Permit file must be {max_bytes // (1024*1024)}MB or smaller.'
+
         # Keep permit files outside /static to avoid public direct access.
         upload_dir = os.path.join(app.instance_path, 'uploads', 'permits')
         os.makedirs(upload_dir, exist_ok=True)
-        ts = datetime.utcnow().strftime('%Y%m%d%H%M%S%f')
+        ts = datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S%f')
         filename = f"{prefix}_{ts}_{sanitized}"
         abs_path = os.path.join(upload_dir, filename)
-        upload_file.save(abs_path)
+        try:
+            upload_file.save(abs_path)
+        except Exception:
+            try:
+                app.logger.exception('Failed to save permit file %s', sanitized)
+            except Exception:
+                import logging
+                logging.getLogger(__name__).exception('Failed to save permit file')
+            return None, 'Failed to save permit file. Please try again.'
         return f"permits/{filename}", None
 
     def save_return_evidence(upload_file, customer_id):
@@ -987,7 +1107,7 @@ def create_app(config_class=Config):
 
         upload_dir = os.path.join(app.instance_path, 'uploads', 'returns')
         os.makedirs(upload_dir, exist_ok=True)
-        ts = datetime.utcnow().strftime('%Y%m%d%H%M%S%f')
+        ts = datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S%f')
         filename = f"cust{customer_id}_{ts}_{sanitized}"
         abs_path = os.path.join(upload_dir, filename)
         try:
@@ -996,7 +1116,8 @@ def create_app(config_class=Config):
             try:
                 app.logger.exception('Failed to save return evidence file')
             except Exception:
-                pass
+                import logging
+                logging.getLogger(__name__).exception('Failed to save return evidence file')
             return None, 'Failed to save evidence image. Please try again.'
         return f"returns/{filename}", None
 
@@ -1189,7 +1310,7 @@ def create_app(config_class=Config):
                     item.product.stock = int(item.product.stock or 0) + int(item.quantity or 0)
 
             if order.voucher_id:
-                voucher = Voucher.query.get(order.voucher_id)
+                voucher = db.session.get(Voucher, order.voucher_id)
                 if voucher:
                     voucher.uses_count = max(0, int(voucher.uses_count or 1) - 1)
 
@@ -1210,7 +1331,6 @@ def create_app(config_class=Config):
             db.session.rollback()
             return False, 'Could not cancel order. Please try again.'
 
-    def finalize_seller_refund(seller, rrt_ref):
         from eacis.models.return_request import ReturnRequest
         from eacis.models.order import Order, OrderItem
 
@@ -1234,7 +1354,7 @@ def create_app(config_class=Config):
         if not seller_has_item:
             return False, 'You do not have access to this return request.'
 
-        order = Order.query.get(return_request.order_id)
+        order = db.session.get(Order, return_request.order_id)
         seller_refund_amount = calculate_refund_amount(order, seller_id=seller.id)
         if seller_refund_amount <= 0:
             seller_refund_amount = float(return_request.refund_amount or 0)
@@ -1413,7 +1533,7 @@ def create_app(config_class=Config):
         challenge_id = session.get('otp_challenge_id')
         purpose = session.get('otp_purpose') or 'login'
         otp_email = session.get('otp_email') or ''
-        challenge_row = OtpChallenge.query.get(challenge_id) if challenge_id else None
+        challenge_row = db.session.get(OtpChallenge, challenge_id) if challenge_id else None
         debug_code = ''
         if challenge_row and challenge_row.meta and isinstance(challenge_row.meta, dict):
             debug_code = challenge_row.meta.get('debug_code') or ''
@@ -1432,14 +1552,14 @@ def create_app(config_class=Config):
             if not ok:
                 return render_template('auth/otp_verify.html', purpose=purpose, email=otp_email, error=message, message=session.get('otp_message', ''), debug_code=debug_code)
 
-            user = User.query.get(session.get('otp_user_id')) if session.get('otp_user_id') else None
+            user = db.session.get(User, session.get('otp_user_id')) if session.get('otp_user_id') else None
             remember = bool(session.get('otp_remember'))
             remember_device = bool(request.form.get('remember_device'))
             next_url = session.get('otp_next') or ''
 
             if purpose == 'register_verify':
                 if user and not user.email_verified_at:
-                    user.email_verified_at = datetime.utcnow()
+                    user.email_verified_at = datetime.now(timezone.utc)
                     db.session.commit()
                 from flask_login import login_user
                 if user:
@@ -1611,7 +1731,7 @@ def create_app(config_class=Config):
         user = None
         try:
             if chal and chal.user_id:
-                user = User.query.get(chal.user_id)
+                user = db.session.get(User, chal.user_id)
         except Exception:
             user = None
 
@@ -1620,7 +1740,7 @@ def create_app(config_class=Config):
             return redirect(url_for('auth_login'))
 
         try:
-            user.email_verified_at = datetime.utcnow()
+            user.email_verified_at = datetime.now(timezone.utc)
             db.session.commit()
             from eacis.models.audit import AuditLog
             try:
@@ -1663,7 +1783,7 @@ def create_app(config_class=Config):
         except Exception:
             from models.user import User
 
-        user = User.query.get(user_id)
+        user = db.session.get(User, user_id)
         if not user:
             flash('Unable to resend OTP for this account.', 'error')
             return redirect(url_for('auth_login'))
@@ -1784,7 +1904,7 @@ def create_app(config_class=Config):
             if password != confirm:
                 return render_template('auth/reset_password.html', error='Passwords do not match.'), 200
 
-            user = User.query.get(session.get('password_reset_user_id'))
+            user = db.session.get(User, session.get('password_reset_user_id'))
             if not user:
                 flash('Account not found.', 'error')
                 clear_otp_session()
@@ -2057,7 +2177,7 @@ def create_app(config_class=Config):
                 product_ref = (request.form.get('product_ref') or '').strip()
                 product = None
                 if product_id:
-                    product = Product.query.get(product_id)
+                    product = db.session.get(Product, product_id)
                 elif product_ref:
                     product = Product.query.filter_by(product_ref=product_ref).first()
 
@@ -2103,7 +2223,7 @@ def create_app(config_class=Config):
                         product_id = None
 
                 updated = False
-                product = Product.query.get(product_id) if product_id else None
+                product = db.session.get(Product, product_id) if product_id else None
                 if product:
                     qty_errors, qty_data = validate_cart_quantity_payload(request.form, max_stock=int(product.stock or 0))
                     qty = qty_data['qty']
@@ -2155,7 +2275,7 @@ def create_app(config_class=Config):
                 preview_lines = []
                 preview_subtotal = 0.0
                 for entry in items:
-                    product = Product.query.get(entry.get('product_id'))
+                    product = db.session.get(Product, entry.get('product_id'))
                     if not product:
                         continue
                     quantity = max(int(entry.get('qty') or 1), 1)
@@ -2188,7 +2308,7 @@ def create_app(config_class=Config):
         cart_lines = []
         subtotal = 0.0
         for entry in cart.items or []:
-            product = Product.query.get(entry.get('product_id'))
+            product = db.session.get(Product, entry.get('product_id'))
             if not product:
                 continue
             quantity = max(int(entry.get('qty') or 1), 1)
@@ -2290,7 +2410,7 @@ def create_app(config_class=Config):
                 # If a selection was provided, skip entries not in the selection
                 if selected_ids and (not pid or pid not in selected_ids):
                     continue
-                product = Product.query.get(entry.get('product_id'))
+                product = db.session.get(Product, entry.get('product_id'))
                 if not product:
                     continue
                 quantity = max(int(entry.get('qty') or 1), 1)
@@ -2375,7 +2495,7 @@ def create_app(config_class=Config):
             address_id = request.form.get('address_id', 'new')
             if address_id and address_id != 'new':
                 try:
-                    addr = Address.query.get(int(address_id))
+                    addr = db.session.get(Address, int(address_id))
                     if addr and addr.user_id == current_user.id:
                         checkout_form.update({
                             'recipient_name': addr.recipient_name or checkout_form.get('recipient_name'),
@@ -3930,7 +4050,7 @@ def create_app(config_class=Config):
             if action == 'set_default':
                 try:
                     addr_id = int(request.form.get('address_id') or 0)
-                    addr = Address.query.get(addr_id)
+                    addr = db.session.get(Address, addr_id)
                     if addr and addr.user_id == current_user.id:
                         Address.query.filter_by(user_id=current_user.id, is_default=True).update({'is_default': False})
                         addr.is_default = True
@@ -3943,7 +4063,7 @@ def create_app(config_class=Config):
             if action == 'delete':
                 try:
                     addr_id = int(request.form.get('address_id') or 0)
-                    addr = Address.query.get(addr_id)
+                    addr = db.session.get(Address, addr_id)
                     if addr and addr.user_id == current_user.id:
                         db.session.delete(addr)
                         db.session.commit()
@@ -4428,12 +4548,12 @@ def create_app(config_class=Config):
             flash('Image management is unavailable: database table not found. Run migrations.', 'error')
             return redirect(url_for('seller_products'))
 
-        image = ProductImage.query.get(image_id)
+        image = db.session.get(ProductImage, image_id)
         if not image:
             flash('Image not found.', 'error')
             return redirect(url_for('seller_products'))
 
-        product = Product.query.get(image.product_id)
+        product = db.session.get(Product, image.product_id)
         if not product or product.product_ref != ref or product.seller_id != current_user.id:
             flash('Permission denied.', 'error')
             return redirect(url_for('seller_products'))
@@ -5115,12 +5235,12 @@ def create_app(config_class=Config):
         except Exception:
             InstSvc = None
 
-        schedule = InstallmentSchedule.query.get(schedule_id)
+        schedule = db.session.get(InstallmentSchedule, schedule_id)
         if not schedule:
             flash('Installment schedule not found.', 'error')
             return redirect(url_for('seller_installment_payments'))
 
-        plan = InstallmentPlan.query.get(schedule.plan_id)
+        plan = db.session.get(InstallmentPlan, schedule.plan_id)
         if not plan:
             flash('Installment plan not found.', 'error')
             return redirect(url_for('seller_installment_payments'))
@@ -6163,7 +6283,7 @@ def create_app(config_class=Config):
                         product_id = int(action_payload.get('product_id') or 0)
                     except Exception:
                         product_id = 0
-                    product = Product.query.get(product_id)
+                    product = db.session.get(Product, product_id)
                     if product and product.seller_id == seller.id:
                         ref = product.product_ref
                         db.session.delete(product)
@@ -6379,7 +6499,7 @@ def create_app(config_class=Config):
         if request.method == 'POST':
             action = (request.form.get('action') or '').strip()
             product_id = request.form.get('product_id', type=int)
-            product = Product.query.get(product_id) if product_id else None
+            product = db.session.get(Product, product_id) if product_id else None
 
             if not product:
                 flash('Product not found.', 'error')
@@ -6565,7 +6685,7 @@ def create_app(config_class=Config):
             elif action == 'update':
                 user_id = request.form.get('user_id', type=int)
                 if user_id:
-                    user = User.query.get(user_id)
+                    user = db.session.get(User, user_id)
                 else:
                     user = None
                 if not user:
@@ -6601,7 +6721,7 @@ def create_app(config_class=Config):
             elif action == 'delete':
                 user_id = request.form.get('user_id', type=int)
                 if user_id:
-                    user = User.query.get(user_id)
+                    user = db.session.get(User, user_id)
                 else:
                     user = None
                 if not user:

@@ -1,7 +1,7 @@
 """
 Installment Service — overdue sync, eligibility checks, and payment recording.
 """
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 try:
     from eacis.extensions import db
@@ -35,7 +35,7 @@ def sync_overdue_schedules():
     Also mark parent plans as 'defaulted' if ALL remaining schedules are past_due.
     Lightweight — only updates rows that need it.
     """
-    today = datetime.utcnow().date()
+    today = datetime.now(timezone.utc).date()
     overdue = InstallmentSchedule.query.filter(
         InstallmentSchedule.status == 'pending',
         InstallmentSchedule.due_date < today,
@@ -48,7 +48,7 @@ def sync_overdue_schedules():
 
     # Check if entire plans are now defaulted
     for plan_id in updated_plan_ids:
-        plan = InstallmentPlan.query.get(plan_id)
+        plan = db.session.get(InstallmentPlan, plan_id)
         if plan and plan.status == 'active':
             remaining = InstallmentSchedule.query.filter(
                 InstallmentSchedule.plan_id == plan_id,
@@ -119,17 +119,17 @@ def record_payment(schedule_id, payment_ref, actor_id=None):
     Mark a single schedule row as 'paid'.
     If all rows in the plan are now paid → mark plan as 'completed'.
     """
-    schedule = InstallmentSchedule.query.get(schedule_id)
+    schedule = db.session.get(InstallmentSchedule, schedule_id)
     if not schedule:
         return False, 'Schedule not found.'
     if schedule.status == 'paid':
         return False, 'This schedule is already marked as paid.'
 
     schedule.status = 'paid'
-    schedule.paid_at = datetime.utcnow()
-    schedule.payment_ref = payment_ref or f'MANUAL-{datetime.utcnow().strftime("%y%m%d%H%M%S")}'
+    schedule.paid_at = datetime.now(timezone.utc)
+    schedule.payment_ref = payment_ref or f'MANUAL-{datetime.now(timezone.utc).strftime("%y%m%d%H%M%S")}'
 
-    plan = InstallmentPlan.query.get(schedule.plan_id)
+    plan = db.session.get(InstallmentPlan, schedule.plan_id)
     if plan:
         all_schedules = InstallmentSchedule.query.filter_by(plan_id=plan.id).all()
         if all(s.status == 'paid' for s in all_schedules):
@@ -142,7 +142,7 @@ def get_plan_summary(plan_id):
     """
     Returns a dict with plan status metrics.
     """
-    plan = InstallmentPlan.query.get(plan_id)
+    plan = db.session.get(InstallmentPlan, plan_id)
     if not plan:
         return None
 

@@ -8,7 +8,7 @@ except Exception:
             from ..extensions import db
         except Exception:
             from extensions import db
-from datetime import datetime
+from datetime import datetime, timezone
 
 class AuditLog(db.Model):
     __tablename__ = 'audit_logs'
@@ -21,4 +21,4 @@ class AuditLog(db.Model):
     target_ref = db.Column(db.String(100))
     meta = db.Column(db.JSON)
     ip_address = db.Column(db.String(45))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
