@@ -1,0 +1,311 @@
+{#
+  E-ACIS Electronic Home Appliance Catalog Template
+  Architecture: Mobile-First to Widescreen Desktop Progression, Accessible, High-Density Ergonomics
+  Features: Persistent Sticky Sidebar Filters, Quick-Spec Slide-Over Drawer, ARIA Synchronization
+#}
+{% extends 'base.html' %}
+
+{% block title %}Appliance Catalog — E-ACIS{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/desktop-catalog.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/appliance-animations.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="appliance-catalog-container" aria-label="Electronic Home Appliances Catalog">
+  <!-- Top Catalog Header Bar with Fluid Typography -->
+  <header class="catalog-header-bar">
+    <div>
+      <h1 class="catalog-main-heading">Home Appliance Catalog</h1>
+      <p class="catalog-sub-heading">
+        Browse energy-efficient refrigerators, inverter air conditioners, washers, and kitchen appliances.
+      </p>
+    </div>
+
+    <!-- Mobile-Only Filter Button (Hidden on Desktop >=1024px) -->
+    <button 
+      type="button" 
+      id="mobile-filter-toggle"
+      class="mobile-filter-btn" 
+      aria-expanded="false" 
+      aria-controls="spec-filter-sidebar"
+      aria-label="Toggle appliance specification filters"
+    >
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="4" y1="21" x2="4" y2="14"></line>
+        <line x1="4" y1="10" x2="4" y2="3"></line>
+        <line x1="12" y1="21" x2="12" y2="12"></line>
+        <line x1="12" y1="8" x2="12" y2="3"></line>
+        <line x1="20" y1="21" x2="20" y2="16"></line>
+        <line x1="20" y1="12" x2="20" y2="3"></line>
+        <line x1="1" y1="14" x2="7" y2="14"></line>
+        <line x1="9" y1="8" x2="15" y2="8"></line>
+        <line x1="17" y1="16" x2="23" y2="16"></line>
+      </svg>
+      <span>Filter Specs</span>
+    </button>
+  </header>
+
+  <!-- Progressive Layout Wrapper: Single-Column (<1024px) to Sticky Sidebar Grid (>=1024px) -->
+  <div class="catalog-layout-wrapper">
+    <!-- Left Specification Filter Sidebar (Sticky 280px-300px on Desktop) -->
+    <aside id="spec-filter-sidebar" class="spec-filter-sidebar" aria-label="Appliance Specification Filters">
+      <!-- Department / Category Group -->
+      <div class="filter-section">
+        <h2 class="filter-section-title">Department</h2>
+        <ul class="filter-pill-group">
+          <li class="filter-pill-item">
+            <a href="{{ url_for('shop') }}" data-filter-chip class="filter-pill-link {% if not request.args.get('category') %}is-active{% endif %}">
+              All Appliances
+            </a>
+          </li>
+          {% for cat in (shop_categories or ['Cooling', 'Kitchen', 'Laundry', 'Entertainment', 'Small Appliances']) %}
+          <li class="filter-pill-item">
+            <a href="{{ url_for('shop', category=cat) }}" data-filter-chip class="filter-pill-link {% if request.args.get('category') == cat %}is-active{% endif %}">
+              {{ cat }}
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <!-- Financial Terms & Availability Group -->
+      <div class="filter-section">
+        <h2 class="filter-section-title">Financing & Stock</h2>
+        <ul class="filter-pill-group">
+          <li class="filter-pill-item">
+            <a 
+              href="{{ url_for('shop', installment='1') }}" 
+              data-filter-chip
+              class="filter-pill-link {% if request.args.get('installment') == '1' %}is-active{% endif %}"
+            >
+              0% Installment Plan
+            </a>
+          </li>
+          <li class="filter-pill-item">
+            <a 
+              href="{{ url_for('shop', in_stock='1') }}" 
+              data-filter-chip
+              class="filter-pill-link {% if request.args.get('in_stock') == '1' %}is-active{% endif %}"
+            >
+              Ready Stock Only
+            </a>
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- Main Catalog Grid Stream -->
+    <main class="catalog-stream-content">
+      <div class="appliance-catalog-grid">
+        {% set appliance_items = products if products is defined else appliances %}
+        {% for item in (appliance_items or []) %}
+        <article 
+          class="appliance-item-card" 
+          id="appliance-card-{{ item.id }}"
+          style="--stagger-index: {{ loop.index0 }};"
+          data-appliance-id="{{ item.id }}"
+        >
+          <!-- Visual Media & Installment Tag -->
+          <div class="appliance-media-box">
+            {% if item.installment_enabled %}
+            <span class="appliance-badge-installment">0% Installment</span>
+            {% endif %}
+
+            <a 
+              href="{{ url_for('product_detail', ref=(item.product_ref or item.ref or item.id)) }}" 
+              class="appliance-img-link" 
+              tabindex="-1" 
+              aria-hidden="true"
+            >
+              <img 
+                src="{{ item.image_url or item.image or '/static/assets/Featured.png' }}" 
+                alt="{{ item.name }}" 
+                class="appliance-card-img"
+                loading="lazy"
+                width="320"
+                height="240"
+              />
+            </a>
+          </div>
+
+          <!-- Product Specifications & Information -->
+          <div class="appliance-info-box">
+            {% if item.category %}
+            <div class="appliance-category-tag">{{ item.category }}</div>
+            {% endif %}
+
+            <h2 class="appliance-model-heading">
+              <a href="{{ url_for('product_detail', ref=(item.product_ref or item.ref or item.id)) }}">
+                {{ item.name }}
+              </a>
+            </h2>
+
+            <!-- Compact Technical Specification Badges -->
+            <ul class="appliance-spec-tags" aria-label="Technical Highlights">
+              {% if item.specs and item.specs is mapping %}
+                {% if item.specs.brand %}<li class="spec-tag-item">{{ item.specs.brand }}</li>{% endif %}
+                {% if item.specs.capacity %}<li class="spec-tag-item">{{ item.specs.capacity }}</li>{% endif %}
+                {% if item.specs.wattage %}<li class="spec-tag-item">{{ item.specs.wattage }}</li>{% endif %}
+                {% if item.specs.energy_rating %}<li class="spec-tag-item">{{ item.specs.energy_rating }}</li>{% endif %}
+                {% if item.specs.inverter %}<li class="spec-tag-item">Inverter</li>{% endif %}
+              {% else %}
+                {% if item.warranty_months %}<li class="spec-tag-item">{{ item.warranty_months }}M Warranty</li>{% endif %}
+                <li class="spec-tag-item">{{ 'In Stock' if (item.stock or 0) > 0 else 'Pre-order' }}</li>
+                {% if item.installment_enabled %}<li class="spec-tag-item">0% Available</li>{% endif %}
+              {% endif %}
+            </ul>
+
+            <!-- Unified Bottom Bar: Price & High-Density Dual CTA -->
+            <div class="appliance-bottom-bar">
+              <div class="appliance-pricing-display">
+                <span class="appliance-active-price">₱{{ "{:,.2f}".format(item.price or 0) }}</span>
+                {% if item.compare_price and item.compare_price > item.price %}
+                <span class="appliance-original-price">₱{{ "{:,.2f}".format(item.compare_price) }}</span>
+                {% endif %}
+              </div>
+
+              <div class="appliance-buttons-cluster">
+                <!-- Quick Spec Slide-Over Trigger -->
+                <button 
+                  type="button"
+                  class="quick-spec-trigger-btn"
+                  data-quick-spec-btn
+                  data-product-name="{{ item.name }}"
+                  data-product-ref="{{ item.product_ref or item.ref or item.id }}"
+                  data-product-price="₱{{ '{:,.2f}'.format(item.price or 0) }}"
+                  data-product-img="{{ item.image_url or item.image or '/static/assets/Featured.png' }}"
+                  data-product-category="{{ item.category or 'Home Appliance' }}"
+                  data-product-warranty="{{ item.warranty_months or 12 }} Months"
+                  data-product-stock="{{ item.stock or 0 }}"
+                  data-product-installment="{{ '0% Plan Available (Up to 12 Mos)' if item.installment_enabled else 'Standard Payment' }}"
+                  data-product-specs='{{ (item.specs or {}) | tojson }}'
+                  data-product-url="{{ url_for('product_detail', ref=(item.product_ref or item.ref or item.id)) }}"
+                  aria-haspopup="dialog"
+                  aria-expanded="false"
+                  aria-label="Quick preview technical specifications for {{ item.name }}"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                  </svg>
+                  <span>Quick Spec</span>
+                </button>
+
+                <!-- Add to Bag Form -->
+                <form method="POST" action="{{ url_for('cart') }}" style="margin: 0;">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <input type="hidden" name="action" value="add">
+                  <input type="hidden" name="product_id" value="{{ item.id }}">
+                  <input type="hidden" name="qty" value="1">
+
+                  <button 
+                    type="submit" 
+                    class="direct-cart-btn" 
+                    data-cart-action-btn
+                    style="width: 100%;"
+                    aria-label="Add {{ item.name }} to shopping cart"
+                    {% if (item.stock or 0) <= 0 %}disabled{% endif %}
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <circle cx="9" cy="21" r="1"></circle>
+                      <circle cx="20" cy="21" r="1"></circle>
+                      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
+                    <span class="btn-label">Add to Bag</span>
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </article>
+        {% else %}
+        <!-- Empty Results State -->
+        <div style="grid-column: 1 / -1; text-align: center; padding: 4rem 1.5rem; background: #ffffff; border-radius: 0.75rem; border: 1px dashed #cbd5e1;">
+          <h2 style="font-size: 1.25rem; font-weight: 600; color: #334155; margin: 0 0 0.5rem;">No Appliances Found</h2>
+          <p style="color: #64748b; margin: 0 0 1.5rem;">Try adjusting or clearing your current filter criteria.</p>
+          <a href="{{ url_for('shop') }}" class="mobile-filter-btn" style="display: inline-flex;">
+            Reset All Filters
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- =========================================================================
+     Accessible Quick-Spec Slide-Over Drawer & Backdrop Modal
+     ========================================================================= -->
+<div 
+  id="quick-spec-backdrop" 
+  class="quick-spec-overlay-backdrop" 
+  tabindex="-1" 
+  aria-hidden="true"
+></div>
+
+<aside 
+  id="quick-spec-drawer" 
+  class="quick-spec-slide-drawer" 
+  role="dialog" 
+  aria-modal="true" 
+  aria-labelledby="quick-spec-title" 
+  aria-hidden="true"
+>
+  <!-- Drawer Header -->
+  <div class="spec-drawer-header">
+    <div class="spec-drawer-title-group">
+      <span id="quick-spec-category" class="spec-drawer-kicker">Home Appliance</span>
+      <h2 id="quick-spec-title" class="spec-drawer-title">Specification Sheet</h2>
+    </div>
+    <button 
+      type="button" 
+      id="quick-spec-close-btn" 
+      class="spec-drawer-close-btn" 
+      aria-label="Close specification sheet"
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Drawer Body -->
+  <div class="spec-drawer-content-body">
+    <div class="spec-drawer-hero-img-box">
+      <img id="quick-spec-img" src="/static/assets/Featured.png" alt="Appliance" class="spec-drawer-hero-img" />
+    </div>
+
+    <div class="spec-table-wrap">
+      <table class="spec-data-table" aria-label="Technical Specification Sheet">
+        <tbody id="quick-spec-tbody">
+          <!-- Dynamically populated by desktop-catalog.js -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Drawer Footer Actions -->
+  <div class="spec-drawer-footer">
+    <div class="spec-drawer-price-wrap">
+      <span class="spec-drawer-price-label">Official Price</span>
+      <span id="quick-spec-price" class="spec-drawer-price-value">₱0.00</span>
+    </div>
+    <a id="quick-spec-detail-link" href="#" class="direct-cart-btn" style="text-decoration: none; padding: 0.625rem 1.25rem;">
+      <span>Full Product Page</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+        <polyline points="12 5 19 12 12 19"></polyline>
+      </svg>
+    </a>
+  </div>
+</aside>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/desktop-catalog.js') }}"></script>
+<script src="{{ url_for('static', filename='js/appliance-animations.js') }}"></script>
+{% endblock %}

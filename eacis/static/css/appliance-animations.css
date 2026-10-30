@@ -1,0 +1,276 @@
+/* ==========================================================================
+   E-ACIS Electronic Home Appliance UI Animations & Micro-Interactions
+   Performance Standard: 60 FPS Compositor-Only (transform & opacity only)
+   Timing Functions: Natural cubic-bezier(0.22, 1, 0.36, 1) and ease-in-out
+   Micro-Interaction Durations: 150ms - 300ms (Zero Layout Thrashing / CLS = 0)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Hardware-Accelerated Compositor Keyframes
+   -------------------------------------------------------------------------- */
+@keyframes cardFadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes toastSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes toastSlideOut {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(16px) scale(0.95);
+  }
+}
+
+@keyframes badgePop {
+  0% {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+  60% {
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   2. Staggered Appliance Card Entrances (150ms - 280ms)
+   -------------------------------------------------------------------------- */
+.appliance-item-card {
+  opacity: 0;
+  animation: cardFadeUp 280ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: calc(var(--stagger-index, 0) * 45ms);
+  will-change: transform, opacity;
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+              opacity 220ms ease-in-out,
+              box-shadow 220ms ease-in-out;
+}
+
+/* Card Hover Elevation (Compositor Only) */
+.appliance-item-card:hover {
+  transform: translateY(-4px);
+}
+
+/* Card Image Scale on Hover (Compositor Only) */
+.appliance-card-img {
+  will-change: transform;
+  transition: transform 250ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.appliance-item-card:hover .appliance-card-img {
+  transform: scale(1.03);
+}
+
+/* Installment Badge Entrance */
+.appliance-badge-installment {
+  animation: badgePop 240ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  will-change: transform, opacity;
+}
+
+/* --------------------------------------------------------------------------
+   3. Button Micro-Interactions (160ms - 200ms)
+   -------------------------------------------------------------------------- */
+.direct-cart-btn,
+.quick-spec-trigger-btn,
+.mobile-filter-btn {
+  will-change: transform, opacity;
+  transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
+              opacity 180ms ease-in-out,
+              background-color 180ms ease-in-out,
+              color 180ms ease-in-out;
+}
+
+.direct-cart-btn:hover,
+.quick-spec-trigger-btn:hover,
+.mobile-filter-btn:hover {
+  transform: translateY(-2px);
+}
+
+.direct-cart-btn:active,
+.quick-spec-trigger-btn:active,
+.mobile-filter-btn:active {
+  transform: scale(0.96);
+}
+
+.direct-cart-btn:disabled {
+  transform: none !important;
+  opacity: 0.6;
+}
+
+/* Added state badge pulse */
+.btn-pulse-feedback {
+  transform: scale(1.05);
+  opacity: 0.95;
+}
+
+/* --------------------------------------------------------------------------
+   4. Filter Chips & Interactive Badges (150ms - 180ms)
+   -------------------------------------------------------------------------- */
+.filter-pill-link,
+.spec-tag-item {
+  will-change: transform, opacity;
+  transition: transform 160ms cubic-bezier(0.22, 1, 0.36, 1),
+              opacity 160ms ease-in-out,
+              background-color 160ms ease-in-out,
+              color 160ms ease-in-out;
+}
+
+.filter-pill-link:hover {
+  transform: translateY(-1px);
+}
+
+.filter-pill-link:active {
+  transform: scale(0.97);
+}
+
+/* --------------------------------------------------------------------------
+   5. Specification Slide-Over Drawer Transitions (260ms - 300ms)
+   -------------------------------------------------------------------------- */
+.quick-spec-overlay-backdrop {
+  opacity: 0;
+  pointer-events: none;
+  will-change: opacity;
+  transition: opacity 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.quick-spec-overlay-backdrop.is-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.quick-spec-slide-drawer {
+  transform: translateX(100%);
+  will-change: transform;
+  transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.quick-spec-slide-drawer.is-active {
+  transform: translateX(0);
+}
+
+.spec-drawer-close-btn {
+  will-change: transform;
+  transition: transform 160ms cubic-bezier(0.22, 1, 0.36, 1),
+              background-color 160ms ease-in-out;
+}
+
+.spec-drawer-close-btn:hover {
+  transform: scale(1.08);
+}
+
+.spec-drawer-close-btn:active {
+  transform: scale(0.92);
+}
+
+/* --------------------------------------------------------------------------
+   6. Toast Notifications (Compositor Only)
+   -------------------------------------------------------------------------- */
+.appliance-toast-container {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  pointer-events: none;
+}
+
+.appliance-toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.125rem;
+  background: #0f172a;
+  color: #ffffff;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);
+  font-size: 0.875rem;
+  font-weight: 500;
+  will-change: transform, opacity;
+  animation: toastSlideIn 260ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.appliance-toast.is-dismissing {
+  animation: toastSlideOut 200ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* --------------------------------------------------------------------------
+   7. Accessibility: Strict Reduced Motion Support
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .appliance-item-card {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .appliance-badge-installment,
+  .appliance-toast {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .appliance-item-card:hover,
+  .appliance-card-img,
+  .appliance-item-card:hover .appliance-card-img,
+  .direct-cart-btn,
+  .direct-cart-btn:hover,
+  .direct-cart-btn:active,
+  .quick-spec-trigger-btn,
+  .quick-spec-trigger-btn:hover,
+  .quick-spec-trigger-btn:active,
+  .mobile-filter-btn,
+  .mobile-filter-btn:hover,
+  .mobile-filter-btn:active,
+  .filter-pill-link,
+  .filter-pill-link:hover,
+  .filter-pill-link:active,
+  .spec-drawer-close-btn:hover,
+  .spec-drawer-close-btn:active {
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .quick-spec-slide-drawer {
+    transition: none !important;
+  }
+
+  .quick-spec-overlay-backdrop {
+    transition: none !important;
+  }
+}

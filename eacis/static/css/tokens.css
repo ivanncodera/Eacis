@@ -5,23 +5,30 @@
 
 :root {
 
-  /* ── BRAND ───────────────────────────────── */
-  --brand-primary:          #007AFF;
-  --brand-primary-dark:     #0062CC;
-  --brand-primary-darker:   #004999;
-  --brand-primary-light:    #3395FF;
-  --brand-primary-subtle:   rgba(0, 122, 255, 0.08);
-  --brand-primary-subtle-2: rgba(0, 122, 255, 0.14);
-  --brand-primary-glow:     rgba(0, 122, 255, 0.28);
+  /* ── OFFICIAL LOGO DESIGN TOKENS (SINGLE SOURCE OF TRUTH) ──────── */
+  --brand-navy:             #210F5C;
+  --brand-navy-dark:        #170A42;
+  --brand-primary:          #2A4494;
+  --brand-primary-dark:     #1E3374;
+  --brand-primary-darker:   #17285C;
+  --brand-primary-light:    #4361B8;
+  --brand-primary-subtle:   rgba(42, 68, 148, 0.08);
+  --brand-primary-subtle-2: rgba(42, 68, 148, 0.14);
+  --brand-primary-glow:     rgba(42, 68, 148, 0.25);
+
+  --brand-light-blue:       #D0E5F6;
+  --brand-light-blue-soft:  #E6F2FA;
+  --brand-light-blue-subtle:#F0F6FC;
+  --brand-white:            #FFFFFF;
 
   /* ── ACCENT & ARCHITECTURAL PALETTE ──────── */
-  --brand-accent-cyan:      #06B6D4;
-  --brand-accent-indigo:    #4F46E5;
+  --brand-accent-cyan:      #2A4494;
+  --brand-accent-indigo:    #210F5C;
   --brand-accent-emerald:   #00875A;
-  --brand-gradient:         linear-gradient(135deg, #007AFF 0%, #2563EB 52%, #06B6D4 100%);
-  --brand-gradient-dark:    linear-gradient(135deg, #091E42 0%, #0F2952 55%, #004999 100%);
-  --brand-surface-tint:     linear-gradient(180deg, rgba(0, 122, 255, 0.04) 0%, rgba(247, 248, 250, 0) 100%);
-  --focus-ring:             0 0 0 3px rgba(0, 122, 255, 0.28);
+  --brand-gradient:         linear-gradient(135deg, #2A4494 0%, #210F5C 100%);
+  --brand-gradient-dark:    linear-gradient(135deg, #210F5C 0%, #170A42 60%, #0F062E 100%);
+  --brand-surface-tint:     linear-gradient(180deg, rgba(208, 229, 246, 0.35) 0%, rgba(247, 248, 250, 0) 100%);
+  --focus-ring:             0 0 0 3px rgba(42, 68, 148, 0.28);
 
   /* ── FLOATING SHAPES TOKENS ──────────────── */
   --shape-color-primary:    rgba(0, 122, 255, 0.085);

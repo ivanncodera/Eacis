@@ -44,7 +44,7 @@ window.renderProducts = function(sel, list){
   if(!root) return;
   root.innerHTML = '';
 
-  list.forEach(p => {
+  list.forEach((p, idx) => {
     const refValue = p.ref || p.product_ref || '';
     const showSku = !!p.show_sku;
     const imageValue = p.image || p.image_url || '/static/assets/Featured.png';
@@ -54,6 +54,7 @@ window.renderProducts = function(sel, list){
 
     const card = document.createElement('article');
     card.className = 'product-card reveal';
+    card.style.setProperty('--stagger-index', String(idx));
     card.tabIndex = 0;
     const titleId = 'prod-title-' + (refValue || Math.random().toString(36).slice(2,8));
     card.setAttribute('aria-labelledby', titleId);
@@ -314,4 +315,5 @@ window.renderProducts = function(sel, list){
   });
 
   if(window.initReveal) window.initReveal();
+  if(typeof window.initApplianceAnimations === 'function') window.initApplianceAnimations();
 };

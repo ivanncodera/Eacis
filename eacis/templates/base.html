@@ -23,6 +23,7 @@
   <link rel="stylesheet" href="/static/css/utilities.css?v=20261030">
   <link rel="stylesheet" href="/static/css/floating-shapes.css?v=20261030">
   <link rel="stylesheet" href="/static/css/landing.css?v=20261030">
+  {% block extra_css %}{% endblock %}
   <style>
     .toast-stack { position: fixed; top: 80px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
     .toast { transform: translateX(120%); transition: all 0.4s cubic-bezier(0.16,1,0.3,1); opacity: 0; min-width: 300px; }
@@ -123,6 +124,9 @@
     </div>
 
     <div class="topbar__actions" style="display: flex; align-items: center; gap: var(--sp-2);">
+      <button class="topbar__icon-btn" id="base-search-toggle" aria-label="Search" style="display: none; color: var(--grey-700);">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      </button>
       {% if current_user.is_authenticated %}
         
         <!-- Support Entry -->
@@ -147,7 +151,7 @@
         <!-- Account Management Dropdown -->
       {% else %}
         <a class="btn btn--ghost btn--sm" href="/auth/login">Sign In</a>
-        <a class="btn btn--primary btn--sm" href="/auth/register" style="box-shadow: 0 4px 12px rgba(0, 122, 255, 0.2);">Register</a>
+        <a class="btn btn--primary btn--sm" href="/auth/register" style="box-shadow: 0 4px 12px rgba(42, 68, 148, 0.25);">Register</a>
       {% endif %}
     </div>
   </header>
@@ -1142,8 +1146,20 @@
     document.addEventListener('click', (ev) => {
       if (!results.contains(ev.target) && ev.target !== input) clearResults();
     });
+
+    const searchToggle = document.getElementById('base-search-toggle');
+    const searchBox = document.querySelector('.topbar__search');
+    if (searchToggle && searchBox) {
+      searchToggle.addEventListener('click', () => {
+        searchBox.classList.toggle('is-open');
+        if (searchBox.classList.contains('is-open') && input) {
+          input.focus();
+        }
+      });
+    }
   })();
   </script>
   {% block scripts %}{% endblock %}
+  {% block extra_js %}{% endblock %}
 </body>
 </html>
