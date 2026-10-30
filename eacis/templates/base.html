@@ -88,7 +88,7 @@
   <div class="progress-bar shimmer" id="page-progress"><div class="progress-bar__fill" id="page-progress-fill"></div></div>
   {% include 'partials/floating_shapes.html' %}
   <a href="#main" class="skip-link">Skip to main content</a>
-  <header class="topbar shimmer" role="banner" style="backdrop-filter: blur(12px); background: rgba(255,255,255,0.85); border-bottom: 1px solid var(--border-subtle); z-index: 1200;">
+  <header class="topbar" role="banner" style="position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; width: 100% !important; z-index: 1200 !important; backdrop-filter: blur(16px); background: rgba(255,255,255,0.96); border-bottom: 1px solid var(--border-medium); box-shadow: 0 1px 4px rgba(0,0,0,0.03);">
     <div class="topbar__logo">
       <a href="/" class="topbar__home-link">
         <span class="topbar__brand-mark" aria-hidden="true" style="background: transparent; box-shadow: none; width: auto; height: auto; padding: 0; margin-right: 10px;">
@@ -148,7 +148,6 @@
         </button>
         {% endif %}
 
-        <!-- Account Management Dropdown -->
       {% else %}
         <a class="btn btn--ghost btn--sm" href="/auth/login">Sign In</a>
         <a class="btn btn--primary btn--sm" href="/auth/register" style="box-shadow: 0 4px 12px rgba(42, 68, 148, 0.25);">Register</a>

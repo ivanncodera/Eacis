@@ -20,7 +20,7 @@
       <a href="/customer/profile/edit" class="btn btn--primary btn--sm">Edit Profile</a>
     </header>
 
-    <div class="kpi-grid mb-6" style="grid-template-columns: repeat(5, minmax(0, 1fr));">
+    <div class="profile-stats-grid mb-6">
       <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Total Orders</div><div class="type-display-md mt-2">{{ profile_stats.total_orders }}</div></div></div>
       <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Pending</div><div class="type-display-md mt-2">{{ profile_stats.pending_orders }}</div></div></div>
       <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Delivered</div><div class="type-display-md mt-2">{{ profile_stats.delivered_orders }}</div></div></div>
@@ -28,7 +28,7 @@
       <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Total Spend</div><div class="type-display-md mt-2"><span class="currency-code">PHP</span>{{ '%.2f'|format(profile_stats.total_spent or 0) }}</div></div></div>
     </div>
 
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:var(--sp-6); align-items:start;">
+    <div class="profile-sections-grid">
       <section class="glass-card p-6">
         <h2 class="type-h4" style="margin:0 0 var(--sp-4) 0;">Account Information</h2>
         <div style="display:grid; gap:var(--sp-3);">

@@ -1,208 +1,650 @@
 {% extends 'base.html' %}
 {% block title %}Sign in — E-ACIS{% endblock %}
-{% block content %}
-<div class="page-center" style="padding: var(--sp-12) var(--sp-6);">
-  <div class="glass-card glass-card--interactive" style="max-width: 480px; width: 100%; padding: var(--sp-12) var(--sp-10);">
-    <div class="text-center" style="margin-bottom: var(--sp-8);">
-      <a href="/" style="display: inline-flex; align-items: center; justify-content: center; margin-bottom: var(--sp-4); text-decoration: none;">
-        <img src="/static/assets/logo.png?v=20261030" alt="E-ACIS Official Logo" style="height: 68px; width: auto; object-fit: contain; display: block;">
-      </a>
-      <h1 class="type-display-md" style="color: var(--grey-900);">Welcome Back</h1>
-      <p class="type-body-md text-muted" style="margin-top: var(--sp-3);">Access your E-ACIS hub to manage orders, inventory, or system settings.</p>
-    </div>
 
-    <form id="login-form" method="post" action="/auth/login" class="form-stack" novalidate aria-describedby="login-error" data-enhance="submit-loading">
+{% block extra_css %}
+<style>
+  /* ==========================================================================
+     E-ACIS Login Page Modern Glassmorphic UI & Ambient Floating Shapes
+     ========================================================================== */
+  
+  /* 1. Eliminate redundant main shell padding to reduce the top gap */
+  main#main {
+    padding-top: 0 !important;
+  }
+
+  /* 2. Tightened Login Page Wrapper */
+  .login-page-wrap {
+    min-height: calc(100vh - var(--topbar-height, 60px));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 16px;
+    padding-bottom: 2rem;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+    box-sizing: border-box;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(180deg, #f8fafc 0%, #edf2f7 100%);
+  }
+
+  @media (min-width: 768px) {
+    .login-page-wrap {
+      padding-top: 24px;
+      padding-bottom: 3rem;
+    }
+  }
+
+  /* 3. Ambient Pure CSS Floating Circles/Orbs in Background */
+  .login-ambient-shapes {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 0;
+  }
+
+  .floating-orb {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    will-change: transform;
+  }
+
+  .floating-orb--1 {
+    width: 420px;
+    height: 420px;
+    top: -100px;
+    right: -80px;
+    background: radial-gradient(circle, rgba(2, 132, 199, 0.12) 0%, rgba(2, 132, 199, 0) 70%);
+    filter: blur(44px);
+    animation: driftOrb1 22s cubic-bezier(0.22, 1, 0.36, 1) infinite alternate;
+  }
+
+  .floating-orb--2 {
+    width: 360px;
+    height: 360px;
+    bottom: -60px;
+    left: -80px;
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.14) 0%, rgba(56, 189, 248, 0) 70%);
+    filter: blur(40px);
+    animation: driftOrb2 26s cubic-bezier(0.22, 1, 0.36, 1) infinite alternate;
+  }
+
+  .floating-orb--ring {
+    width: 160px;
+    height: 160px;
+    top: 18%;
+    left: 8%;
+    border: 1.5px solid rgba(2, 132, 199, 0.16);
+    background: transparent;
+    animation: floatRotateRing 30s linear infinite;
+  }
+
+  .floating-orb--accent {
+    width: 90px;
+    height: 90px;
+    bottom: 18%;
+    right: 12%;
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, rgba(16, 185, 129, 0) 70%);
+    filter: blur(18px);
+    animation: pulseOrb 8s ease-in-out infinite alternate;
+  }
+
+  @keyframes driftOrb1 {
+    0% { transform: translate3d(0, 0, 0) scale(1); }
+    100% { transform: translate3d(-40px, 30px, 0) scale(1.08); }
+  }
+
+  @keyframes driftOrb2 {
+    0% { transform: translate3d(0, 0, 0) scale(1); }
+    100% { transform: translate3d(50px, -40px, 0) scale(1.06); }
+  }
+
+  @keyframes floatRotateRing {
+    0% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-16px) rotate(180deg); }
+    100% { transform: translateY(0) rotate(360deg); }
+  }
+
+  @keyframes pulseOrb {
+    0% { transform: scale(0.9); opacity: 0.6; }
+    100% { transform: scale(1.2); opacity: 0.9; }
+  }
+
+  /* 4. Modern Glassmorphic Login Card */
+  .login-card {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 440px;
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    border-radius: 1.25rem;
+    box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+    padding: 1.75rem 1.5rem;
+    box-sizing: border-box;
+    transition: box-shadow 200ms ease, transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  @media (min-width: 768px) {
+    .login-card {
+      padding: 2.25rem 2.25rem;
+    }
+  }
+
+  .login-card:hover {
+    box-shadow: 0 25px 50px -18px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+  }
+
+  /* 5. Header & Typography */
+  .login-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .login-logo-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+    text-decoration: none;
+    transition: transform 160ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .login-logo-link:hover {
+    transform: scale(1.04);
+  }
+
+  .login-brand-logo {
+    height: 48px;
+    width: auto;
+    object-fit: contain;
+    display: block;
+  }
+
+  .login-title {
+    font-size: clamp(1.4rem, 2.5vw, 1.75rem);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+    color: var(--grey-900, #0f172a);
+    margin: 0 0 0.35rem;
+  }
+
+  .login-subtitle {
+    font-size: 0.875rem;
+    color: var(--grey-500, #64748b);
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  /* 6. Form Groups & Inputs */
+  .login-form-group {
+    margin-bottom: 1.125rem;
+  }
+
+  .login-form-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 0.375rem;
+  }
+
+  .login-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+
+  .login-input-icon {
+    position: absolute;
+    left: 0.875rem;
+    color: #94a3b8;
+    pointer-events: none;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .login-input {
+    width: 100%;
+    min-height: 46px;
+    padding: 0.625rem 0.875rem 0.625rem 2.35rem;
+    font-size: 0.9375rem;
+    color: #0f172a;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.625rem;
+    box-sizing: border-box;
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+  }
+
+  .login-input--pwd {
+    padding-right: 2.75rem;
+  }
+
+  .login-input:hover {
+    border-color: #94a3b8;
+  }
+
+  .login-input:focus {
+    border-color: var(--brand-primary, #0284c7);
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+    outline: none;
+  }
+
+  .login-input.is-error {
+    border-color: #ef4444;
+    background: #fffafa;
+  }
+
+  .login-input.is-error:focus {
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+  }
+
+  .password-toggle-btn {
+    position: absolute;
+    right: 0.625rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: 0.375rem;
+    color: #94a3b8;
+    cursor: pointer;
+    border-radius: 0.375rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 150ms ease;
+  }
+
+  .password-toggle-btn:hover {
+    color: #334155;
+  }
+
+  .password-toggle-btn:focus-visible {
+    outline: 2px solid var(--brand-primary, #0284c7);
+    outline-offset: 1px;
+  }
+
+  .login-hint-text {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin-top: 0.25rem;
+  }
+
+  /* 7. Action Bar (Remember Me & Forgot Password) */
+  .login-actions-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .login-remember-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    color: #475569;
+    cursor: pointer;
+    user-select: none;
+    margin: 0;
+  }
+
+  .login-remember-checkbox {
+    width: 17px;
+    height: 17px;
+    accent-color: var(--brand-primary, #0284c7);
+    cursor: pointer;
+    margin: 0;
+  }
+
+  .login-forgot-link {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--brand-primary, #0284c7);
+    text-decoration: none;
+    transition: color 150ms ease;
+  }
+
+  .login-forgot-link:hover {
+    color: #0369a1;
+    text-decoration: underline;
+  }
+
+  /* 8. Submit Button */
+  .login-submit-btn {
+    width: 100%;
+    min-height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #ffffff;
+    background: var(--brand-primary, #0284c7);
+    border: none;
+    border-radius: 0.625rem;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+    will-change: transform;
+    transition: background-color 160ms ease, transform 160ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 160ms ease;
+  }
+
+  .login-submit-btn:hover {
+    background: #0369a1;
+    box-shadow: 0 6px 16px rgba(2, 132, 199, 0.35);
+  }
+
+  .login-submit-btn:active {
+    transform: scale(0.98);
+  }
+
+  .login-submit-btn:disabled {
+    background: #94a3b8;
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* 9. Card Footer (Registration Links) */
+  .login-card-footer {
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid #f1f5f9;
+    text-align: center;
+  }
+
+  .login-footer-lead {
+    font-size: 0.8125rem;
+    color: #64748b;
+    margin: 0 0 0.75rem;
+  }
+
+  .login-register-pills {
+    display: flex;
+    gap: 0.625rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .login-register-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    padding: 0.375rem 0.875rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #334155;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+  }
+
+  .login-register-pill:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+    border-color: #cbd5e1;
+  }
+
+  /* Accessibility: Reduced Motion */
+  @media (prefers-reduced-motion: reduce) {
+    .floating-orb,
+    .login-submit-btn,
+    .login-card,
+    .login-logo-link {
+      animation: none !important;
+      transition: none !important;
+      transform: none !important;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-page-wrap">
+  <!-- Ambient Floating Circles / Pure CSS Geometric Orbs -->
+  <div class="login-ambient-shapes" aria-hidden="true" role="presentation">
+    <div class="floating-orb floating-orb--1"></div>
+    <div class="floating-orb floating-orb--2"></div>
+    <div class="floating-orb floating-orb--ring"></div>
+    <div class="floating-orb floating-orb--accent"></div>
+  </div>
+
+  <!-- Glassmorphic Login Card -->
+  <div class="login-card">
+    <!-- Header -->
+    <header class="login-header">
+      <a href="/" class="login-logo-link" aria-label="Return to Homepage">
+        <img src="/static/assets/logo.png?v=20261030" alt="E-ACIS Official Logo" class="login-brand-logo">
+      </a>
+      <h1 class="login-title">Welcome Back</h1>
+      <p class="login-subtitle">Access your E-ACIS hub to manage orders, inventory, or system settings.</p>
+    </header>
+
+    <!-- Login Form -->
+    <form id="login-form" method="post" action="/auth/login" novalidate aria-describedby="login-error" data-enhance="submit-loading">
       <input type="hidden" name="next" value="{{ request.args.get('next','') }}">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
       {% if error %}
-      <div id="login-error" role="alert" aria-live="polite" class="form-error">{{ error }}</div>
+      <div id="login-error" role="alert" aria-live="polite" class="form-error" style="margin-bottom: 1rem; padding: 0.625rem 0.875rem; font-size: 0.85rem; border-radius: 0.5rem; background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c;">{{ error }}</div>
       {% else %}
       <div id="login-error" role="alert" aria-live="polite" class="sr-only" hidden></div>
       {% endif %}
 
-      <div class="form-group">
-        <label for="email" class="form-label">Email Address <abbr class="required" title="required">*</abbr></label>
-        <div class="form-input-group">
-          <span class="form-input-group__icon" aria-hidden="true" style="font-size: 14px; font-weight: 600; color: var(--grey-400);">@</span>
-          <input id="email" name="email" type="email" placeholder="you@example.com" autocomplete="email" required class="form-input" aria-describedby="email-hint" />
+      <!-- Email Field -->
+      <div class="login-form-group">
+        <label for="email" class="login-form-label">
+          <span>Email Address</span>
+          <span style="color: #ef4444;" title="required">*</span>
+        </label>
+        <div class="login-input-wrap">
+          <span class="login-input-icon" aria-hidden="true">@</span>
+          <input 
+            id="email" 
+            name="email" 
+            type="email" 
+            placeholder="you@example.com" 
+            autocomplete="email" 
+            required 
+            class="login-input" 
+            aria-describedby="email-hint" 
+          />
         </div>
-        <div id="email-hint" class="form-helper" style="margin-top: var(--sp-2);">Use the email linked to your E-ACIS account.</div>
+        <div id="email-hint" class="login-hint-text">Use the email linked to your E-ACIS account.</div>
       </div>
 
-      <div class="form-group">
-        <label for="password" class="form-label">Password <abbr class="required" title="required">*</abbr></label>
-        <div class="form-input-group" style="position:relative;">
-          <input id="password" name="password" type="password" placeholder="••••••••" autocomplete="current-password" required class="form-input" style="padding-right: 40px;" aria-describedby="password-hint" />
-          <button type="button" id="password-toggle" aria-label="Show password" aria-pressed="false" class="password-toggle" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;padding:5px;cursor:pointer;color:var(--grey-400);transition:color var(--dur-fast);">
-            <svg class="icon icon-eye" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+      <!-- Password Field -->
+      <div class="login-form-group">
+        <label for="password" class="login-form-label">
+          <span>Password</span>
+          <span style="color: #ef4444;" title="required">*</span>
+        </label>
+        <div class="login-input-wrap">
+          <span class="login-input-icon" aria-hidden="true">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          </span>
+          <input 
+            id="password" 
+            name="password" 
+            type="password" 
+            placeholder="••••••••" 
+            autocomplete="current-password" 
+            required 
+            class="login-input login-input--pwd" 
+            aria-describedby="password-hint" 
+          />
+          <button 
+            type="button" 
+            id="password-toggle" 
+            aria-label="Show password" 
+            aria-pressed="false" 
+            class="password-toggle-btn"
+          >
+            <svg class="icon icon-eye" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
           </button>
         </div>
-        <div id="password-hint" class="form-helper" style="margin-top: var(--sp-2);">Minimum 8 characters.</div>
+        <div id="password-hint" class="login-hint-text">Minimum 8 characters.</div>
       </div>
 
-      <div class="form-group auth-actions" style="display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:12px;flex-wrap:nowrap;">
-        <label class="form-label" for="remember" style="display:inline-flex;align-items:center;gap:8px;font-weight:var(--weight-regular);">
-          <input id="remember" type="checkbox" name="remember" style="width:18px;height:18px;" />
-          <span class="type-body-sm">Remember me</span>
+      <!-- Remember Me & Forgot Password -->
+      <div class="login-actions-row">
+        <label class="login-remember-label" for="remember">
+          <input id="remember" type="checkbox" name="remember" class="login-remember-checkbox" />
+          <span>Remember me</span>
         </label>
+        <a href="/auth/forgot-password" class="login-forgot-link">Forgot password?</a>
       </div>
 
-      <div style="margin-top:var(--sp-8);">
-        <button id="signin-btn" class="btn btn--primary btn--full btn--xl" type="submit" aria-disabled="false">
+      <!-- Sign In Button -->
+      <div>
+        <button id="signin-btn" class="login-submit-btn" type="submit" aria-disabled="false">
           <span class="btn__label">Sign In</span>
         </button>
       </div>
 
-      <div class="text-center" style="margin-top: var(--sp-4);">
-        <a href="/auth/forgot-password" class="type-body-sm text-primary fw-semibold">Forgot your password?</a>
-      </div>
-
-      <div class="form-footer" style="margin-top:var(--sp-10); border-top: 1px solid var(--border-subtle); padding-top: var(--sp-6); text-align: center;">
-        <p class="type-body-sm text-muted mb-4">New to E-ACIS?</p>
-        <div style="display: flex; gap: var(--sp-3); justify-content: center; flex-wrap: wrap;">
-          <a href="/auth/register/customer" class="btn btn--secondary btn--sm">As Customer</a>
-          <a href="/auth/register/seller" class="btn btn--ghost btn--sm">As Seller</a>
+      <!-- Card Footer: Registration Links -->
+      <div class="login-card-footer">
+        <p class="login-footer-lead">New to E-ACIS?</p>
+        <div class="login-register-pills">
+          <a href="/auth/register/customer" class="login-register-pill">Customer Portal</a>
+          <a href="/auth/register/seller" class="login-register-pill">Seller Portal</a>
         </div>
       </div>
     </form>
   </div>
 </div>
 
-<style>
-  .auth-actions { flex-direction: row !important; }
-  .auth-actions .form-label { margin-bottom: 0; }
-  .password-toggle:hover { color: var(--grey-700) !important; }
-  .password-toggle:focus-visible {
-    border-radius: var(--radius-sm);
-    outline: 2px solid var(--brand-primary);
-    outline-offset: 2px;
-  }
+<script>
+  // Mark page as auth to reduce chrome clutter
+  document.body.classList.add('page-auth');
+  (function(){
+    const form = document.getElementById('login-form');
+    const email = document.getElementById('email');
+    const pwd = document.getElementById('password');
+    const btn = document.getElementById('signin-btn');
+    const emailHint = document.getElementById('email-hint');
+    const pwdHint = document.getElementById('password-hint');
+    const toggle = document.getElementById('password-toggle');
+    const err = document.getElementById('login-error');
 
-</style>
+    function validEmail(v){ return /\S+@\S+\.\S+/.test(v); }
 
-    <script>
-    // mark page as auth to reduce chrome clutter
-    document.body.classList.add('page-auth');
-    (function(){
-      // Elements are present because script is placed after the form
-      const form = document.getElementById('login-form');
-      const email = document.getElementById('email');
-      const pwd = document.getElementById('password');
-      const btn = document.getElementById('signin-btn');
-      const emailHint = document.getElementById('email-hint');
-      const pwdHint = document.getElementById('password-hint');
-      const toggle = document.getElementById('password-toggle');
-      const err = document.getElementById('login-error');
+    function updateHelper(el, ok){
+      if(!el) return;
+      el.style.display = ok ? 'none' : 'block';
+    }
 
-      function validEmail(v){ return /\S+@\S+\.\S+/.test(v); }
+    function setFieldState(input, valid){
+      if (!input) return;
+      input.classList.toggle('is-error', !valid);
+      input.classList.toggle('is-success', valid && input.value.trim().length > 0);
+      input.setAttribute('aria-invalid', String(!valid));
+    }
 
-      function updateHelper(el, ok){
-        if(!el) return;
-        el.style.display = ok ? 'none' : 'block';
+    function setSubmitState(enabled){
+      btn.disabled = !enabled;
+      btn.setAttribute('aria-disabled', String(!enabled));
+    }
+
+    function validate(){
+      const eok = validEmail(email.value.trim());
+      const pok = pwd.value.length >= 8;
+      setFieldState(email, eok);
+      setFieldState(pwd, pok);
+      if (emailHint) {
+        emailHint.textContent = eok ? 'Email looks good.' : 'Enter a valid email address.';
+        updateHelper(emailHint, eok);
       }
-
-      function setFieldState(input, valid){
-        if (!input) return;
-        input.classList.toggle('is-error', !valid);
-        input.classList.toggle('is-success', valid && input.value.trim().length > 0);
-        input.setAttribute('aria-invalid', String(!valid));
+      if (pwdHint) {
+        pwdHint.textContent = pok ? 'Password format is valid.' : 'Minimum 8 characters.';
+        updateHelper(pwdHint, pok);
       }
+      setSubmitState(eok && pok && !isLocked);
+      return eok && pok;
+    }
 
-      function setSubmitState(enabled){
-        btn.disabled = !enabled;
-        btn.setAttribute('aria-disabled', String(!enabled));
+    let isLocked = false;
+    let lockTimer = null;
+
+    // Password toggle
+    toggle.addEventListener('click', ()=>{
+      const isVisible = pwd.type === 'text';
+      pwd.type = isVisible ? 'password' : 'text';
+      toggle.setAttribute('aria-pressed', String(!isVisible));
+      toggle.setAttribute('title', !isVisible ? 'Hide password' : 'Show password');
+      toggle.setAttribute('aria-label', !isVisible ? 'Hide password' : 'Show password');
+      
+      const svg = toggle.querySelector('svg');
+      if (isVisible) {
+        svg.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+      } else {
+        svg.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="23" x2="23" y2="23"></line>';
       }
+    });
 
-      function validate(){
-        const eok = validEmail(email.value.trim());
-        const pok = pwd.value.length >= 8;
-        setFieldState(email, eok);
-        setFieldState(pwd, pok);
-        if (emailHint) {
-          emailHint.textContent = eok ? 'Email looks good.' : 'Enter a valid email address.';
-          updateHelper(emailHint, eok);
+    email.addEventListener('input', validate);
+    pwd.addEventListener('input', validate);
+
+    function startLockCountdown(text){
+      const m = text && text.match(/(\d+)\s*seconds/);
+      if(!m) return;
+      let secs = parseInt(m[1],10);
+      isLocked = true; setSubmitState(false);
+      if(lockTimer) clearInterval(lockTimer);
+      lockTimer = setInterval(()=>{
+        if(secs <= 0){
+          clearInterval(lockTimer); lockTimer = null; isLocked = false; if(err){ err.hidden = true; }
+          validate(); return;
         }
-        if (pwdHint) {
-          pwdHint.textContent = pok ? 'Password format is valid.' : 'Minimum 8 characters.';
-          updateHelper(pwdHint, pok);
+        if(err){ err.hidden = false; err.textContent = `Account temporarily locked. Try again in ${secs} seconds.`; }
+        secs -= 1;
+      }, 1000);
+    }
+
+    if(err && err.textContent && /locked/i.test(err.textContent)){
+      startLockCountdown(err.textContent);
+    }
+    if(err && err.textContent && err.textContent.trim().length){
+      try{ err.hidden = false; err.setAttribute('tabindex','-1'); err.focus(); }catch(e){}
+    }
+
+    validate();
+    requestAnimationFrame(validate);
+    setTimeout(validate, 200);
+
+    form.addEventListener('submit', (e)=>{
+      if(!validate()){
+        e.preventDefault();
+        if (err) {
+          err.hidden = false;
+          err.textContent = 'Please provide a valid email and password before signing in.';
         }
-        setSubmitState(eok && pok && !isLocked);
-        return eok && pok;
+        return;
       }
-
-      let isLocked = false;
-      let lockTimer = null;
-
-      // Password toggle: compute current state and flip
-      toggle.addEventListener('click', ()=>{
-        const isVisible = pwd.type === 'text';
-        pwd.type = isVisible ? 'password' : 'text';
-        toggle.setAttribute('aria-pressed', String(!isVisible));
-        toggle.setAttribute('title', !isVisible ? 'Hide password' : 'Show password');
-        toggle.setAttribute('aria-label', !isVisible ? 'Hide password' : 'Show password');
-        
-        // Update SVG icon
-        const svg = toggle.querySelector('svg');
-        if (isVisible) {
-          // Switch to Eye icon (now hidden)
-          svg.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
-        } else {
-          // Switch to Eye-Off icon (now visible)
-          svg.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
-        }
-      });
-
-      email.addEventListener('input', validate);
-      pwd.addEventListener('input', validate);
-
-      function startLockCountdown(text){
-        const m = text && text.match(/(\d+)\s*seconds/);
-        if(!m) return;
-        let secs = parseInt(m[1],10);
-        isLocked = true; setSubmitState(false);
-        if(lockTimer) clearInterval(lockTimer);
-        lockTimer = setInterval(()=>{
-          if(secs <= 0){
-            clearInterval(lockTimer); lockTimer = null; isLocked = false; if(err){ err.hidden = true; }
-            validate(); return;
-          }
-          if(err){ err.hidden = false; err.textContent = `Account temporarily locked. Try again in ${secs} seconds.`; }
-          secs -= 1;
-        }, 1000);
-      }
-
-      // Initialize immediately (script placed after DOM), no DOMContentLoaded listener
-      if(err && err.textContent && /locked/i.test(err.textContent)){
-        startLockCountdown(err.textContent);
-      }
-      // If server returned an error, surface it and move focus for screen readers
-      if(err && err.textContent && err.textContent.trim().length){
-        try{ err.hidden = false; err.setAttribute('tabindex','-1'); err.focus(); }catch(e){}
-      }
-
-      // Browser autofill may not send input events immediately.
-      validate();
-      requestAnimationFrame(validate);
-      setTimeout(validate, 200);
-
-      // Progressive enhancement: intercept submission to show loading state and disable inputs
-      form.addEventListener('submit', (e)=>{
-        if(!validate()){
-          e.preventDefault();
-          if (err) {
-            err.hidden = false;
-            err.textContent = 'Please provide a valid email and password before signing in.';
-          }
-          return;
-        }
-        // show inline loading affordance and mark busy for accessibility
-        btn.classList.add('btn--loading');
-        btn.setAttribute('aria-busy','true');
-        // disable the submit button to avoid double submits, but keep inputs enabled
-        // so they are serialized into the POST request body.
-        btn.disabled = true;
-      });
-    })();
-  </script>
+      btn.classList.add('btn--loading');
+      btn.setAttribute('aria-busy','true');
+      btn.disabled = true;
+    });
+  })();
+</script>
 {% endblock %}

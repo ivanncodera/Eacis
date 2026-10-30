@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Order {{ order.order_ref }} — E-ACIS{% endblock %}
 {% block content %}
-<div class="main-content stagger-children" style="padding-top: calc(var(--topbar-height) + var(--sp-8)); padding-bottom: var(--sp-24);">
+<div class="main-content stagger-children" style="padding-top: var(--sp-4); padding-bottom: var(--sp-24);">
   <div class="container" style="max-width: 1080px;">
     <style>
       .order-item.item-with-divider { border-bottom: 1px solid var(--border-subtle); }
@@ -56,7 +56,7 @@
       </div>
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 320px; gap: var(--sp-8); align-items: start;">
+    <div class="order-detail-layout-grid">
 
       <!-- LEFT COLUMN -->
       <div class="form-stack" style="gap: var(--sp-6);">

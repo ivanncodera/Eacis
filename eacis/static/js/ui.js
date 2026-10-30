@@ -27,9 +27,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebarToggle = document.getElementById('base-sidebar-toggle');
     const body = document.body;
     
-    // Initial state from localStorage
+    // Initial state from localStorage (desktop only)
     const isCollapsed = localStorage.getItem('eacis_sidebar_collapsed') === 'true';
-    if (isCollapsed) body.classList.add('sidebar-collapsed');
+    if (isCollapsed && window.innerWidth > 1023) {
+        body.classList.add('sidebar-collapsed');
+    }
 
     // Portal layout setup
     // Initializing state directly from dataset for resilience
@@ -43,8 +45,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (sidebarToggle) {
         sidebarToggle.addEventListener('click', () => {
-            const nowCollapsed = body.classList.toggle('sidebar-collapsed');
-            localStorage.setItem('eacis_sidebar_collapsed', nowCollapsed);
+            if (window.innerWidth > 1023) {
+                const nowCollapsed = body.classList.toggle('sidebar-collapsed');
+                localStorage.setItem('eacis_sidebar_collapsed', nowCollapsed);
+            }
         });
     }
 

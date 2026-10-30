@@ -24,10 +24,10 @@
       </div>
     </header>
 
-    <div class="grid" style="display: grid; grid-template-columns: 1fr 340px; gap: var(--sp-8); align-items: start;">
+    <div class="returns-layout-grid">
        <div style="min-width: 0;">
           <!-- KPI Row -->
-          <div class="kpi-grid mb-10 stagger-item" style="grid-template-columns: repeat(4, 1fr);">
+          <div class="kpi-grid mb-10 stagger-item">
             <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label-sm text-muted">Total</div><div class="type-h2 mt-1">{{ stats.total }}</div></div></div>
             <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label-sm text-info">Pending</div><div class="type-h2 mt-1">{{ stats.pending }}</div></div></div>
             <div class="glass-card glass-card--kpi" style="border-top: 2px solid var(--color-success);"><div class="kpi__content"><div class="type-label-sm text-success">Approved</div><div class="type-h2 mt-1">{{ stats.accepted }}</div></div></div>

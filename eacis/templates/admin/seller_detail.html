@@ -22,7 +22,7 @@
       <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Order Value</div><div class="type-display-md mt-2">PHP {{ '%.2f'|format(metrics.payout_total or 0) }}</div></div></div>
     </div>
 
-    <div style="display:grid; grid-template-columns: 320px 1fr; gap:var(--sp-8); align-items: start;">
+    <div class="admin-split-layout">
       <!-- Left Column: Primary Identity & Docs -->
       <div style="display:flex; flex-direction:column; gap:var(--sp-6);">
         <!-- Profile Card -->

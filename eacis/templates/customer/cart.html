@@ -2,10 +2,27 @@
 {% from '_icons.html' import icon_check %}
 {% block title %}Shopping Cart — E-ACIS{% endblock %}
 {% block content %}
-<div class="main-content stagger-children" style="padding-top: calc(var(--topbar-height) + var(--sp-8)); padding-bottom: var(--sp-24);">
+<div class="main-content stagger-children" style="padding-top: var(--sp-4); padding-bottom: var(--sp-24);">
   <div class="container" style="max-width: 1100px;">
     <style>
       .cart-item.item-with-divider { border-bottom: 1px solid var(--border-subtle); }
+      .cart-layout-grid {
+        display: grid;
+        grid-template-columns: 1fr 360px;
+        gap: var(--sp-10);
+        align-items: start;
+      }
+      @media (max-width: 900px) {
+        .cart-layout-grid {
+          grid-template-columns: 1fr !important;
+          gap: var(--sp-6) !important;
+        }
+        .cart-item {
+          flex-wrap: wrap !important;
+          padding: var(--sp-4) !important;
+          gap: var(--sp-3) !important;
+        }
+      }
     </style>
 
     <!-- Breadcrumb -->
@@ -21,7 +38,7 @@
     </nav>
 
     {% if cart_lines %}
-    <div style="display: grid; grid-template-columns: 1fr 360px; gap: var(--sp-10); align-items: start;">
+    <div class="cart-layout-grid">
 
       <!-- Cart Items -->
       <div class="form-stack" style="gap: var(--sp-4);">

@@ -446,9 +446,9 @@ body.saas-portal {
 }
 
 .saas-dashboard {
-  padding: 32px 36px 56px;
+  padding: 0 0 var(--sp-12);
   max-width: 1440px;
-  margin: 0 auto;
+  margin: 0;
 }
 
 .saas-command-bar {

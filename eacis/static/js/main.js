@@ -136,6 +136,36 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // User Profile Dropdown in Topbar
+  const userMenuBtn = document.getElementById('topbar-user-dropdown-btn');
+  const userMenuDropdown = document.getElementById('topbar-user-dropdown');
+  if (userMenuBtn && userMenuDropdown) {
+    const toggleUserMenu = (forceState) => {
+      const isCurrentlyOpen = userMenuDropdown.style.display === 'block';
+      const nextState = typeof forceState === 'boolean' ? forceState : !isCurrentlyOpen;
+      userMenuDropdown.style.display = nextState ? 'block' : 'none';
+      userMenuBtn.setAttribute('aria-expanded', nextState ? 'true' : 'false');
+    };
+
+    userMenuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleUserMenu();
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.topbar-user-menu')) {
+        toggleUserMenu(false);
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && userMenuDropdown.style.display === 'block') {
+        toggleUserMenu(false);
+        userMenuBtn.focus();
+      }
+    });
+  }
+
 });
 
 // ── GLOBAL EACIS NAMESPACE ──

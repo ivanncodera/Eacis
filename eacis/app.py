@@ -893,7 +893,7 @@ def create_app(config_class=Config):
             if getattr(current_user, 'role', None) != 'seller':
                 role = getattr(current_user, 'role', None)
                 if role == 'customer':
-                    return redirect(url_for('shop'))
+                    return redirect(url_for('customer_home'))
                 if role == 'admin':
                     return redirect(url_for('admin_dashboard'))
                 return redirect(url_for('auth_login', next=request.path))
@@ -918,7 +918,7 @@ def create_app(config_class=Config):
             if getattr(current_user, 'role', None) != 'admin':
                 role = getattr(current_user, 'role', None)
                 if role == 'customer':
-                    return redirect(url_for('shop'))
+                    return redirect(url_for('customer_home'))
                 if role == 'seller':
                     return redirect(url_for('seller_dashboard'))
                 return redirect(url_for('auth_login', next=request.path))
@@ -1218,7 +1218,7 @@ def create_app(config_class=Config):
                     return target
                 dest = safe_redirect_for_role(user.role, nxt)
                 if not dest:
-                    if user.role == 'customer': dest = url_for('shop')
+                    if user.role == 'customer': dest = url_for('customer_home')
                     elif user.role == 'seller': dest = url_for('seller_dashboard')
                     elif user.role == 'admin': dest = url_for('admin_dashboard')
                     else: dest = url_for('index')
@@ -2457,6 +2457,13 @@ def create_app(config_class=Config):
 
         # Apply server-side filters
         if category:
+            cat_canonical = {
+                'Cooling': 'Cooling & Air Quality',
+                'Kitchen': 'Kitchen & Cooking',
+                'Laundry': 'Laundry & Cleaning',
+                'Entertainment': 'Home Entertainment & Gadgets'
+            }
+            category = cat_canonical.get(category, category)
             base_q = base_q.filter(Product.category == category)
 
         if q and len(q) >= 2:

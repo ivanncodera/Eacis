@@ -9,7 +9,7 @@
     <a href="/seller/vouchers/create" class="btn btn--primary btn--sm">Create Voucher</a>
   </div>
 
-  <div class="kpi-grid mb-6" style="grid-template-columns: repeat(4, minmax(0, 1fr));">
+  <div class="kpi-grid mb-6">
     <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Active Vouchers</div><div class="type-display-md mt-2">{{ stats.active }}</div></div></div>
     <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Redemptions</div><div class="type-display-md mt-2">{{ stats.redemptions_today }}</div></div></div>
     <div class="glass-card glass-card--kpi"><div class="kpi__content"><div class="type-label type-label--sm text-muted">Total Discount</div><div class="type-display-md mt-2">PHP {{ '%.2f'|format(stats.discount_total or 0) }}</div></div></div>
@@ -21,7 +21,7 @@
     <h2 class="type-h4" style="margin:0 0 var(--sp-4) 0;">Create Voucher</h2>
     <form method="post" action="/seller/vouchers/create" style="display:grid; gap:var(--sp-4);">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <div style="display:grid; grid-template-columns: 1.2fr 1fr 1fr; gap:var(--sp-4);">
+      <div class="form-row-3col">
         <div>
           <label class="form-label">Voucher Code</label>
           <input type="text" name="code" class="form-input" placeholder="e.g. SUMMER15" value="{{ form.code if form else '' }}" required>
@@ -39,7 +39,7 @@
         </div>
       </div>
 
-      <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:var(--sp-4);">
+      <div class="form-row-3col">
         <div>
           <label class="form-label">Min Order Amount</label>
           <input type="number" step="0.01" min="0" name="min_order_amount" class="form-input" value="{{ form.min_order_amount if form else '0' }}">
@@ -65,7 +65,7 @@
         </div>
       </div>
 
-      <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:var(--sp-4);">
+      <div class="form-row-3col">
         <div>
           <label class="form-label">Target Category (Optional)</label>
           <input type="text" name="target_category" class="form-input" placeholder="e.g. ELECTRONICS" value="{{ form.target_category if form else '' }}">
