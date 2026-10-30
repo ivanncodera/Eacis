@@ -63,6 +63,12 @@
       .step-node span.is-active {
         color: var(--grey-900);
       }
+      @media (max-width: 640px) {
+        .form-row-responsive {
+          grid-template-columns: 1fr !important;
+          gap: var(--sp-4) !important;
+        }
+      }
       .form-input.error {
         border-color: var(--color-danger);
         background: #fffafa;
@@ -141,7 +147,7 @@
       <!-- Step 2: Identity -->
       <div class="form-step" data-step="2" style="display:none;">
         <h3 class="type-h4 mb-4">Authorized Representative</h3>
-        <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:var(--sp-6);">
+        <div class="form-row-responsive" style="display:grid; grid-template-columns:repeat(2, 1fr); gap:var(--sp-6);">
           <div class="form-group"><label class="form-label">First Name</label><input class="form-input" name="first_name" value="{{ form.get('first_name','') }}" pattern="^[a-zA-Z\s\-]+$" title="Only letters, spaces, and hyphens" required></div>
           <div class="form-group"><label class="form-label">Last Name</label><input class="form-input" name="last_name" value="{{ form.get('last_name','') }}" pattern="^[a-zA-Z\s\-]+$" title="Only letters, spaces, and hyphens" required></div>
         </div>
@@ -159,11 +165,11 @@
       <div class="form-step" data-step="3" style="display:none;">
         <h3 class="type-h4 mb-4">Business Location</h3>
         <div class="form-group"><label class="form-label">Store/Primary Address</label><input class="form-input" name="address_line1" value="{{ form.get('address_line1','') }}" required></div>
-        <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:var(--sp-6);">
+        <div class="form-row-responsive" style="display:grid; grid-template-columns:repeat(2, 1fr); gap:var(--sp-6);">
           <div class="form-group"><label class="form-label">Barangay</label><input class="form-input" name="barangay" value="{{ form.get('barangay','') }}" required></div>
           <div class="form-group"><label class="form-label">City / Municipality</label><input class="form-input" name="city_municipality" id="city_municipality" value="{{ form.get('city_municipality','') }}" required></div>
         </div>
-        <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:var(--sp-6);">
+        <div class="form-row-responsive" style="display:grid; grid-template-columns:repeat(2, 1fr); gap:var(--sp-6);">
           <div class="form-group"><label class="form-label">Province</label><input class="form-input" name="province" value="{{ form.get('province','') }}" required></div>
           <div class="form-group"><label class="form-label">Postal Code</label><input class="form-input" name="postal_code" id="postal_code" value="{{ form.get('postal_code','') }}" required></div>
         </div>
@@ -194,7 +200,7 @@
           </div>
         </div>
 
-        <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:var(--sp-6);">
+        <div class="form-row-responsive" style="display:grid; grid-template-columns:repeat(2, 1fr); gap:var(--sp-6);">
           <div class="form-group">
             <label class="form-label">Create Password</label>
             <div class="password-container">
