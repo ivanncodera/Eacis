@@ -359,6 +359,20 @@ def process_refund(rrt_id, seller_id=None, amount=None, method='original_payment
     except Exception:
         refund_val = 0.0
 
+    # LOGIC-02: Ensure installment refunds never exceed the amount actually paid
+    order = getattr(rrt, 'order', None)
+    if order and getattr(order, 'payment_method', '') == 'installment':
+        try:
+            from eacis.models.installment import InstallmentPlan
+            plan = InstallmentPlan.query.filter_by(order_id=order.id).first()
+            if plan:
+                s_list = plan.schedules.all() if hasattr(plan.schedules, 'all') else plan.schedules
+                paid_scheds_total = sum(float(s.amount or 0) for s in s_list if getattr(s, 'status', '') == 'paid')
+                paid_scheds_total += float(getattr(plan, 'downpayment', 0) or getattr(plan, 'downpayment_amount', 0) or 0)
+                refund_val = min(refund_val, paid_scheds_total)
+        except Exception:
+            pass
+
     # Use a nested transaction / savepoint to serialize checks and the creation of the refund transaction.
     from sqlalchemy.exc import IntegrityError
     try:
@@ -424,24 +438,45 @@ def process_refund(rrt_id, seller_id=None, amount=None, method='original_payment
             rrt.refund_amount = refund_val
             rrt.resolved_at = datetime.utcnow()
 
-            # 5. Deduct Points (to prevent farming)
+            # LOGIC-02: Cancel InstallmentPlan and unpaid schedules for installment order returns
+            if order and getattr(order, 'payment_method', '') == 'installment':
+                try:
+                    from eacis.models.installment import InstallmentPlan
+                    plan = InstallmentPlan.query.filter_by(order_id=order.id).first()
+                    if plan:
+                        plan.status = 'cancelled'
+                        for s in plan.schedules:
+                            if getattr(s, 'status', None) != 'paid':
+                                s.status = 'cancelled'
+                        db.session.add(plan)
+                except Exception:
+                    pass
+
+            # 5. Deduct Points (LOGIC-08: only deduct if points were actually awarded for this order)
             customer = rrt.customer
             if customer and hasattr(customer, 'loyalty_points'):
-                points_to_deduct = int(float(refund_val) // 100)
-                if points_to_deduct > 0:
-                    customer.loyalty_points = max(0, customer.loyalty_points - points_to_deduct)
-                    # Add transaction log if possible
-                    try:
-                        from eacis.models.loyalty import LoyaltyTransaction
-                        db.session.add(LoyaltyTransaction(
-                            user_id=customer.id,
-                            type='redeem',
-                            points=points_to_deduct,
-                            reference=rrt.rrt_ref,
-                            note=f"Points reversed due to refund {rrt.rrt_ref}"
-                        ))
-                    except Exception:
-                        pass
+                from eacis.models.loyalty import LoyaltyTransaction
+                awarded_tx = LoyaltyTransaction.query.filter(
+                    LoyaltyTransaction.user_id == customer.id,
+                    LoyaltyTransaction.reference.in_([getattr(order, 'order_ref', ''), rrt.rrt_ref]),
+                    LoyaltyTransaction.type == 'earn'
+                ).all()
+                total_awarded = sum(int(tx.points or 0) for tx in awarded_tx)
+
+                if total_awarded > 0:
+                    points_to_deduct = min(total_awarded, int(float(refund_val) // 100))
+                    if points_to_deduct > 0:
+                        customer.loyalty_points = max(0, customer.loyalty_points - points_to_deduct)
+                        try:
+                            db.session.add(LoyaltyTransaction(
+                                user_id=customer.id,
+                                type='redeem',
+                                points=points_to_deduct,
+                                reference=rrt.rrt_ref,
+                                note=f"Points reversed due to refund {rrt.rrt_ref}"
+                            ))
+                        except Exception:
+                            pass
 
             # Flush within the savepoint so DB errors (e.g. constraint violations) are raised here and can be handled.
             db.session.flush()

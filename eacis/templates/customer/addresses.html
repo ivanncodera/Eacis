@@ -43,15 +43,17 @@
             {% if addr.landmark %}<div class="type-body-xs text-muted address-card__landmark">Landmark: {{ addr.landmark }}</div>{% endif %}
           </div>
           <div class="address-card__actions">
-            <a href="{{ url_for('customer_addresses.edit_address', addr_id=addr.id) }}" class="btn btn--white btn--sm">Edit</a>
-            <form method="post" action="{{ url_for('customer_addresses.save_address') }}" class="inline-form">
+            <button type="button" class="btn btn--white btn--sm" onclick="try { document.querySelector('input[name=recipient_name]').value='{{ addr.recipient_name|e }}'; document.querySelector('input[name=phone]').value='{{ addr.phone or '' }}'; document.querySelector('input[name=address_line1]').value='{{ addr.address_line1|e }}'; document.querySelector('input[name=label]').value='{{ addr.label or '' }}'; } catch(e){}">Edit</button>
+            <form method="post" action="{{ url_for('customer_addresses') }}" class="inline-form">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-              <input type="hidden" name="id" value="{{ addr.id }}">
-              <input type="hidden" name="is_default" value="1">
+              <input type="hidden" name="action" value="set_default">
+              <input type="hidden" name="address_id" value="{{ addr.id }}">
               <button class="btn btn--secondary btn--sm" type="submit">Set Default</button>
             </form>
-            <form method="post" action="{{ url_for('customer_addresses.delete_address', addr_id=addr.id) }}" class="inline-form" data-confirm="Delete this address?">
+            <form method="post" action="{{ url_for('customer_addresses') }}" class="inline-form" onsubmit="return confirm('Delete this address?');">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="action" value="delete">
+              <input type="hidden" name="address_id" value="{{ addr.id }}">
               <button class="btn btn--danger btn--sm" type="submit">Delete</button>
             </form>
           </div>

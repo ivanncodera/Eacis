@@ -27,6 +27,7 @@
               <td>{{ d.expires_at.strftime('%b %d, %Y') if d.expires_at else '-' }}</td>
               <td style="text-align:right;">
                 <form method="post" style="display:inline" data-confirm="Revoke this trusted device?">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                   <input type="hidden" name="revoke_id" value="{{ d.id }}">
                   <button type="submit" class="btn btn--white btn--sm">Revoke</button>
                 </form>

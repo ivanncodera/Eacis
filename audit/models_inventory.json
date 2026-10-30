@@ -1,0 +1,485 @@
+{
+  "addresses": {
+    "columns": {
+      "id": "INTEGER",
+      "user_id": "INTEGER",
+      "label": "VARCHAR(50)",
+      "recipient_name": "VARCHAR(255)",
+      "phone": "VARCHAR(32)",
+      "address_line1": "VARCHAR(255)",
+      "address_line2": "VARCHAR(255)",
+      "barangay": "VARCHAR(120)",
+      "city_municipality": "VARCHAR(120)",
+      "province": "VARCHAR(120)",
+      "region": "VARCHAR(120)",
+      "postal_code": "VARCHAR(20)",
+      "is_default": "BOOLEAN",
+      "house_number": "VARCHAR(128)",
+      "landmark": "VARCHAR(255)",
+      "is_pickup": "BOOLEAN",
+      "is_return": "BOOLEAN",
+      "lat": "FLOAT",
+      "lng": "FLOAT",
+      "created_at": "DATETIME",
+      "updated_at": "DATETIME"
+    },
+    "foreign_keys": [
+      "user_id -> users.id"
+    ],
+    "indexes": []
+  },
+  "users": {
+    "columns": {
+      "id": "INTEGER",
+      "email": "VARCHAR(255)",
+      "password_hash": "VARCHAR(255)",
+      "role": "VARCHAR(8)",
+      "full_name": "VARCHAR(255)",
+      "first_name": "VARCHAR(100)",
+      "middle_name": "VARCHAR(100)",
+      "last_name": "VARCHAR(100)",
+      "suffix": "VARCHAR(20)",
+      "address_line1": "VARCHAR(255)",
+      "address_line2": "VARCHAR(255)",
+      "barangay": "VARCHAR(120)",
+      "city_municipality": "VARCHAR(120)",
+      "province": "VARCHAR(120)",
+      "region": "VARCHAR(120)",
+      "postal_code": "VARCHAR(20)",
+      "business_name": "VARCHAR(255)",
+      "business_permit_path": "VARCHAR(500)",
+      "barangay_permit_path": "VARCHAR(500)",
+      "mayors_permit_path": "VARCHAR(500)",
+      "seller_verification_status": "VARCHAR(20)",
+      "phone": "VARCHAR(20)",
+      "is_active": "BOOLEAN",
+      "email_verified_at": "DATETIME",
+      "created_at": "DATETIME",
+      "loyalty_points": "INTEGER",
+      "seller_code": "VARCHAR(10)"
+    },
+    "foreign_keys": [],
+    "indexes": []
+  },
+  "products": {
+    "columns": {
+      "id": "INTEGER",
+      "product_ref": "VARCHAR(30)",
+      "seller_id": "INTEGER",
+      "name": "VARCHAR(255)",
+      "category": "VARCHAR(100)",
+      "description": "TEXT",
+      "price": "NUMERIC(12, 2)",
+      "compare_price": "NUMERIC(12, 2)",
+      "stock": "INTEGER",
+      "low_stock_threshold": "INTEGER",
+      "warranty_months": "INTEGER",
+      "installment_enabled": "BOOLEAN",
+      "is_active": "BOOLEAN",
+      "weight_kg": "NUMERIC(6, 2)",
+      "image_url": "VARCHAR(500)",
+      "specs": "JSON",
+      "created_at": "DATETIME"
+    },
+    "foreign_keys": [
+      "seller_id -> users.id"
+    ],
+    "indexes": []
+  },
+  "product_images": {
+    "columns": {
+      "id": "INTEGER",
+      "product_id": "INTEGER",
+      "filename": "VARCHAR(500)",
+      "position": "INTEGER",
+      "created_at": "DATETIME"
+    },
+    "foreign_keys": [
+      "product_id -> products.id"
+    ],
+    "indexes": []
+  },
+  "product_stars": {
+    "columns": {
+      "id": "INTEGER",
+      "product_id": "INTEGER",
+      "user_id": "INTEGER",
+      "created_at": "DATETIME"
+    },
+    "foreign_keys": [
+      "product_id -> products.id",
+      "user_id -> users.id"
+    ],
+    "indexes": [
+      "ix_product_stars_product_id",
+      "ix_product_stars_user_id"
+    ]
+  },
+  "reviews": {
+    "columns": {
+      "id": "INTEGER",
+      "product_id": "INTEGER",
+      "user_id": "INTEGER",
+      "rating": "SMALLINT",
+      "title": "VARCHAR(255)",
+      "body": "TEXT",
+      "is_approved": "BOOLEAN",
+      "is_anonymous": "BOOLEAN",
+      "reviewer_name": "VARCHAR(255)",
+      "created_at": "DATETIME",
+      "updated_at": "DATETIME"
+    },
+    "foreign_keys": [
+      "product_id -> products.id",
+      "user_id -> users.id"
+    ],
+    "indexes": [
+      "ix_reviews_user_id",
+      "ix_reviews_product_id"
+    ]
+  },
+  "orders": {
+    "columns": {
+      "id": "INTEGER",
+      "order_ref": "VARCHAR(30)",
+      "customer_id": "INTEGER",
+      "status": "VARCHAR(9)",
+      "subtotal": "NUMERIC(12, 2)",
+      "discount": "NUMERIC(12, 2)",
+      "shipping_fee": "NUMERIC(12, 2)",
+      "tax": "NUMERIC(12, 2)",
+      "total": "NUMERIC(12, 2)",
+      "voucher_id": "INTEGER",
+      "loyalty_redeemed": "INTEGER",
+      "payment_method": "VARCHAR(11)",
+      "payment_ref": "VARCHAR(100)",
+      "shipping_address": "JSON",
+      "tracking_number": "VARCHAR(100)",
+      "notes": "TEXT",
+      "created_at": "DATETIME",
+      "paid_at": "DATETIME",
+      "shipped_at": "DATETIME",
+      "delivered_at": "DATETIME"
+    },
+    "foreign_keys": [
+      "customer_id -> users.id",
+      "voucher_id -> vouchers.id"
+    ],
+    "indexes": []
+  },
+  "order_items": {
+    "columns": {
+      "id": "INTEGER",
+      "order_id": "INTEGER",
+      "product_id": "INTEGER",
+      "quantity": "INTEGER",
+      "unit_price": "NUMERIC(12, 2)",
+      "subtotal": "NUMERIC(12, 2)"
+    },
+    "foreign_keys": [
+      "order_id -> orders.id",
+      "product_id -> products.id"
+    ],
+    "indexes": []
+  },
+  "vouchers": {
+    "columns": {
+      "id": "INTEGER",
+      "voucher_ref": "VARCHAR(30)",
+      "code": "VARCHAR(50)",
+      "discount_type": "VARCHAR(7)",
+      "discount_value": "NUMERIC(10, 2)",
+      "min_order_amount": "NUMERIC(12, 2)",
+      "max_uses": "INTEGER",
+      "uses_count": "INTEGER",
+      "per_user_limit": "INTEGER",
+      "valid_from": "DATETIME",
+      "valid_until": "DATETIME",
+      "seller_id": "INTEGER",
+      "is_active": "BOOLEAN",
+      "combinable": "BOOLEAN"
+    },
+    "foreign_keys": [
+      "seller_id -> users.id"
+    ],
+    "indexes": []
+  },
+  "voucher_usage_logs": {
+    "columns": {
+      "id": "INTEGER",
+      "voucher_id": "INTEGER",
+      "customer_id": "INTEGER",
+      "order_id": "INTEGER",
+      "discount_applied": "NUMERIC(12, 2)",
+      "used_at": "DATETIME"
+    },
+    "foreign_keys": [
+      "voucher_id -> vouchers.id",
+      "customer_id -> users.id",
+      "order_id -> orders.id"
+    ],
+    "indexes": [
+      "ix_voucher_usage_logs_customer_id",
+      "ix_voucher_usage_logs_voucher_id"
+    ]
+  },
+  "return_requests": {
+    "columns": {
+      "id": "INTEGER",
+      "rrt_ref": "VARCHAR(30)",
+      "order_id": "INTEGER",
+      "customer_id": "INTEGER",
+      "reason": "VARCHAR(255)",
+      "description": "TEXT",
+      "evidence_urls": "JSON",
+      "status": "VARCHAR(16)",
+      "seller_notes": "TEXT",
+      "restocked_qty": "INTEGER",
+      "refund_amount": "NUMERIC(12, 2)",
+      "admin_notes": "TEXT",
+      "paymongo_refund_id": "VARCHAR(100)",
+      "created_at": "DATETIME",
+      "updated_at": "DATETIME",
+      "resolved_at": "DATETIME"
+    },
+    "foreign_keys": [
+      "order_id -> orders.id",
+      "customer_id -> users.id"
+    ],
+    "indexes": []
+  },
+  "return_abuse_logs": {
+    "columns": {
+      "id": "INTEGER",
+      "customer_id": "INTEGER",
+      "abuse_score": "FLOAT",
+      "flag_reason": "TEXT",
+      "is_flagged": "BOOLEAN",
+      "is_restricted": "BOOLEAN",
+      "last_computed": "DATETIME",
+      "reviewed_by": "INTEGER",
+      "reviewed_at": "DATETIME",
+      "admin_notes": "TEXT"
+    },
+    "foreign_keys": [
+      "customer_id -> users.id",
+      "reviewed_by -> users.id"
+    ],
+    "indexes": [
+      "ix_return_abuse_logs_customer_id"
+    ]
+  },
+  "refund_transactions": {
+    "columns": {
+      "id": "INTEGER",
+      "refund_ref": "VARCHAR(30)",
+      "return_request_id": "INTEGER",
+      "amount": "NUMERIC(12, 2)",
+      "status": "VARCHAR(9)",
+      "method": "VARCHAR(50)",
+      "processed_at": "DATETIME"
+    },
+    "foreign_keys": [
+      "return_request_id -> return_requests.id"
+    ],
+    "indexes": []
+  },
+  "inquiry_tickets": {
+    "columns": {
+      "id": "INTEGER",
+      "ticket_ref": "VARCHAR(30)",
+      "customer_id": "INTEGER",
+      "order_id": "INTEGER",
+      "assigned_to": "INTEGER",
+      "subject": "VARCHAR(255)",
+      "description": "TEXT",
+      "priority": "VARCHAR(6)",
+      "status": "VARCHAR(11)",
+      "created_at": "DATETIME",
+      "updated_at": "DATETIME",
+      "resolved_at": "DATETIME"
+    },
+    "foreign_keys": [
+      "customer_id -> users.id",
+      "order_id -> orders.id",
+      "assigned_to -> users.id"
+    ],
+    "indexes": []
+  },
+  "inquiry_replies": {
+    "columns": {
+      "id": "INTEGER",
+      "ticket_id": "INTEGER",
+      "author_id": "INTEGER",
+      "body": "TEXT",
+      "is_internal": "BOOLEAN",
+      "created_at": "DATETIME"
+    },
+    "foreign_keys": [
+      "ticket_id -> inquiry_tickets.id",
+      "author_id -> users.id"
+    ],
+    "indexes": [
+      "ix_inquiry_replies_ticket_id"
+    ]
+  },
+  "invoices": {
+    "columns": {
+      "id": "INTEGER",
+      "invoice_ref": "VARCHAR(30)",
+      "order_id": "INTEGER",
+      "customer_id": "INTEGER",
+      "seller_id": "INTEGER",
+      "subtotal": "NUMERIC(12, 2)",
+      "discount_total": "NUMERIC(12, 2)",
+      "tax_total": "NUMERIC(12, 2)",
+      "shipping_total": "NUMERIC(12, 2)",
+      "grand_total": "NUMERIC(12, 2)",
+      "status": "VARCHAR(6)",
+      "issued_at": "DATETIME",
+      "due_at": "DATETIME"
+    },
+    "foreign_keys": [
+      "order_id -> orders.id",
+      "customer_id -> users.id",
+      "seller_id -> users.id"
+    ],
+    "indexes": []
+  },
+  "carts": {
+    "columns": {
+      "id": "INTEGER",
+      "user_id": "INTEGER",
+      "items": "JSON",
+      "voucher_code": "VARCHAR(50)",
+      "loyalty_redeemed": "INTEGER",
+      "updated_at": "DATETIME"
+    },
+    "foreign_keys": [
+      "user_id -> users.id"
+    ],
+    "indexes": []
+  },
+  "installment_plans": {
+    "columns": {
+      "id": "INTEGER",
+      "order_id": "INTEGER",
+      "months": "INTEGER",
+      "monthly_amount": "NUMERIC(12, 2)",
+      "downpayment": "NUMERIC(12, 2)",
+      "total_interest": "NUMERIC(12, 2)",
+      "status": "VARCHAR(9)"
+    },
+    "foreign_keys": [
+      "order_id -> orders.id"
+    ],
+    "indexes": []
+  },
+  "installment_schedule": {
+    "columns": {
+      "id": "INTEGER",
+      "plan_id": "INTEGER",
+      "due_date": "DATE",
+      "amount": "NUMERIC(12, 2)",
+      "status": "VARCHAR(8)",
+      "paid_at": "DATETIME",
+      "payment_ref": "VARCHAR(100)"
+    },
+    "foreign_keys": [
+      "plan_id -> installment_plans.id"
+    ],
+    "indexes": []
+  },
+  "loyalty_transactions": {
+    "columns": {
+      "id": "INTEGER",
+      "user_id": "INTEGER",
+      "type": "VARCHAR(6)",
+      "points": "INTEGER",
+      "reference": "VARCHAR(100)",
+      "note": "VARCHAR(255)",
+      "created_at": "DATETIME"
+    },
+    "foreign_keys": [
+      "user_id -> users.id"
+    ],
+    "indexes": []
+  },
+  "audit_logs": {
+    "columns": {
+      "id": "INTEGER",
+      "actor_id": "INTEGER",
+      "actor_name": "VARCHAR(255)",
+      "role": "VARCHAR(50)",
+      "action": "VARCHAR(100)",
+      "module": "VARCHAR(50)",
+      "target_ref": "VARCHAR(100)",
+      "meta": "JSON",
+      "ip_address": "VARCHAR(45)",
+      "created_at": "DATETIME"
+    },
+    "foreign_keys": [
+      "actor_id -> users.id"
+    ],
+    "indexes": []
+  },
+  "stock_movements": {
+    "columns": {
+      "id": "INTEGER",
+      "product_id": "INTEGER",
+      "quantity": "INTEGER",
+      "type": "VARCHAR(12)",
+      "reference": "VARCHAR(80)",
+      "note": "VARCHAR(255)",
+      "created_at": "DATETIME",
+      "created_by": "INTEGER"
+    },
+    "foreign_keys": [
+      "product_id -> products.id",
+      "created_by -> users.id"
+    ],
+    "indexes": [
+      "ix_stock_movements_product_id"
+    ]
+  },
+  "otp_challenges": {
+    "columns": {
+      "id": "INTEGER",
+      "user_id": "INTEGER",
+      "email": "VARCHAR(255)",
+      "purpose": "VARCHAR(50)",
+      "code_hash": "VARCHAR(255)",
+      "expires_at": "DATETIME",
+      "consumed_at": "DATETIME",
+      "attempt_count": "INTEGER",
+      "max_attempts": "INTEGER",
+      "ip_address": "VARCHAR(45)",
+      "user_agent": "VARCHAR(255)",
+      "sent_to": "VARCHAR(255)",
+      "created_at": "DATETIME",
+      "verified_at": "DATETIME",
+      "failure_reason": "VARCHAR(100)",
+      "meta": "JSON"
+    },
+    "foreign_keys": [
+      "user_id -> users.id"
+    ],
+    "indexes": []
+  },
+  "trusted_devices": {
+    "columns": {
+      "id": "INTEGER",
+      "user_id": "INTEGER",
+      "token_hash": "VARCHAR(255)",
+      "device_name": "VARCHAR(255)",
+      "created_at": "DATETIME",
+      "last_used_at": "DATETIME",
+      "expires_at": "DATETIME",
+      "revoked": "BOOLEAN"
+    },
+    "foreign_keys": [
+      "user_id -> users.id"
+    ],
+    "indexes": []
+  }
+}

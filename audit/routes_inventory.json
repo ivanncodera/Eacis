@@ -1,0 +1,1629 @@
+[
+  {
+    "rule": "/",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "index",
+    "lineno": 1020,
+    "decorators": [
+      "app.route('/')"
+    ]
+  },
+  {
+    "rule": "/about",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "about",
+    "lineno": 4876,
+    "decorators": [
+      "app.route('/about')"
+    ]
+  },
+  {
+    "rule": "/admin/audit",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "admin_audit",
+    "lineno": 7431,
+    "decorators": [
+      "app.route('/admin/audit')"
+    ]
+  },
+  {
+    "rule": "/admin/customers",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "endpoint": "admin_customers",
+    "lineno": 7671,
+    "decorators": [
+      "app.route('/admin/customers', methods=['GET', 'POST'])"
+    ]
+  },
+  {
+    "rule": "/admin/customers/export",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "admin_customers_export",
+    "lineno": 7834,
+    "decorators": [
+      "app.route('/admin/customers/export')"
+    ]
+  },
+  {
+    "rule": "/admin/dashboard",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "admin_dashboard",
+    "lineno": 7029,
+    "decorators": [
+      "app.route('/admin/dashboard')"
+    ]
+  },
+  {
+    "rule": "/admin/permits/<path:filename>",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "admin_view_permit",
+    "lineno": 7263,
+    "decorators": [
+      "app.route('/admin/permits/<path:filename>')"
+    ]
+  },
+  {
+    "rule": "/admin/products",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "endpoint": "admin_products",
+    "lineno": 7539,
+    "decorators": [
+      "app.route('/admin/products', methods=['GET', 'POST'])"
+    ]
+  },
+  {
+    "rule": "/admin/products/export",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "admin_products_export",
+    "lineno": 7621,
+    "decorators": [
+      "app.route('/admin/products/export')"
+    ]
+  },
+  {
+    "rule": "/admin/profile",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "endpoint": "admin_profile",
+    "lineno": 7903,
+    "decorators": [
+      "app.route('/admin/profile', methods=['GET', 'POST'])"
+    ]
+  },
+  {
+    "rule": "/admin/reports",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "admin_reports",
+    "lineno": 7976,
+    "decorators": [
+      "app.route('/admin/reports')"
+    ]
+  },
+  {
+    "rule": "/admin/reports/export",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "admin_reports_export",
+    "lineno": 8023,
+    "decorators": [
+      "app.route('/admin/reports/export')"
+    ]
+  },
+  {
+    "rule": "/admin/reports/export/excel",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "admin_reports_export_excel",
+    "lineno": 8078,
+    "decorators": [
+      "app.route('/admin/reports/export/excel')"
+    ]
+  },
+  {
+    "rule": "/admin/reports/export/pdf",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "admin_reports_export_pdf",
+    "lineno": 8124,
+    "decorators": [
+      "app.route('/admin/reports/export/pdf')"
+    ]
+  },
+  {
+    "rule": "/admin/reports/print",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "admin_reports_print",
+    "lineno": 8176,
+    "decorators": [
+      "app.route('/admin/reports/print')"
+    ]
+  },
+  {
+    "rule": "/admin/sellers",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "endpoint": "admin_sellers",
+    "lineno": 7137,
+    "decorators": [
+      "app.route('/admin/sellers', methods=['GET', 'POST'])"
+    ]
+  },
+  {
+    "rule": "/admin/sellers/<seller_id>",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "endpoint": "admin_seller_detail",
+    "lineno": 7287,
+    "decorators": [
+      "app.route('/admin/sellers/<seller_id>', methods=['GET', 'POST'])"
+    ]
+  },
+  {
+    "rule": "/admin/settings",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "admin_settings",
+    "lineno": 7877,
+    "decorators": [
+      "app.route('/admin/settings')"
+    ]
+  },
+  {
+    "rule": "/admin/trusted-devices",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "endpoint": "admin_trusted_devices",
+    "lineno": 7480,
+    "decorators": [
+      "app.route('/admin/trusted-devices', methods=['GET', 'POST'])"
+    ]
+  },
+  {
+    "rule": "/api/cart/summary",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "api_cart_summary",
+    "lineno": 697,
+    "decorators": [
+      "app.route('/api/cart/summary')"
+    ]
+  },
+  {
+    "rule": "/api/postal/suggest",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "postal_suggest",
+    "lineno": 692,
+    "decorators": [
+      "app.route('/api/postal/suggest')"
+    ]
+  },
+  {
+    "rule": "/api/search",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "api_search",
+    "lineno": 2412,
+    "decorators": [
+      "app.route('/api/search')"
+    ]
+  },
+  {
+    "rule": "/api/session",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "api_session",
+    "lineno": 609,
+    "decorators": [
+      "app.route('/api/session')"
+    ]
+  },
+  {
+    "rule": "/auth/forgot-password",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "endpoint": "auth_forgot_password",
+    "lineno": 2163,
+    "decorators": [
+      "app.route('/auth/forgot-password', methods=['GET', 'POST'])"
+    ]
+  },
+  {
+    "rule": "/auth/login",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "auth_login",
+    "lineno": 1028,
+    "decorators": [
+      "app.route('/auth/login')"
+    ]
+  },
+  {
+    "rule": "/auth/login",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "endpoint": "auth_login",
+    "lineno": 1028,
+    "decorators": [
+      "app.route('/auth/login')"
+    ]
+  },
+  {
+    "rule": "/auth/logout",
+    "methods": [
+      "POST"
+    ],
+    "endpoint": "auth_logout",
+    "lineno": 1732,
+    "decorators": [
+      "app.route('/auth/logout', methods=['POST'])"
+    ]
+  },
+  {
+    "rule": "/auth/otp/debug",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "auth_otp_debug",
+    "lineno": 1938,
+    "decorators": [
+      "app.route('/auth/otp/debug', methods=['GET'])"
+    ]
+  },
+  {
+    "rule": "/auth/otp/resend",
+    "methods": [
+      "POST"
+    ],
+    "endpoint": "auth_otp_resend",
+    "lineno": 2066,
+    "decorators": [
+      "app.route('/auth/otp/resend', methods=['POST'])"
+    ]
+  },
+  {
+    "rule": "/auth/otp/send",
+    "methods": [
+      "POST"
+    ],
+    "endpoint": "auth_otp_send",
+    "lineno": 2113,
+    "decorators": [
+      "app.route('/auth/otp/send', methods=['POST'])"
+    ]
+  },
+  {
+    "rule": "/auth/otp/verify",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "endpoint": "auth_otp_verify",
+    "lineno": 1739,
+    "decorators": [
+      "app.route('/auth/otp/verify', methods=['GET', 'POST'])"
+    ]
+  },
+  {
+    "rule": "/auth/register",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "endpoint": "auth_register",
+    "lineno": 1529,
+    "decorators": [
+      "app.route('/auth/register', methods=['GET', 'POST'])"
+    ]
+  },
+  {
+    "rule": "/auth/register/customer",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "endpoint": "auth_register_customer",
+    "lineno": 1538,
+    "decorators": [
+      "app.route('/auth/register/customer', methods=['GET', 'POST'])"
+    ]
+  },
+  {
+    "rule": "/auth/register/seller",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "endpoint": "auth_register_seller",
+    "lineno": 1626,
+    "decorators": [
+      "app.route('/auth/register/seller', methods=['GET', 'POST'])"
+    ]
+  },
+  {
+    "rule": "/auth/register/verify/<token>",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "auth_register_verify",
+    "lineno": 2001,
+    "decorators": [
+      "app.route('/auth/register/verify/<token>')"
+    ]
+  },
+  {
+    "rule": "/auth/reset-password",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "endpoint": "auth_reset_password",
+    "lineno": 2191,
+    "decorators": [
+      "app.route('/auth/reset-password', methods=['GET', 'POST'])"
+    ]
+  },
+  {
+    "rule": "/auth/verify-required",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "auth_verify_required",
+    "lineno": 1962,
+    "decorators": [
+      "app.route('/auth/verify-required')"
+    ]
+  },
+  {
+    "rule": "/cart",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "endpoint": "cart",
+    "lineno": 2625,
+    "decorators": [
+      "app.route('/customer/cart', methods=['GET', 'POST'])",
+      "app.route('/cart', methods=['GET', 'POST'])"
+    ]
+  },
+  {
+    "rule": "/checkout",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "endpoint": "checkout",
+    "lineno": 2832,
+    "decorators": [
+      "app.route('/customer/checkout', methods=['GET', 'POST'])",
+      "app.route('/checkout', methods=['GET', 'POST'])"
+    ]
+  },
+  {
+    "rule": "/checkout/verify-identity",
+    "methods": [
+      "POST"
+    ],
+    "endpoint": "customer_checkout_verify_identity",
+    "lineno": 3527,
+    "decorators": [
+      "app.route('/checkout/verify-identity', methods=['POST'])",
+      "app.route('/customer/checkout/verify-identity', methods=['POST'])"
+    ]
+  },
+  {
+    "rule": "/contact",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "contact",
+    "lineno": 4880,
+    "decorators": [
+      "app.route('/contact')"
+    ]
+  },
+  {
+    "rule": "/cookies",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "cookies",
+    "lineno": 4892,
+    "decorators": [
+      "app.route('/cookies')"
+    ]
+  },
+  {
+    "rule": "/customer/addresses",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "endpoint": "customer_addresses",
+    "lineno": 4750,
+    "decorators": [
+      "app.route('/customer/addresses', methods=['GET', 'POST'])"
+    ]
+  },
+  {
+    "rule": "/customer/addresses/",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "customer_addresses.list_addresses",
+    "lineno": 280,
+    "decorators": []
+  },
+  {
+    "rule": "/customer/addresses/api",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "customer_addresses.api_addresses",
+    "lineno": 280,
+    "decorators": []
+  },
+  {
+    "rule": "/customer/addresses/delete/<int:addr_id>",
+    "methods": [
+      "POST"
+    ],
+    "endpoint": "customer_addresses.delete_address",
+    "lineno": 280,
+    "decorators": []
+  },
+  {
+    "rule": "/customer/addresses/save",
+    "methods": [
+      "POST"
+    ],
+    "endpoint": "customer_addresses.save_address",
+    "lineno": 280,
+    "decorators": []
+  },
+  {
+    "rule": "/customer/cart",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "endpoint": "cart",
+    "lineno": 2625,
+    "decorators": [
+      "app.route('/customer/cart', methods=['GET', 'POST'])",
+      "app.route('/cart', methods=['GET', 'POST'])"
+    ]
+  },
+  {
+    "rule": "/customer/checkout",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "endpoint": "checkout",
+    "lineno": 2832,
+    "decorators": [
+      "app.route('/customer/checkout', methods=['GET', 'POST'])",
+      "app.route('/checkout', methods=['GET', 'POST'])"
+    ]
+  },
+  {
+    "rule": "/customer/checkout/installment-confirm",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "customer_checkout_installment_confirm",
+    "lineno": 3580,
+    "decorators": [
+      "app.route('/customer/checkout/installment-confirm', methods=['GET'])"
+    ]
+  },
+  {
+    "rule": "/customer/checkout/kyc",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "customer_checkout_kyc",
+    "lineno": 3515,
+    "decorators": [
+      "app.route('/customer/checkout/kyc', methods=['GET'])"
+    ]
+  },
+  {
+    "rule": "/customer/checkout/success",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "checkout_success",
+    "lineno": 3651,
+    "decorators": [
+      "app.route('/customer/checkout/success')"
+    ]
+  },
+  {
+    "rule": "/customer/checkout/verify-identity",
+    "methods": [
+      "POST"
+    ],
+    "endpoint": "customer_checkout_verify_identity",
+    "lineno": 3527,
+    "decorators": [
+      "app.route('/checkout/verify-identity', methods=['POST'])",
+      "app.route('/customer/checkout/verify-identity', methods=['POST'])"
+    ]
+  },
+  {
+    "rule": "/customer/home",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "customer_home",
+    "lineno": 2268,
+    "decorators": [
+      "app.route('/customer/home')"
+    ]
+  },
+  {
+    "rule": "/customer/inquiries",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "endpoint": "customer_inquiries",
+    "lineno": 4354,
+    "decorators": [
+      "app.route('/customer/inquiries', methods=['GET', 'POST'])"
+    ]
+  },
+  {
+    "rule": "/customer/inquiries/<ticket_ref>",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "endpoint": "customer_inquiry_detail",
+    "lineno": 4421,
+    "decorators": [
+      "app.route('/customer/inquiries/<ticket_ref>', methods=['GET', 'POST'])"
+    ]
+  },
+  {
+    "rule": "/customer/installment-payments",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "customer_installments",
+    "lineno": 4058,
+    "decorators": [
+      "app.route('/customer/installments')",
+      "app.route('/customer/installment-payments')"
+    ]
+  },
+  {
+    "rule": "/customer/installments",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "customer_installments",
+    "lineno": 4058,
+    "decorators": [
+      "app.route('/customer/installments')",
+      "app.route('/customer/installment-payments')"
+    ]
+  },
+  {
+    "rule": "/customer/installments/<int:schedule_id>/pay",
+    "methods": [
+      "POST"
+    ],
+    "endpoint": "customer_installment_pay",
+    "lineno": 4150,
+    "decorators": [
+      "app.route('/customer/installments/<int:schedule_id>/pay', methods=['POST'])"
+    ]
+  },
+  {
+    "rule": "/customer/invoices",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "customer_invoices",
+    "lineno": 4014,
+    "decorators": [
+      "app.route('/customer/invoices')"
+    ]
+  },
+  {
+    "rule": "/customer/invoices/<invoice_ref>",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "customer_invoice_detail",
+    "lineno": 4041,
+    "decorators": [
+      "app.route('/customer/invoices/<invoice_ref>')"
+    ]
+  },
+  {
+    "rule": "/customer/loyalty",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "customer_loyalty",
+    "lineno": 4447,
+    "decorators": [
+      "app.route('/customer/loyalty')"
+    ]
+  },
+  {
+    "rule": "/customer/orders",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "customer_orders",
+    "lineno": 3738,
+    "decorators": [
+      "app.route('/customer/orders')"
+    ]
+  },
+  {
+    "rule": "/customer/orders/<order_ref>",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "customer_order_detail",
+    "lineno": 3788,
+    "decorators": [
+      "app.route('/customer/orders/<order_ref>')"
+    ]
+  },
+  {
+    "rule": "/customer/orders/<order_ref>/cancel",
+    "methods": [
+      "POST"
+    ],
+    "endpoint": "customer_order_cancel",
+    "lineno": 3686,
+    "decorators": [
+      "app.route('/customer/orders/<order_ref>/cancel', methods=['POST'])"
+    ]
+  },
+  {
+    "rule": "/customer/orders/<order_ref>/receipt",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "customer_order_receipt",
+    "lineno": 3923,
+    "decorators": [
+      "app.route('/customer/orders/<order_ref>/receipt')"
+    ]
+  },
+  {
+    "rule": "/customer/product/<ref>",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "product_detail",
+    "lineno": 2448,
+    "decorators": [
+      "app.route('/customer/product/<ref>')",
+      "app.route('/products/<ref>')"
+    ]
+  },
+  {
+    "rule": "/customer/profile",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "customer_profile",
+    "lineno": 4493,
+    "decorators": [
+      "app.route('/customer/profile')"
+    ]
+  },
+  {
+    "rule": "/customer/profile/edit",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "endpoint": "customer_profile_edit",
+    "lineno": 4556,
+    "decorators": [
+      "app.route('/customer/profile/edit', methods=['GET', 'POST'])"
+    ]
+  },
+  {
+    "rule": "/customer/profile/trusted-devices",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "endpoint": "customer_trusted_devices",
+    "lineno": 4846,
+    "decorators": [
+      "app.route('/customer/profile/trusted-devices', methods=['GET', 'POST'])"
+    ]
+  },
+  {
+    "rule": "/customer/returns",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "endpoint": "customer_returns",
+    "lineno": 4202,
+    "decorators": [
+      "app.route('/customer/returns', methods=['GET', 'POST'])"
+    ]
+  },
+  {
+    "rule": "/customer/security",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "endpoint": "customer_security",
+    "lineno": 4678,
+    "decorators": [
+      "app.route('/customer/security', methods=['GET', 'POST'])"
+    ]
+  },
+  {
+    "rule": "/customer/wishlist",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "customer_wishlist",
+    "lineno": 4871,
+    "decorators": [
+      "app.route('/customer/wishlist')"
+    ]
+  },
+  {
+    "rule": "/data-compliance",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "data_compliance",
+    "lineno": 2258,
+    "decorators": [
+      "app.route('/data-compliance')"
+    ]
+  },
+  {
+    "rule": "/favicon.ico",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "favicon",
+    "lineno": 835,
+    "decorators": [
+      "app.route('/favicon.ico')"
+    ]
+  },
+  {
+    "rule": "/landing",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "landing",
+    "lineno": 1024,
+    "decorators": [
+      "app.route('/landing')"
+    ]
+  },
+  {
+    "rule": "/postal_lookup",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "postal_lookup_api",
+    "lineno": 343,
+    "decorators": [
+      "app.route('/postal_lookup')"
+    ]
+  },
+  {
+    "rule": "/privacy",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "privacy_policy",
+    "lineno": 2254,
+    "decorators": [
+      "app.route('/privacy')"
+    ]
+  },
+  {
+    "rule": "/privacy",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "privacy",
+    "lineno": 4888,
+    "decorators": [
+      "app.route('/privacy')"
+    ]
+  },
+  {
+    "rule": "/products/<ref>",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "product_detail",
+    "lineno": 2448,
+    "decorators": [
+      "app.route('/customer/product/<ref>')",
+      "app.route('/products/<ref>')"
+    ]
+  },
+  {
+    "rule": "/products/<ref>/reviews",
+    "methods": [
+      "POST"
+    ],
+    "endpoint": "product_create_review",
+    "lineno": 2567,
+    "decorators": [
+      "app.route('/products/<ref>/reviews', methods=['POST'])"
+    ]
+  },
+  {
+    "rule": "/products/<ref>/star",
+    "methods": [
+      "POST"
+    ],
+    "endpoint": "product_star",
+    "lineno": 2524,
+    "decorators": [
+      "app.route('/products/<ref>/star', methods=['POST'])"
+    ]
+  },
+  {
+    "rule": "/refunds",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "refunds",
+    "lineno": 4896,
+    "decorators": [
+      "app.route('/refunds')"
+    ]
+  },
+  {
+    "rule": "/seller/analytics",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "seller_analytics",
+    "lineno": 5847,
+    "decorators": [
+      "app.route('/seller/analytics')",
+      "app.route('/seller/sales-analytics')"
+    ]
+  },
+  {
+    "rule": "/seller/crm-analytics",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "seller_crm_analytics",
+    "lineno": 6514,
+    "decorators": [
+      "app.route('/seller/retention-engagement')",
+      "app.route('/seller/crm-analytics')"
+    ]
+  },
+  {
+    "rule": "/seller/customer-accounts",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "seller_customer_accounts",
+    "lineno": 6468,
+    "decorators": [
+      "app.route('/seller/customer-accounts')"
+    ]
+  },
+  {
+    "rule": "/seller/customer-inquiries",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "seller_customer_inquiries",
+    "lineno": 6321,
+    "decorators": [
+      "app.route('/seller/inquiries', methods=['GET'])",
+      "app.route('/seller/customer-inquiries')"
+    ]
+  },
+  {
+    "rule": "/seller/customer-orders",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "seller_customer_orders",
+    "lineno": 5555,
+    "decorators": [
+      "app.route('/seller/customer-orders')"
+    ]
+  },
+  {
+    "rule": "/seller/dashboard",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "seller_dashboard",
+    "lineno": 4920,
+    "decorators": [
+      "app.route('/seller/dashboard')"
+    ]
+  },
+  {
+    "rule": "/seller/delivery-services",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "seller_delivery_services",
+    "lineno": 6633,
+    "decorators": [
+      "app.route('/seller/delivery-services')"
+    ]
+  },
+  {
+    "rule": "/seller/financial-analytics",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "seller_financial_analytics",
+    "lineno": 6076,
+    "decorators": [
+      "app.route('/seller/financial-analytics')"
+    ]
+  },
+  {
+    "rule": "/seller/inquiries",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "seller_customer_inquiries",
+    "lineno": 6321,
+    "decorators": [
+      "app.route('/seller/inquiries', methods=['GET'])",
+      "app.route('/seller/customer-inquiries')"
+    ]
+  },
+  {
+    "rule": "/seller/inquiries/<ticket_ref>",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "endpoint": "seller_inquiry_detail",
+    "lineno": 6421,
+    "decorators": [
+      "app.route('/seller/inquiries/<ticket_ref>', methods=['GET', 'POST'])"
+    ]
+  },
+  {
+    "rule": "/seller/inquiries/new",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "endpoint": "seller_inquiry_new",
+    "lineno": 6361,
+    "decorators": [
+      "app.route('/seller/inquiries/new', methods=['GET', 'POST'])"
+    ]
+  },
+  {
+    "rule": "/seller/installment-payments",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "seller_installment_payments",
+    "lineno": 6091,
+    "decorators": [
+      "app.route('/seller/installment-payments')",
+      "app.route('/seller/installments')"
+    ]
+  },
+  {
+    "rule": "/seller/installment-payments/<int:schedule_id>/mark-paid",
+    "methods": [
+      "POST"
+    ],
+    "endpoint": "seller_installment_mark_paid",
+    "lineno": 6163,
+    "decorators": [
+      "app.route('/seller/installment-payments/<int:schedule_id>/mark-paid', methods=['POST'])"
+    ]
+  },
+  {
+    "rule": "/seller/installment-review/<order_ref>",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "endpoint": "seller_installment_review",
+    "lineno": 6217,
+    "decorators": [
+      "app.route('/seller/installment-review/<order_ref>', methods=['GET', 'POST'])"
+    ]
+  },
+  {
+    "rule": "/seller/installments",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "seller_installment_payments",
+    "lineno": 6091,
+    "decorators": [
+      "app.route('/seller/installment-payments')",
+      "app.route('/seller/installments')"
+    ]
+  },
+  {
+    "rule": "/seller/inventory",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "seller_inventory",
+    "lineno": 5469,
+    "decorators": [
+      "app.route('/seller/inventory')"
+    ]
+  },
+  {
+    "rule": "/seller/inventory-analytics",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "seller_inventory_analytics",
+    "lineno": 6594,
+    "decorators": [
+      "app.route('/seller/inventory-analytics')"
+    ]
+  },
+  {
+    "rule": "/seller/invoices",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "seller_invoices",
+    "lineno": 6557,
+    "decorators": [
+      "app.route('/seller/invoices')"
+    ]
+  },
+  {
+    "rule": "/seller/invoices/<invoice_ref>",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "seller_invoice_detail",
+    "lineno": 6579,
+    "decorators": [
+      "app.route('/seller/invoices/<invoice_ref>')"
+    ]
+  },
+  {
+    "rule": "/seller/orders",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "seller_orders",
+    "lineno": 5487,
+    "decorators": [
+      "app.route('/seller/orders')"
+    ]
+  },
+  {
+    "rule": "/seller/orders/<order_ref>",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "seller_order_detail",
+    "lineno": 5562,
+    "decorators": [
+      "app.route('/seller/orders/<order_ref>')"
+    ]
+  },
+  {
+    "rule": "/seller/orders/<order_ref>",
+    "methods": [
+      "POST"
+    ],
+    "endpoint": "seller_order_detail_post",
+    "lineno": 5640,
+    "decorators": [
+      "app.route('/seller/orders/<order_ref>', methods=['POST'])"
+    ]
+  },
+  {
+    "rule": "/seller/payouts",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "seller_payouts",
+    "lineno": 6802,
+    "decorators": [
+      "app.route('/seller/payouts')"
+    ]
+  },
+  {
+    "rule": "/seller/product/create",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "seller_product_create",
+    "lineno": 4999,
+    "decorators": [
+      "app.route('/seller/products/new')",
+      "app.route('/seller/products/create')",
+      "app.route('/seller/product/create')"
+    ]
+  },
+  {
+    "rule": "/seller/product/create",
+    "methods": [
+      "POST"
+    ],
+    "endpoint": "seller_product_create_post",
+    "lineno": 5017,
+    "decorators": [
+      "app.route('/seller/products/new', methods=['POST'])",
+      "app.route('/seller/products/create', methods=['POST'])",
+      "app.route('/seller/product/create', methods=['POST'])"
+    ]
+  },
+  {
+    "rule": "/seller/products",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "seller_products",
+    "lineno": 4957,
+    "decorators": [
+      "app.route('/seller/products')"
+    ]
+  },
+  {
+    "rule": "/seller/products/<ref>",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "seller_product_detail",
+    "lineno": 5104,
+    "decorators": [
+      "app.route('/seller/products/<ref>')",
+      "app.route('/seller/products/<ref>/edit')"
+    ]
+  },
+  {
+    "rule": "/seller/products/<ref>/delete",
+    "methods": [
+      "POST"
+    ],
+    "endpoint": "seller_product_delete",
+    "lineno": 5219,
+    "decorators": [
+      "app.route('/seller/products/<ref>/delete', methods=['POST'])"
+    ]
+  },
+  {
+    "rule": "/seller/products/<ref>/edit",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "seller_product_detail",
+    "lineno": 5104,
+    "decorators": [
+      "app.route('/seller/products/<ref>')",
+      "app.route('/seller/products/<ref>/edit')"
+    ]
+  },
+  {
+    "rule": "/seller/products/<ref>/edit",
+    "methods": [
+      "POST"
+    ],
+    "endpoint": "seller_product_detail_post",
+    "lineno": 5141,
+    "decorators": [
+      "app.route('/seller/products/<ref>/edit', methods=['POST'])"
+    ]
+  },
+  {
+    "rule": "/seller/products/<ref>/images/<int:image_id>/delete",
+    "methods": [
+      "POST"
+    ],
+    "endpoint": "seller_product_image_delete",
+    "lineno": 5415,
+    "decorators": [
+      "app.route('/seller/products/<ref>/images/<int:image_id>/delete', methods=['POST'])"
+    ]
+  },
+  {
+    "rule": "/seller/products/<ref>/images/upload",
+    "methods": [
+      "POST"
+    ],
+    "endpoint": "seller_product_image_upload",
+    "lineno": 5247,
+    "decorators": [
+      "app.route('/seller/products/<ref>/images/upload', methods=['POST'])"
+    ]
+  },
+  {
+    "rule": "/seller/products/create",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "seller_product_create",
+    "lineno": 4999,
+    "decorators": [
+      "app.route('/seller/products/new')",
+      "app.route('/seller/products/create')",
+      "app.route('/seller/product/create')"
+    ]
+  },
+  {
+    "rule": "/seller/products/create",
+    "methods": [
+      "POST"
+    ],
+    "endpoint": "seller_product_create_post",
+    "lineno": 5017,
+    "decorators": [
+      "app.route('/seller/products/new', methods=['POST'])",
+      "app.route('/seller/products/create', methods=['POST'])",
+      "app.route('/seller/product/create', methods=['POST'])"
+    ]
+  },
+  {
+    "rule": "/seller/products/new",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "seller_product_create",
+    "lineno": 4999,
+    "decorators": [
+      "app.route('/seller/products/new')",
+      "app.route('/seller/products/create')",
+      "app.route('/seller/product/create')"
+    ]
+  },
+  {
+    "rule": "/seller/products/new",
+    "methods": [
+      "POST"
+    ],
+    "endpoint": "seller_product_create_post",
+    "lineno": 5017,
+    "decorators": [
+      "app.route('/seller/products/new', methods=['POST'])",
+      "app.route('/seller/products/create', methods=['POST'])",
+      "app.route('/seller/product/create', methods=['POST'])"
+    ]
+  },
+  {
+    "rule": "/seller/profile",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "endpoint": "seller_profile",
+    "lineno": 6894,
+    "decorators": [
+      "app.route('/seller/profile', methods=['GET', 'POST'])"
+    ]
+  },
+  {
+    "rule": "/seller/refund-transactions",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "seller_return_transactions",
+    "lineno": 5790,
+    "decorators": [
+      "app.route('/seller/return-transactions')",
+      "app.route('/seller/refund-transactions')"
+    ]
+  },
+  {
+    "rule": "/seller/reports/export/csv",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "seller_reports_export_csv",
+    "lineno": 5988,
+    "decorators": [
+      "app.route('/seller/reports/export/csv')"
+    ]
+  },
+  {
+    "rule": "/seller/reports/export/excel",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "seller_reports_export_excel",
+    "lineno": 5949,
+    "decorators": [
+      "app.route('/seller/reports/export/excel')"
+    ]
+  },
+  {
+    "rule": "/seller/reports/export/pdf",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "seller_reports_export_pdf",
+    "lineno": 6020,
+    "decorators": [
+      "app.route('/seller/reports/export/pdf')"
+    ]
+  },
+  {
+    "rule": "/seller/reports/print",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "seller_reports_print",
+    "lineno": 6065,
+    "decorators": [
+      "app.route('/seller/reports/print')"
+    ]
+  },
+  {
+    "rule": "/seller/retention-engagement",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "seller_crm_analytics",
+    "lineno": 6514,
+    "decorators": [
+      "app.route('/seller/retention-engagement')",
+      "app.route('/seller/crm-analytics')"
+    ]
+  },
+  {
+    "rule": "/seller/return-transactions",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "seller_return_transactions",
+    "lineno": 5790,
+    "decorators": [
+      "app.route('/seller/return-transactions')",
+      "app.route('/seller/refund-transactions')"
+    ]
+  },
+  {
+    "rule": "/seller/returns",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "seller_returns",
+    "lineno": 5644,
+    "decorators": [
+      "app.route('/seller/returns')"
+    ]
+  },
+  {
+    "rule": "/seller/returns/<rrt_ref>",
+    "methods": [
+      "POST"
+    ],
+    "endpoint": "seller_returns_update",
+    "lineno": 5700,
+    "decorators": [
+      "app.route('/seller/returns/<rrt_ref>', methods=['POST'])"
+    ]
+  },
+  {
+    "rule": "/seller/sales-analytics",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "seller_analytics",
+    "lineno": 5847,
+    "decorators": [
+      "app.route('/seller/analytics')",
+      "app.route('/seller/sales-analytics')"
+    ]
+  },
+  {
+    "rule": "/seller/security",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "endpoint": "seller_security",
+    "lineno": 6957,
+    "decorators": [
+      "app.route('/seller/security', methods=['GET', 'POST'])"
+    ]
+  },
+  {
+    "rule": "/seller/settings",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "seller_settings",
+    "lineno": 6866,
+    "decorators": [
+      "app.route('/seller/settings')"
+    ]
+  },
+  {
+    "rule": "/seller/vouchers",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "seller_vouchers",
+    "lineno": 5798,
+    "decorators": [
+      "app.route('/seller/vouchers')"
+    ]
+  },
+  {
+    "rule": "/seller/vouchers/create",
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "endpoint": "seller_voucher_create",
+    "lineno": 6689,
+    "decorators": [
+      "app.route('/seller/vouchers/create', methods=['GET', 'POST'])"
+    ]
+  },
+  {
+    "rule": "/shop",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "shop",
+    "lineno": 2316,
+    "decorators": [
+      "app.route('/shop')"
+    ]
+  },
+  {
+    "rule": "/static/<path:filename>",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "static",
+    "lineno": 257,
+    "decorators": []
+  },
+  {
+    "rule": "/support",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "support",
+    "lineno": 4900,
+    "decorators": [
+      "app.route('/support')"
+    ]
+  },
+  {
+    "rule": "/terms",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "terms_of_service",
+    "lineno": 2250,
+    "decorators": [
+      "app.route('/terms')"
+    ]
+  },
+  {
+    "rule": "/terms",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "terms",
+    "lineno": 4884,
+    "decorators": [
+      "app.route('/terms')"
+    ]
+  },
+  {
+    "rule": "/uploads/avatars/<role>/<int:user_id>",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "serve_avatar",
+    "lineno": 620,
+    "decorators": [
+      "app.route('/uploads/avatars/<role>/<int:user_id>')"
+    ]
+  },
+  {
+    "rule": "/uploads/permits/<path:filename>",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "serve_permit",
+    "lineno": 657,
+    "decorators": [
+      "app.route('/uploads/permits/<path:filename>')"
+    ]
+  },
+  {
+    "rule": "/uploads/products/<path:filename>",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "uploads_products_view",
+    "lineno": 7277,
+    "decorators": [
+      "app.route('/uploads/products/<path:filename>')"
+    ]
+  },
+  {
+    "rule": "/whats-new",
+    "methods": [
+      "GET"
+    ],
+    "endpoint": "whats_new",
+    "lineno": 2262,
+    "decorators": [
+      "app.route('/whats-new')"
+    ]
+  }
+]

@@ -93,7 +93,7 @@
         <span class="topbar__brand-mark" aria-hidden="true" style="background: transparent; box-shadow: none; width: auto; height: auto; padding: 0; margin-right: 10px;">
           <img src="/static/assets/logo.png?v=20261030" alt="E-ACIS Logo" class="topbar__brand-logo" style="height: 38px; width: auto; object-fit: contain; display: block;">
         </span>
-        <span class="topbar__wordmark" style="letter-spacing: normal; font-weight: 600;">E-ACIS</span>
+        <span class="topbar__wordmark" style="letter-spacing: normal; font-weight: 600;"></span>
         {% if current_user.is_authenticated %}
         <span class="topbar__portal-chip topbar__portal-chip--{{ current_user.role }}">
           {{ current_user.role|capitalize }}
@@ -588,7 +588,15 @@
         csrfToken: document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
       };
 
-      // --- QUICK WIN: GLASSMOPRHISM TOASTS ---
+          function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str).replace(/[&<>"']/g, function(c) {
+        return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+      });
+    }
+    window.escapeHtml = escapeHtml;
+
+    // --- QUICK WIN: GLASSMOPRHISM TOASTS ---
       window.EACIS_toast = function(message, type = 'info') {
         const stack = document.querySelector('.toast-stack');
         if (!stack) return;
@@ -598,7 +606,7 @@
         if (type === 'success') toast.style.borderColor = 'var(--color-success)';
         if (type === 'error' || type === 'danger') toast.style.borderColor = 'var(--color-danger)';
         
-        toast.innerHTML = `<div class="type-body-sm fw-semibold">${message}</div>`;
+        toast.innerHTML = `<div class="type-body-sm fw-semibold">${escapeHtml(message)}</div>`;
         stack.appendChild(toast);
         setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 5000);
       };
@@ -693,15 +701,15 @@
         }
 
         itemsWrap.innerHTML = items.map(item => `
-          <div class="mini-cart-item" data-product-id="${item.product_id || ''}">
-            <img src="${item.image_url || '/static/assets/Featured.png'}" alt="${item.name}" />
+          <div class="mini-cart-item" data-product-id="${escapeHtml(item.product_id || '')}">
+            <img src="${escapeHtml(item.image_url || '/static/assets/Featured.png')}" alt="${escapeHtml(item.name || '')}" />
             <div class="mini-cart-info">
-              <div class="type-body-sm fw-bold mb-1" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px;">${item.name}</div>
-              <div class="type-label-xs text-muted">${item.qty} x ${formatPHP(item.unit_price)}</div>
+              <div class="type-body-sm fw-bold mb-1" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px;">${escapeHtml(item.name || '')}</div>
+              <div class="type-label-xs text-muted">${escapeHtml(item.qty)} x ${formatPHP(item.unit_price)}</div>
               <div class="type-body-sm fw-bold mt-2">${formatPHP(item.line_total)}</div>
             </div>
             <div class="mini-cart-actions" style="margin-left:8px;">
-              <button class="btn btn--ghost btn--sm mini-cart-remove" data-product-id="${item.product_id || ''}" aria-label="Remove item">Remove</button>
+              <button class="btn btn--ghost btn--sm mini-cart-remove" data-product-id="${escapeHtml(item.product_id || '')}" aria-label="Remove item">Remove</button>
             </div>
           </div>
         `).join('');

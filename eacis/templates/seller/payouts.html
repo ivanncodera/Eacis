@@ -37,7 +37,7 @@
             <td><a href="/seller/orders/{{ order.order_ref }}">{{ order.order_ref }}</a></td>
             <td>{{ (order.delivered_at or order.created_at).strftime('%Y-%m-%d') if (order.delivered_at or order.created_at) else '-' }}</td>
             <td>{{ order.status|title }}</td>
-            <td style="text-align:right;">PHP {{ '%.2f'|format(order.total or 0) }}</td>
+            <td style="text-align:right;">PHP {{ '%.2f'|format(order.seller_amount if order.seller_amount is defined else (order.total or 0)) }}</td>
           </tr>
           {% else %}
           <tr><td colspan="4" style="text-align:center;">No payout records yet.</td></tr>

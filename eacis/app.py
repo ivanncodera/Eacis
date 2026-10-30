@@ -469,7 +469,20 @@ def create_app(config_class=Config):
 
         ratio = scoped_items_subtotal / order_subtotal
         ratio = min(max(ratio, 0.0), 1.0)
-        return round(order_total * ratio, 2)
+        base_refund = round(order_total * ratio, 2)
+        if getattr(order, 'payment_method', '') == 'installment':
+            try:
+                from eacis.models.installment import InstallmentPlan
+                plan = InstallmentPlan.query.filter_by(order_id=order.id).first()
+                if plan:
+                    s_list = plan.schedules.all() if hasattr(plan.schedules, 'all') else plan.schedules
+                    actually_paid = sum(float(s.amount or 0) for s in s_list if getattr(s, 'status', '') == 'paid')
+                    actually_paid += float(getattr(plan, 'downpayment', 0) or getattr(plan, 'downpayment_amount', 0) or 0)
+                    scoped_paid = round(actually_paid * ratio, 2) if seller_id is not None else round(actually_paid, 2)
+                    return min(base_refund, scoped_paid)
+            except Exception:
+                pass
+        return base_refund
 
     def validate_voucher_for_cart(voucher_code, cart_items, subtotal, customer_id, VoucherModel, OrderModel):
         try:
@@ -557,6 +570,13 @@ def create_app(config_class=Config):
 
     # expose helper on app for use in templates or other modules
     app.can_view_product_id = can_view_product_id
+    @app.template_filter('peso')
+    def peso_filter(val):
+        try:
+            return f"₱{float(val or 0):,.2f}"
+        except Exception:
+            return "₱0.00"
+
 
     # Make a template-level helper that checks visibility for the current user
     @app.context_processor
@@ -665,29 +685,99 @@ def create_app(config_class=Config):
         # Normalize filename: callers may pass 'permits/<file>' or '<file>'
         filepart = filename.split('permits/', 1)[-1]
         base = os.path.join(app.instance_path, 'uploads', 'permits')
-        # Authorization: admins and sellers may view any permit; customers may only view their own KYC files
         role = getattr(current_user, 'role', None)
-        if role == 'customer':
-            expected_prefix = f"kyc_cust{current_user.id}_"
-            if not filepart.startswith(expected_prefix):
-                abort(404)
-        elif role in ('seller', 'admin'):
-            # seller/admin allowed to view for review purposes
+        if role == 'admin':
             pass
+        elif role == 'customer':
+            expected_prefix = f"kyc_cust{current_user.id}_"
+            owns_doc = filepart.startswith(expected_prefix) or (current_user.business_permit_path and filepart in current_user.business_permit_path)
+            if not owns_doc:
+                abort(403)
+        elif role == 'seller':
+            owns_permit = any(
+                getattr(current_user, col, None) and filepart in getattr(current_user, col)
+                for col in ('business_permit_path', 'barangay_permit_path', 'mayors_permit_path')
+            )
+            if owns_permit:
+                pass
+            elif filepart.startswith('kyc_cust'):
+                try:
+                    import re
+                    m = re.match(r'kyc_cust(\d+)_', filepart)
+                    cust_id = int(m.group(1)) if m else None
+                    if cust_id:
+                        from eacis.models.order import Order, OrderItem
+                        from eacis.models.product import Product
+                        has_order = (
+                            db.session.query(OrderItem.id)
+                            .join(Order, Order.id == OrderItem.order_id)
+                            .join(Product, Product.id == OrderItem.product_id)
+                            .filter(Order.customer_id == cust_id, Product.seller_id == current_user.id)
+                            .first()
+                        ) is not None
+                        if not has_order:
+                            abort(403)
+                    else:
+                        abort(403)
+                except Exception:
+                    abort(403)
+            else:
+                abort(403)
         else:
-            abort(404)
+            abort(403)
 
         try:
             if not os.path.exists(os.path.join(base, filepart)):
                 abort(404)
             return send_from_directory(base, filepart)
         except Exception:
-            try:
-                app.logger.exception('Error serving permit file %s', filepart)
-            except Exception:
-                import logging
-                logging.getLogger(__name__).exception('Error serving permit file')
             abort(404)
+
+    @app.route('/uploads/returns/<path:filename>')
+    def serve_return_upload(filename):
+        from flask_login import current_user
+        from flask import send_from_directory
+        if not (current_user and getattr(current_user, 'is_authenticated', False)):
+            abort(404)
+
+        filepart = filename.split('returns/', 1)[-1]
+        safe_name = secure_filename(filepart)
+        base = os.path.join(app.instance_path, 'uploads', 'returns')
+
+        role = getattr(current_user, 'role', None)
+        if role == 'admin':
+            pass
+        else:
+            from eacis.models.return_request import ReturnRequest
+            from eacis.models.order import OrderItem
+            from eacis.models.product import Product
+
+            rrt = ReturnRequest.query.filter(ReturnRequest.evidence_urls.like(f"%{safe_name}%")).first()
+            if not rrt:
+                import re
+                m = re.match(r'cust(\d+)_', safe_name)
+                cust_id = int(m.group(1)) if m else None
+                if role == 'customer' and cust_id == current_user.id:
+                    pass
+                else:
+                    abort(403)
+            else:
+                if role == 'customer':
+                    if rrt.customer_id != current_user.id:
+                        abort(403)
+                elif role == 'seller':
+                    seller_on_order = (
+                        db.session.query(OrderItem.id)
+                        .join(Product, Product.id == OrderItem.product_id)
+                        .filter(OrderItem.order_id == rrt.order_id, Product.seller_id == current_user.id)
+                        .first()
+                    ) is not None
+                    if not seller_on_order:
+                        abort(403)
+                else:
+                    abort(403)
+
+        return send_from_directory(base, safe_name)
 
     @app.route('/api/postal/suggest')
     def postal_suggest():
@@ -808,6 +898,10 @@ def create_app(config_class=Config):
                     return redirect(url_for('admin_dashboard'))
                 return redirect(url_for('auth_login', next=request.path))
             verification_status = (getattr(current_user, 'seller_verification_status', '') or '').lower()
+            if verification_status == 'suspended' or not getattr(current_user, 'is_active', True):
+                flash('Your seller account has been suspended by administration. Access to portal features is revoked.', 'error')
+                return render_template('errors/seller_suspended.html'), 403
+
             if verification_status in ('pending', 'rejected'):
                 allowed_prefixes_for_unverified = (
                     '/seller/dashboard',
@@ -1101,8 +1195,19 @@ def create_app(config_class=Config):
                 
                 # success - step-up via OTP
                 nxt = request.args.get('next') or request.form.get('next') or ''
+                from urllib.parse import urlsplit
+                def is_safe_redirect(target):
+                    if not target or not isinstance(target, str):
+                        return False
+                    if target.startswith('//') or target.startswith('/\\') or target.startswith('\\'):
+                        return False
+                    if not target.startswith('/'):
+                        return False
+                    parts = urlsplit(target)
+                    return parts.netloc == '' and parts.scheme == ''
+
                 def safe_redirect_for_role(role, target):
-                    if not target or not target.startswith('/'):
+                    if not is_safe_redirect(target):
                         return None
                     if target.startswith('/admin') and role != 'admin':
                         return None
@@ -1491,6 +1596,7 @@ def create_app(config_class=Config):
             db.session.rollback()
             return False, 'Could not cancel order. Please try again.'
 
+    def finalize_seller_refund(seller, rrt_ref):
         from eacis.models.return_request import ReturnRequest
         from eacis.models.order import Order, OrderItem
 
@@ -1787,7 +1893,15 @@ def create_app(config_class=Config):
                         pass
                     login_user(user, remember=False)
                 # If user opted to remember this device, create a trusted-device token and set cookie.
-                target = next_url or (url_for('seller_dashboard') if user and user.role == 'seller' else url_for('shop'))
+                from urllib.parse import urlsplit
+            def _is_safe(u):
+                if not u or not isinstance(u, str) or u.startswith('//') or u.startswith('/\\') or not u.startswith('/'):
+                    return False
+                parts = urlsplit(u)
+                return parts.netloc == '' and parts.scheme == ''
+            target = next_url if _is_safe(next_url) else None
+            if not target:
+                target = url_for('seller_dashboard') if user and user.role == 'seller' else url_for('shop')
                 if user and remember_device:
                     try:
                         from eacis.services.trusted_device_service import create_trusted_device
@@ -2836,6 +2950,10 @@ def create_app(config_class=Config):
         if not (current_user and getattr(current_user, 'is_authenticated', False) and getattr(current_user, 'role', None) == 'customer'):
             return redirect(url_for('auth_login', next=request.path))
 
+        if not app.config.get('TESTING') and not getattr(current_user, 'email_verified_at', None):
+            flash('Please verify your email address to proceed to checkout.', 'warning')
+            return redirect(url_for('auth_otp_verify'))
+
         try:
             from .models.cart import Cart
             from .models.order import Order, OrderItem
@@ -3389,6 +3507,17 @@ def create_app(config_class=Config):
 
                 if voucher:
                     voucher.uses_count = int(voucher.uses_count or 0) + 1
+                    try:
+                        from eacis.services import voucher_service as VchSvc
+                        if VchSvc:
+                            VchSvc.record_usage(
+                                voucher=voucher,
+                                customer_id=current_user.id,
+                                order_id=order.id,
+                                discount_amount=voucher_discount
+                            )
+                    except Exception:
+                        pass
 
                 if loyalty_applied > 0:
                     current_user.loyalty_points = max(
@@ -3426,7 +3555,22 @@ def create_app(config_class=Config):
                             pass
                         order.notes = (getattr(order, 'notes', '') or '') + f" | invoice_error: {str(ie)}"
 
-                cart.items = []
+                purchased_item_keys = set()
+                for line in cart_items:
+                    prod = line.get('product')
+                    if prod:
+                        purchased_item_keys.add(str(prod.id))
+                        purchased_item_keys.add(str(getattr(prod, 'product_ref', '')))
+                    if line.get('product_id'):
+                        purchased_item_keys.add(str(line['product_id']))
+
+                remaining_items = []
+                for entry in (cart.items or []):
+                    entry_pid = str(entry.get('product_id', ''))
+                    if entry_pid not in purchased_item_keys:
+                        remaining_items.append(entry)
+
+                cart.items = remaining_items
                 cart.voucher_code = None
                 db.session.commit()
                 # Notify recipient email (if provided) about the completed order
@@ -3667,7 +3811,10 @@ def create_app(config_class=Config):
             if order:
                 ordered_items = list(order.items.all()) if order.items else []
                 placed_at = order.created_at
-                earned_points = int(order.total // 100) if order.total else 0
+                if getattr(order, 'payment_method', '') == 'full_pay':
+                    earned_points = int(order.total // 100) if order.total else 0
+                else:
+                    earned_points = 0
                 # Clear KYC session flag after successful order
                 session.pop('kyc_verified', None)
                 session.pop('kyc_id_type', None)
@@ -5593,47 +5740,39 @@ def create_app(config_class=Config):
         if request.method == 'POST':
             action = (request.form.get('action') or '').strip()
             if action == 'update_status':
-                    new_status = (request.form.get('status') or '').strip()
-                    # Sellers may only transition a safe subset of statuses.
-                    allowed = ('packed', 'shipped', 'delivered')
-                    if new_status not in allowed:
-                        flash('Invalid or unauthorized order status change.', 'error')
-                    else:
-                        try:
-                            # Gather distinct seller ids for items on this order
-                            seller_ids = set()
-                            for item in order.items.all():
-                                if item.product and getattr(item.product, 'seller_id', None) is not None:
-                                    try:
-                                        seller_ids.add(int(item.product.seller_id))
-                                    except Exception:
-                                        seller_ids.add(item.product.seller_id)
+                new_status = (request.form.get('status') or '').strip().lower()
+                current_status = getattr(order, 'status', '').lower()
+                allowed_transitions = {
+                    'paid': ['packed'],
+                    'packed': ['shipped'],
+                    'shipped': ['delivered'],
+                    'delivered': [],
+                    'cancelled': [],
+                    'refunded': [],
+                }
+                kyc_approved = 'kyc approved' in (order.notes or '').lower() or 'kyc_approved' in (order.notes or '').lower()
+                if current_status == 'pending' and order.payment_method == 'installment' and kyc_approved:
+                    allowed_transitions['pending'] = ['packed']
+                else:
+                    allowed_transitions['pending'] = []
 
-                            # Prevent global 'shipped' or 'delivered' for multi-seller orders
-                            if len(seller_ids) > 1 and new_status in ('shipped', 'delivered'):
-                                flash('Cannot mark multi-seller order as shipped/delivered. Please coordinate with admin.', 'error')
-                            else:
-                                # If marking delivered, ensure this seller owns all items (safety check)
-                                from flask_login import current_user
-                                if new_status == 'delivered' and any(
-                                    (item.product and int(item.product.seller_id or 0) != int(current_user.id))
-                                    for item in order.items.all()
-                                ):
-                                    flash('Only the seller owning all items may mark the order as delivered.', 'error')
-                                else:
-                                    order.status = new_status
-                                    if new_status == 'shipped' and not order.shipped_at:
-                                        order.shipped_at = datetime.utcnow()
-                                    elif new_status == 'delivered' and not order.delivered_at:
-                                        order.delivered_at = datetime.utcnow()
-                                    if new_status == 'shipped' and not order.tracking_number:
-                                        order.tracking_number = f'TRK-{order.order_ref[-6:]}'
-                                    db.session.commit()
-                                    flash(f'Order {order.order_ref} updated to {new_status}.', 'success')
-                        except Exception:
-                            db.session.rollback()
-                            flash('Could not update order status.', 'error')
-                    return redirect(url_for('seller_order_detail', order_ref=order_ref))
+                if new_status not in allowed_transitions.get(current_status, []):
+                    flash(f'Cannot change order status from {current_status} to {new_status}.', 'error')
+                else:
+                    try:
+                        order.status = new_status
+                        if new_status == 'shipped' and not order.shipped_at:
+                            order.shipped_at = datetime.utcnow()
+                        elif new_status == 'delivered' and not order.delivered_at:
+                            order.delivered_at = datetime.utcnow()
+                        if new_status == 'shipped' and not order.tracking_number:
+                            order.tracking_number = f'TRK-{order.order_ref[-6:]}'
+                        db.session.commit()
+                        flash(f'Order {order.order_ref} updated to {new_status}.', 'success')
+                    except Exception:
+                        db.session.rollback()
+                        flash('Could not update order status.', 'error')
+                return redirect(url_for('seller_order_detail', order_ref=order_ref))
 
         return render_template('seller/order_detail.html', order=order, seller_items=seller_items)
 
@@ -5858,7 +5997,14 @@ def create_app(config_class=Config):
             from models.order import Order, OrderItem
             from models.product import Product
 
-        rows = db.session.query(OrderItem, Product, Order).join(Product, Product.id == OrderItem.product_id).join(Order, Order.id == OrderItem.order_id).filter(Product.seller_id == current_user.id).all()
+        VALID_REVENUE_STATUSES = ('paid', 'packed', 'shipped', 'delivered')
+        rows = (
+            db.session.query(OrderItem, Product, Order)
+            .join(Product, Product.id == OrderItem.product_id)
+            .join(Order, Order.id == OrderItem.order_id)
+            .filter(Product.seller_id == current_user.id, Order.status.in_(VALID_REVENUE_STATUSES))
+            .all()
+        )
 
         category_revenue = {}
         top_products = {}
@@ -6248,8 +6394,7 @@ def create_app(config_class=Config):
             action = (request.form.get('action') or '').strip().lower()
             if action == 'approve':
                 try:
-                    order.status = 'paid'
-                    order.paid_at = datetime.utcnow()
+                    order.notes = (order.notes or '') + ' | KYC approved by seller'
                     db.session.add(order)
                     invoice_err = None
                     try:
@@ -6260,19 +6405,17 @@ def create_app(config_class=Config):
                             app.logger.exception('Invoice generation failed for order %s', order.order_ref)
                         except Exception:
                             pass
-                        # Append an audit note to the order so admins can inspect later
                         try:
                             order.notes = (order.notes or '') + f' | invoice_error={invoice_err}'
                             db.session.add(order)
                         except Exception:
                             pass
 
-                    # Commit the order regardless of invoice generation success to avoid leaving the order in limbo
                     db.session.commit()
                     if invoice_err:
-                        flash('Installment order confirmed but invoice generation failed; please review.', 'warning')
+                        flash('Installment KYC approved but invoice generation failed; please review.', 'warning')
                     else:
-                        flash('Installment order confirmed and invoices generated.', 'success')
+                        flash('Installment KYC approved. Order is now ready to be packed.', 'success')
                 except Exception:
                     db.session.rollback()
                     flash('Could not confirm the order at this time.', 'error')
@@ -6435,6 +6578,9 @@ def create_app(config_class=Config):
         if not ticket:
             flash('Inquiry not found.', 'error')
             return redirect(url_for('seller_customer_inquiries'))
+
+        if ticket.assigned_to and int(ticket.assigned_to) != int(current_user.id):
+            abort(403)
 
         if request.method == 'POST':
             try:
@@ -6821,10 +6967,20 @@ def create_app(config_class=Config):
 
         base_q = db.session.query(Order).join(OrderItem, OrderItem.order_id == Order.id).join(Product, Product.id == OrderItem.product_id).filter(Product.seller_id == current_user.id).distinct()
 
-        # Compute balances from full datasets (not just the page) so KPIs remain accurate
+        def _seller_order_amount(ord_obj, sel_id):
+            items = getattr(ord_obj, 'items', None)
+            if not items:
+                return 0.0
+            total_amt = 0.0
+            for it in items.all() if hasattr(items, 'all') else items:
+                prod = getattr(it, 'product', None)
+                if prod and int(getattr(prod, 'seller_id', 0) or 0) == int(sel_id):
+                    total_amt += float(getattr(it, 'subtotal', None) or ((getattr(it, 'unit_price', 0) or 0) * (getattr(it, 'quantity', 0) or 0)) or 0)
+            return round(total_amt, 2)
+
         delivered_orders = base_q.filter(Order.status == 'delivered').all()
-        available_balance = sum(float(o.total or 0) for o in delivered_orders)
-        pending_clearance = sum(float(o.total or 0) for o in base_q.filter(Order.status.in_(['paid', 'packed', 'shipped'])).all())
+        available_balance = sum(_seller_order_amount(o, current_user.id) for o in delivered_orders)
+        pending_clearance = sum(_seller_order_amount(o, current_user.id) for o in base_q.filter(Order.status.in_(['paid', 'packed', 'shipped'])).all())
 
         today = datetime.utcnow().date()
         days_to_friday = (4 - today.weekday()) % 7
@@ -6850,7 +7006,7 @@ def create_app(config_class=Config):
             writer.writerow(['order_ref', 'date', 'status', 'amount'])
             for o in rows:
                 date = (o.delivered_at or o.created_at).strftime('%Y-%m-%d') if (o.delivered_at or o.created_at) else ''
-                writer.writerow([o.order_ref, date, o.status, '%.2f' % float(o.total or 0)])
+                writer.writerow([o.order_ref, date, o.status, '%.2f' % _seller_order_amount(o, current_user.id)])
             output = si.getvalue()
             return Response(output, mimetype='text/csv', headers={'Content-Disposition': f'attachment; filename=payouts_{current_user.id}.csv'})
 
@@ -6858,8 +7014,10 @@ def create_app(config_class=Config):
         pagination = history_q.order_by(Order.delivered_at.desc() if hasattr(Order, 'delivered_at') else Order.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
         history = pagination.items
 
-        # Page subtotal for the displayed rows
-        page_total = sum(float(o.total or 0) for o in history)
+        for o in history:
+            o.seller_amount = _seller_order_amount(o, current_user.id)
+        # Page subtotal for the displayed rows (computed from seller items only)
+        page_total = sum(getattr(o, 'seller_amount', 0.0) for o in history)
 
         return render_template('seller/payouts.html', stats=stats, history=history, pagination=pagination, page_total=page_total)
 
@@ -7031,6 +7189,14 @@ def create_app(config_class=Config):
         from flask_login import current_user
         if not (current_user and getattr(current_user, 'is_authenticated', False) and getattr(current_user, 'role', None) == 'admin'):
             return redirect(url_for('auth_login', next=request.path))
+
+        try:
+            from eacis.services import installment_service as InstSvc
+            if InstSvc:
+                InstSvc.sync_overdue_schedules()
+                db.session.commit()
+        except Exception:
+            db.session.rollback()
         try:
             from .models.product import Product
             from .models.return_request import ReturnRequest
@@ -7124,6 +7290,8 @@ def create_app(config_class=Config):
             'otp_resend_today': otp_resend_today,
             'otp_expired_today': otp_expired_today,
             'otp_success_rate': otp_success_rate,
+            'otp_verify_rate_24h': (otp_success_rate / 100.0) if otp_sent_today else 1.0,
+            'otp_sent_24h': otp_sent_today,
             'otp_top_purposes': otp_top_purposes,
             'total_customers': total_customers,
             'total_products': total_products,
@@ -7404,9 +7572,11 @@ def create_app(config_class=Config):
         for order in orders:
             if order.status in ('delivered', 'paid', 'shipped', 'packed'):
                 try:
-                    payout_total += float(order.total or 0)
+                    for item in (order.items.all() if hasattr(order.items, 'all') else order.items):
+                        if item.product and int(getattr(item.product, 'seller_id', 0) or 0) == int(seller.id):
+                            payout_total += float(item.subtotal or ((item.unit_price or 0) * (item.quantity or 0)) or 0)
                 except Exception:
-                    payout_total += 0.0
+                    pass
 
         recent_actions = AuditLog.query.filter(
             (AuditLog.target_ref == seller.email) | (AuditLog.target_ref == (seller.seller_code or 'UNKNOWN'))
@@ -7993,7 +8163,8 @@ def create_app(config_class=Config):
 
         def order_total_since(dt):
             total = 0.0
-            rows = Order.query.filter(Order.created_at >= dt).all()
+            VALID_REVENUE_STATUSES = ('paid', 'packed', 'shipped', 'delivered')
+            rows = Order.query.filter(Order.created_at >= dt, Order.status.in_(VALID_REVENUE_STATUSES)).all()
             for row in rows:
                 try:
                     total += float(row.total or 0)
@@ -8205,6 +8376,8 @@ def create_app(config_class=Config):
         except Exception:
             app.logger.debug('customer_addresses blueprint not available')
 
+    app.calculate_refund_amount = calculate_refund_amount
+    app.finalize_seller_refund = finalize_seller_refund
     return app
 
 

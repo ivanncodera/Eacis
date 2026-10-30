@@ -1,0 +1,1427 @@
+{
+  "app_py_total_lines": 8213,
+  "total_functions_in_app_py": 182,
+  "top_15_largest_functions": [
+    {
+      "name": "create_app",
+      "lineno": 67,
+      "end_lineno": 8208,
+      "length": 8142,
+      "decorators": []
+    },
+    {
+      "name": "checkout",
+      "lineno": 2834,
+      "end_lineno": 3513,
+      "length": 680,
+      "decorators": [
+        "app.route('/customer/checkout', methods=['GET', 'POST'])",
+        "app.route('/checkout', methods=['GET', 'POST'])"
+      ]
+    },
+    {
+      "name": "cart",
+      "lineno": 2627,
+      "end_lineno": 2830,
+      "length": 204,
+      "decorators": [
+        "app.route('/customer/cart', methods=['GET', 'POST'])",
+        "app.route('/cart', methods=['GET', 'POST'])"
+      ]
+    },
+    {
+      "name": "auth_otp_verify",
+      "lineno": 1740,
+      "end_lineno": 1936,
+      "length": 197,
+      "decorators": [
+        "app.route('/auth/otp/verify', methods=['GET', 'POST'])"
+      ]
+    },
+    {
+      "name": "seller_product_image_upload",
+      "lineno": 5248,
+      "end_lineno": 5413,
+      "length": 166,
+      "decorators": [
+        "app.route('/seller/products/<ref>/images/upload', methods=['POST'])"
+      ]
+    },
+    {
+      "name": "admin_customers",
+      "lineno": 7672,
+      "end_lineno": 7832,
+      "length": 161,
+      "decorators": [
+        "app.route('/admin/customers', methods=['GET', 'POST'])"
+      ]
+    },
+    {
+      "name": "customer_returns",
+      "lineno": 4203,
+      "end_lineno": 4352,
+      "length": 150,
+      "decorators": [
+        "app.route('/customer/returns', methods=['GET', 'POST'])"
+      ]
+    },
+    {
+      "name": "admin_seller_detail",
+      "lineno": 7288,
+      "end_lineno": 7429,
+      "length": 142,
+      "decorators": [
+        "app.route('/admin/sellers/<seller_id>', methods=['GET', 'POST'])"
+      ]
+    },
+    {
+      "name": "customer_order_detail",
+      "lineno": 3789,
+      "end_lineno": 3921,
+      "length": 133,
+      "decorators": [
+        "app.route('/customer/orders/<order_ref>')"
+      ]
+    },
+    {
+      "name": "finalize_customer_order_cancel",
+      "lineno": 1403,
+      "end_lineno": 1527,
+      "length": 125,
+      "decorators": []
+    },
+    {
+      "name": "admin_sellers",
+      "lineno": 7138,
+      "end_lineno": 7261,
+      "length": 124,
+      "decorators": [
+        "app.route('/admin/sellers', methods=['GET', 'POST'])"
+      ]
+    },
+    {
+      "name": "customer_profile_edit",
+      "lineno": 4557,
+      "end_lineno": 4676,
+      "length": 120,
+      "decorators": [
+        "app.route('/customer/profile/edit', methods=['GET', 'POST'])"
+      ]
+    },
+    {
+      "name": "build_landing_context",
+      "lineno": 857,
+      "end_lineno": 970,
+      "length": 114,
+      "decorators": []
+    },
+    {
+      "name": "auth_login",
+      "lineno": 1029,
+      "end_lineno": 1139,
+      "length": 111,
+      "decorators": [
+        "app.route('/auth/login')"
+      ]
+    },
+    {
+      "name": "seller_voucher_create",
+      "lineno": 6690,
+      "end_lineno": 6800,
+      "length": 111,
+      "decorators": [
+        "app.route('/seller/vouchers/create', methods=['GET', 'POST'])"
+      ]
+    }
+  ],
+  "duplicate_functions": {
+    "money": [
+      61,
+      519
+    ],
+    "static_page_payload": [
+      53,
+      972
+    ],
+    "write_audit": [
+      7150,
+      7685
+    ]
+  },
+  "swallowed_or_no_rollback_excepts_count": 346,
+  "swallowed_excepts": [
+    {
+      "lineno": 76,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 312,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 2050,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": true,
+      "body": [
+        "db.session.rollback()"
+      ]
+    },
+    {
+      "lineno": 2060,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 2558,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 2610,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 3612,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 3840,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 3885,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 3898,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 3910,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 3918,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 3979,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 3991,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 4002,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 4009,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 5277,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 5449,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 1986,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 1995,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 2048,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": true,
+      "body": [
+        "db.session.rollback()"
+      ]
+    },
+    {
+      "lineno": 2057,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 4081,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": true,
+      "body": [
+        "db.session.rollback()"
+      ]
+    },
+    {
+      "lineno": 4616,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 4628,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 5459,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 5523,
+      "type": "ValueError",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 6121,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": true,
+      "body": [
+        "db.session.rollback()"
+      ]
+    },
+    {
+      "lineno": 7163,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": true,
+      "body": [
+        "db.session.rollback()"
+      ]
+    },
+    {
+      "lineno": 7701,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": true,
+      "body": [
+        "db.session.rollback()"
+      ]
+    },
+    {
+      "lineno": 254,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 772,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 1130,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 1908,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 1914,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 2237,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": true,
+      "body": [
+        "db.session.rollback()"
+      ]
+    },
+    {
+      "lineno": 2999,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 3024,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": true,
+      "body": [
+        "db.session.rollback()"
+      ]
+    },
+    {
+      "lineno": 4818,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": true,
+      "body": [
+        "db.session.rollback()"
+      ]
+    },
+    {
+      "lineno": 5376,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 5382,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 5409,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 6923,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 6932,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 7509,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": true,
+      "body": [
+        "db.session.rollback()"
+      ]
+    },
+    {
+      "lineno": 429,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 1786,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 2242,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 2985,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 3167,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": true,
+      "body": [
+        "db.session.rollback()"
+      ]
+    },
+    {
+      "lineno": 3472,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 4614,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 4733,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": true,
+      "body": [
+        "db.session.rollback()"
+      ]
+    },
+    {
+      "lineno": 5397,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 7012,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": true,
+      "body": [
+        "db.session.rollback()"
+      ]
+    },
+    {
+      "lineno": 3465,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 4738,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 6921,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 7017,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 3425,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 6261,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 6267,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 7963,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": true,
+      "body": [
+        "db.session.rollback()"
+      ]
+    },
+    {
+      "lineno": 3453,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 3460,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "pass"
+      ]
+    },
+    {
+      "lineno": 5609,
+      "type": "Exception",
+      "is_swallowed": true,
+      "has_rollback": false,
+      "body": [
+        "seller_ids.add(item.product.seller_id)"
+      ]
+    }
+  ],
+  "commits_in_loops": [],
+  "utcnow_count": 57,
+  "utcnow_sample_lines": [
+    413,
+    414,
+    981,
+    991,
+    1001,
+    1011,
+    1296,
+    1310,
+    1324,
+    1338,
+    1352,
+    1366,
+    1421,
+    1601,
+    1707,
+    1823,
+    1837,
+    1846,
+    1853,
+    1859
+  ],
+  "float_money_count": 92,
+  "float_money_sample": [
+    [
+      378,
+      "line_total = float(item.subtotal or ((item.unit_price or 0) * (item.quantity or 0)) or 0)"
+    ],
+    [
+      379,
+      "seller_totals[seller_id] = float(seller_totals.get(seller_id, 0.0)) + line_total"
+    ],
+    [
+      385,
+      "grand_total = float(order.total or 0)"
+    ],
+    [
+      386,
+      "safe_grand_total = grand_total if grand_total > 0 else float(sum(seller_totals.values()))"
+    ],
+    [
+      387,
+      "discount_ratio = (float(order.discount or 0) / safe_grand_total) if safe_grand_total > 0 else 0.0"
+    ],
+    [
+      388,
+      "tax_ratio = (float(order.tax or 0) / safe_grand_total) if safe_grand_total > 0 else 0.0"
+    ],
+    [
+      389,
+      "shipping_ratio = (float(order.shipping_fee or 0) / safe_grand_total) if safe_grand_total > 0 else 0.0"
+    ],
+    [
+      443,
+      "return round(float(order.total or order.subtotal or 0), 2)"
+    ],
+    [
+      449,
+      "line_total = float(item.subtotal or ((item.unit_price or 0) * (item.quantity or 0)) or 0)"
+    ],
+    [
+      463,
+      "return round(float(order.total or full_items_subtotal or 0), 2)"
+    ],
+    [
+      465,
+      "order_subtotal = float(order.subtotal or full_items_subtotal or 0)"
+    ],
+    [
+      466,
+      "order_total = float(order.total or full_items_subtotal or 0)"
+    ],
+    [
+      493,
+      "eligible_subtotal = float(subtotal)"
+    ],
+    [
+      496,
+      "float(line.get('line_total') or 0)"
+    ],
+    [
+      503,
+      "if eligible_subtotal < float(voucher.min_order_amount or 0):"
+    ],
+    [
+      504,
+      "return None, '', 0.0, f'Voucher requires minimum order of PHP {float(voucher.min_order_amount or 0):.2f}.'"
+    ],
+    [
+      513,
+      "discount = eligible_subtotal * (float(voucher.discount_value or 0) / 100.0)"
+    ],
+    [
+      515,
+      "discount = float(voucher.discount_value or 0)"
+    ],
+    [
+      517,
+      "return voucher, voucher.code, float(discount), None"
+    ],
+    [
+      731,
+      "unit_price = float(product.price or 0)"
+    ],
+    [
+      755,
+      "preview_lines.append({'product': prod, 'qty': int(it.get('qty') or 1), 'line_total': float(it.get('line_total') or 0)})"
+    ],
+    [
+      768,
+      "voucher_discount = float(discount_value or 0.0)"
+    ],
+    [
+      775,
+      "grand_total = max(subtotal - float(voucher_discount or 0.0), 0.0)"
+    ],
+    [
+      885,
+      "'price': float(product.price or 0),"
+    ],
+    [
+      906,
+      "'price': float(p.price or 0),"
+    ]
+  ],
+  "total_routes": 143,
+  "broken_url_for": [
+    {
+      "file": "eacis/templates/customer/addresses.html",
+      "line": 46,
+      "endpoint": "customer_addresses.edit_address"
+    }
+  ],
+  "forms_missing_csrf": [
+    {
+      "file": "eacis/templates/admin/trusted_devices.html",
+      "line": 37,
+      "attrs": "method=\"post\" style=\"display:inline\" data-enhance=\"submit-loading\" data-confirm=\"Revoke trusted device #{{ d.id }}?\""
+    },
+    {
+      "file": "eacis/templates/customer/trusted_devices.html",
+      "line": 29,
+      "attrs": "method=\"post\" style=\"display:inline\" data-confirm=\"Revoke this trusted device?\""
+    }
+  ],
+  "xss_safe_usages": [
+    {
+      "file": "eacis/templates/admin/products.html",
+      "line": 124,
+      "code": "<span class=\"type-label-xs text-danger\">{{ icon_warn(14) | safe }} {{ defect }}.4% Trace</span>"
+    },
+    {
+      "file": "eacis/templates/admin/products.html",
+      "line": 126,
+      "code": "<span class=\"type-label-xs text-success\">{{ icon_check(14) | safe }} {{ defect }}.1% Health</span>"
+    },
+    {
+      "file": "eacis/templates/customer/cart.html",
+      "line": 160,
+      "code": "<span class=\"type-body-xs fw-bold text-success\">{{ icon_check(14) | safe }} Applied: {{ applied_voucher.code }}</span>"
+    },
+    {
+      "file": "eacis/templates/seller/fulfillment_strategy.html",
+      "line": 92,
+      "code": "<div style=\"font-size:18px; margin-bottom:var(--sp-2);\">{{ icon_robot(18) | safe }}</div>"
+    },
+    {
+      "file": "eacis/templates/seller/fulfillment_strategy.html",
+      "line": 97,
+      "code": "<div style=\"font-size:18px; margin-bottom:var(--sp-2);\">{{ icon_pin(18) | safe }}</div>"
+    },
+    {
+      "file": "eacis/templates/seller/fulfillment_strategy.html",
+      "line": 102,
+      "code": "<div style=\"font-size:18px; margin-bottom:var(--sp-2);\">{{ icon_check(18) | safe }}</div>"
+    }
+  ],
+  "xss_innerhtml_usages": [
+    {
+      "file": "eacis/templates/auth/login.html",
+      "line": 149,
+      "code": "svg.innerHTML = '<path d=\"M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z\"></path><circle cx=\"12\" cy=\"12\" r=\"3\"></circle>';"
+    },
+    {
+      "file": "eacis/templates/auth/login.html",
+      "line": 152,
+      "code": "svg.innerHTML = '<path d=\"M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 "
+    },
+    {
+      "file": "eacis/templates/auth/otp_verify.html",
+      "line": 76,
+      "code": "result.innerHTML = '<div class=\"alert alert--info\"><strong>Debug OTP:</strong> ' + (data.debug_code || '(none)') + '</di"
+    },
+    {
+      "file": "eacis/templates/auth/otp_verify.html",
+      "line": 79,
+      "code": "result.innerHTML = '<div class=\"alert alert--warning\">' + (data.message || 'No debug code available.') + '</div>';"
+    },
+    {
+      "file": "eacis/templates/auth/otp_verify.html",
+      "line": 83,
+      "code": "result.innerHTML = '<div class=\"alert alert--warning\">Error fetching debug code.</div>';"
+    },
+    {
+      "file": "eacis/templates/auth/register.html",
+      "line": 315,
+      "code": "svg.innerHTML = '<circle cx=\"12\" cy=\"12\" r=\"3\"/><path d=\"M21 12c-1.9 3-5.3 6-9 6s-7.1-3-9-6c1.9-3 5.3-6 9-6s7.1 3 9 6z\"/"
+    },
+    {
+      "file": "eacis/templates/auth/register.html",
+      "line": 318,
+      "code": "svg.innerHTML = '<path d=\"M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12"
+    },
+    {
+      "file": "eacis/templates/auth/register_customer.html",
+      "line": 548,
+      "code": "btn.innerHTML = type === 'password' ?"
+    },
+    {
+      "file": "eacis/templates/auth/register_seller.html",
+      "line": 524,
+      "code": "btn.innerHTML = type === 'password' ?"
+    },
+    {
+      "file": "eacis/templates/base.html",
+      "line": 601,
+      "code": "toast.innerHTML = `<div class=\"type-body-sm fw-semibold\">${message}</div>`;"
+    },
+    {
+      "file": "eacis/templates/base.html",
+      "line": 671,
+      "code": "subtotalWrap.innerHTML = formatted.replace(/^PHP\\s+/, '<span class=\"currency-code\">PHP</span>');"
+    },
+    {
+      "file": "eacis/templates/base.html",
+      "line": 674,
+      "code": "itemsWrap.innerHTML = `"
+    },
+    {
+      "file": "eacis/templates/base.html",
+      "line": 695,
+      "code": "itemsWrap.innerHTML = items.map(item => `"
+    },
+    {
+      "file": "eacis/templates/base.html",
+      "line": 1091,
+      "code": "results.innerHTML = '';"
+    },
+    {
+      "file": "eacis/templates/base.html",
+      "line": 1096,
+      "code": "results.innerHTML = '';"
+    },
+    {
+      "file": "eacis/templates/base.html",
+      "line": 1108,
+      "code": "a.innerHTML = `<div style=\"display:flex;gap:12px;align-items:center;\"><img src=\"${it.image}\" style=\"width:48px;height:48"
+    },
+    {
+      "file": "eacis/templates/customer/checkout.html",
+      "line": 24,
+      "code": "sel.innerHTML = '';"
+    },
+    {
+      "file": "eacis/templates/customer/checkout.html",
+      "line": 29,
+      "code": "function clear(sel, placeholder){ sel.innerHTML = ''; const o = document.createElement('option'); o.value=''; o.textCont"
+    },
+    {
+      "file": "eacis/templates/customer/checkout.html",
+      "line": 56,
+      "code": "brgySel.innerHTML = '';"
+    },
+    {
+      "file": "eacis/templates/customer/checkout.html",
+      "line": 826,
+      "code": "list.innerHTML = '';"
+    },
+    {
+      "file": "eacis/templates/customer/checkout.html",
+      "line": 850,
+      "code": "inner.innerHTML = '<div class=\"fw-semibold\" style=\"margin-bottom:4px;\">' + (a.label || 'Address') + (a.is_default ? ' <s"
+    },
+    {
+      "file": "eacis/templates/customer/checkout.html",
+      "line": 974,
+      "code": "if(picker){ picker.innerHTML = ''; data.forEach(function(a){"
+    },
+    {
+      "file": "eacis/templates/customer/checkout.html",
+      "line": 979,
+      "code": "var inner = document.createElement('div'); inner.style.flex='1'; inner.innerHTML = '<div class=\"fw-semibold\">'+(a.label|"
+    },
+    {
+      "file": "eacis/templates/customer/checkout.html",
+      "line": 1121,
+      "code": "subtitle.innerHTML = `Billed Monthly: <strong>PHP ${monthly}</strong>`;"
+    },
+    {
+      "file": "eacis/templates/customer/order_detail.html",
+      "line": 363,
+      "code": "this.innerHTML = `${icon} <span class=\"order-star-count\" data-pid=\"${pid || ''}\">${count}</span>`;"
+    },
+    {
+      "file": "eacis/templates/customer/order_detail.html",
+      "line": 414,
+      "code": "closeBtn.innerHTML = '<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\""
+    },
+    {
+      "file": "eacis/templates/customer/order_detail.html",
+      "line": 457,
+      "code": "b.innerHTML = '\u2605';"
+    },
+    {
+      "file": "eacis/templates/customer/product_detail.html",
+      "line": 282,
+      "code": "this.innerHTML = `${icon} <span id=\"star-count\">${count}</span>`;"
+    },
+    {
+      "file": "eacis/templates/customer/returns.html",
+      "line": 644,
+      "code": "evidenceFileList.innerHTML = '';"
+    },
+    {
+      "file": "eacis/templates/customer/returns.html",
+      "line": 645,
+      "code": "evidencePreviewGrid.innerHTML = '';"
+    },
+    {
+      "file": "eacis/templates/customer/returns.html",
+      "line": 649,
+      "code": "evidenceFileList.innerHTML = '<span class=\"type-label-xs text-muted\">No images selected yet.</span>';"
+    },
+    {
+      "file": "eacis/templates/customer/returns.html",
+      "line": 671,
+      "code": "removeBtn.innerHTML = '\u00d7';"
+    },
+    {
+      "file": "eacis/templates/customer/returns.html",
+      "line": 730,
+      "code": "evidenceFileList.innerHTML = '<span class=\"type-label-xs text-muted\">No images selected yet.</span>';"
+    },
+    {
+      "file": "eacis/templates/customer/returns.html",
+      "line": 737,
+      "code": "evidenceFileList.innerHTML = '<span class=\"type-label-xs text-muted\">No images selected yet.</span>';"
+    },
+    {
+      "file": "eacis/templates/landing.html",
+      "line": 528,
+      "code": "grid.innerHTML = '';"
+    },
+    {
+      "file": "eacis/templates/landing.html",
+      "line": 553,
+      "code": "grid.innerHTML = '';"
+    },
+    {
+      "file": "eacis/templates/seller/product_form.html",
+      "line": 279,
+      "code": "clearBtn.innerHTML = '\u2715';"
+    },
+    {
+      "file": "eacis/static/js/admin/refunds.js",
+      "line": 71,
+      "code": "h.innerHTML = `<h3 id=\"modal-title\">${title}</h3>`;"
+    },
+    {
+      "file": "eacis/static/js/admin/refunds.js",
+      "line": 74,
+      "code": "if (typeof body === 'string') b.innerHTML = body; else b.appendChild(body);"
+    },
+    {
+      "file": "eacis/static/js/admin/refunds.js",
+      "line": 77,
+      "code": "if (typeof footer === 'string') f.innerHTML = footer; else if (footer) f.appendChild(footer);"
+    },
+    {
+      "file": "eacis/static/js/admin/refunds.js",
+      "line": 124,
+      "code": "body.innerHTML = `"
+    },
+    {
+      "file": "eacis/static/js/components/modal.js",
+      "line": 36,
+      "code": "panel.innerHTML = typeof content === 'string' ? content : '';"
+    },
+    {
+      "file": "eacis/static/js/components/modal.js",
+      "line": 44,
+      "code": "closeBtn.innerHTML = '&#10005;';"
+    },
+    {
+      "file": "eacis/static/js/components/modal.js",
+      "line": 144,
+      "code": "if(typeof nodeOrHtml === 'string') modal.innerHTML = nodeOrHtml; else modal.appendChild(nodeOrHtml);"
+    },
+    {
+      "file": "eacis/static/js/components/productGrid.js",
+      "line": 45,
+      "code": "root.innerHTML = '';"
+    },
+    {
+      "file": "eacis/static/js/components/productGrid.js",
+      "line": 92,
+      "code": "btnQuick.innerHTML = '<svg width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" viewBox=\"0 0 24 2"
+    },
+    {
+      "file": "eacis/static/js/components/productGrid.js",
+      "line": 100,
+      "code": "content.innerHTML = `"
+    },
+    {
+      "file": "eacis/static/js/components/productGrid.js",
+      "line": 201,
+      "code": "btn.innerHTML = '<svg width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" viewBox=\"0 0 24 24\"><p"
+    },
+    {
+      "file": "eacis/static/js/components/productGrid.js",
+      "line": 216,
+      "code": "btn.innerHTML = '<svg width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" viewBox=\"0 0 24 24\"><p"
+    },
+    {
+      "file": "eacis/static/js/components/productGrid.js",
+      "line": 249,
+      "code": "sellerName.innerHTML = `by <strong>${p.seller_name || 'Unknown'}</strong>`;"
+    },
+    {
+      "file": "eacis/static/js/components/productGrid.js",
+      "line": 290,
+      "code": "rating.innerHTML = `${starsHTML}${reviewPart}`;"
+    },
+    {
+      "file": "eacis/static/js/components/productGrid.js",
+      "line": 299,
+      "code": "footer.innerHTML = '<span class=\"badge badge--danger\">Out of Stock</span>';"
+    },
+    {
+      "file": "eacis/static/js/components/toast.js",
+      "line": 18,
+      "code": "wrap.innerHTML = icons[type] || icons.info;"
+    },
+    {
+      "file": "eacis/static/js/components/toast.js",
+      "line": 49,
+      "code": "dismissBtn.innerHTML = '\u2715';"
+    },
+    {
+      "file": "eacis/static/js/customer/customer.js",
+      "line": 51,
+      "code": "container.innerHTML = `"
+    },
+    {
+      "file": "eacis/static/js/customer/customer.js",
+      "line": 62,
+      "code": "container.innerHTML = cart.map(item => {"
+    },
+    {
+      "file": "eacis/static/js/customer/customer.js",
+      "line": 90,
+      "code": "thumbs.innerHTML = '';"
+    },
+    {
+      "file": "eacis/static/js/customer/customer.js",
+      "line": 92,
+      "code": "main.innerHTML = '';"
+    },
+    {
+      "file": "eacis/static/js/customer/customer.js",
+      "line": 128,
+      "code": "qs('cart-empty').style.display='block'; container.innerHTML=''; qs('cart-subtotal').textContent='PHP 0.00';"
+    },
+    {
+      "file": "eacis/static/js/customer/customer.js",
+      "line": 131,
+      "code": "qs('cart-empty').style.display='none'; container.innerHTML='';"
+    },
+    {
+      "file": "eacis/static/js/customer/customer.js",
+      "line": 137,
+      "code": "row.innerHTML = `"
+    },
+    {
+      "file": "eacis/static/js/customer/customer.js",
+      "line": 187,
+      "code": "if(!orders.length){ el.innerHTML = '<div class=\"empty-state\">No orders yet.</div>'; return;}"
+    },
+    {
+      "file": "eacis/static/js/customer/customer.js",
+      "line": 188,
+      "code": "el.innerHTML='';"
+    },
+    {
+      "file": "eacis/static/js/customer/customer.js",
+      "line": 192,
+      "code": "node.innerHTML = `"
+    },
+    {
+      "file": "eacis/static/js/main.js",
+      "line": 232,
+      "code": "toast.innerHTML = `"
+    },
+    {
+      "file": "eacis/static/js/security.js",
+      "line": 27,
+      "code": "content.innerHTML = `"
+    },
+    {
+      "file": "eacis/static/js/seller/dashboard.js",
+      "line": 5,
+      "code": "el.innerHTML = '<ul style=\"list-style:none;padding:0;margin:0\"><li>PRD-SLR01-0004 \u2022 Gas Range \u2022 44 sold</li><li>PRD-SLR0"
+    },
+    {
+      "file": "eacis/static/js/seller/products.js",
+      "line": 11,
+      "code": "tbody.innerHTML = '';"
+    },
+    {
+      "file": "eacis/static/js/seller/products.js",
+      "line": 16,
+      "code": "tr.innerHTML = `"
+    },
+    {
+      "file": "eacis/static/js/seller/products.js",
+      "line": 66,
+      "code": "node.innerHTML = `<h3 style=\"margin:0\">${title}</h3><p style=\"margin-top:8px;color:var(--muted)\">${message}</p><div styl"
+    },
+    {
+      "file": "eacis/static/js/ui/micro.js",
+      "line": 131,
+      "code": "const btn = document.createElement('button'); btn.className='toast-close'; btn.setAttribute('aria-label','Close notifica"
+    },
+    {
+      "file": "eacis/static/js/ui.js",
+      "line": 288,
+      "code": "searchResults.innerHTML = renderNotice(validation.message, searchRole);"
+    },
+    {
+      "file": "eacis/static/js/ui.js",
+      "line": 294,
+      "code": "searchResults.innerHTML = renderNotice(validation.message, searchRole);"
+    },
+    {
+      "file": "eacis/static/js/ui.js",
+      "line": 343,
+      "code": "searchResults.innerHTML = `"
+    },
+    {
+      "file": "eacis/static/js/ui.js",
+      "line": 353,
+      "code": "searchResults.innerHTML = renderNoResults(cleaned, searchRole, validation.message || `No match for \\\"${cleaned}\\\"`);"
+    },
+    {
+      "file": "eacis/static/js/ui.js",
+      "line": 367,
+      "code": "searchResults.innerHTML = shortcuts.map(item => `"
+    },
+    {
+      "file": "eacis/static/js/ui.js",
+      "line": 389,
+      "code": "searchResults.innerHTML = renderNotice('Search requires at least 2 characters.', searchRole);"
+    }
+  ],
+  "model_tables_count": 24,
+  "actual_db_tables_count": 25,
+  "schema_diffs": [],
+  "missing_fk_indexes": [
+    {
+      "table": "addresses",
+      "column": "user_id"
+    },
+    {
+      "table": "products",
+      "column": "seller_id"
+    },
+    {
+      "table": "product_images",
+      "column": "product_id"
+    },
+    {
+      "table": "orders",
+      "column": "customer_id"
+    },
+    {
+      "table": "orders",
+      "column": "voucher_id"
+    },
+    {
+      "table": "order_items",
+      "column": "order_id"
+    },
+    {
+      "table": "order_items",
+      "column": "product_id"
+    },
+    {
+      "table": "vouchers",
+      "column": "seller_id"
+    },
+    {
+      "table": "voucher_usage_logs",
+      "column": "order_id"
+    },
+    {
+      "table": "return_requests",
+      "column": "order_id"
+    },
+    {
+      "table": "return_requests",
+      "column": "customer_id"
+    },
+    {
+      "table": "return_abuse_logs",
+      "column": "reviewed_by"
+    },
+    {
+      "table": "refund_transactions",
+      "column": "return_request_id"
+    },
+    {
+      "table": "inquiry_tickets",
+      "column": "customer_id"
+    },
+    {
+      "table": "inquiry_tickets",
+      "column": "order_id"
+    },
+    {
+      "table": "inquiry_tickets",
+      "column": "assigned_to"
+    },
+    {
+      "table": "inquiry_replies",
+      "column": "author_id"
+    },
+    {
+      "table": "invoices",
+      "column": "order_id"
+    },
+    {
+      "table": "invoices",
+      "column": "customer_id"
+    },
+    {
+      "table": "invoices",
+      "column": "seller_id"
+    },
+    {
+      "table": "installment_plans",
+      "column": "order_id"
+    },
+    {
+      "table": "installment_schedule",
+      "column": "plan_id"
+    },
+    {
+      "table": "loyalty_transactions",
+      "column": "user_id"
+    },
+    {
+      "table": "audit_logs",
+      "column": "actor_id"
+    },
+    {
+      "table": "stock_movements",
+      "column": "created_by"
+    },
+    {
+      "table": "otp_challenges",
+      "column": "user_id"
+    },
+    {
+      "table": "trusted_devices",
+      "column": "user_id"
+    }
+  ]
+}

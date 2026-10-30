@@ -1,0 +1,965 @@
+{
+  "db_uri_verified": "sqlite:///C:/Users/Ivann/Downloads/Eacis/instance/audit_copy.db",
+  "role_matrix": {
+    "guest": {
+      "GET /": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /shop": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /cart": {
+        "status": 302,
+        "redirect": "/auth/login?next=/cart"
+      },
+      "GET /checkout": {
+        "status": 302,
+        "redirect": "/auth/login?next=/checkout"
+      },
+      "GET /customer/dashboard": {
+        "status": 302,
+        "redirect": "/auth/login?next=/customer/dashboard"
+      },
+      "GET /customer/orders": {
+        "status": 302,
+        "redirect": "/auth/login?next=/customer/orders"
+      },
+      "GET /customer/installments": {
+        "status": 302,
+        "redirect": "/auth/login?next=/customer/installments"
+      },
+      "GET /customer/returns": {
+        "status": 302,
+        "redirect": "/auth/login?next=/customer/returns"
+      },
+      "GET /customer/loyalty": {
+        "status": 302,
+        "redirect": "/auth/login?next=/customer/loyalty"
+      },
+      "GET /customer/profile": {
+        "status": 302,
+        "redirect": "/auth/login?next=/customer/profile"
+      },
+      "GET /seller/dashboard": {
+        "status": 302,
+        "redirect": "/auth/login?next=/seller/dashboard"
+      },
+      "GET /seller/products": {
+        "status": 302,
+        "redirect": "/auth/login?next=/seller/products"
+      },
+      "GET /seller/orders": {
+        "status": 302,
+        "redirect": "/auth/login?next=/seller/orders"
+      },
+      "GET /seller/returns": {
+        "status": 302,
+        "redirect": "/auth/login?next=/seller/returns"
+      },
+      "GET /seller/payouts": {
+        "status": 302,
+        "redirect": "/auth/login?next=/seller/payouts"
+      },
+      "GET /seller/verification": {
+        "status": 302,
+        "redirect": "/auth/login?next=/seller/verification"
+      },
+      "GET /admin/dashboard": {
+        "status": 302,
+        "redirect": "/auth/login?next=/admin/dashboard"
+      },
+      "GET /admin/sellers": {
+        "status": 302,
+        "redirect": "/auth/login?next=/admin/sellers"
+      },
+      "GET /admin/users": {
+        "status": 302,
+        "redirect": "/auth/login?next=/admin/users"
+      },
+      "GET /admin/reports": {
+        "status": 302,
+        "redirect": "/auth/login?next=/admin/reports"
+      },
+      "GET /admin/audit": {
+        "status": 302,
+        "redirect": "/auth/login?next=/admin/audit"
+      }
+    },
+    "customer_unverified": {
+      "GET /": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /shop": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /cart": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /checkout": {
+        "status": 302,
+        "redirect": "/cart"
+      },
+      "GET /customer/dashboard": {
+        "status": 404,
+        "redirect": ""
+      },
+      "GET /customer/orders": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /customer/installments": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /customer/returns": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /customer/loyalty": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /customer/profile": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /seller/dashboard": {
+        "status": 302,
+        "redirect": "/shop"
+      },
+      "GET /seller/products": {
+        "status": 302,
+        "redirect": "/shop"
+      },
+      "GET /seller/orders": {
+        "status": 302,
+        "redirect": "/shop"
+      },
+      "GET /seller/returns": {
+        "status": 302,
+        "redirect": "/shop"
+      },
+      "GET /seller/payouts": {
+        "status": 302,
+        "redirect": "/shop"
+      },
+      "GET /seller/verification": {
+        "status": 302,
+        "redirect": "/shop"
+      },
+      "GET /admin/dashboard": {
+        "status": 302,
+        "redirect": "/shop"
+      },
+      "GET /admin/sellers": {
+        "status": 302,
+        "redirect": "/shop"
+      },
+      "GET /admin/users": {
+        "status": 302,
+        "redirect": "/shop"
+      },
+      "GET /admin/reports": {
+        "status": 302,
+        "redirect": "/shop"
+      },
+      "GET /admin/audit": {
+        "status": 302,
+        "redirect": "/shop"
+      }
+    },
+    "customer_verified": {
+      "GET /": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /shop": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /cart": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /checkout": {
+        "status": 302,
+        "redirect": "/cart"
+      },
+      "GET /customer/dashboard": {
+        "status": 404,
+        "redirect": ""
+      },
+      "GET /customer/orders": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /customer/installments": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /customer/returns": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /customer/loyalty": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /customer/profile": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /seller/dashboard": {
+        "status": 302,
+        "redirect": "/shop"
+      },
+      "GET /seller/products": {
+        "status": 302,
+        "redirect": "/shop"
+      },
+      "GET /seller/orders": {
+        "status": 302,
+        "redirect": "/shop"
+      },
+      "GET /seller/returns": {
+        "status": 302,
+        "redirect": "/shop"
+      },
+      "GET /seller/payouts": {
+        "status": 302,
+        "redirect": "/shop"
+      },
+      "GET /seller/verification": {
+        "status": 302,
+        "redirect": "/shop"
+      },
+      "GET /admin/dashboard": {
+        "status": 302,
+        "redirect": "/shop"
+      },
+      "GET /admin/sellers": {
+        "status": 302,
+        "redirect": "/shop"
+      },
+      "GET /admin/users": {
+        "status": 302,
+        "redirect": "/shop"
+      },
+      "GET /admin/reports": {
+        "status": 302,
+        "redirect": "/shop"
+      },
+      "GET /admin/audit": {
+        "status": 302,
+        "redirect": "/shop"
+      }
+    },
+    "customer_kyc_ok": {
+      "GET /": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /shop": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /cart": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /checkout": {
+        "status": 302,
+        "redirect": "/cart"
+      },
+      "GET /customer/dashboard": {
+        "status": 404,
+        "redirect": ""
+      },
+      "GET /customer/orders": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /customer/installments": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /customer/returns": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /customer/loyalty": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /customer/profile": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /seller/dashboard": {
+        "status": 302,
+        "redirect": "/shop"
+      },
+      "GET /seller/products": {
+        "status": 302,
+        "redirect": "/shop"
+      },
+      "GET /seller/orders": {
+        "status": 302,
+        "redirect": "/shop"
+      },
+      "GET /seller/returns": {
+        "status": 302,
+        "redirect": "/shop"
+      },
+      "GET /seller/payouts": {
+        "status": 302,
+        "redirect": "/shop"
+      },
+      "GET /seller/verification": {
+        "status": 302,
+        "redirect": "/shop"
+      },
+      "GET /admin/dashboard": {
+        "status": 302,
+        "redirect": "/shop"
+      },
+      "GET /admin/sellers": {
+        "status": 302,
+        "redirect": "/shop"
+      },
+      "GET /admin/users": {
+        "status": 302,
+        "redirect": "/shop"
+      },
+      "GET /admin/reports": {
+        "status": 302,
+        "redirect": "/shop"
+      },
+      "GET /admin/audit": {
+        "status": 302,
+        "redirect": "/shop"
+      }
+    },
+    "customer_kyc_expired": {
+      "GET /": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /shop": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /cart": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /checkout": {
+        "status": 302,
+        "redirect": "/cart"
+      },
+      "GET /customer/dashboard": {
+        "status": 404,
+        "redirect": ""
+      },
+      "GET /customer/orders": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /customer/installments": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /customer/returns": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /customer/loyalty": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /customer/profile": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /seller/dashboard": {
+        "status": 302,
+        "redirect": "/shop"
+      },
+      "GET /seller/products": {
+        "status": 302,
+        "redirect": "/shop"
+      },
+      "GET /seller/orders": {
+        "status": 302,
+        "redirect": "/shop"
+      },
+      "GET /seller/returns": {
+        "status": 302,
+        "redirect": "/shop"
+      },
+      "GET /seller/payouts": {
+        "status": 302,
+        "redirect": "/shop"
+      },
+      "GET /seller/verification": {
+        "status": 302,
+        "redirect": "/shop"
+      },
+      "GET /admin/dashboard": {
+        "status": 302,
+        "redirect": "/shop"
+      },
+      "GET /admin/sellers": {
+        "status": 302,
+        "redirect": "/shop"
+      },
+      "GET /admin/users": {
+        "status": 302,
+        "redirect": "/shop"
+      },
+      "GET /admin/reports": {
+        "status": 302,
+        "redirect": "/shop"
+      },
+      "GET /admin/audit": {
+        "status": 302,
+        "redirect": "/shop"
+      }
+    },
+    "seller_pending": {
+      "GET /": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /shop": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /cart": {
+        "status": 302,
+        "redirect": "/auth/login?next=/cart"
+      },
+      "GET /checkout": {
+        "status": 302,
+        "redirect": "/auth/login?next=/checkout"
+      },
+      "GET /customer/dashboard": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      },
+      "GET /customer/orders": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      },
+      "GET /customer/installments": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      },
+      "GET /customer/returns": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      },
+      "GET /customer/loyalty": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      },
+      "GET /customer/profile": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      },
+      "GET /seller/dashboard": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /seller/products": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      },
+      "GET /seller/orders": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      },
+      "GET /seller/returns": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      },
+      "GET /seller/payouts": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      },
+      "GET /seller/verification": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      },
+      "GET /admin/dashboard": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      },
+      "GET /admin/sellers": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      },
+      "GET /admin/users": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      },
+      "GET /admin/reports": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      },
+      "GET /admin/audit": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      }
+    },
+    "seller_approved": {
+      "GET /": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /shop": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /cart": {
+        "status": 302,
+        "redirect": "/auth/login?next=/cart"
+      },
+      "GET /checkout": {
+        "status": 302,
+        "redirect": "/auth/login?next=/checkout"
+      },
+      "GET /customer/dashboard": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      },
+      "GET /customer/orders": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      },
+      "GET /customer/installments": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      },
+      "GET /customer/returns": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      },
+      "GET /customer/loyalty": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      },
+      "GET /customer/profile": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      },
+      "GET /seller/dashboard": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /seller/products": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /seller/orders": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /seller/returns": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /seller/payouts": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /seller/verification": {
+        "status": 404,
+        "redirect": ""
+      },
+      "GET /admin/dashboard": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      },
+      "GET /admin/sellers": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      },
+      "GET /admin/users": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      },
+      "GET /admin/reports": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      },
+      "GET /admin/audit": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      }
+    },
+    "seller_rejected": {
+      "GET /": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /shop": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /cart": {
+        "status": 302,
+        "redirect": "/auth/login?next=/cart"
+      },
+      "GET /checkout": {
+        "status": 302,
+        "redirect": "/auth/login?next=/checkout"
+      },
+      "GET /customer/dashboard": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      },
+      "GET /customer/orders": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      },
+      "GET /customer/installments": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      },
+      "GET /customer/returns": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      },
+      "GET /customer/loyalty": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      },
+      "GET /customer/profile": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      },
+      "GET /seller/dashboard": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /seller/products": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      },
+      "GET /seller/orders": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      },
+      "GET /seller/returns": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      },
+      "GET /seller/payouts": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      },
+      "GET /seller/verification": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      },
+      "GET /admin/dashboard": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      },
+      "GET /admin/sellers": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      },
+      "GET /admin/users": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      },
+      "GET /admin/reports": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      },
+      "GET /admin/audit": {
+        "status": 302,
+        "redirect": "/seller/dashboard"
+      }
+    },
+    "seller_suspended": {
+      "GET /": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /shop": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /cart": {
+        "status": 302,
+        "redirect": "/auth/login?next=/cart"
+      },
+      "GET /checkout": {
+        "status": 302,
+        "redirect": "/auth/login?next=/checkout"
+      },
+      "GET /customer/dashboard": {
+        "status": 302,
+        "redirect": "/auth/login?next=/customer/dashboard"
+      },
+      "GET /customer/orders": {
+        "status": 302,
+        "redirect": "/auth/login?next=/customer/orders"
+      },
+      "GET /customer/installments": {
+        "status": 302,
+        "redirect": "/auth/login?next=/customer/installments"
+      },
+      "GET /customer/returns": {
+        "status": 302,
+        "redirect": "/auth/login?next=/customer/returns"
+      },
+      "GET /customer/loyalty": {
+        "status": 302,
+        "redirect": "/auth/login?next=/customer/loyalty"
+      },
+      "GET /customer/profile": {
+        "status": 302,
+        "redirect": "/auth/login?next=/customer/profile"
+      },
+      "GET /seller/dashboard": {
+        "status": 302,
+        "redirect": "/auth/login?next=/seller/dashboard"
+      },
+      "GET /seller/products": {
+        "status": 302,
+        "redirect": "/auth/login?next=/seller/products"
+      },
+      "GET /seller/orders": {
+        "status": 302,
+        "redirect": "/auth/login?next=/seller/orders"
+      },
+      "GET /seller/returns": {
+        "status": 302,
+        "redirect": "/auth/login?next=/seller/returns"
+      },
+      "GET /seller/payouts": {
+        "status": 302,
+        "redirect": "/auth/login?next=/seller/payouts"
+      },
+      "GET /seller/verification": {
+        "status": 302,
+        "redirect": "/auth/login?next=/seller/verification"
+      },
+      "GET /admin/dashboard": {
+        "status": 302,
+        "redirect": "/auth/login?next=/admin/dashboard"
+      },
+      "GET /admin/sellers": {
+        "status": 302,
+        "redirect": "/auth/login?next=/admin/sellers"
+      },
+      "GET /admin/users": {
+        "status": 302,
+        "redirect": "/auth/login?next=/admin/users"
+      },
+      "GET /admin/reports": {
+        "status": 302,
+        "redirect": "/auth/login?next=/admin/reports"
+      },
+      "GET /admin/audit": {
+        "status": 302,
+        "redirect": "/auth/login?next=/admin/audit"
+      }
+    },
+    "admin": {
+      "GET /": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /shop": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /cart": {
+        "status": 302,
+        "redirect": "/auth/login?next=/cart"
+      },
+      "GET /checkout": {
+        "status": 302,
+        "redirect": "/auth/login?next=/checkout"
+      },
+      "GET /customer/dashboard": {
+        "status": 302,
+        "redirect": "/admin/dashboard"
+      },
+      "GET /customer/orders": {
+        "status": 302,
+        "redirect": "/admin/dashboard"
+      },
+      "GET /customer/installments": {
+        "status": 302,
+        "redirect": "/admin/dashboard"
+      },
+      "GET /customer/returns": {
+        "status": 302,
+        "redirect": "/admin/dashboard"
+      },
+      "GET /customer/loyalty": {
+        "status": 302,
+        "redirect": "/admin/dashboard"
+      },
+      "GET /customer/profile": {
+        "status": 302,
+        "redirect": "/admin/dashboard"
+      },
+      "GET /seller/dashboard": {
+        "status": 302,
+        "redirect": "/admin/dashboard"
+      },
+      "GET /seller/products": {
+        "status": 302,
+        "redirect": "/admin/dashboard"
+      },
+      "GET /seller/orders": {
+        "status": 302,
+        "redirect": "/admin/dashboard"
+      },
+      "GET /seller/returns": {
+        "status": 302,
+        "redirect": "/admin/dashboard"
+      },
+      "GET /seller/payouts": {
+        "status": 302,
+        "redirect": "/admin/dashboard"
+      },
+      "GET /seller/verification": {
+        "status": 302,
+        "redirect": "/admin/dashboard"
+      },
+      "GET /admin/dashboard": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /admin/sellers": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /admin/users": {
+        "status": 404,
+        "redirect": ""
+      },
+      "GET /admin/reports": {
+        "status": 200,
+        "redirect": ""
+      },
+      "GET /admin/audit": {
+        "status": 200,
+        "redirect": ""
+      }
+    }
+  },
+  "flow_checks": {
+    "SEC_03_suspended_seller": {
+      "when_is_active_false_status": 302,
+      "when_is_active_false_redirect": "/auth/login?next=/seller/orders",
+      "when_is_active_true_status_suspended": 200,
+      "when_is_active_true_redirect": ""
+    },
+    "SEC_01a_pending_seller_reads_any_permit_or_kyc": {
+      "status": 200,
+      "body_len": 18
+    },
+    "SEC_01b_seller_inquiry_idor": {
+      "ticket_ref": "TCK-1001",
+      "assigned_to": 2,
+      "other_seller_id": 16,
+      "status": 200
+    },
+    "SEC_02_missing_returns_upload_route": {
+      "status": 404
+    },
+    "LOGIC_01_finalize_seller_refund": {
+      "status": 500,
+      "error": "NameError: name 'finalize_seller_refund' is not defined"
+    },
+    "LOGIC_06_partial_cart_checkout_wipes_unselected": {
+      "http_status": 302,
+      "redirect": "/customer/checkout/success?order_ref=ORD-6FE0A061DF84",
+      "cart_items_before_count": 2,
+      "selected_count": 1,
+      "cart_items_after": []
+    },
+    "LOGIC_02_08_installment_refund": {
+      "order_ref": "ORD-2001",
+      "order_total": 8249.0,
+      "actually_paid_before_refund": 7249.98,
+      "refunded_amount": 8249.0,
+      "plan_status_after_refund": "completed",
+      "customer_points_before": 500,
+      "customer_points_after": 418,
+      "process_refund_ok": true,
+      "process_refund_msg": "Refund of \u20b18,249.00 processed and items restocked."
+    }
+  },
+  "financial_reconciliation": {
+    "total_orders_checked": 12,
+    "order_math_mismatches": [
+      {
+        "order_ref": "ORD-1004",
+        "items_sum": 0.0,
+        "subtotal_col": 18000.0,
+        "discount": 0.0,
+        "shipping_fee": 250.0,
+        "total_col": 18250.0,
+        "expected_total": 250.0
+      },
+      {
+        "order_ref": "ORD-1005",
+        "items_sum": 0.0,
+        "subtotal_col": 18000.0,
+        "discount": 0.0,
+        "shipping_fee": 250.0,
+        "total_col": 18250.0,
+        "expected_total": 250.0
+      }
+    ],
+    "total_installment_plans_checked": 3,
+    "installment_schedule_mismatches": [
+      {
+        "plan_id": 1,
+        "order_id": 8,
+        "financed_amount": 0.0,
+        "schedules_sum": 7249.98,
+        "diff": 7249.98
+      },
+      {
+        "plan_id": 2,
+        "order_id": 9,
+        "financed_amount": 0.0,
+        "schedules_sum": 11250.0,
+        "diff": 11250.0
+      },
+      {
+        "plan_id": 3,
+        "order_id": 10,
+        "financed_amount": 0.0,
+        "schedules_sum": 13249.02,
+        "diff": 13249.02
+      }
+    ],
+    "voucher_usage_logs_count": 0,
+    "orders_with_voucher_count": 2
+  },
+  "auth_debug": {
+    "user_1_in_db": true,
+    "api_session_resp": {
+      "authenticated": true,
+      "id": "1",
+      "role": "admin"
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Account Suspended — E-ACIS{% endblock %}
+{% block content %}
+<div class="container" style="max-width: 600px; margin: var(--sp-12) auto; text-align: center;">
+  <div class="card" style="padding: var(--sp-8); border-top: 4px solid var(--danger, #dc2626);">
+    <div style="font-size: 3rem; margin-bottom: var(--sp-4);">🚫</div>
+    <h1 style="font-size: 1.5rem; margin-bottom: var(--sp-3);">Seller Account Suspended</h1>
+    <p class="text-muted" style="margin-bottom: var(--sp-6);">Your merchant privileges on the E-ACIS marketplace have been suspended by system administration due to compliance or performance review.</p>
+    <p class="text-muted" style="font-size: 0.9rem; margin-bottom: var(--sp-6);">If you believe this suspension is in error or wish to appeal, please contact the marketplace governance team at <strong>admin@eacis.com</strong>.</p>
+    <div>
+      <a href="{{ url_for('auth_logout') }}" class="btn btn--secondary">Sign Out</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

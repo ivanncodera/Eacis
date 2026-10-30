@@ -1,5 +1,7 @@
 # Environment variables
 .env
+.env.*
+eacis/.env
 .env.local
 
 # Database
@@ -16,6 +18,8 @@ build/
 
 # Flask
 instance/
+instance/*.db*
+*.db*
 
 # IDE
 .vscode/
