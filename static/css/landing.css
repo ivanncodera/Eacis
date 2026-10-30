@@ -1,0 +1,413 @@
+/* ==========================================================================
+   E-ACIS HOMEPAGE — CALM, MINIMAL E-COMMERCE DESIGN
+   Typography: max 2 font weights (400 regular, 600 semibold)
+   Accent: single blue (var(--brand-primary)) for primary buttons & small tags
+   ========================================================================== */
+
+body.page-landing .main-content {
+  padding-top: var(--sp-4, 16px);
+}
+
+.landing.eacis-landing {
+  position: relative;
+  z-index: 1;
+  background: transparent;
+  color: var(--grey-900, #091E42);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.6;
+  padding-bottom: var(--sp-16, 64px);
+}
+
+.eacis-landing p {
+  max-width: 55ch;
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+/* Visible WCAG AA focus states */
+.eacis-landing a:focus-visible,
+.eacis-landing button:focus-visible {
+  outline: 2.5px solid var(--brand-primary, #007AFF);
+  outline-offset: 3px;
+}
+
+/* Brand Emblem in Topbar & Footer */
+.topbar__brand-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-md, 10px);
+  background: var(--brand-primary, #007AFF);
+  color: var(--grey-0, #FFFFFF);
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.topbar__home-link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+/* ── 1. CALM ABOVE-THE-FOLD HERO ────────────────────────────────────────── */
+.landing-hero {
+  padding: var(--sp-6, 24px) 0 var(--sp-8, 32px);
+}
+
+.landing-hero__grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: var(--sp-12, 48px);
+  align-items: center;
+}
+
+.landing-hero__content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 28px;
+}
+
+.landing-hero__title {
+  font-size: clamp(2.125rem, 3.6vw, 3.125rem);
+  font-weight: 600;
+  letter-spacing: normal;
+  line-height: 1.18;
+  color: var(--grey-900, #091E42);
+  max-width: 16ch;
+  margin: 0;
+}
+
+.landing-hero__subtitle {
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--grey-600, #505F79);
+  max-width: 55ch;
+  margin: 0;
+}
+
+.landing-hero__actions {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+
+.landing-hero__primary-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+  padding: 0 28px;
+  border-radius: var(--radius-lg, 14px);
+  background: var(--brand-primary, #007AFF);
+  color: var(--grey-0, #FFFFFF);
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 8px 20px rgba(0, 122, 255, 0.22);
+  transition: background-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+
+.landing-hero__primary-btn:hover {
+  background: var(--brand-primary-dark, #0062CC);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(0, 122, 255, 0.28);
+}
+
+.landing-hero__quiet-link {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--grey-700, #344563);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: rgba(52, 69, 99, 0.35);
+  transition: color 160ms ease, text-decoration-color 160ms ease;
+}
+
+.landing-hero__quiet-link:hover {
+  color: var(--grey-900, #091E42);
+  text-decoration-color: var(--grey-900, #091E42);
+}
+
+/* Clean Featured Product Card (Right Column) */
+.landing-hero__product-card {
+  display: block;
+  width: 100%;
+  max-width: 440px;
+  margin-left: auto;
+  padding: 28px;
+  border-radius: var(--radius-2xl, 24px);
+  background: var(--surface-card, #FFFFFF);
+  border: 1px solid var(--border-default, rgba(9, 30, 66, 0.08));
+  box-shadow: 0 16px 40px rgba(9, 30, 66, 0.07);
+  text-decoration: none;
+  color: inherit;
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+.landing-hero__product-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 48px rgba(9, 30, 66, 0.1);
+}
+
+.landing-hero__image-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 250px;
+  border-radius: var(--radius-xl, 18px);
+  background: var(--grey-50, #F7F8FA);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.landing-hero__image {
+  max-width: 100%;
+  max-height: 210px;
+  object-fit: contain;
+}
+
+.landing-hero__product-meta {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.landing-hero__product-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--grey-900, #091E42);
+  margin: 0 0 4px;
+}
+
+.landing-hero__product-price {
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--grey-600, #505F79);
+  margin: 0;
+}
+
+.landing-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill, 9999px);
+  background: var(--brand-primary-subtle, rgba(0, 122, 255, 0.08));
+  color: var(--brand-primary-dark, #0062CC);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── 2. SLIM 3-ITEM TRUST ROW UNDER HERO ────────────────────────────────── */
+.landing-trust-row {
+  margin-top: 8px;
+  padding: 20px 28px;
+  border-radius: var(--radius-xl, 18px);
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid var(--border-default, rgba(9, 30, 66, 0.08));
+  box-shadow: 0 6px 20px rgba(9, 30, 66, 0.04);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.landing-trust-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--grey-800, #172B4D);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.landing-trust-item__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--brand-primary-subtle, rgba(0, 122, 255, 0.08));
+  color: var(--brand-primary, #007AFF);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ── 3. SECTIONS & HEADINGS ─────────────────────────────────────────────── */
+.landing-section {
+  margin-top: 72px;
+}
+
+.landing-section__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+
+.landing-section__label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--brand-primary-dark, #0062CC);
+  margin-bottom: 6px;
+}
+
+.landing-section__title {
+  font-size: clamp(1.5rem, 2.2vw, 2rem);
+  font-weight: 600;
+  letter-spacing: normal;
+  color: var(--grey-900, #091E42);
+  margin: 0;
+}
+
+.landing-section__desc {
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--grey-600, #505F79);
+  margin: 6px 0 0;
+  max-width: 55ch;
+}
+
+/* ── 4. CATEGORIES GRID ─────────────────────────────────────────────────── */
+.landing-categories-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.landing-category-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 24px;
+  border-radius: var(--radius-xl, 18px);
+  background: var(--surface-card, #FFFFFF);
+  border: 1px solid var(--border-default, rgba(9, 30, 66, 0.08));
+  box-shadow: 0 8px 24px rgba(9, 30, 66, 0.04);
+  text-decoration: none;
+  color: var(--grey-900, #091E42);
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.landing-category-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(9, 30, 66, 0.08);
+  border-color: rgba(0, 122, 255, 0.3);
+}
+
+.landing-category-card__icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: var(--brand-primary-subtle, rgba(0, 122, 255, 0.08));
+  color: var(--brand-primary, #007AFF);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.landing-category-card__title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 6px;
+  color: var(--grey-900, #091E42);
+}
+
+.landing-category-card__desc {
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--grey-600, #505F79);
+  margin: 0 0 16px;
+}
+
+.landing-category-card__link {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--brand-primary-dark, #0062CC);
+}
+
+/* ── 5. FILTER TABS & FEATURED GRID ─────────────────────────────────────── */
+.landing-filter-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.landing-filter-tab {
+  padding: 8px 16px;
+  border-radius: var(--radius-pill, 9999px);
+  border: 1px solid var(--border-default, rgba(9, 30, 66, 0.1));
+  background: var(--surface-card, #FFFFFF);
+  color: var(--grey-700, #344563);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+
+.landing-filter-tab:hover,
+.landing-filter-tab.is-active {
+  background: var(--brand-primary, #007AFF);
+  border-color: var(--brand-primary, #007AFF);
+  color: var(--grey-0, #FFFFFF);
+}
+
+/* ── 6. CALM BOTTOM CTA CARD ────────────────────────────────────────────── */
+.landing-bottom-cta {
+  padding: 40px;
+  border-radius: var(--radius-2xl, 24px);
+  background: var(--surface-card, #FFFFFF);
+  border: 1px solid var(--border-default, rgba(9, 30, 66, 0.08));
+  box-shadow: 0 12px 32px rgba(9, 30, 66, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+/* ── RESPONSIVE BREAKPOINTS ─────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .landing-hero__grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .landing-hero__product-card {
+    margin-left: 0;
+    max-width: 100%;
+  }
+
+  .landing-categories-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .landing-trust-row {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 20px;
+  }
+
+  .landing-categories-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-bottom-cta {
+    padding: 28px;
+  }
+}

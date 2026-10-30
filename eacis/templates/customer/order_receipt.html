@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% block title %}Receipt — {{ order.order_ref }}{% endblock %}
+{% block content %}
+<div style="padding: 24px; max-width:900px; margin: 0 auto;">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+    <div>
+      <div style="display:flex; align-items:center; gap:12px;"><img src="/static/assets/logo.png?v=20261030" alt="E-ACIS Official Logo" style="height:48px; width:auto; object-fit:contain; display:block;"><h2 class="type-h4" style="margin:0;">E-ACIS</h2></div>
+      <div class="type-body-xs text-muted">Official Receipt</div>
+    </div>
+    <div style="text-align:right;">
+      <div class="type-label-xs text-muted">Receipt #</div>
+      <div style="font-family:var(--font-mono); font-weight:700;">{{ order.order_ref }}</div>
+      <div class="type-body-xs text-muted">{{ order.created_at.strftime('%B %d, %Y %I:%M %p') if order.created_at else '—' }}</div>
+    </div>
+  </div>
+
+  <div class="glass-card p-6" style="margin-bottom:16px;">
+    <div style="display:flex; justify-content:space-between; gap:12px;">
+      <div>
+        <div class="type-label-xs text-muted">Billed To</div>
+        <div class="fw-semibold">{{ order.customer.full_name if order.customer else current_user.full_name }}</div>
+        <div class="type-body-xs text-muted">{{ order.customer.email if order.customer else current_user.email }}</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="type-label-xs text-muted">Shipping Address</div>
+        {% set addr = order.shipping_address %}
+        {% if addr %}
+          <div class="type-body-xs">{{ addr.get('recipient_name','') }}<br>{{ addr.get('address_line1','') }}{% if addr.get('address_line2') %}<br>{{ addr.get('address_line2') }}{% endif %}<br>{{ addr.get('city_municipality','') }}{% if addr.get('province') %}, {{ addr.get('province') }}{% endif %} {{ addr.get('postal_code','') }}</div>
+        {% else %}
+          <div class="type-body-xs text-muted">No address recorded</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="glass-card p-0" style="overflow:hidden;">
+    <div style="padding:12px 16px; border-bottom:1px solid var(--border-subtle); background:var(--grey-25);">
+      <div class="type-label-xs text-muted">Items</div>
+    </div>
+    <div style="padding:12px 16px;">
+      <table style="width:100%; border-collapse:collapse;">
+        <thead>
+          <tr style="text-align:left; color:var(--grey-600); font-size:0.9rem;">
+            <th style="padding:8px 0;">Description</th>
+            <th style="padding:8px 0; width:80px; text-align:right;">Qty</th>
+            <th style="padding:8px 0; width:140px; text-align:right;">Unit</th>
+            <th style="padding:8px 0; width:140px; text-align:right;">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in order.items.all() %}
+          <tr style="border-top:1px solid var(--border-subtle);">
+            <td style="padding:12px 0;">{{ item.product.name if item.product else 'Product' }}</td>
+            <td style="padding:12px 0; text-align:right;">{{ item.quantity }}</td>
+            <td style="padding:12px 0; text-align:right;">PHP {{ '%.2f'|format(item.unit_price|float) }}</td>
+            <td style="padding:12px 0; text-align:right; font-weight:700;">PHP {{ '%.2f'|format(item.subtotal|float) }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div style="padding:12px 16px; border-top:1px solid var(--border-default); background:var(--grey-25); display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <div class="type-body-xs text-muted">Payment Method</div>
+        <div class="fw-semibold">{{ 'Installment' if order.payment_method == 'installment' else 'Full Payment' }}</div>
+        {% if order.payment_method == 'installment' and order.installment_plan %}
+          <div class="type-body-xs text-muted">{{ order.installment_plan.months }} months • PHP {{ '%.2f'|format(order.installment_plan.monthly_amount|float) }}/mo</div>
+        {% else %}
+          <div class="type-body-xs text-muted">Paid on {{ order.paid_at.strftime('%b %d, %Y') if order.paid_at else '—' }}</div>
+        {% endif %}
+      </div>
+      <div style="text-align:right; min-width:220px;">
+        <div style="display:flex; justify-content:space-between;">
+          <div class="type-body-xs text-muted">Subtotal</div>
+          <div class="fw-semibold">PHP {{ '%.2f'|format(order.subtotal|float) }}</div>
+        </div>
+        <div style="display:flex; justify-content:space-between;">
+          <div class="type-body-xs text-muted">Discount</div>
+          <div class="fw-semibold">PHP {{ '%.2f'|format(order.discount|float) }}</div>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-top:8px; font-size:1.1rem;">
+          <div class="fw-bold">Total</div>
+          <div style="font-weight:800; color:var(--brand-primary);">PHP {{ '%.2f'|format(order.total|float) }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if order.payment_method == 'installment' and order.installment_plan %}
+  <div class="glass-card p-6" style="margin-top:12px;">
+    <h3 class="type-h5">Installment Plan</h3>
+    <div class="type-body-sm text-muted">Monthly: PHP {{ '%.2f'|format(order.installment_plan.monthly_amount|float) }} • Duration: {{ order.installment_plan.months }} months</div>
+    <div style="margin-top:12px;">
+      <table class="data-table" style="width:100%;">
+        <thead><tr><th>Month</th><th>Due Date</th><th style="text-align:right;">Amount</th></tr></thead>
+        <tbody>
+          {% for idx, s in enumerate(order.installment_plan.schedules.order_by('due_date').all(), start=1) %}
+          <tr>
+            <td>Month {{ idx }}</td>
+            <td>{{ s.due_date.strftime('%b %d, %Y') }}</td>
+            <td style="text-align:right;">PHP {{ '%.2f'|format(s.amount|float) }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+  <div style="display:flex; gap:8px; margin-top:16px; justify-content:flex-end;">
+    <a href="/customer/orders/{{ order.order_ref }}" class="btn btn--secondary">Back to Order</a>
+    <button class="btn btn--ghost" onclick="window.print()">Print Receipt</button>
+  </div>
+</div>
+{% endblock %}

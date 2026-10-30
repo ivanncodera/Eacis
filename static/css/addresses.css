@@ -1,0 +1,47 @@
+:root{--addr-gap:12px}
+.address-card{display:flex;justify-content:space-between;align-items:flex-start;padding:12px;border-radius:8px;border:1px solid var(--border-medium);background:var(--surface);gap:12px}
+.address-card__main{flex:1}
+.address-card__label{display:flex;gap:8px;align-items:center}
+.address-card__addr{margin-top:6px}
+.address-card__landmark{margin-top:6px;color:var(--muted)}
+.address-card__actions{display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+.address-card__actions .btn{min-width:110px}
+@media (max-width:720px){
+  .address-card{flex-direction:column}
+  .address-card__actions{flex-direction:row;justify-content:flex-end;width:100%}
+  .address-card__actions .btn{min-width:unset}
+}
+#addr-search{padding:8px;border-radius:6px;border:1px solid var(--border-medium)}
+.badge-default{background:var(--brand-primary-subtle);padding:2px 6px;border-radius:6px;margin-left:6px}
+.badge-pickup{background:#fff3cd;padding:2px 6px;border-radius:6px;margin-left:6px}
+.badge-return{background:#ffeef0;padding:2px 6px;border-radius:6px;margin-left:6px}
+
+/* address picker item (compact) */
+.address-pick-item{display:flex;gap:8px;align-items:flex-start;padding:8px;border-radius:8px;border:1px solid var(--border-medium);background:var(--surface);cursor:pointer}
+.address-pick-item input[type="radio"]{margin-top:4px}
+.address-pick-item:hover{box-shadow:var(--shadow-sm);background:var(--grey-0)}
+
+/* dropdown specific styling */
+#address-picker-dropdown{max-width:420px}
+#address-picker-dropdown .form-input{width:220px}
+#picker-search{border:1px solid var(--border-medium);border-radius:6px;padding:6px}
+
+/* focus styles for keyboard users */
+.address-pick-item:focus{outline:2px solid var(--brand-primary);outline-offset:2px}
+.address-card:focus{outline:2px solid var(--brand-primary);outline-offset:2px}
+
+/* Ensure the compact dropdown is responsive */
+.address-pick-item:hover{box-shadow:var(--shadow-sm);background:var(--grey-0)}
+
+/* prefer a larger desktop width but remain responsive */
+#address-picker-dropdown{width:1100px; max-width:95vw}
+#address-picker-dropdown .glass-card{overflow:hidden; box-shadow: 0 32px 80px rgba(0,0,0,0.18); border-radius:16px; transition:box-shadow .18s ease, transform .18s ease}
+#address-picker-dropdown .glass-card:hover{box-shadow: 0 40px 120px rgba(0,0,0,0.22); transform:translateY(-6px)}
+
+/* fallback/responsive rule for small viewports */
+@media (max-width: 1200px) {
+  #address-picker-dropdown{width:min(95vw,1100px)}
+}
+
+/* ensure the internal pick list can expand */
+#address-picker-list{max-height:600px !important; width:100%; overflow:auto}

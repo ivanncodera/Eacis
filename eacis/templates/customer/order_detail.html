@@ -3,6 +3,9 @@
 {% block content %}
 <div class="main-content stagger-children" style="padding-top: calc(var(--topbar-height) + var(--sp-8)); padding-bottom: var(--sp-24);">
   <div class="container" style="max-width: 1080px;">
+    <style>
+      .order-item.item-with-divider { border-bottom: 1px solid var(--border-subtle); }
+    </style>
 
     <!-- Breadcrumb -->
     <nav class="mb-8 stagger-item" aria-label="Breadcrumb">
@@ -42,6 +45,10 @@
           Download Invoice
         </a>
         {% endif %}
+        <a href="/customer/orders/{{ order.order_ref }}/receipt" class="btn btn--white btn--sm" style="margin-left:8px;">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right: 6px;"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          View Receipt
+        </a>
         <button class="btn btn--ghost btn--sm" onclick="window.print()">
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right: 6px;"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2m-12 0h12v4H6v-4z"/></svg>
           Print
@@ -91,7 +98,7 @@
           </div>
           <div style="padding: var(--sp-4);">
             {% for item in order.items.all() %}
-            <div style="display: flex; gap: var(--sp-4); align-items: center; padding: var(--sp-4); {% if not loop.last %}border-bottom: 1px solid var(--border-subtle);{% endif %}">
+            <div class="order-item {{ 'item-with-divider' if not loop.last else '' }}" style="display: flex; gap: var(--sp-4); align-items: center; padding: var(--sp-4);">
               <div style="width: 64px; height: 64px; border-radius: 10px; overflow: hidden; background: var(--grey-50); border: 1px solid var(--border-subtle); flex-shrink: 0;">
                 {% if item.product and item.product.image_url %}
                   <img src="{{ item.product.image_url }}" alt="{{ item.product.name }}" style="width:100%;height:100%;object-fit:cover;" loading="lazy">
@@ -115,15 +122,16 @@
                 {% if order.status == 'delivered' %}
                   <div>
                     {% set pid = item.product.product_ref %}
-                    {% if can_review_map and can_review_map.get(item.product.id) %}
+                        {% if can_review_map and can_review_map.get(item.product.id) %}
                       {% if user_reviews_map and user_reviews_map.get(item.product.id) %}
                         <a href="/products/{{ item.product.product_ref }}#reviews-list" class="btn btn--white btn--sm">Edit Review</a>
                       {% else %}
-                        <button type="button" class="btn btn--primary btn--sm order-review-toggle" data-pid="{{ pid }}" data-ref="{{ item.product.product_ref }}">Write Review</button>
-                        <form method="post" action="/products/{{ item.product.product_ref }}/reviews" class="inline-review-form" data-pid="{{ pid }}" style="display:none; margin-top:8px;">
+                        <button type="button" class="btn btn--primary btn--sm order-review-toggle" data-pid="{{ pid }}" data-ref="{{ item.product.product_ref }}" aria-controls="review-form-{{ pid }}" aria-expanded="false">Write Review</button>
+                        <form id="review-form-{{ pid }}" method="post" action="/products/{{ item.product.product_ref }}/reviews" class="inline-review-form" data-pid="{{ pid }}" role="region" aria-hidden="true" style="display:none; margin-top:8px;">
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                          <input type="hidden" name="next" value="{{ request.path }}">
                           <div class="form-group" style="margin:0;">
-                            <select name="rating" class="form-select" required style="width:120px;">
+                            <select name="rating" id="review-rating-{{ pid }}" class="form-select" required style="width:120px;" aria-label="Rating">
                               <option value="5">5</option>
                               <option value="4">4</option>
                               <option value="3">3</option>
@@ -132,7 +140,7 @@
                             </select>
                           </div>
                           <div class="form-group" style="margin:8px 0;">
-                            <textarea name="body" rows="2" class="form-textarea" placeholder="Write a short review"></textarea>
+                            <textarea name="body" id="review-body-{{ pid }}" rows="2" class="form-textarea" placeholder="Write a short review" aria-label="Your review"></textarea>
                           </div>
                           <div style="display:flex; gap:8px;">
                             <button type="submit" class="btn btn--primary btn--sm">Submit</button>
@@ -366,22 +374,289 @@
       });
     });
 
-    // Toggle inline review form
-    document.querySelectorAll('.order-review-toggle').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        const pid = this.dataset.pid;
-        const form = document.querySelector('.inline-review-form[data-pid="'+pid+'"]');
-        if (form) form.style.display = (form.style.display === 'none' || !form.style.display) ? 'block' : 'none';
+    // Review form: transform inline form into a notification-style modal
+    (function(){
+      function createWrapperFor(form){
+        if (!form) return null;
+        if (form._modalWrapper && document.body.contains(form._modalWrapper)) return form._modalWrapper;
+        const pid = form.dataset.pid || Math.random().toString(36).slice(2);
+        const wrapper = document.createElement('div');
+        wrapper.className = 'logout-modal inline-review-modal';
+        wrapper.id = 'review-modal-'+pid;
+        wrapper.setAttribute('role','dialog');
+        wrapper.setAttribute('aria-modal','true');
+        wrapper.setAttribute('aria-hidden','true');
+
+        const backdrop = document.createElement('div');
+        backdrop.className = 'logout-modal__backdrop';
+        backdrop.setAttribute('data-modal-backdrop','');
+        wrapper.appendChild(backdrop);
+
+        const panel = document.createElement('div');
+        panel.className = 'logout-modal__panel glass-card inline-review-panel';
+        panel.setAttribute('tabindex','-1');
+
+        const header = document.createElement('div');
+        header.style.display = 'flex';
+        header.style.alignItems = 'center';
+        header.style.justifyContent = 'space-between';
+        header.style.marginBottom = '8px';
+
+        const title = document.createElement('div');
+        title.className = 'type-body-sm fw-bold';
+        title.textContent = 'Review your order';
+        header.appendChild(title);
+
+        const closeBtn = document.createElement('button');
+        closeBtn.type = 'button';
+        closeBtn.className = 'btn btn--icon btn--ghost review-close-x';
+        closeBtn.setAttribute('aria-label','Close review');
+        closeBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>';
+        header.appendChild(closeBtn);
+
+        panel.appendChild(header);
+
+        const container = document.createElement('div');
+        container.className = 'inline-review-panel__content';
+        panel.appendChild(container);
+
+        wrapper.appendChild(panel);
+        document.body.appendChild(wrapper);
+
+        wrapper._panel = panel;
+        wrapper._container = container;
+
+        // close button handler
+        try {
+          closeBtn.addEventListener('click', function(){ try{ EACIS_modal.close(wrapper); } catch(e){ wrapper.style.display='none'; wrapper.setAttribute('aria-hidden','true'); } });
+        } catch(e){}
+
+        return wrapper;
+      }
+
+      // Enhance review form: star rating, autosize textarea, char counter, and enable/disable submit
+      function enhanceReviewForm(form){
+        if (!form || form._enhanced) return;
+        form._enhanced = true;
+
+        // Star rating enhancement (keeps underlying select in sync)
+        const ratingSelect = form.querySelector('select[name="rating"]');
+        if (ratingSelect) {
+          const starWrap = document.createElement('div');
+          starWrap.className = 'star-rating';
+          starWrap.setAttribute('role','radiogroup');
+          starWrap.setAttribute('aria-label','Rating');
+          for (let i = 5; i >= 1; i--) {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'star';
+            b.setAttribute('data-value', String(i));
+            b.setAttribute('role','radio');
+            b.setAttribute('aria-checked', (ratingSelect.value == String(i)) ? 'true' : 'false');
+            b.setAttribute('aria-label', i + ' stars');
+            b.innerHTML = '★';
+            b.addEventListener('click', function(){
+              ratingSelect.value = this.dataset.value;
+              updateStars(starWrap, this.dataset.value);
+              updateSubmitState(form);
+            });
+            starWrap.appendChild(b);
+          }
+          ratingSelect.style.display = 'none';
+          ratingSelect.parentNode.insertBefore(starWrap, ratingSelect);
+
+          function updateStars(container, value){
+            const v = parseInt(value,10) || 0;
+            container.querySelectorAll('button[data-value]').forEach(function(btn){
+              const val = parseInt(btn.dataset.value,10);
+              if (val <= v) { btn.classList.add('selected'); btn.setAttribute('aria-checked','true'); } else { btn.classList.remove('selected'); btn.setAttribute('aria-checked','false'); }
+            });
+          }
+          updateStars(starWrap, ratingSelect.value || '5');
+
+          // keyboard support
+          starWrap.tabIndex = 0;
+          starWrap.addEventListener('keydown', function(e){
+            const cur = parseInt(ratingSelect.value,10) || 0;
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { const nv = Math.max(1, cur-1); ratingSelect.value = nv; updateStars(starWrap, nv); updateSubmitState(form); e.preventDefault(); }
+            if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { const nv = Math.min(5, cur+1); ratingSelect.value = nv; updateStars(starWrap, nv); updateSubmitState(form); e.preventDefault(); }
+            if (e.key === 'Home') { ratingSelect.value = 1; updateStars(starWrap, 1); updateSubmitState(form); e.preventDefault(); }
+            if (e.key === 'End') { ratingSelect.value = 5; updateStars(starWrap, 5); updateSubmitState(form); e.preventDefault(); }
+          });
+        }
+
+        // Textarea autosize and char counter
+        const bodyEl = form.querySelector('textarea[name="body"]');
+        if (bodyEl) {
+          bodyEl.setAttribute('maxlength', bodyEl.getAttribute('maxlength') || '1000');
+          bodyEl.style.minHeight = '96px';
+          bodyEl.addEventListener('input', function(){ autosize(bodyEl); updateCharCounter(form); updateSubmitState(form); });
+          // initial size
+          autosize(bodyEl);
+          // counter
+          const counter = document.createElement('div'); counter.className = 'char-counter';
+          bodyEl.parentNode.insertBefore(counter, bodyEl.nextSibling);
+          updateCharCounter(form);
+        }
+
+        // Ensure submit button enabled state matches validity
+        function updateCharCounter(form){ const t = form.querySelector('textarea[name="body"]'); if (!t) return; const max = parseInt(t.getAttribute('maxlength')||'1000',10); const len = t.value.length; const c = form.querySelector('.char-counter'); if (c) c.textContent = len + '/' + max + ' characters'; }
+        function autosize(el){ try{ el.style.height = 'auto'; el.style.height = (el.scrollHeight) + 'px'; }catch(e){} }
+        function updateSubmitState(form){ const submit = form.querySelector('button[type="submit"]'); if (!submit) return; const rating = parseInt(form.querySelector('[name="rating"]').value || '0',10); const body = form.querySelector('[name="body"]'); let ok = rating >= 1; if (body && body.value && body.value.trim().length > 0) ok = ok && body.value.trim().length >= 5; if (ok) { submit.disabled = false; submit.removeAttribute('aria-disabled'); } else { submit.disabled = true; submit.setAttribute('aria-disabled','true'); } }
+
+        // initialize state
+        updateSubmitState(form);
+      }
+
+      function openForm(form){
+        if (!form) return;
+        // close other open review-modals
+        document.querySelectorAll('.inline-review-modal.is-open').forEach(function(w){ try{ if (w._container && w._container.contains(form) === false) { EACIS_modal.close(w); } }catch(e){} });
+
+        const wrapper = createWrapperFor(form);
+        if (!wrapper) return;
+
+        // Save placeholder to restore later
+        if (!form._placeholder) {
+          const ph = document.createElement('div'); ph.style.display = 'none';
+          form._placeholder = ph;
+          form._originalParent = form.parentNode;
+          form._originalParent.insertBefore(ph, form);
+        }
+
+        // move the actual form into the modal container
+        wrapper._container.appendChild(form);
+        form.style.display = 'block';
+        form.classList.add('is-open');
+        form.setAttribute('aria-hidden','false');
+        form._modalWrapper = wrapper;
+
+        // enhance UI (stars, counters, autosize)
+        try { enhanceReviewForm(form); } catch(e) { console.warn('enhanceReviewForm failed', e); }
+
+        // mark the toggle as expanded
+        const pid = form.dataset.pid;
+        const t = document.querySelector('.order-review-toggle[data-pid="'+pid+'"]');
+        if (t) t.setAttribute('aria-expanded','true');
+
+        // open via global modal manager when available
+        try { EACIS_modal.open(wrapper);
+          // entrance pop animation for panel (non-blocking) - removed after animation end
+          const panelEl = wrapper._panel || wrapper.querySelector('.inline-review-panel, .logout-modal__panel');
+          if (panelEl) {
+            try {
+              panelEl.classList.add('eacis-anim-pop');
+              const onAnimEnd = function(){ panelEl.removeEventListener('animationend', onAnimEnd); panelEl.classList.remove('eacis-anim-pop'); };
+              panelEl.addEventListener('animationend', onAnimEnd);
+              setTimeout(()=>{ try{ panelEl.classList.remove('eacis-anim-pop'); } catch(e){} }, 700);
+            } catch(e){}
+          }
+        }
+        catch(e){ wrapper.classList.add('is-open'); wrapper.style.display = 'flex'; }
+
+        // focus first field
+        requestAnimationFrame(function(){ try{ const first = form.querySelector('select, textarea, input, button'); if (first) first.focus(); }catch(e){} });
+      }
+
+      function closeForm(form){
+        if (!form) return;
+        const wrapper = form._modalWrapper || form.closest('.inline-review-modal');
+        if (wrapper) {
+          try { EACIS_modal.close(wrapper); } catch(e){ wrapper.classList.remove('is-open'); wrapper.style.display = 'none'; }
+
+          // restore original position after transition
+          const moveBack = function(){
+            try {
+              if (form._placeholder && form._placeholder.parentNode) {
+                form._placeholder.parentNode.insertBefore(form, form._placeholder);
+                form._placeholder.remove();
+              } else if (form._originalParent) {
+                form._originalParent.appendChild(form);
+              }
+            } catch(e) {}
+            form.style.display = 'none';
+            form.classList.remove('is-open');
+            form.setAttribute('aria-hidden','true');
+            // cleanup
+            try { wrapper.remove(); } catch(e) {}
+            delete form._modalWrapper; delete form._placeholder; delete form._originalParent;
+          };
+
+          const panel = wrapper.querySelector('.logout-modal__panel, .inline-review-panel');
+          if (panel) {
+            const onEnd = function(ev){ if (ev.target === panel) { panel.removeEventListener('transitionend', onEnd); moveBack(); } };
+            panel.addEventListener('transitionend', onEnd);
+            // fallback
+            setTimeout(moveBack, 500);
+          } else moveBack();
+
+          // update toggle aria
+          const pid = form.dataset.pid;
+          const t = document.querySelector('.order-review-toggle[data-pid="'+pid+'"]');
+          if (t) t.setAttribute('aria-expanded','false');
+          return;
+        }
+
+        // fallback for inline behavior
+        form.classList.remove('is-open'); form.setAttribute('aria-hidden','true'); form.style.display = 'none';
+        const pid2 = form.dataset.pid; const t2 = document.querySelector('.order-review-toggle[data-pid="'+pid2+'"]'); if (t2) t2.setAttribute('aria-expanded','false');
+      }
+
+      document.addEventListener('click', function(e){
+        const toggle = e.target.closest('.order-review-toggle');
+        if (toggle) {
+          e.preventDefault();
+          const pid = toggle.dataset.pid;
+          const form = document.querySelector('.inline-review-form[data-pid="'+pid+'"]');
+          if (!form) return;
+          if (form._modalWrapper && form._modalWrapper.classList.contains('is-open')) closeForm(form); else openForm(form);
+          return;
+        }
+
+        const cancel = e.target.closest('.order-review-cancel');
+        if (cancel) {
+          e.preventDefault();
+          const form = cancel.closest('.inline-review-form');
+          if (form) closeForm(form);
+          return;
+        }
+      }, true);
+    })();
+
+    // Client-side validation + double-submit prevention for inline review forms
+    document.querySelectorAll('.inline-review-form').forEach(function(form){
+      form.addEventListener('submit', function(e){
+        // remove any existing inline error before validation
+        const prev = form.querySelector('.form-error-inline'); if (prev) prev.remove();
+        const ratingEl = form.querySelector('[name="rating"]');
+        const bodyEl = form.querySelector('[name="body"]');
+        const rating = ratingEl ? parseInt(ratingEl.value) : NaN;
+        if (!rating || isNaN(rating) || rating < 1 || rating > 5){
+          e.preventDefault(); showInlineError(form, 'Please select a rating between 1 and 5.'); return false;
+        }
+        if (bodyEl && bodyEl.value && bodyEl.value.trim().length > 2000){
+          e.preventDefault(); showInlineError(form, 'Review too long (max 2000 characters).'); return false;
+        }
+        // prevent double submit: disable submit button and provide immediate feedback
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.setAttribute('aria-disabled','true');
+          submitBtn.dataset._orig = submitBtn.textContent;
+          submitBtn.textContent = 'Sending…';
+          submitBtn.classList.add('btn--sending');
+          submitBtn.setAttribute('aria-busy','true');
+        }
+        // allow normal form submit (server-side will redirect)
       });
     });
 
-    // Cancel inline review
-    document.querySelectorAll('.order-review-cancel').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        const form = this.closest('.inline-review-form');
-        if (form) form.style.display = 'none';
-      });
-    });
+    function showInlineError(form, msg){
+      let el = form.querySelector('.form-error-inline');
+      if(!el){ el = document.createElement('div'); el.className = 'form-error-inline type-body-xs text-danger'; el.style.marginTop = '6px'; form.insertBefore(el, form.firstChild); }
+      el.textContent = msg;
+      setTimeout(()=>{ try{ el.remove(); }catch(e){} }, 4500);
+    }
   });
   </script>
   {% endblock %}

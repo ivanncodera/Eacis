@@ -39,9 +39,11 @@ from eacis.validation import (
     validate_seller_security_payload,
     validate_cart_quantity_payload,
     validate_seller_product_payload,
+    validate_password_complexity,
     sanitize_search_query,
     validate_search_query,
     normalize_phone,
+    contains_emoji,
 )
 
  
@@ -65,6 +67,19 @@ def money(value):
 def create_app(config_class=Config):
     app = Flask(__name__, template_folder='templates', static_folder='static')
     app.config.from_object(config_class)
+    # Developer-friendly: when not running in production, don't require referrer header
+    # for CSRF strict ssl checks. This prevents privacy/browser settings from breaking
+    # form POSTs during local development or CI tests.
+    try:
+        if os.getenv('FLASK_ENV', '').lower() != 'production':
+            app.config['WTF_CSRF_SSL_STRICT'] = False
+    except Exception:
+        pass
+
+    # Global upload / request size limits and per-file defaults
+    app.config.setdefault('MAX_CONTENT_LENGTH', 16 * 1024 * 1024)  # 16 MB global request limit
+    app.config.setdefault('MAX_PERMIT_UPLOAD_BYTES', 5 * 1024 * 1024)  # 5 MB per permit file
+    app.config.setdefault('MAX_IMAGE_UPLOAD_BYTES', 5 * 1024 * 1024)   # 5 MB per product image
 
     # Avatar upload configuration
     app.config.setdefault('MAX_AVATAR_UPLOAD_BYTES', 2 * 1024 * 1024)  # 2 MB
@@ -234,6 +249,10 @@ def create_app(config_class=Config):
     def ensure_dev_users():
         try:
             with app.app_context():
+                try:
+                    import eacis.models  # noqa: F401
+                except Exception:
+                    pass
                 db.create_all()
                 try:
                     from eacis.models.voucher import Voucher
@@ -248,7 +267,13 @@ def create_app(config_class=Config):
                 for email, role, full_name in demo_users:
                     user = User.query.filter_by(email=email).first()
                     if user is None:
-                        user = User(email=email, role=role, full_name=full_name)
+                        user = User(
+                            email=email,
+                            role=role,
+                            full_name=full_name,
+                            email_verified_at=datetime.now(timezone.utc),
+                            seller_verification_status='approved' if role == 'seller' else 'pending',
+                        )
                         user.set_password('password')
                         db.session.add(user)
                         changed = True
@@ -314,6 +339,23 @@ def create_app(config_class=Config):
         'cebu city': '6000',
         'davao city': '8000',
     }
+
+    @app.route('/postal_lookup')
+    def postal_lookup_api():
+        """Simple postal code lookup used by the address form. Returns a JSON with city/province.
+
+        Note: this is a lightweight in-memory lookup for development. For production, integrate
+        a proper postal-code dataset or external API.
+        """
+        code = (request.args.get('code') or '').strip()
+        if not code:
+            return jsonify({})
+        # invert the small mapping to find the city by code
+        inv = {v: k for k, v in postal_lookup.items()}
+        city = inv.get(code)
+        if city:
+            return jsonify({'city_municipality': city.title(), 'province': ''})
+        return jsonify({})
 
     def ensure_invoice_for_order(order):
         from eacis.models.invoice import Invoice
@@ -612,6 +654,41 @@ def create_app(config_class=Config):
                 logging.getLogger(__name__).exception('Error while serving avatar')
         abort(404)
 
+    @app.route('/uploads/permits/<path:filename>')
+    def serve_permit(filename):
+        from flask_login import current_user
+        from flask import send_from_directory
+        # Only authenticated users may access uploaded permits; authorization rules apply below.
+        if not (current_user and getattr(current_user, 'is_authenticated', False)):
+            abort(404)
+
+        # Normalize filename: callers may pass 'permits/<file>' or '<file>'
+        filepart = filename.split('permits/', 1)[-1]
+        base = os.path.join(app.instance_path, 'uploads', 'permits')
+        # Authorization: admins and sellers may view any permit; customers may only view their own KYC files
+        role = getattr(current_user, 'role', None)
+        if role == 'customer':
+            expected_prefix = f"kyc_cust{current_user.id}_"
+            if not filepart.startswith(expected_prefix):
+                abort(404)
+        elif role in ('seller', 'admin'):
+            # seller/admin allowed to view for review purposes
+            pass
+        else:
+            abort(404)
+
+        try:
+            if not os.path.exists(os.path.join(base, filepart)):
+                abort(404)
+            return send_from_directory(base, filepart)
+        except Exception:
+            try:
+                app.logger.exception('Error serving permit file %s', filepart)
+            except Exception:
+                import logging
+                logging.getLogger(__name__).exception('Error serving permit file')
+            abort(404)
+
     @app.route('/api/postal/suggest')
     def postal_suggest():
         city = (request.args.get('city') or '').strip().lower()
@@ -704,7 +781,7 @@ def create_app(config_class=Config):
         from flask_login import current_user
         path = request.path
         # allow static/api/auth/public pages. Keep '/' exact to avoid bypassing all guards.
-        allowed_prefixes = ('/static/', '/api/', '/auth', '/landing', '/shop', '/product', '/about', '/contact', '/terms', '/privacy')
+        allowed_prefixes = ('/static/', '/favicon.ico', '/api/', '/auth', '/landing', '/shop', '/product', '/about', '/contact', '/terms', '/privacy')
         if path == '/' or any(path.startswith(p) for p in allowed_prefixes):
             return None
         # customer portal
@@ -755,6 +832,11 @@ def create_app(config_class=Config):
 
     # Blueprints will be registered here later
 
+    @app.route('/favicon.ico')
+    def favicon():
+        from flask import send_from_directory
+        return send_from_directory(app.static_folder, 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
     @app.errorhandler(404)
     def page_not_found(e):
         return render_template('404.html'), 404
@@ -763,13 +845,31 @@ def create_app(config_class=Config):
     def internal_server_error(e):
         return render_template('500.html'), 500
 
+    def _format_php(val):
+        try:
+            return f"{float(val or 0):,.2f}"
+        except (TypeError, ValueError):
+            return "0.00"
+
+    app.jinja_env.filters['php'] = _format_php
+    app.jinja_env.filters['currency'] = _format_php
+
     def build_landing_context():
         from eacis.models.product import Product
         from eacis.models.user import User
 
+        _excluded_demo_cats = ('Demo Products', 'Demo', 'Installment')
+
+        # Only include production catalog products from approved, active sellers
         featured = (
-            Product.query
-            .filter_by(is_active=True)
+            Product.query.join(User, User.id == Product.seller_id)
+            .filter(
+                Product.is_active.is_(True),
+                User.seller_verification_status == 'approved',
+                User.is_active.is_(True),
+                ~Product.product_ref.like('DEMO-%'),
+                ~Product.category.in_(_excluded_demo_cats),
+            )
             .order_by(Product.created_at.desc())
             .limit(8)
             .all()
@@ -806,19 +906,32 @@ def create_app(config_class=Config):
                 'price': float(p.price or 0),
             }
 
-        category_rows = db.session.query(Product.category).filter(
-            Product.is_active.is_(True),
-            Product.category.isnot(None),
-            Product.category != '',
-        ).distinct().order_by(Product.category.asc()).all()
+        category_rows = (
+            db.session.query(Product.category)
+            .join(User, User.id == Product.seller_id)
+            .filter(
+                Product.is_active.is_(True),
+                User.seller_verification_status == 'approved',
+                User.is_active.is_(True),
+                Product.category.isnot(None),
+                Product.category != '',
+                ~Product.product_ref.like('DEMO-%'),
+                ~Product.category.in_(_excluded_demo_cats),
+            )
+            .distinct().order_by(Product.category.asc()).all()
+        )
         shop_categories = [r[0] for r in category_rows if r[0]]
 
         spotlight_rows = (
-            Product.query.filter(
+            Product.query.join(User, User.id == Product.seller_id).filter(
                 Product.is_active.is_(True),
+                User.seller_verification_status == 'approved',
+                User.is_active.is_(True),
                 Product.compare_price.isnot(None),
                 Product.price.isnot(None),
                 Product.compare_price > Product.price,
+                ~Product.product_ref.like('DEMO-%'),
+                ~Product.category.in_(_excluded_demo_cats),
             )
             .order_by(Product.created_at.desc())
             .limit(6)
@@ -838,7 +951,7 @@ def create_app(config_class=Config):
                 'compare_price': float(p.compare_price or 0),
             })
 
-        active_products = Product.query.filter_by(is_active=True).count()
+        active_products = Product.query.join(User, User.id == Product.seller_id).filter(Product.is_active.is_(True), User.seller_verification_status == 'approved', User.is_active.is_(True)).count()
         seller_count = User.query.filter_by(role='seller').count()
 
         return {
@@ -1010,39 +1123,15 @@ def create_app(config_class=Config):
                 if not user.email_verified_at:
                     return render_template('auth/verify_required.html', email=user.email or '')
 
-                purpose = 'login'
-                otp_message = 'Check your email for the sign-in code.'
-
-                # Trusted device bypass: if user has a valid trusted-device cookie, skip OTP.
-                if purpose == 'login':
-                    from eacis.services.trusted_device_service import find_by_token, touch
-                    td_token = request.cookies.get(app.config.get('TRUSTED_DEVICE_COOKIE_NAME', 'trusted_device')) or request.cookies.get('trusted_device')
-                    if td_token:
-                        td = find_by_token(td_token)
-                        if td and getattr(td, 'user_id', None) == user.id:
-                            try:
-                                touch(td)
-                            except Exception:
-                                app.logger.exception('Failed to touch trusted device')
-                            from flask_login import login_user
-                            login_user(user, remember=remember)
-                            return redirect(dest)
-
-                challenge, otp_error = start_otp_flow(
-                    user=user,
-                    purpose=purpose,
-                    next_url=dest,
-                    remember=remember if purpose == 'login' else False,
-                    mode='login' if purpose == 'login' else 'register',
-                    meta={'ip': client_ip, 'role': user.role},
-                )
-                if not challenge:
-                    error = otp_error or 'Could not send OTP. Please try again.'
-                    return render_template('auth/login.html', error=error)
-
+                # Direct login (skip OTP) — successful password authenticates the user.
+                from flask_login import login_user
+                try:
+                    session.clear()
+                except Exception:
+                    pass
+                login_user(user, remember=remember)
                 _reset_guardrails(email, client_ip)
-                session['otp_message'] = otp_message
-                return redirect(url_for('auth_otp_verify'))
+                return redirect(dest)
             except Exception:
                 # Keep logs operationally useful while avoiding sensitive payload leakage.
                 app.logger.exception('Unhandled login error during authentication flow.')
@@ -1071,6 +1160,29 @@ def create_app(config_class=Config):
 
         if file_size is not None and file_size > max_bytes:
             return None, f'Permit file must be {max_bytes // (1024*1024)}MB or smaller.'
+
+        # Basic magic-bytes/content check to avoid extension-only validation bypasses
+        try:
+            upload_file.stream.seek(0)
+            header = upload_file.stream.read(12) or b''
+            upload_file.stream.seek(0)
+        except Exception:
+            header = b''
+
+        valid_magic = False
+        if header.startswith(b'%PDF') and ext == '.pdf':
+            valid_magic = True
+        if header.startswith(b"\x89PNG") and ext == '.png':
+            valid_magic = True
+        if header.startswith(b'\xff\xd8\xff') and ext in ('.jpg', '.jpeg'):
+            valid_magic = True
+        if header.startswith(b'GIF8') and ext == '.gif':
+            valid_magic = True
+        if len(header) >= 12 and header[:4] == b'RIFF' and header[8:12] == b'WEBP' and ext == '.webp':
+            valid_magic = True
+
+        if not valid_magic:
+            return None, 'Invalid file contents.'
 
         # Keep permit files outside /static to avoid public direct access.
         upload_dir = os.path.join(app.instance_path, 'uploads', 'permits')
@@ -1276,6 +1388,16 @@ def create_app(config_class=Config):
         session['otp_next'] = next_url or ''
         session['otp_remember'] = bool(remember)
         session['otp_mode'] = mode
+        # Provide a contextual message for the UI explaining whether the
+        # verification uses a link (preferred for registration) or a numeric code.
+        try:
+            meta = challenge.meta or {}
+            if str(purpose or '').strip() == 'register_verify' and meta.get('activation_token'):
+                session['otp_message'] = 'We sent a verification email with a link to activate your account. If the link does not work, you can enter the one-time code on the verification page.'
+            else:
+                session['otp_message'] = 'Check your email for the one-time code to complete verification.'
+        except Exception:
+            session['otp_message'] = 'Check your email for the verification message.'
         return challenge, None
 
     def finalize_customer_order_cancel(customer, order_ref):
@@ -1323,6 +1445,44 @@ def create_app(config_class=Config):
                     reference=order_ref,
                     note='Restored from order cancellation',
                 ))
+
+            # Reverse any earned points that were credited for this order at checkout
+            try:
+                earned_tx = LoyaltyTransaction.query.filter_by(user_id=customer.id, reference=order_ref, type='earn').first()
+            except Exception:
+                earned_tx = None
+            if earned_tx and int(earned_tx.points or 0) > 0:
+                earned = int(earned_tx.points or 0)
+                customer.loyalty_points = max(0, int(customer.loyalty_points or 0) - earned)
+                db.session.add(LoyaltyTransaction(
+                    user_id=customer.id,
+                    type='adjust',
+                    points=-earned,
+                    reference=order_ref,
+                    note='Reversed earned points from cancelled order',
+                ))
+
+            # If this order had an installment plan, cancel it and any pending schedules
+            try:
+                from eacis.models.installment import InstallmentPlan
+            except Exception:
+                try:
+                    from models.installment import InstallmentPlan
+                except Exception:
+                    InstallmentPlan = None
+
+            if InstallmentPlan:
+                try:
+                    plan = InstallmentPlan.query.filter_by(order_id=order.id).first()
+                    if plan:
+                        plan.status = 'cancelled'
+                        for s in getattr(plan, 'schedules', []) or []:
+                            if getattr(s, 'status', None) == 'pending':
+                                s.status = 'cancelled'
+                        db.session.add(plan)
+                except Exception:
+                    # best-effort only; don't prevent cancellation if plan update fails
+                    app.logger.exception('Failed to cancel installment plan for order %s', order_ref)
 
             order.status = 'cancelled'
             db.session.commit()
@@ -1406,8 +1566,27 @@ def create_app(config_class=Config):
                     email_verified_at=None,
                 )
                 new_user.set_password(normalized['password'])
+                # Generate a unique seller_code for seller accounts
+                try:
+                    import random, string
+                    def _gen_code():
+                        return 'S' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=9))
+                    for _ in range(10):
+                        code = _gen_code()
+                        if not User.query.filter_by(seller_code=code).first():
+                            new_user.seller_code = code
+                            break
+                except Exception:
+                    # If code generation fails, proceed without blocking registration
+                    new_user.seller_code = None
                 db.session.add(new_user)
                 db.session.commit()
+                # attempt to start OTP/email verification flow
+                try:
+                    from eacis.services.email_service import EmailService
+                except Exception:
+                    EmailService = None
+
                 challenge, otp_error = start_otp_flow(
                     user=new_user,
                     purpose='register_verify',
@@ -1416,11 +1595,27 @@ def create_app(config_class=Config):
                     meta={'role': 'customer'},
                 )
                 if not challenge:
+                    # If email sending is not configured, allow account creation in dev
+                    if EmailService is None or not EmailService.is_enabled():
+                        try:
+                            new_user.email_verified_at = datetime.utcnow()
+                            db.session.add(new_user)
+                            db.session.commit()
+                            flash('Account created. Email verification skipped (mail disabled).', 'success')
+                            return redirect(url_for('auth_login'))
+                        except Exception:
+                            db.session.rollback()
+                            errors['general'] = 'Something went wrong while finalizing account.'
+                            return render_template('auth/register_customer.html', errors=errors, form=normalized)
+                    # Otherwise, roll back and show OTP/send error
                     db.session.delete(new_user)
                     db.session.commit()
                     errors['general'] = otp_error or 'Could not send verification code.'
                     return render_template('auth/register_customer.html', errors=errors, form=normalized)
-                flash('We sent a verification code to your email. Enter it to activate your account.', 'success')
+                try:
+                    flash(session.get('otp_message') or 'We sent a verification message to your email.', 'success')
+                except Exception:
+                    flash('We sent a verification message to your email.', 'success')
                 return redirect(url_for('auth_verify_required'))
             except Exception:
                 db.session.rollback()
@@ -1494,6 +1689,11 @@ def create_app(config_class=Config):
                 new_user.set_password(normalized['password'])
                 db.session.add(new_user)
                 db.session.commit()
+                try:
+                    from eacis.services.email_service import EmailService
+                except Exception:
+                    EmailService = None
+
                 challenge, otp_error = start_otp_flow(
                     user=new_user,
                     purpose='register_verify',
@@ -1502,11 +1702,25 @@ def create_app(config_class=Config):
                     meta={'role': 'seller'},
                 )
                 if not challenge:
+                    if EmailService is None or not EmailService.is_enabled():
+                        try:
+                            new_user.email_verified_at = datetime.utcnow()
+                            db.session.add(new_user)
+                            db.session.commit()
+                            flash('Seller account created. Email verification skipped (mail disabled).', 'success')
+                            return redirect(url_for('auth_login'))
+                        except Exception:
+                            db.session.rollback()
+                            errors['general'] = 'Something went wrong while finalizing seller account.'
+                            return render_template('auth/register_seller.html', errors=errors, form=normalized)
                     db.session.delete(new_user)
                     db.session.commit()
                     errors['general'] = otp_error or 'Could not send verification code.'
                     return render_template('auth/register_seller.html', errors=errors, form=normalized)
-                flash('We sent a verification code to your email. Enter it to activate your seller account.', 'success')
+                try:
+                    flash(session.get('otp_message') or 'We sent a verification message to your email.', 'success')
+                except Exception:
+                    flash('We sent a verification message to your email.', 'success')
                 return redirect(url_for('auth_verify_required'))
             except Exception:
                 db.session.rollback()
@@ -1515,9 +1729,10 @@ def create_app(config_class=Config):
 
         return render_template('auth/register_seller.html', errors={}, form={})
 
-    @app.route('/auth/logout')
+    @app.route('/auth/logout', methods=['POST'])
     def auth_logout():
         from flask_login import logout_user
+        # CSRF protection should be enforced by Flask-WTF middleware
         logout_user()
         return redirect(url_for('index'))
 
@@ -1537,6 +1752,8 @@ def create_app(config_class=Config):
         debug_code = ''
         if challenge_row and challenge_row.meta and isinstance(challenge_row.meta, dict):
             debug_code = challenge_row.meta.get('debug_code') or ''
+        is_production = str(app.config.get('FLASK_ENV') or '').lower() == 'production'
+        show_otp_debug_button = bool(app.config.get('DEV_SHOW_OTP_IN_UI')) and not is_production
         if not challenge_id:
             flash('No OTP challenge is active. Please start again.', 'error')
             return redirect(url_for('auth_login'))
@@ -1544,13 +1761,13 @@ def create_app(config_class=Config):
         if request.method == 'POST':
             code = (request.form.get('otp_code') or request.form.get('code') or '').strip()
             if len(code) < 4:
-                return render_template('auth/otp_verify.html', purpose=purpose, email=otp_email, error='Enter the one-time code from your email.', message=session.get('otp_message', ''), debug_code=debug_code)
+                return render_template('auth/otp_verify.html', purpose=purpose, email=otp_email, error='Enter the one-time code from your email.', message=session.get('otp_message', ''), debug_code=debug_code, show_otp_debug_button=show_otp_debug_button)
 
             from eacis.services.otp_service import verify_otp
 
             ok, message = verify_otp(challenge_id, code)
             if not ok:
-                return render_template('auth/otp_verify.html', purpose=purpose, email=otp_email, error=message, message=session.get('otp_message', ''), debug_code=debug_code)
+                return render_template('auth/otp_verify.html', purpose=purpose, email=otp_email, error=message, message=session.get('otp_message', ''), debug_code=debug_code, show_otp_debug_button=show_otp_debug_button)
 
             user = db.session.get(User, session.get('otp_user_id')) if session.get('otp_user_id') else None
             remember = bool(session.get('otp_remember'))
@@ -1563,6 +1780,11 @@ def create_app(config_class=Config):
                     db.session.commit()
                 from flask_login import login_user
                 if user:
+                    # Clear session before establishing authenticated session
+                    try:
+                        session.clear()
+                    except Exception:
+                        pass
                     login_user(user, remember=False)
                 # If user opted to remember this device, create a trusted-device token and set cookie.
                 target = next_url or (url_for('seller_dashboard') if user and user.role == 'seller' else url_for('shop'))
@@ -1679,7 +1901,18 @@ def create_app(config_class=Config):
 
             from flask_login import login_user
             if user:
+                # Preserve OTP redirect target across session regeneration
+                session_next = session.get('otp_next') if session is not None else None
+                try:
+                    session.clear()
+                except Exception:
+                    pass
                 login_user(user, remember=remember)
+                try:
+                    if session_next:
+                        session['otp_next'] = session_next
+                except Exception:
+                    pass
             target = next_url or (url_for('seller_dashboard') if user and user.role == 'seller' else url_for('shop'))
             # If user asked to remember this device (from the OTP form) and this is a login flow, create trusted-device cookie.
             if user and remember_device and purpose == 'login':
@@ -1700,12 +1933,69 @@ def create_app(config_class=Config):
             flash('OTP verified. You are now signed in.', 'success')
             return redirect(target)
 
-        return render_template('auth/otp_verify.html', purpose=purpose, email=otp_email, error='', message=session.get('otp_message', ''), debug_code=debug_code)
+        return render_template('auth/otp_verify.html', purpose=purpose, email=otp_email, error='', message=session.get('otp_message', ''), debug_code=debug_code, show_otp_debug_button=show_otp_debug_button)
+
+    @app.route('/auth/otp/debug', methods=['GET'])
+    def auth_otp_debug():
+        try:
+            from .models.otp_challenge import OtpChallenge
+        except Exception:
+            try:
+                from eacis.models.otp_challenge import OtpChallenge
+            except Exception:
+                from models.otp_challenge import OtpChallenge
+
+        is_production = str(app.config.get('FLASK_ENV') or '').lower() == 'production'
+        if is_production:
+            return jsonify({'ok': False, 'message': 'Not allowed in production.'}), 403
+
+        challenge_id = session.get('otp_challenge_id')
+        if not challenge_id:
+            return jsonify({'ok': False, 'message': 'No active OTP challenge.'}), 400
+
+        chal = db.session.get(OtpChallenge, challenge_id)
+        if not chal or not chal.meta:
+            return jsonify({'ok': False, 'message': 'No debug code available.'}), 404
+
+        return jsonify({'ok': True, 'debug_code': chal.meta.get('debug_code'), 'activation_token': chal.meta.get('activation_token')}), 200
 
     @app.route('/auth/verify-required')
     def auth_verify_required():
         # Shows instructions and resend option for unverified accounts
-        email = (request.args.get('email') or session.get('otp_email') or '')
+        email = None
+        # explicit query param wins
+        email = request.args.get('email') or None
+        # session-held OTP email (set during flows)
+        if not email:
+            email = session.get('otp_email') or None
+        # session user id -> resolve canonical account email
+        if not email and session.get('otp_user_id'):
+            try:
+                from eacis.models.user import User
+                user = db.session.get(User, session.get('otp_user_id'))
+                if user:
+                    email = user.email
+            except Exception:
+                email = None
+        # logged-in user
+        if not email:
+            try:
+                from flask_login import current_user
+                if current_user and getattr(current_user, 'is_authenticated', False):
+                    email = getattr(current_user, 'email', None)
+            except Exception:
+                pass
+        # fallback: if there is an active challenge id, try to use that challenge's email
+        if not email and session.get('otp_challenge_id'):
+            try:
+                from eacis.models.otp_challenge import OtpChallenge
+                chal = db.session.get(OtpChallenge, session.get('otp_challenge_id'))
+                if chal:
+                    email = chal.email or None
+            except Exception:
+                pass
+
+        email = (email or '')
         return render_template('auth/verify_required.html', email=email)
 
     @app.route('/auth/register/verify/<token>')
@@ -1762,6 +2052,10 @@ def create_app(config_class=Config):
 
         try:
             from flask_login import login_user
+            try:
+                session.clear()
+            except Exception:
+                pass
             login_user(user, remember=False)
         except Exception:
             pass
@@ -1803,7 +2097,16 @@ def create_app(config_class=Config):
             return redirect(url_for('auth_otp_verify'))
 
         session['otp_challenge_id'] = challenge.id
-        flash('We sent a new verification code.', 'success')
+        # Contextual message for UI (link vs code) when resending
+        try:
+            meta = challenge.meta or {}
+            if purpose == 'register_verify' and meta.get('activation_token'):
+                session['otp_message'] = 'We sent a verification email with a link to activate your account. If the link does not work, enter the one-time code on the verification page.'
+            else:
+                session['otp_message'] = 'We sent a new verification code. Check your email.'
+        except Exception:
+            session['otp_message'] = 'We sent a new verification message. Check your inbox.'
+        flash(session.get('otp_message') or 'We sent a new verification message.', 'success')
         return redirect(url_for('auth_otp_verify'))
 
 
@@ -1899,10 +2202,12 @@ def create_app(config_class=Config):
         if request.method == 'POST':
             password = request.form.get('password') or ''
             confirm = request.form.get('confirm_password') or ''
-            if len(password) < 8:
-                return render_template('auth/reset_password.html', error='Password must be at least 8 characters.'), 200
-            if password != confirm:
-                return render_template('auth/reset_password.html', error='Passwords do not match.'), 200
+            # Enforce the same complexity rules used at registration
+            pw_email = session.get('password_reset_email') or ''
+            email_local = pw_email.split('@', 1)[0] if pw_email else None
+            pw_err = validate_password_complexity(password, confirm_pwd=confirm, email_local=email_local)
+            if pw_err:
+                return render_template('auth/reset_password.html', error=pw_err), 200
 
             user = db.session.get(User, session.get('password_reset_user_id'))
             if not user:
@@ -1967,12 +2272,38 @@ def create_app(config_class=Config):
         except Exception:
             from models.product import Product
 
-        products = Product.query.filter_by(is_active=True).order_by(Product.created_at.desc()).all()
-        cat_rows = db.session.query(Product.category).filter(
-            Product.is_active.is_(True),
-            Product.category.isnot(None),
-            Product.category != '',
-        ).distinct().order_by(Product.category.asc()).all()
+        # Only show products from approved, active sellers
+        try:
+            from eacis.models.user import User as _User
+        except Exception:
+            from models.user import User as _User
+        # Server-side pagination: avoid embedding the full product dataset into the page
+        try:
+            from eacis.utils.pagination import get_page_args
+        except Exception:
+            from utils.pagination import get_page_args
+
+        page, per_page = get_page_args(default_per_page=15)
+        base_q = (Product.query.join(_User, _User.id == Product.seller_id)
+                  .filter(
+                      Product.is_active.is_(True),
+                      _User.seller_verification_status == 'approved',
+                      _User.is_active.is_(True),
+                  )
+                  .order_by(Product.created_at.desc()))
+        total_products = base_q.count()
+        paginated = base_q.paginate(page=page, per_page=per_page, error_out=False)
+        products = paginated.items
+        cat_rows = (db.session.query(Product.category)
+            .join(_User, _User.id == Product.seller_id)
+            .filter(
+                Product.is_active.is_(True),
+                _User.seller_verification_status == 'approved',
+                _User.is_active.is_(True),
+                Product.category.isnot(None),
+                Product.category != '',
+            )
+            .distinct().order_by(Product.category.asc()).all())
         shop_categories = [r[0] for r in cat_rows if r[0]]
         return render_template(
             'customer/home.html',
@@ -1988,22 +2319,131 @@ def create_app(config_class=Config):
             from .models.product import Product
         except Exception:
             from models.product import Product
-
+        # Parse filter params from query string
         category = (request.args.get('category') or '').strip()
-        products = Product.query.filter_by(is_active=True).order_by(Product.created_at.desc()).all()
-        cat_rows = db.session.query(Product.category).filter(
-            Product.is_active.is_(True),
-            Product.category.isnot(None),
-            Product.category != '',
-        ).distinct().order_by(Product.category.asc()).all()
+        q = (request.args.get('q') or '').strip()
+        try:
+            from eacis.models.user import User as _User
+        except Exception:
+            from models.user import User as _User
+        try:
+            from eacis.utils.pagination import get_page_args
+        except Exception:
+            from utils.pagination import get_page_args
+
+        page, per_page = get_page_args(default_per_page=15)
+
+        # Base query: only active products from approved, active sellers
+        base_q = (Product.query.join(_User, _User.id == Product.seller_id)
+                  .filter(
+                      Product.is_active.is_(True),
+                      _User.seller_verification_status == 'approved',
+                      _User.is_active.is_(True),
+                  ))
+
+        # Apply server-side filters
+        if category:
+            base_q = base_q.filter(Product.category == category)
+
+        if q and len(q) >= 2:
+            likeq = f"%{q}%"
+            base_q = base_q.filter(
+                (Product.name.ilike(likeq)) | (Product.product_ref.ilike(likeq)) | (Product.category.ilike(likeq))
+            )
+
+        try:
+            min_p = float(request.args.get('min_price')) if request.args.get('min_price') else None
+        except Exception:
+            min_p = None
+        try:
+            max_p = float(request.args.get('max_price')) if request.args.get('max_price') else None
+        except Exception:
+            max_p = None
+        if min_p is not None:
+            base_q = base_q.filter(Product.price >= min_p)
+        if max_p is not None:
+            base_q = base_q.filter(Product.price <= max_p)
+
+        if request.args.get('in_stock') in ('1', 'true', 'on'):
+            base_q = base_q.filter(Product.stock > 0)
+
+        if request.args.get('installment') in ('1', 'true', 'on'):
+            base_q = base_q.filter(Product.installment_enabled.is_(True))
+
+        # Sorting
+        sort = (request.args.get('sort') or '').lower()
+        if sort == 'price-asc':
+            base_q = base_q.order_by(Product.price.asc())
+        elif sort == 'price-desc':
+            base_q = base_q.order_by(Product.price.desc())
+        else:
+            base_q = base_q.order_by(Product.created_at.desc())
+
+        total_products = base_q.count()
+        paginated = base_q.paginate(page=page, per_page=per_page, error_out=False)
+        products = paginated.items
+
+        # All available categories (for navigation) — independent of current filters
+        cat_rows = (db.session.query(Product.category)
+            .join(_User, _User.id == Product.seller_id)
+            .filter(
+                Product.is_active.is_(True),
+                _User.seller_verification_status == 'approved',
+                _User.is_active.is_(True),
+                Product.category.isnot(None),
+                Product.category != '',
+            )
+            .distinct().order_by(Product.category.asc()).all())
         shop_categories = [r[0] for r in cat_rows if r[0]]
+
         return render_template(
             'customer/home.html',
             view_mode='catalog',
             products=products,
             shop_categories=shop_categories,
             shop_active_category=category,
+            products_total=total_products,
+            page=page,
+            per_page=per_page,
+            pages=paginated.pages,
+            filters={'q': q, 'min_price': request.args.get('min_price', ''), 'max_price': request.args.get('max_price', ''), 'in_stock': request.args.get('in_stock', ''), 'installment': request.args.get('installment', ''), 'sort': request.args.get('sort', '')}
         )
+
+    @app.route('/api/search')
+    def api_search():
+        q = (request.args.get('q') or '').strip()
+        try:
+            if not q or len(q) < 2:
+                return jsonify([])
+            from .models.product import Product
+        except Exception:
+            from models.product import Product
+        try:
+            from eacis.models.user import User as _User
+        except Exception:
+            from models.user import User as _User
+
+        # Basic, rate-limited-safe search: name, ref, or category
+        likeq = f"%{q}%"
+        matches = (Product.query.join(_User, _User.id == Product.seller_id)
+                   .filter(
+                       Product.is_active.is_(True),
+                       _User.seller_verification_status == 'approved',
+                       _User.is_active.is_(True),
+                       (Product.name.ilike(likeq)) | (Product.product_ref.ilike(likeq)) | (Product.category.ilike(likeq))
+                   )
+                   .limit(10).all())
+        results = []
+        for p in matches:
+            results.append({
+                'id': p.id,
+                'ref': p.product_ref,
+                'name': p.name,
+                'price': float(p.price or 0),
+                'image': p.image_url or url_for('static', filename='assets/Featured.png'),
+                'category': p.category,
+            })
+        return jsonify(results)
 
     @app.route('/customer/product/<ref>')
     @app.route('/products/<ref>')
@@ -2013,16 +2453,29 @@ def create_app(config_class=Config):
         except Exception:
             from models.product import Product
 
-        product = Product.query.filter_by(product_ref=ref, is_active=True).first()
+        try:
+            from eacis.models.user import User as _User
+        except Exception:
+            from models.user import User as _User
+        product = (Product.query.join(_User, _User.id == Product.seller_id)
+                   .filter(
+                       Product.product_ref == ref,
+                       Product.is_active.is_(True),
+                       _User.seller_verification_status == 'approved',
+                       _User.is_active.is_(True),
+                   ).first())
         if not product:
             flash('Product not found.', 'error')
             return redirect(url_for('shop'))
 
-        related_products = Product.query.filter(
-            Product.is_active.is_(True),
-            Product.category == product.category,
-            Product.id != product.id,
-        ).order_by(Product.created_at.desc()).limit(4).all()
+        related_products = (Product.query.join(_User, _User.id == Product.seller_id)
+            .filter(
+                Product.is_active.is_(True),
+                _User.seller_verification_status == 'approved',
+                _User.is_active.is_(True),
+                Product.category == product.category,
+                Product.id != product.id,
+            ).order_by(Product.created_at.desc()).limit(4).all())
         # load ordered product images (position) for display
         try:
             from .models.product_image import ProductImage
@@ -2082,7 +2535,17 @@ def create_app(config_class=Config):
         except Exception:
             from models.product import Product
 
-        product = Product.query.filter_by(product_ref=ref, is_active=True).first()
+        try:
+            from eacis.models.user import User as _User
+        except Exception:
+            from models.user import User as _User
+        product = (Product.query.join(_User, _User.id == Product.seller_id)
+                   .filter(
+                       Product.product_ref == ref,
+                       Product.is_active.is_(True),
+                       _User.seller_verification_status == 'approved',
+                       _User.is_active.is_(True),
+                   ).first())
         if not product:
             return jsonify({'error': 'Product not found.'}), 404
 
@@ -2116,7 +2579,17 @@ def create_app(config_class=Config):
         except Exception:
             from models.product import Product
 
-        product = Product.query.filter_by(product_ref=ref, is_active=True).first()
+        try:
+            from eacis.models.user import User as _User
+        except Exception:
+            from models.user import User as _User
+        product = (Product.query.join(_User, _User.id == Product.seller_id)
+                   .filter(
+                       Product.product_ref == ref,
+                       Product.is_active.is_(True),
+                       _User.seller_verification_status == 'approved',
+                       _User.is_active.is_(True),
+                   ).first())
         if not product:
             flash('Product not found.', 'error')
             return redirect(url_for('shop'))
@@ -2143,6 +2616,10 @@ def create_app(config_class=Config):
             flash(err, 'error')
         else:
             flash('Review submitted.', 'success')
+        # Respect optional 'next' parameter so inline review forms can return to originating page
+        next_path = (request.form.get('next') or '').strip()
+        if next_path and next_path.startswith('/'):
+            return redirect(next_path)
         return redirect(url_for('product_detail', ref=ref))
 
     @app.route('/customer/cart', methods=['GET', 'POST'])
@@ -2492,10 +2969,26 @@ def create_app(config_class=Config):
 
         # handle saved address selection and optional save
         if request.method == 'POST':
-            address_id = request.form.get('address_id', 'new')
-            if address_id and address_id != 'new':
+            # Support multiple selected addresses (checkboxes) or a single selection (legacy radio)
+            selected_address_ids = request.form.getlist('address_id') or []
+            # Normalize values: could include 'new' and numeric ids
+            numeric_ids = []
+            use_new = False
+            for v in selected_address_ids:
+                if not v:
+                    continue
+                if v == 'new':
+                    use_new = True
+                else:
+                    try:
+                        numeric_ids.append(int(v))
+                    except Exception:
+                        pass
+
+            # If specific saved addresses were chosen, prefill checkout_form with first saved addr summary
+            if numeric_ids:
                 try:
-                    addr = db.session.get(Address, int(address_id))
+                    addr = db.session.get(Address, int(numeric_ids[0]))
                     if addr and addr.user_id == current_user.id:
                         checkout_form.update({
                             'recipient_name': addr.recipient_name or checkout_form.get('recipient_name'),
@@ -2506,7 +2999,8 @@ def create_app(config_class=Config):
                 except Exception:
                     pass
 
-            if request.form.get('save_address') and address_id == 'new':
+            # If saving a new address was requested, create it
+            if request.form.get('save_address') and use_new:
                 try:
                     new_addr = Address(
                         user_id=current_user.id,
@@ -2529,6 +3023,10 @@ def create_app(config_class=Config):
                     saved_addresses = Address.query.filter_by(user_id=current_user.id).order_by(Address.is_default.desc(), Address.created_at.desc()).all()
                 except Exception:
                     db.session.rollback()
+
+            # For multi-address orders, store selection in checkout_form for rendering
+            if selected_address_ids:
+                checkout_form['selected_address_ids'] = selected_address_ids
 
         requested_loyalty_before_clamp = int(loyalty_requested)
 
@@ -2604,6 +3102,11 @@ def create_app(config_class=Config):
 
             checkout_errors, checkout_data = validate_checkout_payload(request.form)
             if checkout_errors:
+                # Reflect back normalized phone to the UI so users see the normalized value
+                norm_phone = checkout_data.get('phone') if isinstance(checkout_data, dict) else None
+                if norm_phone:
+                    # UI shows +63 prefix separately, so strip leading 0 for display
+                    checkout_form['phone'] = norm_phone[1:] if norm_phone.startswith('0') else norm_phone
                 return render_template(
                     'customer/checkout.html',
                     cart_items=cart_items,
@@ -2686,6 +3189,7 @@ def create_app(config_class=Config):
             plan_months = checkout_data['plan_months']
             address = {
                 'recipient_name': checkout_data['recipient_name'],
+                'recipient_email': checkout_data.get('recipient_email'),
                 'address_line1': checkout_data['address_line1'],
                 'address_line2': checkout_data['address_line2'],
                 'barangay': checkout_data['barangay'],
@@ -2695,6 +3199,7 @@ def create_app(config_class=Config):
                 'postal_code': checkout_data['postal_code'],
                 'country': checkout_data['country'],
                 'phone': checkout_data['phone'] or current_user.phone or '',
+                'kyc_proof': session.get('kyc_proof'),
             }
 
             def _kyc_is_fresh():
@@ -2710,122 +3215,152 @@ def create_app(config_class=Config):
                     return False
                 return (datetime.utcnow() - verified_at).total_seconds() <= 900  # 15 min window
 
-            try:
-                if payment_method == 'installment' and request.form.get('agree_terms') != '1':
-                    checkout_errors['general'] = 'You must agree to the Terms of Service and Privacy Policy before placing an installment order.'
-                    return render_template('customer/checkout.html',
-                        cart_items=cart_items, subtotal=subtotal,
-                        voucher_code=voucher_code, voucher_discount=voucher_discount,
-                        loyalty_requested=int(loyalty_requested), loyalty_applied=int(loyalty_applied),
-                        available_points=int(available_points), order_total=order_total,
-                        earned_points=int(earned_points), selected_payment=selected_payment,
-                        checkout_form=checkout_form, checkout_errors=checkout_errors)
+            # processing checkout flow
+            if payment_method == 'installment' and request.form.get('agree_terms') != '1':
+                checkout_errors['general'] = 'You must agree to the Terms of Service and Privacy Policy before placing an installment order.'
+                return render_template('customer/checkout.html',
+                    cart_items=cart_items, subtotal=subtotal,
+                    voucher_code=voucher_code, voucher_discount=voucher_discount,
+                    loyalty_requested=int(loyalty_requested), loyalty_applied=int(loyalty_applied),
+                    available_points=int(available_points), order_total=order_total,
+                    earned_points=int(earned_points), selected_payment=selected_payment,
+                    checkout_form=checkout_form, checkout_errors=checkout_errors)
 
-                if payment_method == 'installment' and request.form.get('installment_confirmed') != 'true':
-                    # ── Redirect to KYC gate first, then installment confirm ─
-                    session['pending_checkout'] = {
-                        'data': checkout_data,
-                        'order_total': float(order_total),
-                        'plan_months': plan_months,
-                        'voucher_id': voucher.id if voucher else None,
-                        'loyalty_applied': int(loyalty_applied)
-                    }
-                    # If KYC not yet done this session, go to KYC first
-                    if not _kyc_is_fresh():
-                        return redirect(url_for('customer_checkout_kyc'))
-                    if not is_installment_otp_fresh():
-                        challenge, otp_error = start_otp_flow(
-                            user=current_user,
-                            purpose='installment_confirm',
-                            next_url=url_for('customer_checkout_installment_confirm'),
-                            mode='checkout',
-                            meta={'flow': 'installment_checkout', 'order_total': float(order_total), 'plan_months': int(plan_months)},
+            if payment_method == 'installment' and request.form.get('installment_confirmed') != 'true':
+                # ── Redirect to KYC gate first, then installment confirm ─
+                session['pending_checkout'] = {
+                    'data': checkout_data,
+                    'order_total': float(order_total),
+                    'plan_months': plan_months,
+                    'voucher_id': voucher.id if voucher else None,
+                    'loyalty_applied': int(loyalty_applied)
+                }
+                # If KYC not yet done this session, go to KYC first
+                if not _kyc_is_fresh():
+                    return redirect(url_for('customer_checkout_kyc'))
+                if not is_installment_otp_fresh():
+                    challenge, otp_error = start_otp_flow(
+                        user=current_user,
+                        purpose='installment_confirm',
+                        next_url=url_for('customer_checkout_installment_confirm'),
+                        mode='checkout',
+                        meta={'flow': 'installment_checkout', 'order_total': float(order_total), 'plan_months': int(plan_months)},
+                    )
+                    if not challenge:
+                        checkout_errors['general'] = otp_error or 'Could not send installment verification code.'
+                        return render_template(
+                            'customer/checkout.html',
+                            cart_items=cart_items,
+                            subtotal=subtotal,
+                            voucher_code=voucher_code,
+                            voucher_discount=voucher_discount,
+                            loyalty_requested=int(loyalty_requested),
+                            loyalty_applied=int(loyalty_applied),
+                            available_points=int(available_points),
+                            order_total=order_total,
+                            earned_points=int(earned_points),
+                            selected_payment=selected_payment,
+                            checkout_form=checkout_form,
+                            checkout_errors=checkout_errors,
+                            saved_addresses=saved_addresses,
                         )
-                        if not challenge:
-                            checkout_errors['general'] = otp_error or 'Could not send installment verification code.'
-                            return render_template(
-                                'customer/checkout.html',
-                                cart_items=cart_items,
-                                subtotal=subtotal,
-                                voucher_code=voucher_code,
-                                voucher_discount=voucher_discount,
-                                loyalty_requested=int(loyalty_requested),
-                                loyalty_applied=int(loyalty_applied),
-                                available_points=int(available_points),
-                                order_total=order_total,
-                                earned_points=int(earned_points),
-                                selected_payment=selected_payment,
-                                checkout_form=checkout_form,
-                                checkout_errors=checkout_errors,
-                                saved_addresses=saved_addresses,
-                            )
-                        session['otp_message'] = 'Check your email to confirm this installment order.'
-                        return redirect(url_for('auth_otp_verify'))
+                    session['otp_message'] = 'Check your email to confirm this installment order.'
+                    return redirect(url_for('auth_otp_verify'))
+                return redirect(url_for('customer_checkout_installment_confirm'))
+
+            if payment_method == 'installment' and request.form.get('installment_confirmed') == 'true':
+                pending = session.get('pending_checkout') or {}
+                if not _kyc_is_fresh() or not pending:
+                    flash('Identity verification expired or missing. Please verify again before confirming installment.', 'error')
+                    return redirect(url_for('customer_checkout_kyc'))
+                # Ensure the user actually agreed to the installment terms (either via KYC or explicit checkbox)
+                if request.form.get('agree_installment_terms') != '1' and not _kyc_is_fresh():
+                    flash('You must agree to the installment terms before confirming.', 'error')
+                    return redirect(url_for('customer_checkout_installment_confirm'))
+                if not is_installment_otp_fresh():
+                    flash('Installment verification code expired or missing. Please verify again before confirming.', 'error')
                     return redirect(url_for('customer_checkout_installment_confirm'))
 
-                if payment_method == 'installment' and request.form.get('installment_confirmed') == 'true':
-                    pending = session.get('pending_checkout') or {}
-                    if not _kyc_is_fresh() or not pending:
-                        checkout_errors['general'] = 'Identity verification expired or missing. Please verify again before confirming installment.'
-                        return redirect(url_for('customer_checkout_kyc'))
-                    if not is_installment_otp_fresh():
-                        checkout_errors['general'] = 'Installment verification code expired or missing. Please verify again before confirming.'
-                        return redirect(url_for('customer_checkout_installment_confirm'))
+                pending_total = float(pending.get('order_total') or 0)
+                pending_months = int(pending.get('plan_months') or 0)
+                if abs(float(order_total) - pending_total) > 0.01 or int(plan_months) != pending_months:
+                    checkout_errors['general'] = 'Installment summary changed. Please review and confirm the updated plan again.'
+                    flash(checkout_errors['general'], 'error')
+                    return redirect(url_for('checkout'))
 
-                    pending_total = float(pending.get('order_total') or 0)
-                    pending_months = int(pending.get('plan_months') or 0)
-                    if abs(float(order_total) - pending_total) > 0.01 or int(plan_months) != pending_months:
-                        checkout_errors['general'] = 'Installment summary changed. Please review and confirm the updated plan again.'
-                        flash(checkout_errors['general'], 'error')
-                        return redirect(url_for('checkout'))
+            # Use a UUID-based order_ref to avoid race conditions under concurrency
+            order_ref = f"ORD-{uuid.uuid4().hex[:12].upper()}"
+            order = Order(
+                order_ref=order_ref,
+                customer_id=current_user.id,
+                status='paid' if payment_method == 'full_pay' else 'pending',
+                subtotal=money(subtotal),
+                discount=discount_total,
+                shipping_fee=0,
+                tax=0,
+                total=money(order_total),
+                voucher_id=voucher.id if voucher else None,
+                loyalty_redeemed=loyalty_applied,
+                payment_method=payment_method,
+                shipping_address=address,
+                notes=f"Created from customer checkout{' | voucher=' + voucher.code if voucher else ''}",
+                paid_at=datetime.utcnow() if payment_method == 'full_pay' else None,
+            )
 
-                today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
-                today_count = Order.query.filter(Order.created_at >= today_start).count() + 1
-                order_ref = f"ORD-{datetime.utcnow().strftime('%Y%m%d')}{str(today_count).zfill(5)}"
-                order = Order(
-                    order_ref=order_ref,
-                    customer_id=current_user.id,
-                    status='paid' if payment_method == 'full_pay' else 'pending',
-                    subtotal=money(subtotal),
-                    discount=discount_total,
-                    shipping_fee=0,
-                    tax=0,
-                    total=money(order_total),
-                    voucher_id=voucher.id if voucher else None,
-                    loyalty_redeemed=loyalty_applied,
-                    payment_method=payment_method,
-                    shipping_address=address,
-                    notes=f"Created from customer checkout{' | voucher=' + voucher.code if voucher else ''}",
-                    paid_at=datetime.utcnow() if payment_method == 'full_pay' else None,
-                )
+            try:
                 db.session.add(order)
                 db.session.flush()
-                # ── Stock deduction with audit trail ─────────────────
+
                 try:
                     from eacis.services import inventory_service as InvSvc
                 except Exception:
                     InvSvc = None
 
                 for line in cart_items:
-                    available_stock = int(line['product'].stock or 0)
-                    if int(line['qty']) > available_stock:
-                        raise ValueError(f"Insufficient stock for {line['product'].name}. Available: {available_stock}.")
+                    try:
+                        locked_product = db.session.query(Product).filter_by(id=line['product'].id).with_for_update().first()
+                    except Exception:
+                        locked_product = db.session.get(Product, line['product'].id)
 
-                    db.session.add(OrderItem(
-                        order_id=order.id,
-                        product_id=line['product'].id,
-                        quantity=line['qty'],
-                        unit_price=line['product'].price,
-                        subtotal=money(line['line_total']),
-                    ))
-                    # Use InventoryService for auditable stock deduction
+                    if not locked_product:
+                        raise ValueError(
+                            f"Product not found for cart line: {getattr(line.get('product'), 'name', line.get('product_id', 'unknown'))}."
+                        )
+
+                    if (
+                        payment_method == 'installment'
+                        and not bool(getattr(locked_product, 'installment_enabled', False))
+                    ):
+                        raise ValueError(f"Installment eligibility changed for {locked_product.name}. Please review your cart.")
+
+                    if int(line['qty']) > int(locked_product.stock or 0):
+                        raise ValueError(
+                            f"Insufficient stock for {locked_product.name}. Available: {locked_product.stock or 0}."
+                        )
+
+                    db.session.add(
+                        OrderItem(
+                            order_id=order.id,
+                            product_id=locked_product.id,
+                            quantity=line['qty'],
+                            unit_price=locked_product.price,
+                            subtotal=money(line['line_total']),
+                        )
+                    )
+
                     if InvSvc:
-                        InvSvc.deduct_stock(line['product'], line['qty'], order_ref, current_user.id)
+                        InvSvc.deduct_stock(locked_product, line['qty'], order_ref, current_user.id)
                     else:
-                        line['product'].stock = available_stock - int(line['qty'])
+                        locked_product.stock = int(locked_product.stock or 0) - int(line['qty'])
 
                 if payment_method == 'installment':
-                    monthly_amount = round(float(order_total) / float(plan_months), 2) if plan_months > 0 else float(order_total)
+                    if plan_months > 0:
+                        monthly_amount = round(float(order_total) / float(plan_months), 2)
+                        remainder = round(float(order_total) - (monthly_amount * plan_months), 2)
+                    else:
+                        monthly_amount = float(order_total)
+                        remainder = 0.0
+
                     plan = InstallmentPlan(
                         order_id=order.id,
                         months=plan_months,
@@ -2840,56 +3375,109 @@ def create_app(config_class=Config):
                     today = datetime.utcnow().date()
                     for month_idx in range(plan_months):
                         due_date = today + timedelta(days=30 * (month_idx + 1))
-                        db.session.add(InstallmentSchedule(
-                            plan_id=plan.id,
-                            due_date=due_date,
-                            amount=monthly_amount,
-                            status='pending',
-                        ))
+                        amount = monthly_amount
+                        if month_idx == plan_months - 1:
+                            amount = round(monthly_amount + remainder, 2)
+                        db.session.add(
+                            InstallmentSchedule(
+                                plan_id=plan.id,
+                                due_date=due_date,
+                                amount=amount,
+                                status='pending',
+                            )
+                        )
 
                 if voucher:
                     voucher.uses_count = int(voucher.uses_count or 0) + 1
-                    # Log voucher usage for audit trail
-                    try:
-                        from eacis.services import voucher_service as VchSvc
-                    except Exception:
-                        VchSvc = None
-                    if VchSvc:
-                        VchSvc.record_usage(voucher, current_user.id, order.id, voucher_discount)
 
                 if loyalty_applied > 0:
-                    current_user.loyalty_points = max(int(current_user.loyalty_points or 0) - int(loyalty_applied), 0)
-                    db.session.add(LoyaltyTransaction(
-                        user_id=current_user.id,
-                        type='redeem',
-                        points=int(loyalty_applied),
-                        reference=order_ref,
-                        note='Redeemed at checkout',
-                    ))
+                    current_user.loyalty_points = max(
+                        int(current_user.loyalty_points or 0) - int(loyalty_applied), 0
+                    )
+                    db.session.add(
+                        LoyaltyTransaction(
+                            user_id=current_user.id,
+                            type='redeem',
+                            points=int(loyalty_applied),
+                            reference=order_ref,
+                            note='Redeemed at checkout',
+                        )
+                    )
 
-                if earned_points > 0:
+                if payment_method == 'full_pay' and earned_points > 0:
                     current_user.loyalty_points = int(current_user.loyalty_points or 0) + int(earned_points)
-                    db.session.add(LoyaltyTransaction(
-                        user_id=current_user.id,
-                        type='earn',
-                        points=int(earned_points),
-                        reference=order_ref,
-                        note='Earned from checkout',
-                    ))
+                    db.session.add(
+                        LoyaltyTransaction(
+                            user_id=current_user.id,
+                            type='earn',
+                            points=int(earned_points),
+                            reference=order_ref,
+                            note='Earned from checkout',
+                        )
+                    )
 
                 if order.status == 'paid':
-                    ensure_invoice_for_order(order)
+                    try:
+                        ensure_invoice_for_order(order)
+                    except Exception as ie:
+                        try:
+                            app.logger.exception('Invoice generation failed, attaching note to order')
+                        except Exception:
+                            pass
+                        order.notes = (getattr(order, 'notes', '') or '') + f" | invoice_error: {str(ie)}"
 
                 cart.items = []
                 cart.voucher_code = None
                 db.session.commit()
+                # Notify recipient email (if provided) about the completed order
+                try:
+                    rec_email = None
+                    if isinstance(order.shipping_address, dict):
+                        rec_email = order.shipping_address.get('recipient_email')
+                    # fallback: notify account email if recipient not provided
+                    if not rec_email:
+                        try:
+                            rec_email = getattr(current_user, 'email', None)
+                        except Exception:
+                            rec_email = None
+                    if rec_email:
+                        try:
+                            from eacis.services.email_service import EmailService
+                            subject = f"Your E-ACIS Order {order.order_ref}"
+                            lines = [f"Order Reference: {order.order_ref}", f"Total: PHP {float(order.total):.2f}", "Items:"]
+                            for it in order.items.all() if getattr(order, 'items', None) else []:
+                                try:
+                                    prod = getattr(it, 'product', None)
+                                    name = getattr(prod, 'name', None) or getattr(it, 'product_id', '')
+                                    lines.append(f" - {name} x{int(getattr(it, 'quantity', 1))} — PHP {float(getattr(it, 'unit_price', 0)):.2f}")
+                                except Exception:
+                                    pass
+                            text_body = "\n".join(lines)
+                            EmailService.send_email(rec_email, subject, text_body)
+                        except Exception:
+                            try:
+                                app.logger.exception('Recipient email notification failed for order %s', order.order_ref)
+                            except Exception:
+                                pass
+                except Exception:
+                    try:
+                        app.logger.exception('Failed while attempting recipient notification')
+                    except Exception:
+                        pass
                 return redirect(url_for('checkout_success', order_ref=order_ref))
             except Exception as ex:
                 db.session.rollback()
+                try:
+                    app.logger.exception('Checkout order creation failed')
+                except Exception:
+                    pass
                 if isinstance(ex, ValueError):
                     checkout_errors['general'] = str(ex)
                 else:
-                    checkout_errors['general'] = 'Could not place your order. Please try again.'
+                    if str(app.config.get('FLASK_ENV') or '').lower() != 'production':
+                        checkout_errors['general'] = f'Could not place your order: {str(ex)}'
+                    else:
+                        checkout_errors['general'] = 'Could not place your order. Please try again.'
                 return render_template(
                     'customer/checkout.html',
                     cart_items=cart_items,
@@ -2904,6 +3492,7 @@ def create_app(config_class=Config):
                     selected_payment=selected_payment,
                     checkout_form=checkout_form,
                     checkout_errors=checkout_errors,
+                    saved_addresses=saved_addresses,
                 )
 
         return render_template(
@@ -2965,10 +3554,26 @@ def create_app(config_class=Config):
             for e in errors:
                 flash(e, 'error')
             return render_template('customer/installment_kyc.html', today=date.today().isoformat())
-        # Mark KYC as verified in session
+
+        # Handle uploaded proof file (required)
+        id_proof = request.files.get('id_proof')
+        if not id_proof or not getattr(id_proof, 'filename', None):
+            from datetime import date
+            flash('Please upload a valid ID proof file (PNG, JPG, or PDF).', 'error')
+            return render_template('customer/installment_kyc.html', today=date.today().isoformat())
+
+        saved_path, save_err = save_seller_permit(id_proof, f"kyc_cust{current_user.id}")
+        if save_err:
+            from datetime import date
+            flash(save_err, 'error')
+            return render_template('customer/installment_kyc.html', today=date.today().isoformat())
+
+        # Mark KYC as verified in session and persist pointer to uploaded proof
         session['kyc_verified'] = True
         session['kyc_id_type'] = id_type
         session['kyc_verified_at'] = datetime.utcnow().isoformat()
+        # store relative path (e.g. 'permits/filename') for later attachment to the order
+        session['kyc_proof'] = saved_path
         # Do NOT store actual ID number in session for security
         return redirect(url_for('customer_checkout_installment_confirm'))
 
@@ -3024,11 +3629,20 @@ def create_app(config_class=Config):
 
         total = pending['order_total']
         months = pending['plan_months']
-        monthly = round(total / months, 2) if months > 0 else total
+        # compute monthly amounts with last payment absorbing small rounding remainder
+        if months > 0:
+            monthly = round(float(total) / float(months), 2)
+            remainder = round(float(total) - (monthly * months), 2)
+        else:
+            monthly = total
+            remainder = 0.0
         schedule = []
         today = datetime.utcnow().date()
         for i in range(months):
-            schedule.append({'month': i + 1, 'due_date': today + timedelta(days=30 * (i + 1)), 'amount': monthly})
+            amount = monthly
+            if i == months - 1:
+                amount = round(monthly + remainder, 2)
+            schedule.append({'month': i + 1, 'due_date': today + timedelta(days=30 * (i + 1)), 'amount': amount})
 
         return render_template('customer/checkout_installment_confirm.html',
                                total=total, months=months, monthly=monthly,
@@ -3057,6 +3671,7 @@ def create_app(config_class=Config):
                 # Clear KYC session flag after successful order
                 session.pop('kyc_verified', None)
                 session.pop('kyc_id_type', None)
+                session.pop('kyc_proof', None)
                 session.pop('pending_checkout', None)
                 clear_installment_otp_session()
         if not order:
@@ -3305,6 +3920,97 @@ def create_app(config_class=Config):
 
         return render_template('customer/order_detail.html', order=order, existing_return=existing_return, today=datetime.utcnow().date(), star_counts=star_counts, starred_by_user_map=starred_by_user_map, user_reviews_map=user_reviews_map, can_review_map=can_review_map, cashflow=cashflow)
 
+    @app.route('/customer/orders/<order_ref>/receipt')
+    def customer_order_receipt(order_ref):
+        from flask_login import current_user
+        if not (current_user and getattr(current_user, 'is_authenticated', False) and getattr(current_user, 'role', None) == 'customer'):
+            return redirect(url_for('auth_login', next=request.path))
+
+        try:
+            from .models.order import Order
+        except Exception:
+            from models.order import Order
+
+        order = Order.query.filter_by(order_ref=order_ref, customer_id=current_user.id).first()
+        if not order:
+            flash('Order not found.', 'error')
+            return redirect(url_for('customer_orders'))
+
+        # Build minimal cashflow for receipt: payments, vouchers, refunds, installments
+        cashflow = []
+        try:
+            from eacis.models.voucher_usage import VoucherUsageLog
+            from eacis.models.return_request import ReturnRequest as ReturnReqModel
+            from eacis.models.refund_transaction import RefundTransaction
+            from eacis.models.installment import InstallmentSchedule
+        except Exception:
+            try:
+                from models.voucher_usage import VoucherUsageLog
+                from models.return_request import ReturnRequest as ReturnReqModel
+                from models.refund_transaction import RefundTransaction
+                from models.installment import InstallmentSchedule
+            except Exception:
+                VoucherUsageLog = RefundTransaction = InstallmentSchedule = None
+                ReturnReqModel = None
+
+        try:
+            if getattr(order, 'payment_method', '') == 'installment' and getattr(order, 'installment_plan', None):
+                plan = order.installment_plan
+                try:
+                    down = float(getattr(plan, 'downpayment', 0) or 0)
+                except Exception:
+                    down = 0.0
+                if down > 0:
+                    ts = getattr(order, 'paid_at', None) or getattr(order, 'created_at', None)
+                    cashflow.append({'ts': ts, 'kind': 'downpayment', 'label': 'Downpayment', 'amount': -down, 'method': getattr(order, 'payment_method', None), 'ref': None})
+
+                try:
+                    schedules = plan.schedules.order_by(InstallmentSchedule.due_date).all()
+                except Exception:
+                    schedules = list(getattr(plan, 'schedules', []) or [])
+
+                for idx, sch in enumerate(schedules, start=1):
+                    if getattr(sch, 'status', None) == 'paid':
+                        ts = getattr(sch, 'paid_at', None) or (getattr(sch, 'due_date', None) and datetime.combine(getattr(sch, 'due_date'), datetime.min.time()))
+                        cashflow.append({'ts': ts, 'kind': 'installment', 'label': f'Installment payment #{idx}', 'amount': -float(getattr(sch, 'amount', 0) or 0), 'method': getattr(sch, 'payment_ref', None), 'ref': getattr(sch, 'payment_ref', None)})
+            else:
+                if getattr(order, 'paid_at', None):
+                    cashflow.append({'ts': order.paid_at, 'kind': 'payment', 'label': 'Payment received', 'amount': -float(getattr(order, 'total', 0) or 0), 'method': getattr(order, 'payment_method', None), 'ref': getattr(order, 'payment_ref', None)})
+        except Exception:
+            pass
+
+        try:
+            if VoucherUsageLog:
+                vlogs = VoucherUsageLog.query.filter_by(order_id=order.id).all()
+                for v in vlogs:
+                    try:
+                        code = getattr(v.voucher, 'code', '')
+                    except Exception:
+                        code = ''
+                    cashflow.append({'ts': getattr(v, 'used_at', None), 'kind': 'voucher', 'label': f'Voucher used ({code})', 'amount': float(getattr(v, 'discount_applied', 0) or 0), 'ref': None})
+        except Exception:
+            pass
+
+        try:
+            rrs = []
+            if ReturnReqModel:
+                rrs = ReturnReqModel.query.filter_by(order_id=order.id).all()
+            for rr in rrs:
+                cashflow.append({'ts': getattr(rr, 'created_at', None), 'kind': 'return_request', 'label': f'Return requested ({getattr(rr, "status", "")})', 'amount': 0, 'ref': getattr(rr, 'rrt_ref', None)})
+                for rt in getattr(rr, 'refund_transactions', []) or []:
+                    cashflow.append({'ts': getattr(rt, 'processed_at', None), 'kind': 'refund', 'label': f'Refund {getattr(rt, "refund_ref", "")}', 'amount': float(getattr(rt, 'amount', 0) or 0), 'method': getattr(rt, 'method', None), 'ref': getattr(rt, 'refund_ref', None), 'status': getattr(rt, 'status', None)})
+        except Exception:
+            pass
+
+        try:
+            dated = [c for c in cashflow if c.get('ts')]
+            undated = [c for c in cashflow if not c.get('ts')]
+            cashflow = sorted(dated, key=lambda x: x['ts'], reverse=True) + undated
+        except Exception:
+            pass
+
+        return render_template('customer/order_receipt.html', order=order, today=datetime.utcnow().date(), cashflow=cashflow)
+
     @app.route('/customer/invoices')
     def customer_invoices():
         from flask_login import current_user
@@ -3439,6 +4145,59 @@ def create_app(config_class=Config):
         }
 
         return render_template('customer/installments.html', installments=installments, stats=stats, today=today)
+
+
+    @app.route('/customer/installments/<int:schedule_id>/pay', methods=['POST'])
+    def customer_installment_pay(schedule_id):
+        from flask_login import current_user
+        if not (current_user and getattr(current_user, 'is_authenticated', False) and getattr(current_user, 'role', None) == 'customer'):
+            return redirect(url_for('auth_login', next=request.path))
+
+        try:
+            from eacis.models.installment import InstallmentSchedule, InstallmentPlan
+            from eacis.models.order import Order
+        except Exception:
+            from models.installment import InstallmentSchedule, InstallmentPlan
+            from models.order import Order
+
+        try:
+            from eacis.services import installment_service as InstSvc
+        except Exception:
+            InstSvc = None
+
+        schedule = db.session.get(InstallmentSchedule, schedule_id)
+        if not schedule:
+            flash('Installment schedule not found.', 'error')
+            return redirect(url_for('customer_installments'))
+
+        plan = db.session.get(InstallmentPlan, schedule.plan_id)
+        if not plan:
+            flash('Associated installment plan not found.', 'error')
+            return redirect(url_for('customer_installments'))
+
+        # Verify ownership: order must belong to current customer
+        order = db.session.get(Order, plan.order_id) if plan and plan.order_id else None
+        if not order or order.customer_id != int(current_user.id):
+            flash('You do not have permission to pay this installment.', 'error')
+            return redirect(url_for('customer_installments'))
+
+        payment_ref = (request.form.get('payment_ref') or '').strip()
+        if not InstSvc:
+            flash('Installment payments are not available right now.', 'error')
+            return redirect(url_for('customer_installments'))
+
+        ok, message = InstSvc.record_payment(schedule_id=schedule_id, payment_ref=payment_ref, actor_id=current_user.id)
+        if not ok:
+            flash(message, 'error')
+            return redirect(url_for('customer_installments'))
+
+        try:
+            db.session.commit()
+            flash('Payment recorded. Thank you.', 'success')
+        except Exception:
+            db.session.rollback()
+            flash('Unable to record payment right now.', 'error')
+        return redirect(url_for('customer_installments'))
 
     @app.route('/customer/returns', methods=['GET', 'POST'])
     def customer_returns():
@@ -4183,14 +4942,17 @@ def create_app(config_class=Config):
 
         kpis = {
             'revenue_today': revenue_today,
+            'total_revenue': sum(float(order.total or 0) for order in seller_orders),
+            'total_orders': len(seller_orders),
             'pending_orders': pending_orders,
             'active_products': active_products,
             'low_stock': low_stock,
             'open_inquiries': open_inquiries,
         }
-        recent_orders = seller_orders[:5]
+        recent_orders = seller_orders[:6]
+        inventory_snapshot = sorted([p for p in products if p.is_active], key=lambda x: (x.stock or 0))[:6]
         verification_status = getattr(current_user, 'seller_verification_status', None) if current_user and getattr(current_user, 'is_authenticated', False) else None
-        return render_template('seller/dashboard.html', verification_status=verification_status, kpis=kpis, recent_orders=recent_orders)
+        return render_template('seller/dashboard.html', verification_status=verification_status, kpis=kpis, recent_orders=recent_orders, inventory_snapshot=inventory_snapshot)
 
     @app.route('/seller/products')
     def seller_products():
@@ -4241,7 +5003,16 @@ def create_app(config_class=Config):
         from flask_login import current_user
         if not (current_user and getattr(current_user, 'is_authenticated', False) and getattr(current_user, 'role', None) == 'seller'):
             return redirect(url_for('auth_login', next=request.path))
-        return render_template('seller/product_form.html', ref=None, product=None, errors={}, form={})
+        try:
+            from .models.product import Product
+        except Exception:
+            from models.product import Product
+        try:
+            cat_rows = db.session.query(Product.category).filter(Product.category.isnot(None), Product.category != '').distinct().order_by(Product.category.asc()).all()
+            categories = [r[0] for r in cat_rows if r[0]]
+        except Exception:
+            categories = []
+        return render_template('seller/product_form.html', ref=None, product=None, errors={}, form={}, categories=categories)
 
     @app.route('/seller/products/new', methods=['POST'])
     @app.route('/seller/products/create', methods=['POST'])
@@ -4250,6 +5021,10 @@ def create_app(config_class=Config):
         from flask_login import current_user
         if not (current_user and getattr(current_user, 'is_authenticated', False) and getattr(current_user, 'role', None) == 'seller'):
             return redirect(url_for('auth_login', next=request.path))
+        verification_status = (getattr(current_user, 'seller_verification_status', '') or '').lower()
+        if verification_status != 'approved':
+            flash('Your seller account is pending approval. This action is restricted.', 'warning')
+            return redirect(url_for('seller_dashboard'))
         try:
             from .models.product import Product
         except Exception:
@@ -4257,21 +5032,35 @@ def create_app(config_class=Config):
 
         errors, form_data = validate_seller_product_payload(request.form)
         if errors:
-            flash(' '.join(errors.values()), 'error')
             form_product = {
                 'name': form_data['name'],
                 'category': form_data['category'],
                 'description': form_data['description'],
-                'price': form_data['price_raw'],
+                    'price': form_data['price_raw'],
+                    'compare_price': form_data.get('compare_price_raw', ''),
                 'stock': form_data['stock_raw'],
                 'warranty_months': form_data['warranty_raw'],
                 'is_active': form_data['is_active'],
                 'installment_enabled': form_data['installment_enabled'],
             }
-            return render_template('seller/product_form.html', ref=None, product=form_product, errors=errors, form=form_product)
+            try:
+                from .models.product import Product
+            except Exception:
+                from models.product import Product
+            try:
+                cat_rows = db.session.query(Product.category).filter(Product.category.isnot(None), Product.category != '').distinct().order_by(Product.category.asc()).all()
+                categories = [r[0] for r in cat_rows if r[0]]
+            except Exception:
+                categories = []
+            return render_template('seller/product_form.html', ref=None, product=form_product, errors=errors, form=form_product, categories=categories)
 
-        ts = datetime.utcnow().strftime('%y%m%d%H%M%S')
-        product_ref = f"PRD-S{current_user.id}-{ts}"
+        # Use a non-identifying random product reference to avoid exposing internal seller IDs
+        try:
+            import secrets
+            product_ref = f"PRD-{secrets.token_hex(6).upper()}"
+        except Exception:
+            ts = datetime.utcnow().strftime('%y%m%d%H%M%S')
+            product_ref = f"PRD-{ts}"
         try:
             product = Product(
                 product_ref=product_ref,
@@ -4279,7 +5068,8 @@ def create_app(config_class=Config):
                 name=form_data['name'],
                 category=form_data['category'],
                 description=form_data['description'],
-                price=form_data['price'],
+                    price=form_data['price'],
+                    compare_price=form_data.get('compare_price'),
                 stock=form_data['stock'],
                 warranty_months=form_data['warranty_months'],
                 installment_enabled=form_data['installment_enabled'],
@@ -4296,7 +5086,8 @@ def create_app(config_class=Config):
                 'name': form_data['name'],
                 'category': form_data['category'],
                 'description': form_data['description'],
-                'price': form_data['price_raw'],
+                    'price': form_data['price_raw'],
+                    'compare_price': form_data.get('compare_price_raw', ''),
                 'stock': form_data['stock_raw'],
                 'warranty_months': form_data['warranty_raw'],
                 'is_active': form_data['is_active'],
@@ -4336,13 +5127,26 @@ def create_app(config_class=Config):
                 images = ProductImage.query.filter_by(product_id=product.id).order_by(ProductImage.position.asc()).all()
             except Exception:
                 images = []
-        return render_template('seller/product_form.html', ref=ref, product=product, images=images, errors={}, form={})
+        try:
+            from .models.product import Product
+        except Exception:
+            from models.product import Product
+        try:
+            cat_rows = db.session.query(Product.category).filter(Product.category.isnot(None), Product.category != '').distinct().order_by(Product.category.asc()).all()
+            categories = [r[0] for r in cat_rows if r[0]]
+        except Exception:
+            categories = []
+        return render_template('seller/product_form.html', ref=ref, product=product, images=images, errors={}, form={}, categories=categories)
 
     @app.route('/seller/products/<ref>/edit', methods=['POST'])
     def seller_product_detail_post(ref):
         from flask_login import current_user
         if not (current_user and getattr(current_user, 'is_authenticated', False) and getattr(current_user, 'role', None) == 'seller'):
             return redirect(url_for('auth_login', next=request.path))
+        verification_status = (getattr(current_user, 'seller_verification_status', '') or '').lower()
+        if verification_status != 'approved':
+            flash('Your seller account is pending approval. This action is restricted.', 'warning')
+            return redirect(url_for('seller_dashboard'))
         try:
             from .models.product import Product
         except Exception:
@@ -4355,24 +5159,35 @@ def create_app(config_class=Config):
 
         errors, form_data = validate_seller_product_payload(request.form)
         if errors:
-            flash(' '.join(errors.values()), 'error')
+            flash('Please correct the highlighted fields.', 'error')
             form_product = {
                 'name': form_data['name'],
                 'category': form_data['category'],
                 'description': form_data['description'],
                 'price': form_data['price_raw'],
+                'compare_price': form_data.get('compare_price_raw', ''),
                 'stock': form_data['stock_raw'],
                 'warranty_months': form_data['warranty_raw'],
                 'is_active': form_data['is_active'],
                 'installment_enabled': form_data['installment_enabled'],
             }
-            return render_template('seller/product_form.html', ref=ref, product=form_product, errors=errors, form=form_product)
+            try:
+                from .models.product import Product
+            except Exception:
+                from models.product import Product
+            try:
+                cat_rows = db.session.query(Product.category).filter(Product.category.isnot(None), Product.category != '').distinct().order_by(Product.category.asc()).all()
+                categories = [r[0] for r in cat_rows if r[0]]
+            except Exception:
+                categories = []
+            return render_template('seller/product_form.html', ref=ref, product=form_product, errors=errors, form=form_product, categories=categories)
 
         try:
             product.name = form_data['name']
             product.category = form_data['category']
             product.description = form_data['description']
             product.price = form_data['price']
+            product.compare_price = form_data.get('compare_price')
             product.stock = form_data['stock']
             product.warranty_months = form_data['warranty_months']
             product.is_active = form_data['is_active']
@@ -4406,6 +5221,10 @@ def create_app(config_class=Config):
         from flask_login import current_user
         if not (current_user and getattr(current_user, 'is_authenticated', False) and getattr(current_user, 'role', None) == 'seller'):
             return redirect(url_for('auth_login', next=request.path))
+        verification_status = (getattr(current_user, 'seller_verification_status', '') or '').lower()
+        if verification_status != 'approved':
+            flash('Your seller account is pending approval. This action is restricted.', 'warning')
+            return redirect(url_for('seller_dashboard'))
         try:
             from .models.product import Product
         except Exception:
@@ -4416,12 +5235,13 @@ def create_app(config_class=Config):
             flash('Product not found.', 'error')
             return redirect(url_for('seller_products'))
         try:
-            db.session.delete(product)
+            # Soft-deactivate the product to preserve historical data
+            product.is_active = False
             db.session.commit()
-            flash(f'Product {ref} deleted.', 'success')
+            flash('Product deactivated (hidden from shop).', 'success')
         except Exception:
             db.session.rollback()
-            flash('Unable to delete product. It may be linked to existing orders.', 'error')
+            flash('Unable to deactivate product. It may be linked to existing orders.', 'error')
         return redirect(url_for('seller_products'))
 
     @app.route('/seller/products/<ref>/images/upload', methods=['POST'])
@@ -4429,6 +5249,10 @@ def create_app(config_class=Config):
         from flask_login import current_user
         if not (current_user and getattr(current_user, 'is_authenticated', False) and getattr(current_user, 'role', None) == 'seller'):
             return redirect(url_for('auth_login', next=request.path))
+        verification_status = (getattr(current_user, 'seller_verification_status', '') or '').lower()
+        if verification_status != 'approved':
+            flash('Your seller account is pending approval. This action is restricted.', 'warning')
+            return redirect(url_for('seller_dashboard'))
         try:
             from .models.product import Product
             from .models.product_image import ProductImage
@@ -4471,6 +5295,60 @@ def create_app(config_class=Config):
             flash('Unsupported file type. Allowed: png, jpg, jpeg, gif, webp', 'error')
             return redirect(url_for('seller_product_detail', ref=ref))
 
+        # Server-side size and content verification
+        max_bytes = int(app.config.get('MAX_IMAGE_UPLOAD_BYTES', 5 * 1024 * 1024))
+        data = None
+        try:
+            # Read the whole upload into memory for verification (bounded by max_bytes)
+            data = file.read()
+        except Exception:
+            try:
+                file.stream.seek(0)
+                data = file.stream.read()
+            except Exception:
+                data = None
+
+        if not data:
+            if app.config.get('DEBUG_UPLOADS'):
+                return jsonify({'status': 'no_image_data'}), 400
+            flash('Failed to read uploaded file.', 'error')
+            return redirect(url_for('seller_product_detail', ref=ref))
+
+        if len(data) > max_bytes:
+            if app.config.get('DEBUG_UPLOADS'):
+                return jsonify({'status': 'file_too_large', 'size': len(data)}), 400
+            flash(f'Image must be {max_bytes // (1024*1024)}MB or smaller.', 'error')
+            return redirect(url_for('seller_product_detail', ref=ref))
+
+        # Validate with Pillow if available; otherwise fall back to simple magic-bytes checks
+        valid = False
+        try:
+            if Image is not None:
+                try:
+                    img = Image.open(io.BytesIO(data))
+                    img.verify()
+                    valid = True
+                except Exception:
+                    valid = False
+        except Exception:
+            valid = False
+
+        if not valid:
+            header = (data[:12] or b'')
+            if header.startswith(b"\x89PNG") and ext == 'png':
+                valid = True
+            elif header.startswith(b'\xff\xd8\xff') and ext in ('jpg', 'jpeg'):
+                valid = True
+            elif header.startswith(b'GIF8') and ext == 'gif':
+                valid = True
+            elif len(header) >= 12 and header[:4] == b'RIFF' and header[8:12] == b'WEBP' and ext == 'webp':
+                valid = True
+
+        if not valid:
+            if app.config.get('DEBUG_UPLOADS'):
+                return jsonify({'status': 'invalid_image_contents'}), 400
+            flash('Invalid or unsupported image file.', 'error')
+            return redirect(url_for('seller_product_detail', ref=ref))
         existing = 0
         if product_images_table_exists():
             try:
@@ -4488,7 +5366,9 @@ def create_app(config_class=Config):
         unique_name = f"{int(time.time())}_{uuid.uuid4().hex[:8]}.{ext}"
         save_path = os.path.join(upload_dir, unique_name)
         try:
-            file.save(save_path)
+            # Write verified bytes to disk
+            with open(save_path, 'wb') as fh:
+                fh.write(data)
         except Exception:
             # Log exception for diagnostics and optionally print traceback when debugging
             try:
@@ -4537,6 +5417,10 @@ def create_app(config_class=Config):
         from flask_login import current_user
         if not (current_user and getattr(current_user, 'is_authenticated', False) and getattr(current_user, 'role', None) == 'seller'):
             return redirect(url_for('auth_login', next=request.path))
+        verification_status = (getattr(current_user, 'seller_verification_status', '') or '').lower()
+        if verification_status != 'approved':
+            flash('Your seller account is pending approval. This action is restricted.', 'warning')
+            return redirect(url_for('seller_dashboard'))
         try:
             from .models.product import Product
             from .models.product_image import ProductImage
@@ -4680,6 +5564,10 @@ def create_app(config_class=Config):
         from flask_login import current_user
         if not (current_user and getattr(current_user, 'is_authenticated', False) and getattr(current_user, 'role', None) == 'seller'):
             return redirect(url_for('auth_login', next=request.path))
+        verification_status = (getattr(current_user, 'seller_verification_status', '') or '').lower()
+        if verification_status != 'approved':
+            flash('Your seller account is pending approval. This action is restricted.', 'warning')
+            return redirect(url_for('seller_dashboard'))
 
         try:
             from .models.order import Order, OrderItem
@@ -4758,6 +5646,10 @@ def create_app(config_class=Config):
         from flask_login import current_user
         if not (current_user and getattr(current_user, 'is_authenticated', False) and getattr(current_user, 'role', None) == 'seller'):
             return redirect(url_for('auth_login', next=request.path))
+        verification_status = (getattr(current_user, 'seller_verification_status', '') or '').lower()
+        if verification_status != 'approved':
+            flash('Your seller account is pending approval. This action is restricted.', 'warning')
+            return redirect(url_for('seller_dashboard'))
 
         try:
             from .models.return_request import ReturnRequest
@@ -4810,6 +5702,10 @@ def create_app(config_class=Config):
         from flask_login import current_user
         if not (current_user and getattr(current_user, 'is_authenticated', False) and getattr(current_user, 'role', None) == 'seller'):
             return redirect(url_for('auth_login', next=request.path))
+        verification_status = (getattr(current_user, 'seller_verification_status', '') or '').lower()
+        if verification_status != 'approved':
+            flash('Your seller account is pending approval. This action is restricted.', 'warning')
+            return redirect(url_for('seller_dashboard'))
 
         try:
             from .models.return_request import ReturnRequest
@@ -5089,6 +5985,38 @@ def create_app(config_class=Config):
             headers={'Content-Disposition': 'attachment; filename=seller_reports.xlsx'},
         )
 
+    @app.route('/seller/reports/export/csv')
+    def seller_reports_export_csv():
+        from flask_login import current_user
+        if not (current_user and getattr(current_user, 'is_authenticated', False) and getattr(current_user, 'role', None) == 'seller'):
+            return redirect(url_for('auth_login', next=request.path))
+
+        report_rows, open_returns = build_seller_report_rows(current_user.id, days=30)
+        total_sales = sum(float(row['seller_total'] or 0) for row in report_rows)
+
+        output = io.StringIO()
+        writer = csv.writer(output)
+        writer.writerow(['metric', 'value'])
+        writer.writerow(['monthly_sales', f"{round(total_sales,2):.2f}"])
+        writer.writerow(['open_returns', open_returns])
+        writer.writerow([])
+        writer.writerow(['order_ref', 'status', 'customer_id', 'seller_total', 'created_at'])
+        for row in report_rows:
+            writer.writerow([
+                row.get('order_ref', ''),
+                row.get('status', ''),
+                row.get('customer_id', ''),
+                f"{float(row.get('seller_total') or 0):.2f}",
+                row.get('created_at').isoformat() if row.get('created_at') else '',
+            ])
+
+        from flask import Response
+        return Response(
+            output.getvalue(),
+            mimetype='text/csv',
+            headers={'Content-Disposition': 'attachment; filename=seller_reports_export.csv'},
+        )
+
     @app.route('/seller/reports/export/pdf')
     def seller_reports_export_pdf():
         from flask_login import current_user
@@ -5133,6 +6061,17 @@ def create_app(config_class=Config):
             mimetype='application/pdf',
             headers={'Content-Disposition': 'attachment; filename=seller_reports.pdf'},
         )
+
+    @app.route('/seller/reports/print')
+    def seller_reports_print():
+        from flask_login import current_user
+        if not (current_user and getattr(current_user, 'is_authenticated', False) and getattr(current_user, 'role', None) == 'seller'):
+            return redirect(url_for('auth_login', next=request.path))
+
+        report_rows, open_returns = build_seller_report_rows(current_user.id, days=30)
+        total_sales = sum(float(row['seller_total'] or 0) for row in report_rows)
+
+        return render_template('seller/reports_print.html', report_rows=report_rows, open_returns=open_returns, total_sales=total_sales)
 
     @app.route('/seller/financial-analytics')
     def seller_financial_analytics():
@@ -5226,6 +6165,10 @@ def create_app(config_class=Config):
         from flask_login import current_user
         if not (current_user and getattr(current_user, 'is_authenticated', False) and getattr(current_user, 'role', None) == 'seller'):
             return redirect(url_for('auth_login', next=request.path))
+        verification_status = (getattr(current_user, 'seller_verification_status', '') or '').lower()
+        if verification_status != 'approved':
+            flash('Your seller account is pending approval. This action is restricted.', 'warning')
+            return redirect(url_for('seller_dashboard'))
 
         from eacis.models.installment import InstallmentSchedule, InstallmentPlan
         from eacis.models.order import OrderItem
@@ -5270,6 +6213,110 @@ def create_app(config_class=Config):
             db.session.rollback()
             flash('Unable to record installment payment right now.', 'error')
         return redirect(url_for('seller_installment_payments'))
+
+    @app.route('/seller/installment-review/<order_ref>', methods=['GET','POST'])
+    def seller_installment_review(order_ref):
+        from flask_login import current_user
+        if not (current_user and getattr(current_user, 'is_authenticated', False) and getattr(current_user, 'role', None) == 'seller'):
+            return redirect(url_for('auth_login', next=request.path))
+
+        try:
+            from eacis.models.order import Order, OrderItem
+            from eacis.models.product import Product
+        except Exception:
+            from models.order import Order, OrderItem
+            from models.product import Product
+
+        order = Order.query.filter_by(order_ref=order_ref).first()
+        if not order:
+            flash('Order not found.', 'error')
+            return redirect(url_for('seller_installment_payments'))
+
+        # Ensure this seller actually owns at least one order line in the order.
+        seller_owns_order = (
+            db.session.query(OrderItem.id)
+            .join(Product, Product.id == OrderItem.product_id)
+            .filter(OrderItem.order_id == order.id, Product.seller_id == current_user.id)
+            .first()
+            is not None
+        )
+        if not seller_owns_order:
+            flash('You do not have permission to review this order.', 'error')
+            return redirect(url_for('seller_installment_payments'))
+
+        if request.method == 'POST':
+            action = (request.form.get('action') or '').strip().lower()
+            if action == 'approve':
+                try:
+                    order.status = 'paid'
+                    order.paid_at = datetime.utcnow()
+                    db.session.add(order)
+                    invoice_err = None
+                    try:
+                        ensure_invoice_for_order(order)
+                    except Exception as ie:
+                        invoice_err = str(ie)
+                        try:
+                            app.logger.exception('Invoice generation failed for order %s', order.order_ref)
+                        except Exception:
+                            pass
+                        # Append an audit note to the order so admins can inspect later
+                        try:
+                            order.notes = (order.notes or '') + f' | invoice_error={invoice_err}'
+                            db.session.add(order)
+                        except Exception:
+                            pass
+
+                    # Commit the order regardless of invoice generation success to avoid leaving the order in limbo
+                    db.session.commit()
+                    if invoice_err:
+                        flash('Installment order confirmed but invoice generation failed; please review.', 'warning')
+                    else:
+                        flash('Installment order confirmed and invoices generated.', 'success')
+                except Exception:
+                    db.session.rollback()
+                    flash('Could not confirm the order at this time.', 'error')
+                return redirect(url_for('seller_installment_payments'))
+            else:
+                # Mark as reviewed but not approved — append a note for audit.
+                try:
+                    note = f"kyc_rejected_by={int(current_user.id)}@{datetime.utcnow().isoformat()}"
+                    order.notes = (order.notes or '') + ' | ' + note
+                    db.session.add(order)
+                    db.session.commit()
+                    flash('Order marked as KYC-rejected. Customer will be notified.', 'warning')
+                except Exception:
+                    db.session.rollback()
+                    flash('Unable to update order status.', 'error')
+                return redirect(url_for('seller_installment_payments'))
+
+        ordered_items = list(order.items.all()) if order.items else []
+        kyc_proof = None
+        try:
+            sa = order.shipping_address or {}
+            kyc_proof = sa.get('kyc_proof') if isinstance(sa, dict) else None
+        except Exception:
+            kyc_proof = None
+        # Load customer info for seller to review (safely)
+        try:
+            from eacis.models.user import User
+        except Exception:
+            try:
+                from models.user import User
+            except Exception:
+                User = None
+
+        customer = None
+        try:
+            if User:
+                customer = User.query.filter_by(id=order.customer_id).first()
+        except Exception:
+            customer = None
+
+        # Only reveal sensitive data (KYC, customer contact) to verified sellers
+        show_sensitive = getattr(current_user, 'seller_verification_status', '') == 'approved'
+
+        return render_template('seller/installment_review.html', order=order, items=ordered_items, kyc_proof=kyc_proof, customer=customer, show_sensitive=show_sensitive)
 
     @app.route('/seller/inquiries', methods=['GET'])
     @app.route('/seller/customer-inquiries')
@@ -6067,6 +7114,7 @@ def create_app(config_class=Config):
 
         stats = {
             'active_sellers': active_sellers,
+            'pending_sellers': pending_sellers,
             'system_errors': system_errors,
             'open_tickets': open_tickets,
             'pending_returns': open_returns,
@@ -6081,8 +7129,10 @@ def create_app(config_class=Config):
             'total_products': total_products,
             'low_stock_count': low_stock_count,
         }
+        recent_sellers = User.query.filter_by(role='seller').order_by(User.created_at.desc()).limit(6).all()
+        recent_audit_logs = AuditLog.query.order_by(AuditLog.created_at.desc()).limit(8).all()
 
-        return render_template('admin/dashboard.html', stats=stats, alerts=alerts, otp_top_purposes=otp_top_purposes)
+        return render_template('admin/dashboard.html', stats=stats, alerts=alerts, otp_top_purposes=otp_top_purposes, recent_sellers=recent_sellers, recent_audit_logs=recent_audit_logs)
 
     @app.route('/admin/sellers', methods=['GET', 'POST'])
     def admin_sellers():
@@ -6286,9 +7336,10 @@ def create_app(config_class=Config):
                     product = db.session.get(Product, product_id)
                     if product and product.seller_id == seller.id:
                         ref = product.product_ref
-                        db.session.delete(product)
+                        # Soft-deactivate to preserve historical order records
+                        product.is_active = False
                         db.session.commit()
-                        flash(f'Listing {ref} has been removed from the platform.', 'success')
+                        flash(f'Listing {ref} has been deactivated.', 'success')
                     else:
                         flash('Product not found or unauthorized.', 'error')
                 else:
@@ -6517,12 +7568,13 @@ def create_app(config_class=Config):
             elif action == 'delete':
                 try:
                     ref = product.product_ref
-                    db.session.delete(product)
+                    # Soft-deactivate to preserve historical order data
+                    product.is_active = False
                     db.session.commit()
-                    flash(f'Deleted {ref}.', 'success')
+                    flash(f'Deactivated {ref}.', 'success')
                 except Exception:
                     db.session.rollback()
-                    flash('Could not delete product. It may be linked to existing orders.', 'error')
+                    flash('Could not deactivate product. It may be linked to existing orders.', 'error')
 
             return redirect(url_for('admin_products', q=request.args.get('q', ''), status=request.args.get('status', 'all')))
 
@@ -6871,8 +7923,11 @@ def create_app(config_class=Config):
             errors = []
             changed = False
             if full_name and full_name != (user.full_name or ''):
-                user.full_name = full_name
-                changed = True
+                if contains_emoji(full_name):
+                    errors.append('Name cannot contain emoji.')
+                else:
+                    user.full_name = full_name
+                    changed = True
 
             if new_pwd:
                 if not user.check_password(current_pwd):
@@ -7118,7 +8173,37 @@ def create_app(config_class=Config):
             headers={'Content-Disposition': 'attachment; filename=admin_reports.pdf'},
         )
 
-    # demo route removed per user request
+    @app.route('/admin/reports/print')
+    def admin_reports_print():
+        from flask_login import current_user
+        if not (current_user and getattr(current_user, 'is_authenticated', False) and getattr(current_user, 'role', None) == 'admin'):
+            return redirect(url_for('auth_login', next=request.path))
+
+        try:
+            from .models.order import Order
+            from .models.return_request import ReturnRequest
+        except Exception:
+            from models.order import Order
+            from models.return_request import ReturnRequest
+
+        now = datetime.utcnow()
+        monthly_orders = Order.query.filter(Order.created_at >= now - timedelta(days=30)).all()
+        total_sales = sum(float(row.total or 0) for row in monthly_orders)
+        open_returns = ReturnRequest.query.filter(ReturnRequest.status.in_(['pending', 'accepted', 'refund_requested'])).count()
+
+        return render_template('admin/reports_print.html', monthly_orders=monthly_orders, total_sales=total_sales, open_returns=open_returns)
+
+    # Register customer addresses blueprint (optional; best-effort)
+    try:
+        from eacis.customer_addresses import bp as customer_addresses_bp
+        app.register_blueprint(customer_addresses_bp)
+    except Exception:
+        try:
+            # best-effort fallback if package imports differ
+            from customer_addresses import bp as customer_addresses_bp
+            app.register_blueprint(customer_addresses_bp)
+        except Exception:
+            app.logger.debug('customer_addresses blueprint not available')
 
     return app
 

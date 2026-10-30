@@ -36,7 +36,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const isAuthenticated = body.dataset.isAuthenticated === 'true' || (window.EACIS && window.EACIS.isAuthenticated);
     const userRole        = body.dataset.userRole        || (window.EACIS && window.EACIS.userRole);
 
-    if (isAuthenticated && (userRole === 'customer' || userRole === 'seller' || userRole === 'admin')) {
+    const isLandingOrAuth = body.classList.contains('page-landing') || body.classList.contains('page-auth');
+    if (isAuthenticated && !isLandingOrAuth && (userRole === 'customer' || userRole === 'seller' || userRole === 'admin')) {
         body.classList.add('has-sidebar');
     }
 
@@ -419,3 +420,51 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 });
+
+/* Reveal-on-scroll: IntersectionObserver to add .revealed to .reveal / .reveal-on-scroll / .stagger-children */
+(function(){
+    function initRevealObserver(){
+        try {
+            if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            const observer = new IntersectionObserver((entries, obs) => {
+                entries.forEach(entry => {
+                    if (!entry.isIntersecting) return;
+                    const el = entry.target;
+                    if (el.classList.contains('stagger-children')) {
+                        const items = Array.from(el.querySelectorAll('.stagger-item'));
+                        items.forEach((it, i) => {
+                            it.style.transitionDelay = `${i * 70}ms`;
+                            it.classList.add('revealed');
+                        });
+                        el.classList.add('revealed');
+                    } else {
+                        el.classList.add('revealed');
+                    }
+                    obs.unobserve(el);
+                });
+            }, { root: null, rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+
+            document.querySelectorAll('.reveal, .reveal-on-scroll, .stagger-children').forEach(el => {
+                // If already in view, reveal immediately
+                const rect = el.getBoundingClientRect();
+                if (rect.top < window.innerHeight && rect.bottom > 0) {
+                    if (el.classList.contains('stagger-children')) {
+                        Array.from(el.querySelectorAll('.stagger-item')).forEach((it,i) => { it.style.transitionDelay = `${i * 70}ms`; it.classList.add('revealed'); });
+                        el.classList.add('revealed');
+                    } else {
+                        el.classList.add('revealed');
+                    }
+                    return;
+                }
+                observer.observe(el);
+            });
+        } catch (err) {
+            console.warn('initRevealObserver failed', err);
+        }
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initRevealObserver);
+    } else {
+        initRevealObserver();
+    }
+})();

@@ -184,3 +184,273 @@
     padding-top: calc(var(--topbar-height) + var(--sp-10));
   }
 }
+
+/* Subtle reveal animations (applies to elements with .reveal, .reveal-on-scroll, and .stagger-children) */
+.reveal,
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(8px) scale(0.998);
+  transition: opacity 420ms var(--ease-out, cubic-bezier(0.16,1,0.3,1)), transform 420ms var(--ease-out, cubic-bezier(0.16,1,0.3,1));
+  will-change: opacity, transform;
+}
+.reveal.revealed,
+.reveal.is-visible,
+.reveal-on-scroll.revealed {
+  opacity: 1;
+  transform: none;
+}
+
+.stagger-children .stagger-item {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 420ms var(--ease-out, cubic-bezier(0.16,1,0.3,1)), transform 420ms var(--ease-out, cubic-bezier(0.16,1,0.3,1));
+}
+.stagger-children.revealed .stagger-item,
+.stagger-children .stagger-item.revealed {
+  opacity: 1;
+  transform: none;
+}
+
+/* Respect user preference for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .reveal, .reveal-on-scroll, .stagger-children .stagger-item { transition: none !important; transform: none !important; opacity: 1 !important; }
+}
+
+/* Star rating control (progressive enhancement for inline review) */
+.star-rating {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.star-rating button {
+  background: transparent;
+  border: none;
+  padding: 4px 6px;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--grey-300);
+  transition: color 160ms ease, transform 160ms ease;
+}
+.star-rating button:hover,
+.star-rating button:focus {
+  color: var(--brand-primary);
+  transform: scale(1.08);
+}
+.star-rating button.selected {
+  color: var(--brand-primary);
+  transform: scale(1.06);
+}
+
+/* Character counter for review textarea */
+.char-counter { font-size: 12px; color: var(--grey-500); margin-top: 6px; }
+
+/* Improve textarea sizing for reviews */
+.form-textarea { min-height: 96px; padding: 10px; border-radius: 8px; resize: vertical; }
+
+/* Submit button sending state with spinner */
+.btn--sending { position: relative; pointer-events: none; opacity: 0.95; }
+.btn--sending::after {
+  content: "";
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-left-color: transparent;
+  animation: eacis-spin 800ms linear infinite;
+}
+@keyframes eacis-spin { to { transform: rotate(360deg); } }
+
+/* Slightly wider review panel for better composition */
+.inline-review-panel { width: min(420px, 94vw); }
+
+
+/* Entrance pop animation for review panel (works with existing transitions) */
+.inline-review-panel.eacis-anim-pop {
+  animation: eacis-pop 360ms cubic-bezier(0.22,1,0.36,1) both;
+}
+@keyframes eacis-pop {
+  0% { transform: translateY(12px) scale(0.985); opacity: 0; }
+  60% { transform: translateY(-6px) scale(1.02); opacity: 1; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+/* Footer settings buttons — normalize sizes for discard/save controls inside seller settings footer */
+footer.glass-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--sp-4);
+}
+
+footer.glass-footer button#save-settings-btn,
+footer.glass-footer button#discard-settings-btn,
+footer.glass-footer .btn.save-settings,
+footer.glass-footer .btn.discard-settings {
+  height: var(--btn-height-lg); /* 48px */
+  font-size: var(--text-base); /* 15px */
+  box-sizing: border-box;
+  padding: 0 var(--sp-5);
+}
+
+footer.glass-footer button#save-settings-btn,
+footer.glass-footer .btn.save-settings {
+  min-width: 140px;
+}
+
+
+
+/* ============================================
+   Modal system (confirm, logout, release notes)
+   Provides: backdrop fade, panel scale/slide, focus trap, scroll lock
+   ============================================ */
+.confirm-modal,
+.logout-modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+  -webkit-font-smoothing: subpixel-antialiased;
+}
+.confirm-modal.is-open,
+.logout-modal.is-open { display: flex; }
+
+.confirm-modal__backdrop,
+.logout-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(2,6,23,0.56);
+  backdrop-filter: blur(3px) saturate(1.03);
+  opacity: 0;
+  transition: opacity 220ms cubic-bezier(.2,.9,.2,1);
+}
+.confirm-modal.is-open .confirm-modal__backdrop,
+.logout-modal.is-open .logout-modal__backdrop { opacity: 1; }
+
+.confirm-modal__panel,
+.logout-modal__panel {
+  position: relative;
+  z-index: 10000;
+  width: min(560px, 100%);
+  max-width: 100%;
+  background: var(--grey-0, #fff);
+  border-radius: 12px;
+  box-shadow: 0 20px 48px rgba(2,6,23,0.12), 0 8px 14px rgba(2,6,23,0.06);
+  transform: translateY(12px) scale(0.995);
+  opacity: 0;
+  transition: transform 220ms cubic-bezier(.2,.9,.2,1), opacity 200ms cubic-bezier(.2,.9,.2,1);
+  outline: none;
+}
+.confirm-modal.is-open .confirm-modal__panel,
+.logout-modal.is-open .logout-modal__panel {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+/* Accessibility helper: when a modal is open, ensure main content is hidden from screen readers */
+body.modal-open { overflow: hidden; }
+
+@media (max-width: 640px) {
+  .confirm-modal__panel, .logout-modal__panel { width: calc(100% - 32px); margin: 0 8px; }
+}
+
+/* Inline review notification modal (bottom-right) */
+.inline-review-modal {
+  position: fixed;
+  inset: auto 24px 24px auto; /* top right corner: auto top, 24px right, 24px bottom, auto left */
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  z-index: 10050;
+  padding: 8px;
+}
+.inline-review-modal .logout-modal__backdrop {
+  background: rgba(2,6,23,0.28);
+  backdrop-filter: blur(2px);
+}
+.inline-review-panel {
+  width: min(360px, 92vw);
+  max-width: 100%;
+  background: var(--grey-0, #fff);
+  border-radius: 12px;
+  padding: 14px;
+  box-shadow: 0 18px 48px rgba(2,6,23,0.12), 0 6px 18px rgba(2,6,23,0.06);
+  transform: translateY(12px) scale(0.995);
+  opacity: 0;
+  transition: transform 360ms cubic-bezier(0.22,1,0.36,1), opacity 260ms ease-out;
+}
+.inline-review-modal.is-open .inline-review-panel { transform: translateY(0) scale(1); opacity: 1; }
+.inline-review-panel .inline-review-panel__content { padding: 0; }
+.inline-review-panel .form-group { margin-bottom: 8px; }
+
+@media (max-width: 640px) {
+  .inline-review-modal { inset: auto 12px 12px 12px; }
+  .inline-review-panel { width: calc(100% - 24px); }
+}
+
+/* Inline review form polished visuals and transitions */
+.inline-review-form {
+  box-sizing: border-box;
+  width: 360px;
+  max-width: 100%;
+  background: var(--grey-0);
+  border: 1px solid var(--border-subtle);
+  padding: 10px 12px;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(2,6,23,0.06);
+  transform-origin: top right;
+  transform: translateY(-6px) scale(0.995);
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity 220ms cubic-bezier(0.16,1,0.3,1), transform 220ms cubic-bezier(0.16,1,0.3,1), max-height 300ms cubic-bezier(0.16,1,0.3,1);
+  margin-top: 8px;
+}
+.inline-review-form.is-open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  max-height: 520px; /* large enough for textarea + controls */
+}
+.inline-review-form .form-error-inline { margin-bottom: 8px; }
+
+@media (max-width: 640px) {
+  .inline-review-form { width: 100%; padding: 10px; }
+}
+
+/* Subtle reveal animations (applies to elements with .reveal, .reveal-on-scroll, and .stagger-children) */
+.reveal,
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(8px) scale(0.998);
+  transition: opacity 420ms var(--ease-out, cubic-bezier(0.16,1,0.3,1)), transform 420ms var(--ease-out, cubic-bezier(0.16,1,0.3,1));
+  will-change: opacity, transform;
+}
+.reveal.revealed,
+.reveal.is-visible,
+.reveal-on-scroll.revealed {
+  opacity: 1;
+  transform: none;
+}
+
+.stagger-children .stagger-item {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 420ms var(--ease-out, cubic-bezier(0.16,1,0.3,1)), transform 420ms var(--ease-out, cubic-bezier(0.16,1,0.3,1));
+}
+.stagger-children.revealed .stagger-item,
+.stagger-children .stagger-item.revealed {
+  opacity: 1;
+  transform: none;
+}
+
+/* Respect user preference for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .reveal, .reveal-on-scroll, .stagger-children .stagger-item { transition: none !important; transform: none !important; opacity: 1 !important; }
+}

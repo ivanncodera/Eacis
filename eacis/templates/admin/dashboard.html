@@ -1,72 +1,251 @@
 {% extends 'base.html' %}
-{% block title %}Dashboard — Admin Portal{% endblock %}
+{% block title %}Admin SaaS Console — E-ACIS{% endblock %}
 {% block content %}
-<div class="stagger-children">
-   <div class="page-content" style="padding: var(--sp-12); max-width: 1200px; margin: 0 auto;">
-      <div style="display:flex; justify-content:space-between; align-items:center; gap:var(--sp-4); margin-bottom:var(--sp-8);">
-         <div>
-            <h1 class="type-display-md">Admin Dashboard</h1>
-            <p class="type-body-sm text-muted mt-1">Overview of escalations, alerts, and platform health (no direct access to transactions).</p>
-         </div>
+<div class="page-content saas-dashboard stagger-children">
+  <!-- SaaS Command Bar -->
+  <div class="saas-command-bar">
+    <div>
+      <div class="saas-command-bar__title-row">
+        <h1 class="saas-command-bar__title">Admin Governance &amp; Telemetry Console</h1>
+        <span class="saas-status-pill">
+          <span class="saas-status-pill__dot"></span>
+          Platform Operational
+        </span>
       </div>
+      <p class="saas-command-bar__subtitle">Centralized oversight for partner onboarding, catalog compliance, security telemetry, and system audit trails.</p>
+    </div>
+    <div class="saas-command-bar__actions">
+      <a href="/admin/sellers" class="btn btn--secondary btn--sm">Partner Governance</a>
+      <a href="/admin/products" class="btn btn--secondary btn--sm">Catalog Index</a>
+      <a href="/admin/customers" class="btn btn--secondary btn--sm">Customer Registry</a>
+      <a href="/admin/audit" class="btn btn--primary btn--sm">Security Audit Logs</a>
+    </div>
+  </div>
 
-      <div class="kpi-grid mb-8" style="display:grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-4);">
-         <div class="glass-card p-6">
-            <div class="type-label-xs text-muted">Active Sellers</div>
-            <div class="type-display-md">{{ stats and stats.active_sellers or 0 }}</div>
-         </div>
-         <div class="glass-card p-6">
-            <div class="type-label-xs text-muted">Open Tickets</div>
-            <div class="type-display-md">{{ stats and stats.open_tickets or 0 }}</div>
-         </div>
-         <div class="glass-card p-6">
-            <div class="type-label-xs text-muted">Customers</div>
-            <div class="type-display-md">{{ stats and stats.total_customers or 0 }}</div>
-         </div>
-         <div class="glass-card p-6">
-            <div class="type-label-xs text-muted">Products</div>
-            <div class="type-display-md">{{ stats and stats.total_products or 0 }}</div>
-         </div>
+  <!-- SaaS Metric Cards -->
+  <div class="saas-kpi-grid">
+    <div class="saas-metric-card">
+      <div>
+        <div class="saas-metric-card__top">
+          <span class="saas-metric-card__label">Active Partners</span>
+          <span class="saas-metric-card__icon saas-metric-card__icon--success">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/></svg>
+          </span>
+        </div>
+        <div class="saas-metric-card__value">{{ (stats and stats.active_sellers) or 0 }}</div>
       </div>
-
-      <div class="glass-card p-8 mb-8">
-         <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h3 class="type-h4">Quick Actions</h3>
-            <div style="display:flex; gap:var(--sp-3);">
-               <a href="/admin/products" class="btn btn--secondary">Manage Products</a>
-               <a href="/admin/customers" class="btn btn--secondary">Manage Customers</a>
-               <a href="/admin/sellers" class="btn btn--secondary">Manage Sellers</a>
-               <a href="/admin/trusted-devices" class="btn btn--secondary">Trusted Devices</a>
-            </div>
-         </div>
+      <div class="saas-metric-card__footer">
+        <span>Verified merchant accounts</span>
+        <a href="/admin/sellers" class="text-primary fw-semibold" style="text-decoration:none;">Directory →</a>
       </div>
+    </div>
 
-      <div style="display:grid; grid-template-columns: 2fr 1fr; gap:var(--sp-6);">
-         <div class="glass-card p-8">
-            <h3 class="type-h4">Recent Escalations & Alerts</h3>
-            <div style="display:flex; flex-direction:column; gap:var(--sp-3);">
-              {% for a in alerts[:10] %}
-                <div style="padding: var(--sp-3); border-bottom:1px solid var(--border-subtle);">
-                  <div class="fw-bold">{{ a.title }}</div>
-                  <div class="type-body-xs text-muted" style="margin-top:4px;">{{ a.message }}</div>
-                  <div class="type-body-xs text-muted" style="margin-top:6px; font-size:11px; opacity:0.7;">{{ a.time }}</div>
-                </div>
-              {% else %}
-                <div class="text-muted">No escalations recorded.</div>
-              {% endfor %}
-            </div>
-         </div>
-
-         <div class="glass-card p-8">
-            <h3 class="type-h4">Pending Items</h3>
-            <ul style="list-style:none; padding:0; margin:0;">
-               <li style="padding: var(--sp-3) 0; border-bottom: 1px solid var(--border-subtle);">Pending returns: <strong>{{ stats and stats.pending_returns or 0 }}</strong></li>
-               <li style="padding: var(--sp-3) 0; border-bottom: 1px solid var(--border-subtle);">Open tickets: <strong>{{ stats and stats.open_tickets or 0 }}</strong></li>
-               <li style="padding: var(--sp-3) 0;">Low stock products: <strong>{{ stats and stats.low_stock_count or 0 }}</strong></li>
-            </ul>
-         </div>
+    <div class="saas-metric-card">
+      <div>
+        <div class="saas-metric-card__top">
+          <span class="saas-metric-card__label">Pending KYB Reviews</span>
+          <span class="saas-metric-card__icon saas-metric-card__icon--warning">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </span>
+        </div>
+        <div class="saas-metric-card__value">{{ (stats and stats.pending_sellers) or 0 }}</div>
       </div>
+      <div class="saas-metric-card__footer">
+        <span>Partner applications</span>
+        <a href="/admin/sellers" class="text-primary fw-semibold" style="text-decoration:none;">Review →</a>
+      </div>
+    </div>
 
-   </div>
+    <div class="saas-metric-card">
+      <div>
+        <div class="saas-metric-card__top">
+          <span class="saas-metric-card__label">Registered Customers</span>
+          <span class="saas-metric-card__icon">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg>
+          </span>
+        </div>
+        <div class="saas-metric-card__value">{{ (stats and stats.total_customers) or 0 }}</div>
+      </div>
+      <div class="saas-metric-card__footer">
+        <span>Active shopper accounts</span>
+        <a href="/admin/customers" class="text-primary fw-semibold" style="text-decoration:none;">Manage →</a>
+      </div>
+    </div>
+
+    <div class="saas-metric-card">
+      <div>
+        <div class="saas-metric-card__top">
+          <span class="saas-metric-card__label">Indexed Products</span>
+          <span class="saas-metric-card__icon">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 16.2A2 2 0 0 0 21 14.5v-5a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 9.5v5c0 .7.4 1.4 1 1.7l7 4a2 2 0 0 0 2 0z"/></svg>
+          </span>
+        </div>
+        <div class="saas-metric-card__value">{{ (stats and stats.total_products) or 0 }}</div>
+      </div>
+      <div class="saas-metric-card__footer">
+        <span>{{ (stats and stats.low_stock_count) or 0 }} low-stock SKUs</span>
+        <a href="/admin/products" class="text-primary fw-semibold" style="text-decoration:none;">Inspect →</a>
+      </div>
+    </div>
+
+    <div class="saas-metric-card">
+      <div>
+        <div class="saas-metric-card__top">
+          <span class="saas-metric-card__label">Open Support Tickets</span>
+          <span class="saas-metric-card__icon saas-metric-card__icon--warning">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </span>
+        </div>
+        <div class="saas-metric-card__value">{{ (stats and stats.open_tickets) or 0 }}</div>
+      </div>
+      <div class="saas-metric-card__footer">
+        <span>Pending returns: {{ (stats and stats.pending_returns) or 0 }}</span>
+        <span class="badge">SLA Monitored</span>
+      </div>
+    </div>
+
+    <div class="saas-metric-card">
+      <div>
+        <div class="saas-metric-card__top">
+          <span class="saas-metric-card__label">OTP Verification Rate</span>
+          <span class="saas-metric-card__icon saas-metric-card__icon--success">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          </span>
+        </div>
+        <div class="saas-metric-card__value">{{ '%.1f'|format(((stats and stats.otp_verify_rate_24h) or 1.0) * 100) }}%</div>
+      </div>
+      <div class="saas-metric-card__footer">
+        <span>24h sent: {{ (stats and stats.otp_sent_24h) or 0 }}</span>
+        <a href="/admin/trusted-devices" class="text-primary fw-semibold" style="text-decoration:none;">Devices →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Primary Data Table: Partner / Seller Verification & Governance Queue -->
+  <div class="saas-table-card">
+    <div class="saas-table-header">
+      <div>
+        <h2 class="saas-table-header__title">Partner &amp; Seller Governance Directory</h2>
+        <p class="saas-table-header__subtitle">Latest partner registrations, KYB verification states, and store compliance status.</p>
+      </div>
+      <a href="/admin/sellers" class="btn btn--ghost btn--sm">Manage All Partners →</a>
+    </div>
+    <div class="table-wrapper">
+      <table class="saas-data-table data-table">
+        <thead>
+          <tr>
+            <th>Partner / Business Entity</th>
+            <th>Primary Contact</th>
+            <th>Seller Code</th>
+            <th>KYB Verification</th>
+            <th>Account State</th>
+            <th style="text-align:right;">Governance</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for seller in recent_sellers %}
+          <tr>
+            <td>
+              <div class="fw-bold" style="color: #0F172A;">{{ seller.business_name or seller.full_name or 'Partner Merchant' }}</div>
+              <div class="type-body-xs text-muted">ID #{{ seller.id }} · Joined {{ seller.created_at.strftime('%b %d, %Y') if seller.created_at else '—' }}</div>
+            </td>
+            <td>
+              <div>{{ seller.full_name or '—' }}</div>
+              <div class="type-body-xs text-muted">{{ seller.email }}</div>
+            </td>
+            <td style="font-family: var(--font-mono); font-size: 12px;">{{ seller.seller_code or 'PENDING' }}</td>
+            <td>
+              {% set vstat = (seller.seller_verification_status or 'pending')|lower %}
+              <span class="badge {% if vstat == 'approved' %}badge--success{% elif vstat == 'rejected' %}badge--danger{% else %}badge--warning{% endif %}">
+                {{ vstat|upper }}
+              </span>
+            </td>
+            <td>
+              <span class="badge {% if seller.is_active %}badge--primary{% else %}badge--secondary{% endif %}">
+                {{ 'Active' if seller.is_active else 'Suspended' }}
+              </span>
+            </td>
+            <td style="text-align:right;">
+              <a href="/admin/sellers/{{ seller.id }}" class="btn btn--ghost btn--sm">Inspect</a>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="6" style="text-align:center; padding: 32px 20px;" class="text-muted">No partner accounts registered.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Secondary Split Grid: Security Audit Stream + Escalations & Alerts -->
+  <div class="saas-split-grid">
+    <!-- Security & System Audit Trail Table -->
+    <div class="saas-table-card" style="margin-bottom: 0;">
+      <div class="saas-table-header">
+        <div>
+          <h2 class="saas-table-header__title">Security &amp; System Audit Stream</h2>
+          <p class="saas-table-header__subtitle">Immutable log of recent administrative and authentication events.</p>
+        </div>
+        <a href="/admin/audit" class="btn btn--ghost btn--sm">Full Audit Log →</a>
+      </div>
+      <div class="table-wrapper">
+        <table class="saas-data-table data-table">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Actor</th>
+              <th>Event Action</th>
+              <th>Target / Scope</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for log in recent_audit_logs %}
+            <tr>
+              <td class="text-muted" style="white-space:nowrap; font-size: 12px;">{{ log.created_at.strftime('%b %d, %H:%M') if log.created_at else '—' }}</td>
+              <td>
+                <div class="fw-semibold">{{ log.actor_email or ('User #' ~ log.actor_id if log.actor_id else 'System') }}</div>
+                <div class="type-body-xs text-muted">{{ (log.actor_role or 'system')|upper }}</div>
+              </td>
+              <td>
+                <span class="badge" style="font-family: var(--font-mono); font-size: 11px;">{{ log.action }}</span>
+              </td>
+              <td class="text-muted" style="font-size: 12px;">{{ log.target_type or 'system' }}{% if log.target_ref %}: {{ log.target_ref }}{% endif %}</td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="4" style="text-align:center; padding: 32px 20px;" class="text-muted">No recent audit events recorded.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Platform Escalations & Alerts Card -->
+    <div class="saas-table-card" style="margin-bottom: 0;">
+      <div class="saas-table-header">
+        <div>
+          <h2 class="saas-table-header__title">Recent Escalations &amp; Alerts</h2>
+          <p class="saas-table-header__subtitle">Real-time platform health notifications.</p>
+        </div>
+        <a href="/admin/settings" class="btn btn--ghost btn--sm">Settings</a>
+      </div>
+      <div style="padding: 16px 24px; display: flex; flex-direction: column; gap: 12px;">
+        {% for a in alerts[:6] %}
+        <div style="padding: 12px 14px; border: 1px solid #E2E8F0; border-radius: 10px; background: #F8FAFC;">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap: 8px;">
+            <span class="fw-bold" style="color: #0F172A; font-size: 13px;">{{ a.title }}</span>
+            <span class="type-body-xs text-muted" style="font-size: 11px;">{{ a.time }}</span>
+          </div>
+          <div class="type-body-xs text-muted" style="margin-top: 4px;">{{ a.message }}</div>
+        </div>
+        {% else %}
+        <div class="text-muted" style="padding: 24px 0; text-align: center;">No active escalations recorded.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}

@@ -12,6 +12,27 @@ CODE_LIKE_PATTERN = re.compile(r'^[a-zA-Z0-9][a-zA-Z0-9\-#/]{3,}$')
 NUMERIC_PATTERN = re.compile(r'^\d{4,}$')
 
 
+def contains_emoji(s):
+    if not s:
+        return False
+    for ch in s:
+        cp = ord(ch)
+        # common emoji / pictographic ranges
+        if (
+            0x1F300 <= cp <= 0x1F5FF or
+            0x1F600 <= cp <= 0x1F64F or
+            0x1F680 <= cp <= 0x1F6FF or
+            0x1F1E6 <= cp <= 0x1F1FF or
+            0x2600 <= cp <= 0x26FF or
+            0x2700 <= cp <= 0x27BF or
+            0x1F900 <= cp <= 0x1F9FF or
+            0x1FA70 <= cp <= 0x1FAFF or
+            cp == 0x200D or cp == 0xFE0F
+        ):
+            return True
+    return False
+
+
 def split_name(full_name):
     tokens = [token for token in (full_name or '').strip().split(' ') if token]
     if not tokens:
@@ -55,6 +76,41 @@ def validate_postal_code(raw_postal):
     return value, None
 
 
+def validate_password_complexity(password, confirm_pwd=None, email_local=None, first_nm=None, last_nm=None):
+    """Validate password complexity and basic exclusions.
+
+    Returns: None when valid, otherwise an error string describing failures.
+    """
+    if password is None:
+        password = ''
+    pe = []
+    if len(password) < 8:
+        pe.append('Password must be at least 8 characters long.')
+        return ' '.join(pe)
+    checks = {
+        r'[A-Z]': 'at least one uppercase letter',
+        r'[a-z]': 'at least one lowercase letter',
+        r'\d': 'at least one number',
+        r'[^A-Za-z0-9]': 'at least one special character'
+    }
+    missing = [desc for reg, desc in checks.items() if not re.search(reg, password)]
+    if missing:
+        pe.append(f"Password must contain {', '.join(missing)}.")
+
+    lower_password = password.lower()
+    if email_local and email_local and email_local.lower() in lower_password:
+        pe.append('Password must not contain your email address.')
+    if first_nm and first_nm.lower() in lower_password:
+        pe.append('Password must not contain your name.')
+    if last_nm and last_nm.lower() in lower_password:
+        pe.append('Password must not contain your name.')
+
+    if confirm_pwd is not None and password != confirm_pwd:
+        pe.append('Passwords do not match.')
+
+    return ' '.join(pe) if pe else None
+
+
 def validate_registration_payload(payload, role, postal_lookup, email_exists):
     errors = {}
 
@@ -83,17 +139,25 @@ def validate_registration_payload(payload, role, postal_lookup, email_exists):
         errors['first_name'] = 'First name is required.'
     elif not NAME_PATTERN.match(first_name):
         errors['first_name'] = 'First name contains invalid characters.'
+    elif contains_emoji(first_name):
+        errors['first_name'] = 'First name cannot contain emoji.'
 
     if middle_name and not NAME_PATTERN.match(middle_name):
         errors['middle_name'] = 'Middle name contains invalid characters.'
+    elif middle_name and contains_emoji(middle_name):
+        errors['middle_name'] = 'Middle name cannot contain emoji.'
 
     if not last_name:
         errors['last_name'] = 'Last name is required.'
     elif not NAME_PATTERN.match(last_name):
         errors['last_name'] = 'Last name contains invalid characters.'
+    elif contains_emoji(last_name):
+        errors['last_name'] = 'Last name cannot contain emoji.'
 
     if suffix and not NAME_PATTERN.match(suffix):
         errors['suffix'] = 'Suffix contains invalid characters.'
+    elif suffix and contains_emoji(suffix):
+        errors['suffix'] = 'Suffix cannot contain emoji.'
 
     normalized_full_name = join_name(first_name, middle_name, last_name, suffix)
 
@@ -139,35 +203,11 @@ def validate_registration_payload(payload, role, postal_lookup, email_exists):
             errors['postal_code'] = 'Postal code is required.'
 
     # Security Validation
-    password_errors = []
-    if len(password) < 8:
-        password_errors.append('Password must be at least 8 characters long.')
-    else:
-        checks = {
-            r'[A-Z]': 'at least one uppercase letter',
-            r'[a-z]': 'at least one lowercase letter',
-            r'\d': 'at least one number',
-            r'[^A-Za-z0-9]': 'at least one special character'
-        }
-        missing = [desc for reg, desc in checks.items() if not re.search(reg, password)]
-        if missing:
-            password_errors.append(f"Password must contain {', '.join(missing)}.")
-
-    # Ensure password does not contain user-identifying tokens
+    # Reuse top-level password complexity validator so other flows can also call it.
     email_local = email.split('@', 1)[0] if email else ''
-    lower_password = password.lower()
-    if email_local and email_local in lower_password:
-        password_errors.append('Password must not contain your email address.')
-    if first_name and first_name.lower() in lower_password:
-        password_errors.append('Password must not contain your name.')
-    if last_name and last_name.lower() in lower_password:
-        password_errors.append('Password must not contain your name.')
-
-    if password_errors:
-        errors['password'] = ' '.join(password_errors)
-
-    if password != confirm:
-        errors['confirm_password'] = 'Passwords do not match.'
+    pw_err = validate_password_complexity(password, confirm_pwd=confirm, email_local=email_local, first_nm=first_name, last_nm=last_name)
+    if pw_err:
+        errors['password'] = pw_err
 
     terms_accepted = bool(terms_consent or agree)
     privacy_accepted = bool(privacy_consent or agree)
@@ -182,6 +222,8 @@ def validate_registration_payload(payload, role, postal_lookup, email_exists):
         business_name = (payload.get('business_name') or '').strip()
         if not business_name or len(business_name) < 3:
             errors['business_name'] = 'A valid business name (min 3 chars) is required.'
+        elif contains_emoji(business_name):
+            errors['business_name'] = 'Business name cannot contain emoji.'
 
     # Location Suggestion Logic (Partial)
     suggested_postal = postal_lookup.get(city_municipality.lower()) if city_municipality else None
@@ -233,6 +275,9 @@ def validate_profile_payload(payload, postal_lookup):
 
     if not first_name or not last_name:
         errors['full_name'] = 'First name and last name are required.'
+    else:
+        if contains_emoji(first_name) or contains_emoji(last_name):
+            errors['full_name'] = 'Names cannot contain emoji.'
 
     phone, phone_error = validate_phone(payload.get('phone'))
     if phone_error:
@@ -241,6 +286,12 @@ def validate_profile_payload(payload, postal_lookup):
     postal_code, postal_error = validate_postal_code(postal_code)
     if postal_error:
         errors['postal_code'] = postal_error
+
+    # Address fields should not contain emoji
+    for field_name in ('address_line1', 'address_line2', 'barangay', 'city_municipality', 'province', 'region'):
+        val = locals().get(field_name, '')
+        if val and contains_emoji(val):
+            errors[field_name] = 'This field cannot contain emoji.'
 
     suggested_postal = postal_lookup.get(city_municipality.lower()) if city_municipality else None
     if not postal_code and suggested_postal:
@@ -269,6 +320,7 @@ def validate_checkout_payload(payload):
     recipient_name = (payload.get('recipient_name') or '').strip()
     address_line1 = (payload.get('address_line1') or payload.get('address') or '').strip()
     postal_code = (payload.get('postal_code') or '').strip()
+    recipient_email = (payload.get('recipient_email') or '').strip()
 
     if not recipient_name:
         errors['recipient_name'] = 'Recipient name is required.'
@@ -282,6 +334,11 @@ def validate_checkout_payload(payload):
     postal_code, postal_error = validate_postal_code(postal_code)
     if postal_error:
         errors['postal_code'] = postal_error
+
+    # recipient email is optional but should look like an email when provided
+    if recipient_email:
+        if not EMAIL_PATTERN.match(recipient_email):
+            errors['recipient_email'] = 'Please enter a valid recipient email address.'
 
     payment_method = (payload.get('payment') or 'full_pay').strip()
     if payment_method not in ('full_pay', 'installment'):
@@ -305,6 +362,7 @@ def validate_checkout_payload(payload):
         'region': (payload.get('region') or '').strip(),
         'postal_code': postal_code,
         'phone': phone,
+        'recipient_email': recipient_email,
         'country': 'Philippines',
         'payment_method': payment_method,
         'plan_months': plan_months,
@@ -364,8 +422,12 @@ def validate_seller_profile_payload(payload, postal_lookup):
 
     if len(business_name) < 2:
         errors['business_name'] = 'Business name is required.'
+    elif contains_emoji(business_name):
+        errors['business_name'] = 'Business name cannot contain emoji.'
     if len(full_name) < 2:
         errors['full_name'] = 'Owner name is required.'
+    elif contains_emoji(full_name):
+        errors['full_name'] = 'Owner name cannot contain emoji.'
     if phone_error:
         errors['phone'] = phone_error
 
@@ -496,10 +558,17 @@ def validate_seller_product_payload(payload):
     is_active = (payload.get('is_active') or '1').strip() == '1'
     installment_enabled = bool(payload.get('installment_enabled'))
 
+    # Parse price and optional compare_price
     try:
         price = float(price_raw or 0)
     except (TypeError, ValueError):
         price = -1
+
+    compare_price_raw = payload.get('compare_price')
+    try:
+        compare_price = float(compare_price_raw) if compare_price_raw is not None and compare_price_raw != '' else None
+    except (TypeError, ValueError):
+        compare_price = None
 
     try:
         stock = int(stock_raw or 0)
@@ -515,19 +584,27 @@ def validate_seller_product_payload(payload):
         errors['name'] = 'Product name must be at least 3 characters.'
     if not category:
         errors['category'] = 'Category is required.'
-    if price < 0:
-        errors['price'] = 'Price must be a valid non-negative number.'
+    # Business rule: price must be greater than 0 (no zero-priced products allowed)
+    if price <= 0:
+        errors['price'] = 'Price must be greater than ₱0.'
     if stock < 0:
         errors['stock'] = 'Stock must be a valid non-negative integer.'
+
+    # Validate compare_price when provided: it must be higher than the sale price
+    if compare_price is not None:
+        if compare_price <= price:
+            errors['compare_price'] = 'Compare price must be higher than the sale price.'
 
     normalized = {
         'name': name,
         'category': category,
         'description': description,
         'price_raw': price_raw,
+        'compare_price_raw': compare_price_raw,
         'stock_raw': stock_raw,
         'warranty_raw': warranty_raw,
         'price': price,
+        'compare_price': compare_price,
         'stock': stock,
         'warranty_months': max(warranty_months, 0),
         'is_active': is_active,

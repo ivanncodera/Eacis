@@ -1,0 +1,11 @@
+{
+  "name": "eacis-playwright-tests",
+  "version": "0.0.1",
+  "private": true,
+  "devDependencies": {
+    "@playwright/test": "^1.35.0"
+  },
+  "scripts": {
+    "test:playwright": "playwright test --project=chromium"
+  }
+}

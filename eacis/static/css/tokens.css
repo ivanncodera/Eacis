@@ -14,6 +14,23 @@
   --brand-primary-subtle-2: rgba(0, 122, 255, 0.14);
   --brand-primary-glow:     rgba(0, 122, 255, 0.28);
 
+  /* ── ACCENT & ARCHITECTURAL PALETTE ──────── */
+  --brand-accent-cyan:      #06B6D4;
+  --brand-accent-indigo:    #4F46E5;
+  --brand-accent-emerald:   #00875A;
+  --brand-gradient:         linear-gradient(135deg, #007AFF 0%, #2563EB 52%, #06B6D4 100%);
+  --brand-gradient-dark:    linear-gradient(135deg, #091E42 0%, #0F2952 55%, #004999 100%);
+  --brand-surface-tint:     linear-gradient(180deg, rgba(0, 122, 255, 0.04) 0%, rgba(247, 248, 250, 0) 100%);
+  --focus-ring:             0 0 0 3px rgba(0, 122, 255, 0.28);
+
+  /* ── FLOATING SHAPES TOKENS ──────────────── */
+  --shape-color-primary:    rgba(0, 122, 255, 0.085);
+  --shape-color-cyan:       rgba(6, 182, 212, 0.075);
+  --shape-color-indigo:     rgba(79, 70, 229, 0.065);
+  --shape-color-emerald:    rgba(0, 135, 90, 0.06);
+  --shape-border-subtle:    rgba(0, 122, 255, 0.14);
+  --shape-border-accent:    rgba(6, 182, 212, 0.16);
+
   /* ── GREY SCALE (12 steps) ───────────────── */
   --grey-0:    #FFFFFF;
   --grey-25:   #FAFAFA;

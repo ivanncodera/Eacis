@@ -3,6 +3,9 @@
 {% block content %}
 <div style="padding-top: calc(var(--topbar-height) + var(--sp-10)); padding-bottom: var(--sp-32);">
   <div class="container" style="max-width: 760px; text-align: center;">
+    <style>
+      .item-with-divider { margin-bottom: var(--sp-4); padding-bottom: var(--sp-4); border-bottom: 1px solid var(--border-subtle); }
+    </style>
 
     <!-- Animated Success Icon -->
     <div class="reveal" style="margin-bottom: var(--sp-8);">
@@ -79,7 +82,7 @@
         <div style="padding: var(--sp-4) var(--sp-6);">
           <div class="type-label-xs text-muted mb-4" style="letter-spacing: 0.08em;">ITEMS ORDERED</div>
           {% for item in ordered_items %}
-          <div style="display: flex; gap: var(--sp-4); align-items: center; {% if not loop.last %}margin-bottom: var(--sp-4); padding-bottom: var(--sp-4); border-bottom: 1px solid var(--border-subtle);{% endif %}">
+          <div class="{{ 'item-with-divider' if not loop.last else '' }}" style="display: flex; gap: var(--sp-4); align-items: center;">
             <div style="width: 52px; height: 52px; border-radius: 10px; overflow: hidden; background: var(--grey-50); border: 1px solid var(--border-subtle); flex-shrink: 0;">
               {% if item.product and item.product.image_url %}
                 <img src="{{ item.product.image_url }}" alt="{{ item.product.name if item.product else 'Product' }}" style="width:100%; height:100%; object-fit:cover;">
@@ -140,6 +143,9 @@
         <a href="/customer/orders/{{ order_ref }}" class="btn btn--secondary btn--lg" style="min-width: 200px;">
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right: 8px;"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg>
           Track My Order
+        </a>
+        <a href="/customer/orders/{{ order_ref }}/receipt" class="btn btn--white btn--lg" style="min-width: 200px; border: 1.5px solid var(--border-medium);">
+          View Receipt
         </a>
         {% if order.payment_method == 'installment' %}
         <a href="/customer/installments" class="btn btn--white btn--lg" style="min-width: 200px; border: 1.5px solid var(--border-medium);">

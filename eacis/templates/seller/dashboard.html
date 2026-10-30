@@ -1,97 +1,230 @@
 {% extends 'base.html' %}
-{% block title %}Dashboard - Seller Portal{% endblock %}
+{% block title %}Partner SaaS Console — E-ACIS{% endblock %}
 {% block content %}
-<div class="page-content seller-shell stagger-children" style="padding:var(--sp-12);">
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--sp-10);">
+<div class="page-content seller-shell saas-dashboard stagger-children">
+  <!-- SaaS Command Bar -->
+  <div class="saas-command-bar">
     <div>
-      <div style="display:flex; align-items:center; gap:var(--sp-3);">
-        <h1 class="type-display-md" style="margin:0;">Seller Hub</h1>
-        <div class="system-status-indicator pulse-glow" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); padding: 4px 12px; border-radius: 20px; display: flex; align-items: center; gap: 6px;">
-          <div class="pulse-dot pulse-dot--active" style="width: 6px; height: 6px; background: var(--color-success); border-radius: 50%;"></div>
-          <span class="type-label-xs fw-bold" style="color: var(--color-success); font-size: 9px; letter-spacing: 0.1em;">BUSINESS LIVE</span>
-        </div>
+      <div class="saas-command-bar__title-row">
+        <h1 class="saas-command-bar__title">Partner Operations Console</h1>
+        <span class="saas-status-pill">
+          <span class="saas-status-pill__dot"></span>
+          Storefront Live
+        </span>
+        {% if verification_status == 'approved' %}
+        <span class="badge badge--primary">Verified Partner</span>
+        {% endif %}
       </div>
-      <p class="type-body-sm text-muted" style="margin:var(--sp-2) 0 0 0;">Command center for your store and inventory.</p>
+      <p class="saas-command-bar__subtitle">Real-time store telemetry, order fulfillment stream, and inventory stock health.</p>
     </div>
-    <div style="display:flex; gap:var(--sp-4);">
-      <a href="/seller/products/new" class="btn btn--primary btn--lg shadow-primary">New Product Listing</a>
-      <a href="/seller/orders" class="btn btn--secondary btn--lg">View Active Orders</a>
+    <div class="saas-command-bar__actions">
+      <a href="/seller/financial-analytics" class="btn btn--ghost btn--sm">Financial Analytics</a>
+      <a href="/seller/orders" class="btn btn--secondary btn--sm">Manage Orders</a>
+      <a href="/seller/products/new" class="btn btn--primary btn--sm">+ New Product Listing</a>
     </div>
   </div>
 
   {% if verification_status and verification_status != 'approved' %}
-  <div class="glass-card glass-card--interactive p-6 mb-10" style="border-left: 4px solid var(--color-warning); background:var(--brand-primary-subtle-2);">
+  <div class="glass-card p-6 mb-6" style="border-left: 4px solid var(--color-warning); background: #FFFBEB; border-radius: 12px;">
     <div style="display: flex; align-items: center; gap: var(--sp-3);">
-      <svg width="24" height="24" fill="none" stroke="var(--color-warning)" stroke-width="2" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+      <svg width="22" height="22" fill="none" stroke="var(--color-warning)" stroke-width="2" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
       <div>
-        <div class="type-body-sm fw-bold" style="color: var(--grey-900);">Seller Verification: {{ verification_status|title }}</div>
-        <div class="type-body-xs text-muted">Account restricted to non-transactional operations until verified.</div>
+        <div class="type-body-sm fw-bold" style="color: var(--grey-900);">Partner Verification Status: {{ verification_status|title }}</div>
+        <div class="type-body-xs text-muted">Transactional settlement modules unlock automatically once compliance review is approved.</div>
       </div>
     </div>
   </div>
   {% endif %}
 
-  <div class="kpi-grid mb-10">
-    <div class="glass-card status-card p-6 stagger-item" style="border-top: 4px solid var(--brand-primary);">
-      <div class="type-label-xs text-muted mb-2">REVENUE TODAY</div>
-      <div class="type-display-md">₱{{ '%.2f'|format(kpis.revenue_today or 0) }}</div>
-      <div class="mt-4"><span class="badge badge--primary px-2">Live Gains</span></div>
+  <!-- SaaS Metric Cards -->
+  <div class="saas-kpi-grid">
+    <div class="saas-metric-card">
+      <div>
+        <div class="saas-metric-card__top">
+          <span class="saas-metric-card__label">Revenue Today</span>
+          <span class="saas-metric-card__icon saas-metric-card__icon--success">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14a3 3 0 0 1 0 6H6"/></svg>
+          </span>
+        </div>
+        <div class="saas-metric-card__value">₱{{ '{:,.2f}'.format((kpis.revenue_today or 0)|float) }}</div>
+      </div>
+      <div class="saas-metric-card__footer">
+        <span>Daily settlement</span>
+        <span class="badge badge--success">Live</span>
+      </div>
     </div>
-    <div class="glass-card status-card p-6 stagger-item" style="border-top: 4px solid var(--color-warning);">
-      <div class="type-label-xs text-muted mb-2">PENDING ORDERS</div>
-      <div class="type-display-md">{{ kpis.pending_orders }}</div>
-      <div class="mt-4"><span class="badge badge--warning px-2">Action Required</span></div>
+
+    <div class="saas-metric-card">
+      <div>
+        <div class="saas-metric-card__top">
+          <span class="saas-metric-card__label">Gross Store Volume</span>
+          <span class="saas-metric-card__icon">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+          </span>
+        </div>
+        <div class="saas-metric-card__value">₱{{ '{:,.2f}'.format((kpis.total_revenue or 0)|float) }}</div>
+      </div>
+      <div class="saas-metric-card__footer">
+        <span>{{ kpis.total_orders or 0 }} total orders</span>
+        <a href="/seller/financial-analytics" class="text-primary fw-semibold" style="text-decoration:none;">Ledger →</a>
+      </div>
     </div>
-    <div class="glass-card status-card p-6 stagger-item" style="border-top: 3px solid var(--grey-200);">
-      <div class="type-label-xs text-muted mb-2">ACTIVE LISTINGS</div>
-      <div class="type-display-md">{{ kpis.active_products }}</div>
-      <div class="mt-4"><span class="badge badge--white px-2">Operational</span></div>
+
+    <div class="saas-metric-card">
+      <div>
+        <div class="saas-metric-card__top">
+          <span class="saas-metric-card__label">Pending Orders</span>
+          <span class="saas-metric-card__icon saas-metric-card__icon--warning">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </span>
+        </div>
+        <div class="saas-metric-card__value">{{ kpis.pending_orders or 0 }}</div>
+      </div>
+      <div class="saas-metric-card__footer">
+        <span>Awaiting dispatch</span>
+        <span class="badge badge--warning">Action Queue</span>
+      </div>
     </div>
-    <div class="glass-card status-card p-6 stagger-item" style="border-top: 4px solid var(--color-danger);">
-      <div class="type-label-xs text-muted mb-2">LOW STOCK</div>
-      <div class="type-display-md" style="color: var(--color-danger);">{{ kpis.low_stock }}</div>
-      <div class="mt-4"><span class="badge badge--danger px-2">Immediate Risk</span></div>
+
+    <div class="saas-metric-card">
+      <div>
+        <div class="saas-metric-card__top">
+          <span class="saas-metric-card__label">Active Listings</span>
+          <span class="saas-metric-card__icon">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 16.2A2 2 0 0 0 21 14.5v-5a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 9.5v5c0 .7.4 1.4 1 1.7l7 4a2 2 0 0 0 2 0z"/></svg>
+          </span>
+        </div>
+        <div class="saas-metric-card__value">{{ kpis.active_products or 0 }}</div>
+      </div>
+      <div class="saas-metric-card__footer">
+        <span>Published SKUs</span>
+        <a href="/seller/products" class="text-primary fw-semibold" style="text-decoration:none;">Catalog →</a>
+      </div>
     </div>
-    <div class="glass-card status-card p-6 stagger-item" style="background: var(--brand-primary-subtle); border-top: 4px solid var(--brand-primary);">
-      <div class="type-label-xs text-muted mb-2">OPEN INQUIRIES</div>
-      <div class="type-display-md" style="color: var(--brand-primary);">{{ kpis.open_inquiries }}</div>
-      <div class="mt-4"><span class="badge badge--primary px-2">Reply SLA Pending</span></div>
+
+    <div class="saas-metric-card">
+      <div>
+        <div class="saas-metric-card__top">
+          <span class="saas-metric-card__label">Low Stock Alerts</span>
+          <span class="saas-metric-card__icon saas-metric-card__icon--danger">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </span>
+        </div>
+        <div class="saas-metric-card__value" style="color: {% if (kpis.low_stock or 0) > 0 %}var(--color-danger){% else %}#0F172A{% endif %};">{{ kpis.low_stock or 0 }}</div>
+      </div>
+      <div class="saas-metric-card__footer">
+        <span>Threshold ≤ 3 units</span>
+        <a href="/seller/inventory" class="text-primary fw-semibold" style="text-decoration:none;">Restock →</a>
+      </div>
+    </div>
+
+    <div class="saas-metric-card">
+      <div>
+        <div class="saas-metric-card__top">
+          <span class="saas-metric-card__label">Open Inquiries</span>
+          <span class="saas-metric-card__icon">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </span>
+        </div>
+        <div class="saas-metric-card__value">{{ kpis.open_inquiries or 0 }}</div>
+      </div>
+      <div class="saas-metric-card__footer">
+        <span>Customer CRM Desk</span>
+        <a href="/seller/customer-inquiries" class="text-primary fw-semibold" style="text-decoration:none;">Respond →</a>
+      </div>
     </div>
   </div>
 
-  <div class="glass-card p-10 reveal-y">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--sp-6);">
-      <h2 class="type-h4" style="margin:0;">Fulfillment Stream</h2>
-      <a href="/seller/orders" class="type-body-sm fw-semibold" style="color: var(--brand-primary); text-decoration: none; display: flex; align-items: center; gap: 4px;">Explore Full History <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+  <!-- SaaS Data Tables Grid -->
+  <div class="saas-split-grid">
+    <!-- Table 1: Recent Orders & Fulfillment Stream -->
+    <div class="saas-table-card">
+      <div class="saas-table-header">
+        <div>
+          <h2 class="saas-table-header__title">Fulfillment &amp; Order Stream</h2>
+          <p class="saas-table-header__subtitle">Latest customer transactions and dispatch statuses.</p>
+        </div>
+        <a href="/seller/orders" class="btn btn--ghost btn--sm">View All Orders →</a>
+      </div>
+      <div class="table-wrapper">
+        <table class="saas-data-table data-table">
+          <thead>
+            <tr>
+              <th>Order Reference</th>
+              <th>Recorded Timestamp</th>
+              <th>Fulfillment State</th>
+              <th style="text-align:right;">Total Amount</th>
+              <th style="text-align:right;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for order in recent_orders %}
+            <tr>
+              <td>
+                <a href="/seller/orders/{{ order.order_ref }}" class="fw-bold text-primary" style="font-family: var(--font-mono); text-decoration: none;">{{ order.order_ref }}</a>
+              </td>
+              <td class="text-muted">{{ order.created_at.strftime('%b %d, %Y %H:%M') if order.created_at else '—' }}</td>
+              <td>
+                <span class="badge badge--dot {% if order.status == 'delivered' %}badge--success{% elif order.status == 'pending' %}badge--warning{% else %}badge--secondary{% endif %}">
+                  {{ order.status|title }}
+                </span>
+              </td>
+              <td style="text-align:right;" class="fw-bold">PHP {{ '{:,.2f}'.format((order.total or 0)|float) }}</td>
+              <td style="text-align:right;">
+                <a href="/seller/orders/{{ order.order_ref }}" class="btn btn--ghost btn--sm">Inspect</a>
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="5" style="text-align:center; padding: 36px 20px;" class="text-muted">No recent order transactions recorded yet.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
-    
-    <div class="table-wrapper">
-      <table class="data-table">
-        <thead style="background:var(--grey-25);">
-          <tr>
-            <th style="padding-left:24px;">Order Object</th>
-            <th>Recorded Date</th>
-            <th>Fulfillment State</th>
-            <th style="text-align:right; padding-right:24px;">Total Transaction</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for order in recent_orders %}
-          <tr class="hover-bg-light transition-base">
-            <td style="padding-left:24px;"><a href="/seller/orders/{{ order.order_ref }}" class="fw-bold text-primary">{{ order.order_ref }}</a></td>
-            <td class="text-muted">{{ order.created_at.strftime('%b %d, %H:%M') if order.created_at else '-' }}</td>
-            <td>
-              <span class="badge badge--dot {% if order.status == 'delivered' %}badge--success{% elif order.status == 'pending' %}badge--warning{% else %}badge--secondary{% endif %}">
-                {{ order.status|title }}
-              </span>
-            </td>
-            <td style="text-align:right; padding-right:24px;" class="fw-bold">PHP {{ '%.2f'|format(order.total or 0) }}</td>
-          </tr>
-          {% else %}
-          <tr><td colspan="4" style="text-align:center; padding: var(--sp-12);" class="text-muted">No recent transaction activity detected.</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
+
+    <!-- Table 2: Inventory & Stock Health Snapshot -->
+    <div class="saas-table-card">
+      <div class="saas-table-header">
+        <div>
+          <h2 class="saas-table-header__title">Inventory Stock Matrix</h2>
+          <p class="saas-table-header__subtitle">Active appliance listings prioritized by stock level.</p>
+        </div>
+        <a href="/seller/inventory" class="btn btn--ghost btn--sm">Full Inventory →</a>
+      </div>
+      <div class="table-wrapper">
+        <table class="saas-data-table data-table">
+          <thead>
+            <tr>
+              <th>Appliance / SKU</th>
+              <th>Stock</th>
+              <th style="text-align:right;">Unit Price</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in inventory_snapshot %}
+            <tr>
+              <td>
+                <div class="fw-semibold" style="color: #0F172A;">{{ item.name }}</div>
+                <div class="type-body-xs text-muted" style="font-family: var(--font-mono);">{{ item.product_ref or 'SKU' }} · {{ item.category or 'Appliance' }}</div>
+              </td>
+              <td>
+                {% set st = item.stock or 0 %}
+                <span class="badge {% if st <= 3 %}badge--danger{% elif st <= 8 %}badge--warning{% else %}badge--success{% endif %}">
+                  {{ st }} in stock
+                </span>
+              </td>
+              <td style="text-align:right;" class="fw-semibold">PHP {{ '{:,.2f}'.format((item.price or 0)|float) }}</td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="3" style="text-align:center; padding: 36px 20px;" class="text-muted">No active products in catalog.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>

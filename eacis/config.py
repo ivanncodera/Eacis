@@ -1,5 +1,6 @@
 import os
 import importlib
+import importlib.util
 from datetime import timedelta
 from pathlib import Path
 
@@ -40,6 +41,10 @@ class Config:
     MAIL_PASSWORD = os.getenv('MAIL_PASSWORD', '')
     MAIL_FROM_EMAIL = os.getenv('MAIL_FROM_EMAIL', MAIL_USERNAME or 'no-reply@eacis.local')
     MAIL_FROM_NAME = os.getenv('MAIL_FROM_NAME', 'E-ACIS Security')
+    # Alternate mail backends for development: write to file or print to console
+    MAIL_USE_FILE = str(os.getenv('MAIL_USE_FILE', 'false')).lower() in ('1', 'true', 'yes')
+    MAIL_FILE_PATH = os.getenv('MAIL_FILE_PATH', 'instance/emails')
+    MAIL_USE_CONSOLE = str(os.getenv('MAIL_USE_CONSOLE', 'false')).lower() in ('1', 'true', 'yes')
 
     # ── OTP Security ─────────────────────────────────────────────────────────
     OTP_CODE_LENGTH = int(os.getenv('OTP_CODE_LENGTH', '6'))
@@ -56,6 +61,14 @@ class Config:
     LOYALTY_RATE = int(os.getenv("LOYALTY_RATE", 100))
     RETURN_WINDOW_DAYS = int(os.getenv("RETURN_WINDOW_DAYS", 7))
     PERMANENT_SESSION_LIFETIME = timedelta(days=7)
+
+    # Developer convenience: show raw OTP in the UI for seeded/dev flows when
+    # running outside production. Can be overridden by environment variable.
+    _raw_dev_show = os.getenv('DEV_SHOW_OTP_IN_UI')
+    if _raw_dev_show is None:
+        DEV_SHOW_OTP_IN_UI = os.getenv('FLASK_ENV', '').lower() != 'production'
+    else:
+        DEV_SHOW_OTP_IN_UI = str(_raw_dev_show).lower() in ('1', 'true', 'yes')
 
     # ── Return Abuse Scoring ──────────────────────────────────────────────────
     # Score >= FLAG  → account flagged for admin review
@@ -105,3 +118,6 @@ class Config:
     REMEMBER_COOKIE_SAMESITE = 'Strict' if _is_prod else 'Lax'
     PREFERRED_URL_SCHEME = 'https' if _is_prod else 'http'
     WTF_CSRF_ENABLED = True
+    # In production we require a matching referrer for secure requests.
+    # Disable strict referrer enforcement in development to avoid local dev/browser privacy blocks.
+    WTF_CSRF_SSL_STRICT = _is_prod

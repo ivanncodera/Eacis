@@ -33,8 +33,11 @@
               {% endif %}
             </td>
             <td>
+              {% if row.order and row.order.status == 'pending' %}
+                <a class="btn btn--secondary btn--sm" href="{{ url_for('seller_installment_review', order_ref=row.order.order_ref) }}">Review KYC</a>
+              {% endif %}
               {% if row.schedule.status != 'paid' %}
-              <form method="POST" action="{{ url_for('seller_installment_mark_paid', schedule_id=row.schedule.id) }}" style="display:flex; gap:8px; align-items:center;" data-confirm="Record this installment as paid?">
+              <form method="POST" action="{{ url_for('seller_installment_mark_paid', schedule_id=row.schedule.id) }}" style="display:flex; gap:8px; align-items:center; margin-top:6px;" data-confirm="Record this installment as paid?">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <input type="text" name="payment_ref" placeholder="Receipt Ref" class="input" style="max-width: 130px; height: 34px;" aria-label="Payment reference for {{ row.order.order_ref if row.order else 'schedule' }}">
                 <button type="submit" class="btn btn--primary btn--sm">Mark Paid</button>

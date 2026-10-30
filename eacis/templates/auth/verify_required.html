@@ -3,16 +3,23 @@
 {% block content %}
 <div class="page-content" style="padding: var(--sp-12);">
   <div class="glass-card p-10" style="max-width:680px; margin: 0 auto;">
+    <a href="/" style="display: inline-flex; align-items: center; margin-bottom: var(--sp-4); text-decoration: none;"><img src="/static/assets/logo.png?v=20261030" alt="E-ACIS Official Logo" style="height: 56px; width: auto; object-fit: contain; display: block;"></a>
     <h2 class="type-h4">Verify Your Email</h2>
     <p class="type-body-sm text-muted">To activate your account we sent a verification message to <strong>{{ email }}</strong>. Click the link in that email to verify and sign in.</p>
 
     <div style="margin-top: var(--sp-6); display:flex; gap:var(--sp-4); align-items:center;">
       <form method="post" action="{{ url_for('auth_otp_send') }}" style="display:inline;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="email" value="{{ email }}">
         <input type="hidden" name="purpose" value="register_verify">
         <button type="submit" class="btn btn--primary">Resend Verification Email</button>
       </form>
       <a href="{{ url_for('auth_login') }}" class="btn btn--link">Back to Sign In</a>
+    </div>
+
+    <div style="margin-top: var(--sp-6);">
+      <p class="type-body-sm">If you received a one-time code instead of a link, you can enter it manually:</p>
+      <a href="{{ url_for('auth_otp_verify') }}" class="btn btn--white">Enter Verification Code</a>
     </div>
 
     <div class="type-body-xs text-muted" style="margin-top:var(--sp-6);">If you don't receive the email, check spam folders or try again later. For assistance contact support.</div>

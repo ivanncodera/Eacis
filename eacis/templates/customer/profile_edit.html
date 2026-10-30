@@ -135,7 +135,7 @@
 
       <div style="display:flex; gap: var(--sp-3); justify-content:flex-end; flex-wrap:wrap;">
         <a href="/customer/profile" class="btn btn--white">Cancel</a>
-        <button type="submit" class="btn btn--primary">Save Account Settings</button>
+        <button type="button" id="customer-save-btn" class="btn btn--primary">Save Account Settings</button>
       </div>
     </form>
   </div>
@@ -248,6 +248,62 @@
     }
     if (modalClose) modalClose.addEventListener('click', closeModal);
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
+  });
+  </script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('profile-settings-form');
+    const saveBtn = document.getElementById('customer-save-btn');
+    if (!form || !saveBtn) return;
+
+    function containsEmoji(s) {
+      if (!s) return false;
+      try { return /\p{Extended_Pictographic}/u.test(s); } catch (e) { return /[\uD800-\uDBFF][\uDC00-\uDFFF]/.test(s); }
+    }
+
+    function clearJsFieldErrors(f) { if (!f) return; const els = f.querySelectorAll('[data-js-error="1"]'); els.forEach(e => e.remove()); }
+    function addFieldError(el, msg) {
+      if (!el) return; const next = el.nextElementSibling; if (next && next.getAttribute && next.getAttribute('data-js-error') === '1') { next.textContent = msg; return; }
+      const div = document.createElement('div'); div.className = 'form-error-text'; div.style.color = 'var(--color-danger)'; div.style.fontSize = '11px'; div.style.marginTop = '4px'; div.setAttribute('data-js-error','1'); div.textContent = msg; el.insertAdjacentElement('afterend', div);
+    }
+
+    function normalizePhone(raw) {
+      if (!raw) return '';
+      let v = raw.trim().replace(/\s|-/g, '');
+      if (v.startsWith('+63') && v.length === 13 && /^\+63\d+$/.test(v) && v[3] === '9') return '0' + v.slice(3);
+      if (v.startsWith('63') && v.length === 12 && /^63\d+$/.test(v) && v[2] === '9') return '0' + v.slice(2);
+      if (v.length === 10 && /^\d+$/.test(v) && v.startsWith('9')) return '0' + v;
+      return v;
+    }
+
+    function clientValidateCustomerForm(f) {
+      clearJsFieldErrors(f);
+      const errs = [];
+      const first = f.querySelector('[name="first_name"]');
+      const last = f.querySelector('[name="last_name"]');
+      const phone = f.querySelector('[name="phone"]');
+      const email = f.querySelector('[name="email"]');
+      const currentPwd = f.querySelector('[name="current_password"]');
+      if (first) { const v = (first.value||'').trim(); if (!v) { addFieldError(first, 'First name is required.'); errs.push('first_name'); } else if (containsEmoji(v)) { addFieldError(first, 'Name cannot contain emoji.'); errs.push('first_name'); } }
+      if (last) { const v = (last.value||'').trim(); if (!v) { addFieldError(last, 'Last name is required.'); errs.push('last_name'); } else if (containsEmoji(v)) { addFieldError(last, 'Name cannot contain emoji.'); errs.push('last_name'); } }
+      if (phone) { const n = normalizePhone(phone.value); if (n && !/^09\d{9}$/.test(n)) { addFieldError(phone, 'Enter a valid PH mobile number (e.g. 09171234567).'); errs.push('phone'); } }
+      if (email) { const v = (email.value||'').trim(); const re = /^[^@\s]+@[^@\s]+\.[^@\s]+$/; if (!v) { addFieldError(email, 'Email is required.'); errs.push('email'); } else if (!re.test(v)) { addFieldError(email, 'Please enter a valid email address.'); errs.push('email'); } }
+      if (currentPwd && !currentPwd.value) { addFieldError(currentPwd, 'Enter your current password to save account changes.'); errs.push('current_password'); }
+      ['address_line1','address_line2','barangay','city_municipality','province','region','postal_code'].forEach(name => { const el = f.querySelector(`[name="${name}"]`); if (el && containsEmoji(el.value||'')) { addFieldError(el, 'This field cannot contain emoji.'); errs.push(name); } });
+      return errs;
+    }
+
+    saveBtn.addEventListener('click', function (ev) {
+      ev.preventDefault();
+      const errors = clientValidateCustomerForm(form);
+      if (errors.length) { const firstErr = form.querySelector('[data-js-error="1"]'); if (firstErr && firstErr.previousElementSibling) firstErr.previousElementSibling.focus(); return; }
+      const proceed = function () {
+        const phone = form.querySelector('[name="phone"]'); if (phone) phone.value = normalizePhone(phone.value);
+        saveBtn.disabled = true; const label = saveBtn.querySelector('.btn__label'); if (label) label.textContent = 'Saving...';
+        form.submit();
+      };
+      if (window.confirmModal) { confirmModal('Save changes to your account?').then(ok => { if (!ok) return; proceed(); }); } else { if (confirm('Save changes to your account?')) proceed(); }
+    });
   });
   </script>
 {% endblock %}

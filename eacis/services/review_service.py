@@ -37,7 +37,7 @@ def create_or_update_review(user_id, product_id, rating, title=None, body=None, 
     Returns (review_obj, error_message)
     """
     try:
-        rating = int(rating)
+        rating = int(str(rating).strip())
     except Exception:
         return None, 'Invalid rating value.'
     if rating < 1 or rating > 5:
@@ -48,12 +48,31 @@ def create_or_update_review(user_id, product_id, rating, title=None, body=None, 
         if not has_user_received_product(user_id, product_id):
             return None, 'Only customers who purchased and received this product may submit a review.'
 
+    # normalize/trim text fields to safe lengths
+    try:
+        title = (title or '').strip() if title is not None else None
+        if title == '':
+            title = None
+        if title and len(title) > 255:
+            title = title[:255]
+    except Exception:
+        title = None
+    try:
+        body = (body or '').strip() if body is not None else None
+        if body == '':
+            body = None
+        # protect against extremely large values
+        if body and len(body) > 5000:
+            body = body[:5000]
+    except Exception:
+        body = None
+
     # find existing
     existing = Review.query.filter_by(product_id=product_id, user_id=user_id).first()
     if existing:
         existing.rating = rating
-        existing.title = title or existing.title
-        existing.body = body or existing.body
+        existing.title = title if title is not None else existing.title
+        existing.body = body if body is not None else existing.body
         existing.is_anonymous = bool(is_anonymous)
         # capture reviewer snapshot when not anonymous
         if not existing.is_anonymous:

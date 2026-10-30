@@ -1,0 +1,229 @@
+/* ==========================================================================
+   E-ACIS SYSTEM-WIDE FLOATING SHAPES
+   Pure CSS ambient background geometry (transform & opacity only)
+   ========================================================================== */
+
+.eacis-floating-shapes {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+  contain: layout style paint;
+}
+
+/* Ensure main layout containers sit cleanly above the ambient shapes */
+.topbar {
+  position: relative;
+  z-index: 1200;
+}
+
+.main-content {
+  position: relative;
+  z-index: 1;
+}
+
+.footer {
+  position: relative;
+  z-index: 10;
+}
+
+.eacis-shape {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+  will-change: transform, opacity;
+  opacity: 0.45;
+}
+
+/* Shape Geometry Variants — single calm blue accent + subtle slate */
+.eacis-shape--circle {
+  border-radius: var(--radius-pill, 9999px);
+  background: radial-gradient(circle at 35% 35%, rgba(0, 122, 255, 0.055), transparent 72%);
+}
+
+.eacis-shape--blob {
+  border-radius: 42% 58% 63% 37% / 41% 44% 56% 59%;
+  background: radial-gradient(circle at 50% 50%, rgba(0, 122, 255, 0.045), rgba(9, 30, 66, 0.02) 68%, transparent 100%);
+}
+
+.eacis-shape--ring {
+  border-radius: var(--radius-pill, 9999px);
+  border: 1px solid rgba(0, 122, 255, 0.09);
+  background: transparent;
+}
+
+.eacis-shape--square {
+  border-radius: var(--radius-2xl, 28px);
+  border: 1px solid rgba(9, 30, 66, 0.06);
+  background: rgba(0, 122, 255, 0.025);
+}
+
+/* Individual Positions, Sizes & Keyframe Timings */
+.eacis-shape--1 {
+  width: 420px;
+  height: 420px;
+  top: -120px;
+  right: -100px;
+  animation: eacis-drift-a 34s var(--ease-in-out, ease-in-out) infinite alternate;
+}
+
+.eacis-shape--2 {
+  width: 260px;
+  height: 260px;
+  top: 16%;
+  left: -80px;
+  animation: eacis-rotate-drift 42s var(--ease-linear, linear) infinite;
+}
+
+.eacis-shape--3 {
+  width: 140px;
+  height: 140px;
+  top: 56%;
+  right: 6%;
+  animation: eacis-float-rotate 30s var(--ease-in-out, ease-in-out) infinite alternate;
+}
+
+.eacis-shape--4 {
+  width: 320px;
+  height: 320px;
+  bottom: -100px;
+  left: 10%;
+  animation: eacis-drift-b 36s var(--ease-in-out, ease-in-out) infinite alternate;
+}
+
+.eacis-shape--5 {
+  width: 200px;
+  height: 200px;
+  top: 26%;
+  right: 24%;
+  border-style: dashed;
+  animation: eacis-rotate-drift 48s var(--ease-linear, linear) infinite reverse;
+}
+
+.eacis-shape--6 {
+  width: 104px;
+  height: 104px;
+  bottom: 24%;
+  left: 5%;
+  border-radius: var(--radius-xl, 20px);
+  animation: eacis-float-rotate 34s var(--ease-in-out, ease-in-out) infinite alternate-reverse;
+}
+
+.eacis-shape--7 {
+  width: 340px;
+  height: 340px;
+  top: 40%;
+  left: 44%;
+  opacity: 0.3;
+  animation: eacis-drift-a 44s var(--ease-in-out, ease-in-out) infinite alternate-reverse;
+}
+
+.eacis-shape--8 {
+  width: 180px;
+  height: 180px;
+  bottom: 12%;
+  right: 18%;
+  animation: eacis-drift-b 32s var(--ease-in-out, ease-in-out) infinite alternate;
+}
+
+/* Transform & Opacity-only Keyframes */
+@keyframes eacis-drift-a {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+    opacity: 0.35;
+  }
+  50% {
+    transform: translate3d(-22px, 18px, 0) scale(1.04) rotate(6deg);
+    opacity: 0.55;
+  }
+  100% {
+    transform: translate3d(16px, -18px, 0) scale(0.98) rotate(-4deg);
+    opacity: 0.35;
+  }
+}
+
+@keyframes eacis-drift-b {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translate3d(20px, -16px, 0) scale(1.05);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translate3d(-16px, 14px, 0) scale(0.97);
+    opacity: 0.3;
+  }
+}
+
+@keyframes eacis-float-rotate {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(8deg);
+    opacity: 0.28;
+  }
+  50% {
+    transform: translate3d(-14px, -18px, 0) rotate(22deg);
+    opacity: 0.48;
+  }
+  100% {
+    transform: translate3d(12px, 14px, 0) rotate(-8deg);
+    opacity: 0.28;
+  }
+}
+
+@keyframes eacis-rotate-drift {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+    opacity: 0.25;
+  }
+  50% {
+    transform: translate3d(12px, 10px, 0) rotate(180deg);
+    opacity: 0.42;
+  }
+  100% {
+    transform: translate3d(0, 0, 0) rotate(360deg);
+    opacity: 0.25;
+  }
+}
+
+/* Reduce shape count and footprint on mobile devices for performance */
+@media (max-width: 768px) {
+  .eacis-shape--desktop-only {
+    display: none !important;
+  }
+
+  .eacis-shape--1 {
+    width: 240px;
+    height: 240px;
+    top: -80px;
+    right: -70px;
+  }
+
+  .eacis-shape--2 {
+    width: 160px;
+    height: 160px;
+  }
+
+  .eacis-shape--3 {
+    width: 88px;
+    height: 88px;
+  }
+
+  .eacis-shape--4 {
+    width: 200px;
+    height: 200px;
+  }
+}
+
+/* Accessibility: strictly respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .eacis-shape {
+    animation: none !important;
+    transition: none !important;
+  }
+}

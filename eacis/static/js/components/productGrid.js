@@ -161,18 +161,27 @@ window.renderProducts = function(sel, list){
 
         const addBtn = content.querySelector('[data-add-ref]');
         if(addBtn){
-          addBtn.addEventListener('click', async () => {
-            try {
-              await addProductToCart(refValue, 1);
-            } catch (e) {
-              if(window.Toast) Toast.error('Could not add to cart', 'Please try again.');
-              return;
-            }
-            const cartIcon = document.querySelector('.topbar__icon-btn .cart-icon') || document.querySelector('.topbar__icon-btn svg');
-            if(window.EACIS && window.EACIS.flyToCart) window.EACIS.flyToCart(img, cartIcon);
-            if(window.ModalManager) ModalManager.close(content);
-            if(window.Toast) Toast.success('Added to cart', p.name);
-          });
+          const isAuthUser = document.body.dataset.isAuthenticated === 'true' || (window.EACIS && window.EACIS.isAuthenticated);
+          if(isAuthUser){
+            addBtn.addEventListener('click', async (ev) => {
+              ev && ev.stopPropagation();
+              try {
+                await addProductToCart(refValue, 1);
+              } catch (e) {
+                if(window.Toast) Toast.error('Could not add to cart', 'Please try again.');
+                return;
+              }
+              const cartIcon = document.querySelector('.topbar__icon-btn .cart-icon') || document.querySelector('.topbar__icon-btn svg') || document.querySelector('.cart-icon svg');
+              if(window.EACIS && window.EACIS.flyToCart) window.EACIS.flyToCart(img, cartIcon);
+              if(window.ModalManager) ModalManager.close(content);
+              if(window.Toast) Toast.success('Added to cart', p.name);
+            });
+          } else {
+            addBtn.addEventListener('click', (ev) => {
+              ev && ev.stopPropagation();
+              window.location.href = '/auth/login?next=' + encodeURIComponent(window.location.pathname);
+            });
+          }
         }
       } catch(e){ console.error(e); }
     });

@@ -11,40 +11,51 @@
 
   <div style="display:grid; grid-template-columns: 1fr 360px; gap: var(--sp-8);">
     <section class="glass-card">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <h3 class="type-h5">Saved Addresses</h3>
-        <form method="get" style="margin:0;">
-          <label class="type-label type-label--sm text-muted" for="per_page_select_addr">Per page</label>
-          <select id="per_page_select_addr" name="per_page" onchange="this.form.submit()" style="margin-left:8px;padding:6px 8px;border-radius:4px;border:1px solid var(--muted);">
-            <option value="5" {% if (pagination and pagination.per_page == 5) or request.args.get('per_page') == '5' %}selected{% endif %}>5</option>
-            <option value="10" {% if (pagination and pagination.per_page == 10) or request.args.get('per_page') == '10' %}selected{% endif %}>10</option>
-          </select>
-        </form>
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+        <div style="flex:1;">
+          <h3 class="type-h5" style="margin:0 0 6px 0;">Saved Addresses</h3>
+          <div class="type-body-sm text-muted">Manage your saved addresses for checkout</div>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <input id="addr-search" placeholder="Search addresses" class="form-input" style="min-width:220px;" />
+          <form method="get" style="margin:0;">
+            <label class="type-label type-label--sm text-muted" for="per_page_select_addr">Per page</label>
+            <select id="per_page_select_addr" name="per_page" onchange="this.form.submit()" style="margin-left:8px;padding:6px 8px;border-radius:4px;border:1px solid var(--muted);">
+              <option value="5" {% if (pagination and pagination.per_page == 5) or request.args.get('per_page') == '5' %}selected{% endif %}>5</option>
+              <option value="10" {% if (pagination and pagination.per_page == 10) or request.args.get('per_page') == '10' %}selected{% endif %}>10</option>
+            </select>
+          </form>
+        </div>
       </div>
       <div style="display:flex; flex-direction:column; gap: var(--sp-3); margin-top: var(--sp-4);">
         {% for addr in addresses %}
-        <div style="display:flex; justify-content:space-between; gap:var(--sp-3); padding:8px; border-radius:8px; border:1px solid var(--border-medium); background:var(--grey-0);">
-          <div>
-            <div class="fw-semibold">{{ addr.label or 'Address' }} {% if addr.is_default %}<span class="type-label-sm" style="background:var(--brand-primary-subtle); padding:2px 6px; border-radius:6px;">Default</span>{% endif %}</div>
-            <div class="type-body-sm">{{ addr.recipient_name }} &middot; {% if addr.phone and addr.phone.startswith('0') %}+63{{ addr.phone[1:] }}{% else %}{{ addr.phone or '' }}{% endif %}</div>
-            <div class="type-body-xs text-muted">{{ [addr.address_line1, addr.address_line2, addr.barangay, addr.city_municipality, addr.province, addr.region] | select | join(', ') }}</div>
+        <article class="address-card" data-id="{{ addr.id }}">
+          <div class="address-card__main">
+            <div class="address-card__meta">
+              <div class="fw-semibold address-card__label">{{ addr.label or 'Address' }}
+                {% if addr.is_default %}<span class="type-label-sm badge-default">Default</span>{% endif %}
+                {% if addr.is_pickup %}<span class="type-label-sm badge-pickup">Pickup</span>{% endif %}
+                {% if addr.is_return %}<span class="type-label-sm badge-return">Return</span>{% endif %}
+              </div>
+              <div class="type-body-sm">{{ addr.recipient_name }} · {% if addr.phone and addr.phone.startswith('0') %}+63{{ addr.phone[1:] }}{% else %}{{ addr.phone or '' }}{% endif %}</div>
+            </div>
+            <div class="address-card__addr type-body-xs text-muted">{{ [addr.house_number, addr.address_line1, addr.address_line2, addr.barangay, addr.city_municipality, addr.province, addr.region] | select | join(', ') }}</div>
+            {% if addr.landmark %}<div class="type-body-xs text-muted address-card__landmark">Landmark: {{ addr.landmark }}</div>{% endif %}
           </div>
-          <div style="display:flex; flex-direction:column; gap:6px; align-items:flex-end;">
-            <form method="post" action="{{ url_for('customer_addresses') }}">
+          <div class="address-card__actions">
+            <a href="{{ url_for('customer_addresses.edit_address', addr_id=addr.id) }}" class="btn btn--white btn--sm">Edit</a>
+            <form method="post" action="{{ url_for('customer_addresses.save_address') }}" class="inline-form">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-              <input type="hidden" name="action" value="set_default">
-              <input type="hidden" name="address_id" value="{{ addr.id }}">
-              <button class="btn btn--secondary" type="submit">Set Default</button>
+              <input type="hidden" name="id" value="{{ addr.id }}">
+              <input type="hidden" name="is_default" value="1">
+              <button class="btn btn--secondary btn--sm" type="submit">Set Default</button>
             </form>
-
-            <form method="post" action="{{ url_for('customer_addresses') }}" data-confirm="Delete this address?">
+            <form method="post" action="{{ url_for('customer_addresses.delete_address', addr_id=addr.id) }}" class="inline-form" data-confirm="Delete this address?">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-              <input type="hidden" name="action" value="delete">
-              <input type="hidden" name="address_id" value="{{ addr.id }}">
-              <button class="btn btn--danger" type="submit">Delete</button>
+              <button class="btn btn--danger btn--sm" type="submit">Delete</button>
             </form>
           </div>
-        </div>
+        </article>
         {% else %}
         <div class="type-body-sm text-muted">No saved addresses yet. Add one using the form on the right.</div>
         {% endfor %}
@@ -104,9 +115,60 @@
 
         <label style="display:flex; gap:8px; align-items:center;"><input type="checkbox" name="set_default" value="1"> Set as default</label>
 
+        
+
         <button class="btn btn--primary" type="submit">Save Address</button>
       </form>
     </aside>
   </div>
 </div>
+<link rel="stylesheet" href="/static/css/addresses.css" />
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  // Search/filter saved addresses
+  var search = document.getElementById('addr-search');
+  if(search){
+    search.addEventListener('input', function(){
+      var q = (search.value||'').toLowerCase().trim();
+      document.querySelectorAll('.address-card').forEach(function(card){
+        var text = card.innerText.toLowerCase();
+        card.style.display = (!q || text.indexOf(q) !== -1) ? '' : 'none';
+      });
+    });
+  }
+
+  // Simple data-confirm handler for delete forms
+  document.querySelectorAll('form[data-confirm]').forEach(function(f){
+    f.addEventListener('submit', function(ev){
+      var msg = f.getAttribute('data-confirm') || 'Are you sure?';
+      if(!confirm(msg)) ev.preventDefault();
+    });
+  });
+  // Postal code lookup: fill city/province
+  var postal = document.querySelector('input[name="postal_code"]');
+  if(postal){
+    postal.addEventListener('blur', function(){
+      var code = postal.value && postal.value.trim();
+      if(!code) return;
+      fetch('/postal_lookup?code=' + encodeURIComponent(code)).then(function(r){ if(!r.ok) throw new Error('no'); return r.json(); }).then(function(data){
+        if(data && data.city_municipality){ var city = document.querySelector('input[name="city_municipality"]'); if(city) city.value = data.city_municipality; }
+        if(data && data.province){ var prov = document.querySelector('input[name="province"]'); if(prov) prov.value = data.province; }
+      }).catch(function(){/* ignore */});
+    });
+  }
+  
+  // Postal code -> city/province autofill (uses /postal_lookup)
+  var postal = document.getElementById('postal_code');
+  if(postal){
+    postal.addEventListener('blur', function(){
+      var code = postal.value && postal.value.trim();
+      if(!code) return;
+      fetch('/postal_lookup?code=' + encodeURIComponent(code)).then(function(r){ if(!r.ok) throw new Error('no'); return r.json(); }).then(function(data){
+        if(data && data.city_municipality){ document.getElementById('city_municipality').value = data.city_municipality; }
+        if(data && data.province){ document.getElementById('province').value = data.province; }
+      }).catch(function(){/* ignore */});
+    });
+  }
+});
+</script>
 {% endblock %}

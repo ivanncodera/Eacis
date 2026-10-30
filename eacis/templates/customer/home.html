@@ -67,18 +67,24 @@
           <p class="type-body-sm text-muted mt-2">
             {% if view_mode == 'discovery' %}
               Hand-picked trends and premium selections from verified partners.
-            {% else %}
-              Browse {{ products|length }} live listing{% if products|length != 1 %}s{% endif %}{% if shop_active_category %} in {{ shop_active_category }}{% endif %}.
+              {% else %}
+              Browse {{ products_total if products_total is defined else products|length }} live listing{% if (products_total if products_total is defined else products|length) != 1 %}s{% endif %}{% if shop_active_category %} in {{ shop_active_category }}{% endif %}.
             {% endif %}
           </p>
         </div>
         
         <!-- Category Navigator -->
-        <div style="display:flex; gap:var(--sp-2); flex-wrap:wrap;" id="category-chips">
-          <button type="button" class="chip {% if not shop_active_category %}chip--active{% endif %}" data-cat="">All Collections</button>
-          {% for cat in (shop_categories or []) %}
-          <button type="button" class="chip {% if shop_active_category == cat %}chip--active{% endif %}" data-cat="{{ cat }}">{{ cat }}</button>
-          {% endfor %}
+        <div style="display:flex; gap:var(--sp-2); flex-wrap:wrap; align-items:center;" id="category-nav-wrapper">
+          <div id="category-chips" class="category-chips" aria-expanded="false">
+            <button type="button" class="chip {% if not shop_active_category %}chip--active{% endif %}" data-cat="">All Collections</button>
+            {% for cat in (shop_categories or []) %}
+            <button type="button" class="chip {% if shop_active_category == cat %}chip--active{% endif %}" data-cat="{{ cat }}">{{ cat }}</button>
+            {% endfor %}
+          </div>
+          <div style="display:flex; gap:var(--sp-2); align-items:center;">
+            <button id="open-category-browser" type="button" class="btn btn--ghost btn--sm" style="margin-left:var(--sp-2);">Browse categories</button>
+            <button id="toggle-category-chips" type="button" class="btn btn--ghost btn--sm" style="margin-left:var(--sp-2); display:none;">Show all</button>
+          </div>
         </div>
       </div>
     </div>
@@ -97,10 +103,20 @@
           </div>
 
           <div class="filter-section mb-8">
+            <div class="type-label mb-3">Category</div>
+            <select id="filter-category" class="form-select" style="width:100%; height:42px;">
+              <option value="" {% if not shop_active_category %}selected{% endif %}>All Categories</option>
+              {% for cat in (shop_categories or []) %}
+              <option value="{{ cat }}" {% if shop_active_category == cat %}selected{% endif %}>{{ cat }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="filter-section mb-8">
             <div class="type-label mb-3">Price Spectrum</div>
             <div style="display:flex; gap:var(--sp-2);">
-              <input id="price-min" type="number" placeholder="Min" class="form-input" style="height:42px; font-size:var(--text-sm);">
-              <input id="price-max" type="number" placeholder="Max" class="form-input" style="height:42px; font-size:var(--text-sm);">
+              <input id="price-min" type="number" placeholder="Min" class="form-input" style="height:42px; font-size:var(--text-sm);" value="{{ filters.min_price if filters is defined else '' }}">
+              <input id="price-max" type="number" placeholder="Max" class="form-input" style="height:42px; font-size:var(--text-sm);" value="{{ filters.max_price if filters is defined else '' }}">
             </div>
           </div>
 
@@ -119,11 +135,11 @@
           <div class="filter-section mb-8">
             <div class="type-label mb-3">Platform Features</div>
             <label style="display:flex; align-items:center; gap:var(--sp-3); cursor:pointer; margin-bottom:var(--sp-3);" class="type-body-sm">
-              <input id="instock-filter" type="checkbox" style="accent-color:var(--brand-primary); width:18px; height:18px;">
+              <input id="instock-filter" type="checkbox" style="accent-color:var(--brand-primary); width:18px; height:18px;" {% if filters and (filters.in_stock in ['1','true','on']) %}checked{% endif %}>
               In Stock Only
             </label>
             <label style="display:flex; align-items:center; gap:var(--sp-3); cursor:pointer;" class="type-body-sm">
-              <input id="installment-filter" type="checkbox" style="accent-color:var(--brand-primary); width:18px; height:18px;">
+              <input id="installment-filter" type="checkbox" style="accent-color:var(--brand-primary); width:18px; height:18px;" {% if filters and (filters.installment in ['1','true','on']) %}checked{% endif %}>
               0% Installment
             </label>
           </div>
@@ -142,16 +158,30 @@
           <div style="display:flex; align-items:center; gap:var(--sp-3);">
             <div class="type-body-sm text-muted">Sort By</div>
             <select id="sort-select" class="form-select" style="height:42px; width:180px; border-radius: 10px;">
-              <option value="relevance">Relevance</option>
-              <option value="price-asc">Price: Low to High</option>
-              <option value="price-desc">Price: High to Low</option>
-              <option value="rating">Highest Rated</option>
-              <option value="newest">Latest Release</option>
+              <option value="">Relevance</option>
+              <option value="price-asc" {% if filters and filters.sort == 'price-asc' %}selected{% endif %}>Price: Low to High</option>
+              <option value="price-desc" {% if filters and filters.sort == 'price-desc' %}selected{% endif %}>Price: High to Low</option>
+              <option value="rating" {% if filters and filters.sort == 'rating' %}selected{% endif %}>Highest Rated</option>
+              <option value="newest" {% if filters and filters.sort == 'newest' %}selected{% endif %}>Latest Release</option>
             </select>
           </div>
         </div>
 
-        <div id="products-grid" class="product-grid stagger-children"></div>
+        <div id="products-grid" class="product-grid stagger-children">
+          {# Server-rendered fallback cards so filtered results are visible even without JS #}
+          {% for p in products %}
+          <article class="product-card reveal">
+            <div class="product-card__img-wrap">
+              <img src="{{ p.image_url or '/static/assets/Featured.png' }}" alt="{{ p.name }}" loading="lazy">
+            </div>
+            <div class="product-card__body">
+              <div class="product-card__name">{{ p.name }}</div>
+              <div class="product-card__ref">by {{ p.seller.business_name if p.seller else 'Unknown Seller' }}</div>
+              <div class="product-card__price">₱ {{ '%.2f' | format(p.price or 0) }}</div>
+            </div>
+          </article>
+          {% endfor %}
+        </div>
 
         <!-- Luxury Empty State -->
         <div id="empty-state" class="empty-state reveal" style="display:none; padding: var(--sp-20) 0;">
@@ -186,10 +216,10 @@
   color: transparent;
 }
 .chip {
-  height: 38px;
-  padding: 0 var(--sp-6);
+  height: 32px;
+  padding: 0 var(--sp-4);
   border-radius: var(--radius-pill);
-  border: 1.5px solid var(--border-medium);
+  border: 1px solid var(--border-medium);
   background: white;
   font-size: var(--text-sm);
   font-weight: var(--weight-bold);
@@ -204,6 +234,16 @@
   box-shadow: var(--shadow-primary);
 }
 .hover-text-primary:hover { color: var(--brand-primary); }
+/* Compact category chips: collapsed by default, expand on demand */ 
+.category-chips {
+  display:flex;
+  gap:var(--sp-2);
+  flex-wrap:wrap;
+  overflow:hidden;
+  max-height:56px;
+  transition: max-height .28s ease;
+}
+.category-chips.expanded { max-height: 420px; }
 </style>
 
 <script src="/static/js/data/products.js"></script>
@@ -227,99 +267,176 @@
     'comparePrice': (cp | float) if cp is not none else none,
   }) %}
 {% endfor %}
-<script id="__products__" type="application/json">{{ ns.arr | tojson | safe }}</script>
-<script>
+<script id="__products__" type="application/json">{{ ns.arr | tojson }}</script>
+  <script>
 (function(){
-  const PAGE_SIZE = 15;
-  let all = JSON.parse(document.getElementById('__products__').textContent || '[]');
-  let filtered = all.slice();
-  let page = 1;
+  const PRODUCTS = JSON.parse(document.getElementById('__products__').textContent || '[]');
+  const PAGE = {{ page if page is defined else 1 }};
+  const PAGES = {{ pages if pages is defined else 1 }};
+  const PER_PAGE = {{ per_page if per_page is defined else 15 }};
+  const TOTAL = {{ products_total if products_total is defined else (products|length) }};
 
-  function getFilters() {
-    return {
-      category: document.querySelector('#category-chips .chip--active')?.dataset.cat || '',
-      priceMin: parseFloat(document.getElementById('price-min')?.value || '') || 0,
-      priceMax: parseFloat(document.getElementById('price-max')?.value || '') || Infinity,
-      rating:   parseFloat(document.querySelector('input[name="rating-filter"]:checked')?.value || '') || 0,
-      inStock:  Boolean(document.getElementById('instock-filter')?.checked),
-      install:  Boolean(document.getElementById('installment-filter')?.checked),
-    };
-  }
-
-  function applyFilters() {
-    const f = getFilters();
-    filtered = all.filter(p => {
-      if (f.category && p.category !== f.category) return false;
-      if (p.price < f.priceMin || (f.priceMax !== Infinity && p.price > f.priceMax)) return false;
-      if (f.rating && (p.rating || 0) < f.rating) return false;
-      if (f.inStock && p.stock <= 0) return false;
-      if (f.install && !p.installment_enabled) return false; 
-      return true;
-    });
-
-    const sort = document.getElementById('sort-select')?.value || 'relevance';
-    if (sort === 'price-asc')  filtered.sort((a,b) => a.price - b.price);
-    else if (sort === 'price-desc') filtered.sort((a,b) => b.price - a.price);
-    else if (sort === 'rating')     filtered.sort((a,b) => (b.rating||0) - (a.rating||0));
-    else if (sort === 'newest')     filtered.sort((a,b) => b.id - a.id);
-
-    page = 1;
-    render();
-  }
-
-  function render() {
-    const total = filtered.length;
-    const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-    const slice = filtered.slice((page-1)*PAGE_SIZE, page*PAGE_SIZE);
-
-    document.getElementById('products-count').textContent = total;
-    document.getElementById('page-indicator').textContent = `Page ${page} of ${pages}`;
-    document.getElementById('page-prev').disabled = page <= 1;
-    document.getElementById('page-next').disabled = page >= pages;
-    
-    const grid = document.getElementById('products-grid');
-    const empty = document.getElementById('empty-state');
-    const pager = document.getElementById('pagination-wrap');
-
-    if (slice.length === 0) {
-      grid.style.display  = 'none';
-      empty.style.display = 'flex';
-      pager.style.display = 'none';
+  // Render current page products (server-side paginated)
+  function renderCurrent() {
+    if (PRODUCTS.length === 0) {
+      document.getElementById('products-grid').style.display = 'none';
+      document.getElementById('empty-state').style.display = 'flex';
+      document.getElementById('pagination-wrap').style.display = 'none';
     } else {
-      grid.style.display  = '';
-      empty.style.display = 'none';
-      pager.style.display = total > PAGE_SIZE ? 'flex' : 'none';
-      renderProducts('#products-grid', slice);
+      document.getElementById('products-grid').style.display = '';
+      document.getElementById('empty-state').style.display = 'none';
+      document.getElementById('pagination-wrap').style.display = TOTAL > PER_PAGE ? 'flex' : 'none';
+      renderProducts('#products-grid', PRODUCTS);
     }
+    document.getElementById('products-count').textContent = TOTAL;
+    document.getElementById('page-indicator').textContent = `Page ${PAGE} of ${PAGES}`;
+    document.getElementById('page-prev').disabled = PAGE <= 1;
+    document.getElementById('page-next').disabled = PAGE >= PAGES;
+  }
+
+  // Build a new query URL and navigate
+  function navigateWithParams(params) {
+    const base = window.location.pathname || '/shop';
+    const qs = params.toString();
+    window.location.href = base + (qs ? ('?' + qs) : '');
   }
 
   document.querySelectorAll('#category-chips .chip').forEach(chip => {
     chip.addEventListener('click', () => {
-      document.querySelectorAll('#category-chips .chip').forEach(c => c.classList.remove('chip--active'));
-      chip.classList.add('chip--active');
-      applyFilters();
+      const cat = chip.dataset.cat || '';
+      const params = new URLSearchParams(window.location.search);
+      if (cat) params.set('category', cat); else params.delete('category');
+      params.set('page', '1');
+      navigateWithParams(params);
     });
   });
 
-  document.getElementById('apply-filters')?.addEventListener('click', applyFilters);
-  document.getElementById('sort-select')?.addEventListener('change', applyFilters);
-  document.getElementById('page-prev')?.addEventListener('click', () => { page--; render(); window.scrollTo({top:0,behavior:'smooth'}); });
-  document.getElementById('page-next')?.addEventListener('click', () => { page++; render(); window.scrollTo({top:0,behavior:'smooth'}); });
+  document.getElementById('apply-filters')?.addEventListener('click', () => {
+    const params = new URLSearchParams(window.location.search);
+    const min = document.getElementById('price-min')?.value || '';
+    const max = document.getElementById('price-max')?.value || '';
+    const cat = document.getElementById('filter-category')?.value || '';
+    if (min) params.set('min_price', min); else params.delete('min_price');
+    if (max) params.set('max_price', max); else params.delete('max_price');
+    if (cat) params.set('category', cat); else params.delete('category');
+    if (document.getElementById('instock-filter')?.checked) params.set('in_stock','1'); else params.delete('in_stock');
+    if (document.getElementById('installment-filter')?.checked) params.set('installment','1'); else params.delete('installment');
+    const sort = document.getElementById('sort-select')?.value;
+    if (sort) params.set('sort', sort); else params.delete('sort');
+    params.set('page','1');
+    navigateWithParams(params);
+  });
+
+  document.getElementById('sort-select')?.addEventListener('change', () => {
+    const params = new URLSearchParams(window.location.search);
+    const sort = document.getElementById('sort-select')?.value;
+    if (sort) params.set('sort', sort); else params.delete('sort');
+    params.set('page','1');
+    navigateWithParams(params);
+  });
+
+  document.getElementById('page-prev')?.addEventListener('click', () => {
+    const params = new URLSearchParams(window.location.search);
+    const p = Math.max(1, PAGE - 1);
+    params.set('page', String(p));
+    navigateWithParams(params);
+  });
+
+  document.getElementById('page-next')?.addEventListener('click', () => {
+    const params = new URLSearchParams(window.location.search);
+    const p = Math.min(PAGES, PAGE + 1);
+    params.set('page', String(p));
+    navigateWithParams(params);
+  });
 
   function clearAll() {
-    if (document.getElementById('price-min')) document.getElementById('price-min').value = '';
-    if (document.getElementById('price-max')) document.getElementById('price-max').value = '';
-    const ratingDefault = document.querySelector('input[name="rating-filter"][value="0"]');
-    if (ratingDefault) ratingDefault.checked = true;
-    if (document.getElementById('instock-filter')) document.getElementById('instock-filter').checked = false;
-    if (document.getElementById('installment-filter')) document.getElementById('installment-filter').checked = false;
-    applyFilters();
+    const params = new URLSearchParams(window.location.search);
+    ['min_price','max_price','in_stock','installment','sort','q'].forEach(k => params.delete(k));
+    params.delete('category');
+    params.set('page','1');
+    navigateWithParams(params);
   }
-
   document.getElementById('clear-filters')?.addEventListener('click', clearAll);
   document.getElementById('reset-btn')?.addEventListener('click', clearAll);
 
-  applyFilters();
+    // Category browser modal: open, search, pick
+    const openCatBtn = document.getElementById('open-category-browser');
+    const catModal = document.getElementById('category-modal');
+    const catClose = document.getElementById('category-modal-close');
+    const catSearch = document.getElementById('category-search');
+    const catList = document.getElementById('category-list');
+
+    function closeCatModal(){
+      if(catModal) catModal.style.display = 'none';
+    }
+
+    if(openCatBtn && catModal){
+      openCatBtn.addEventListener('click', ()=>{
+        catModal.style.display = 'block';
+        setTimeout(()=> catSearch?.focus(), 20);
+      });
+    }
+    if(catClose) catClose.addEventListener('click', closeCatModal);
+    if(catModal) catModal.addEventListener('click', (e)=>{ if(e.target === catModal) closeCatModal(); });
+    if(catSearch && catList){
+      catSearch.addEventListener('input', (e)=>{
+        const q = (e.target.value || '').trim().toLowerCase();
+        catList.querySelectorAll('.category-list__item').forEach(li=>{
+          li.style.display = li.textContent.toLowerCase().includes(q) ? '' : 'none';
+        });
+      });
+    }
+    if(catList){
+      catList.querySelectorAll('.category-list__item').forEach(li=>{
+        li.addEventListener('click', ()=>{
+          const cat = li.dataset.cat || '';
+          const params = new URLSearchParams(window.location.search);
+          if(cat) params.set('category', cat); else params.delete('category');
+          params.set('page','1');
+          navigateWithParams(params);
+        });
+      });
+    }
+
+    // Compact category chips: show a toggle only when they overflow
+    (function manageCategoryChipsToggle(){
+      const chips = document.getElementById('category-chips');
+      const toggle = document.getElementById('toggle-category-chips');
+      if (!chips || !toggle) return;
+      function refreshToggle() {
+        const isOverflow = chips.scrollHeight > chips.clientHeight + 6;
+        toggle.style.display = isOverflow ? '' : 'none';
+      }
+      // initial check after layout
+      setTimeout(refreshToggle, 40);
+      toggle.addEventListener('click', function(){
+        const expanded = chips.classList.toggle('expanded');
+        chips.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+        this.textContent = expanded ? 'Show less' : 'Show all';
+      });
+      window.addEventListener('resize', refreshToggle);
+    })();
+
+    // Initial render
+    renderCurrent();
 })();
 </script>
+
+  <!-- Category browser modal (searchable list) -->
+  <div id="category-modal" class="modal-overlay" style="display:none;">
+    <div class="modal modal--lg" role="dialog" aria-modal="true" aria-labelledby="category-modal-title">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border-subtle);">
+        <h3 id="category-modal-title" style="margin:0;font-size:1.1rem;">Browse categories</h3>
+        <button id="category-modal-close" class="btn btn--ghost">✕</button>
+      </div>
+      <div style="padding:12px 16px;">
+        <input id="category-search" placeholder="Search categories…" class="form-input" style="width:100%;margin-bottom:10px;" />
+        <ul id="category-list" style="list-style:none;padding:0;margin:0;max-height:420px;overflow:auto;">
+          {% for cat in (shop_categories or []) %}
+          <li class="category-list__item" data-cat="{{ cat }}" style="padding:10px 8px;border-bottom:1px solid var(--border-subtle);cursor:pointer;">{{ cat }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
 {% endblock %}

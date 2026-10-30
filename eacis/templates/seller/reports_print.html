@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}Seller Report — Print{% endblock %}
+{% block extra_css %}
+<style>
+@media print { .no-print { display: none !important; } }
+.report-grid { margin-top: 16px; }
+.table-wrapper .data-table { width:100%; border-collapse: collapse; }
+.data-table th, .data-table td { padding: 8px 10px; border-bottom: 1px solid #eee; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="page-content">
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+    <div>
+      <h1 class="type-display-sm">Seller Report (Last 30 Days)</h1>
+      <div class="type-body-sm text-muted">Total Sales: PHP {{ '%.2f'|format(total_sales) }}</div>
+      <div class="type-body-sm text-muted">Open Returns: {{ open_returns }}</div>
+    </div>
+    <div class="no-print"><button class="btn" onclick="window.print()">Print</button></div>
+  </div>
+
+  <div class="table-wrapper report-grid">
+    <table class="data-table">
+      <thead><tr><th>Order</th><th>Status</th><th style="text-align:right;">Seller Total</th><th>Created</th></tr></thead>
+      <tbody>
+        {% for row in report_rows %}
+        <tr>
+          <td>{{ row['order_ref'] }}</td>
+          <td>{{ row['status'] }}</td>
+          <td style="text-align:right;">PHP {{ '%.2f'|format(row['seller_total'] or 0) }}</td>
+          <td>{{ row['created_at'].isoformat() if row['created_at'] else '' }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" class="text-center">No data available.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

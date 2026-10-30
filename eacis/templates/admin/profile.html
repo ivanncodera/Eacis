@@ -34,7 +34,7 @@
 
     <div style="display:flex; justify-content:flex-end; gap:var(--sp-3);">
       <a href="/admin" class="btn btn--white">Back</a>
-      <button type="submit" class="btn btn--primary btn--xl" id="save-profile-btn">Save Profile</button>
+      <button type="button" class="btn btn--primary btn--xl" id="save-profile-btn">Save Profile</button>
     </div>
   </form>
 </div>
@@ -45,6 +45,30 @@ document.addEventListener('DOMContentLoaded', function () {
   const confirmPwd = document.getElementById('confirm_password');
   const matchEl = document.getElementById('pwd-match');
   const form = document.getElementById('admin-profile-form');
+  const saveBtn = document.getElementById('save-profile-btn');
+
+  function containsEmoji(s) {
+    if (!s) return false;
+    try { return /\p{Extended_Pictographic}/u.test(s); } catch (e) { return /[\uD800-\uDBFF][\uDC00-\uDFFF]/.test(s); }
+  }
+
+  function clearJsFieldErrors(f) {
+    if (!f) return; const els = f.querySelectorAll('[data-js-error="1"]'); els.forEach(e => e.remove());
+  }
+
+  function addFieldError(el, msg) {
+    if (!el) return;
+    const next = el.nextElementSibling;
+    if (next && next.getAttribute && next.getAttribute('data-js-error') === '1') { next.textContent = msg; return; }
+    const div = document.createElement('div');
+    div.className = 'form-error-text';
+    div.style.color = 'var(--color-danger)';
+    div.style.fontSize = '11px';
+    div.style.marginTop = '4px';
+    div.setAttribute('data-js-error','1');
+    div.textContent = msg;
+    el.insertAdjacentElement('afterend', div);
+  }
 
   function checkMatch() {
     if (!newPwd || !confirmPwd) return true;
@@ -56,9 +80,54 @@ document.addEventListener('DOMContentLoaded', function () {
   if (newPwd) newPwd.addEventListener('input', checkMatch);
   if (confirmPwd) confirmPwd.addEventListener('input', checkMatch);
 
-  form.addEventListener('submit', function (ev) {
-    if (!checkMatch()) { ev.preventDefault(); confirmPwd.focus(); }
-  });
+  function clientValidateAdminForm(f) {
+    clearJsFieldErrors(f);
+    const errs = [];
+    const fullName = f.querySelector('[name="full_name"]');
+    const current = f.querySelector('[name="current_password"]');
+    const newp = f.querySelector('[name="new_password"]');
+    const conf = f.querySelector('[name="confirm_password"]');
+
+    if (fullName) {
+      const v = (fullName.value||'').trim();
+      if (!v || v.length < 2) { addFieldError(fullName, 'Full name is required (min 2 characters).'); errs.push('full_name'); }
+      else if (containsEmoji(v)) { addFieldError(fullName, 'Name cannot contain emoji.'); errs.push('full_name'); }
+    }
+
+    if (newp && newp.value) {
+      if (!current || !(current.value && current.value.length)) { addFieldError(current || newp, 'Enter your current password to change password.'); errs.push('current_password'); }
+      if (newp.value.length < 8) { addFieldError(newp, 'New password must be at least 8 characters.'); errs.push('new_password'); }
+      if (conf && newp.value !== conf.value) { addFieldError(conf, 'Passwords do not match.'); errs.push('confirm_password'); }
+    }
+
+    return errs.length === 0;
+  }
+
+  function doSubmit() {
+    if (!saveBtn || !form) return;
+    saveBtn.disabled = true;
+    const label = saveBtn.querySelector('.btn__label');
+    if (label) label.textContent = saveBtn.getAttribute('data-saving-text') || 'Saving...';
+    form.submit();
+  }
+
+  if (saveBtn) {
+    saveBtn.addEventListener('click', function (ev) {
+      ev.preventDefault();
+      if (!form) return;
+      if (!clientValidateAdminForm(form)) {
+        const first = form.querySelector('[data-js-error="1"]');
+        if (first && first.previousElementSibling) first.previousElementSibling.focus();
+        return;
+      }
+      const message = 'Save changes to admin profile?';
+      if (window.confirmModal) {
+        confirmModal(message).then(ok => { if (!ok) return; doSubmit(); });
+      } else {
+        if (confirm(message)) doSubmit();
+      }
+    });
+  }
 });
 </script>
 

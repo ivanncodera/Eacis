@@ -1,71 +1,137 @@
-/* Utility helpers for accessibility and small layout fixes */
+/* Utilities for spacing, layout and small helpers used across templates */
 
-.sr-only {
-  position: absolute !important;
-  width: 1px; height: 1px;
-  padding: 0; margin: -1px; overflow: hidden;
-  clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+/* Display helpers */
+.block { display: block; }
+.inline-block { display: inline-block; }
+.inline-flex { display: inline-flex; }
+
+/* Visibility */
+.hidden { display: none !important; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+/* Spacing helpers */
+.m-0 { margin: 0; }
+.mt-1 { margin-top: var(--sp-1); }
+.mt-2 { margin-top: var(--sp-2); }
+.mt-3 { margin-top: var(--sp-3); }
+.mt-4 { margin-top: var(--sp-4); }
+.mt-6 { margin-top: var(--sp-6); }
+.mt-8 { margin-top: var(--sp-8); }
+.mt-10 { margin-top: var(--sp-10); }
+.mt-12 { margin-top: var(--sp-12); }
+.mt-24 { margin-top: var(--sp-24); }
+.mt-section { margin-top: var(--space-section-gap); }
+.mt-page { margin-top: var(--space-page-gap); }
+
+.mb-0 { margin-bottom: 0; }
+.mb-1 { margin-bottom: var(--sp-1); }
+.mb-2 { margin-bottom: var(--sp-2); }
+.mb-3 { margin-bottom: var(--sp-3); }
+.mb-4 { margin-bottom: var(--sp-4); }
+.mb-6 { margin-bottom: var(--sp-6); }
+.mb-8 { margin-bottom: var(--sp-8); }
+.mb-10 { margin-bottom: var(--sp-10); }
+.mb-12 { margin-bottom: var(--sp-12); }
+.mb-section { margin-bottom: var(--space-section-gap); }
+.mb-page { margin-bottom: var(--space-page-gap); }
+
+.ml-2 { margin-left: var(--sp-2); }
+.mr-2 { margin-right: var(--sp-2); }
+
+.p-0 { padding: 0; }
+.p-2 { padding: var(--sp-2); }
+.p-3 { padding: var(--sp-3); }
+.p-4 { padding: var(--sp-4); }
+.p-6 { padding: var(--sp-6); }
+.p-8 { padding: var(--sp-8); }
+.p-card { padding: var(--card-padding-md); }
+.p-card-lg { padding: var(--card-padding-lg); }
+.pt-3 { padding-top: var(--sp-3); }
+.pt-24 { padding-top: var(--sp-24); }
+.pb-2 { padding-bottom: var(--sp-2); }
+.pb-4 { padding-bottom: var(--sp-4); }
+
+/* Flex helpers */
+.flex { display: flex; }
+.flex-center { display:flex; align-items:center; justify-content:center; }
+.flex-column { display:flex; flex-direction:column; }
+.flex-wrap { flex-wrap: wrap; }
+.items-start { align-items: flex-start; }
+.items-center { align-items: center; }
+.items-end { align-items: flex-end; }
+.justify-start { justify-content: flex-start; }
+.justify-center { justify-content: center; }
+.justify-end { justify-content: flex-end; }
+.justify-between { justify-content: space-between; }
+
+/* Gap helpers */
+.gap-1 { gap: var(--sp-1); }
+.gap-2 { gap: var(--sp-2); }
+.gap-3 { gap: var(--sp-3); }
+.gap-4 { gap: var(--sp-4); }
+.gap-6 { gap: var(--sp-6); }
+.gap-8 { gap: var(--sp-8); }
+.gap-10 { gap: var(--sp-10); }
+.gap-12 { gap: var(--sp-12); }
+.gap-control { gap: var(--space-control-gap); }
+.gap-item { gap: var(--space-item-gap); }
+.gap-block { gap: var(--space-block-gap); }
+.gap-section { gap: var(--space-section-gap); }
+
+/* Grid helpers */
+.grid { display: grid; }
+.grid-2 { display:grid; gap: var(--sp-4); grid-template-columns: 1fr; }
+@media (min-width: 640px) { .grid-2 { grid-template-columns: repeat(2, 1fr); } }
+
+.grid-3 { display:grid; gap: var(--sp-4); grid-template-columns: 1fr; }
+@media (min-width: 640px) { .grid-3 { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1024px) { .grid-3 { grid-template-columns: repeat(3, 1fr); } }
+
+.grid-4 { display:grid; gap: var(--sp-4); grid-template-columns: 1fr; }
+@media (min-width: 640px) { .grid-4 { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 900px) { .grid-4 { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 1200px) { .grid-4 { grid-template-columns: repeat(4, 1fr); } }
+
+/* Width/height helpers */
+.w-full { width: 100%; }
+.w-fit { width: fit-content; }
+.h-control-sm { height: var(--control-size-sm); }
+.h-control-md { height: var(--control-size-md); }
+.h-control-lg { height: var(--control-size-lg); }
+.min-h-60vh { min-height: 60vh; }
+.max-w-540 { max-width: 540px; width: 100%; }
+.max-w-800 { max-width: 800px; width: 100%; }
+
+/* Hero/card helpers */
+.card-hero { width:100%; display:block; }
+.img-hero { width:100%; height:auto; border-radius: var(--radius-2xl); box-shadow: var(--shadow-2xl); object-fit:cover; }
+
+/* Typography helpers */
+.lead-copy { font-size: var(--text-lg); color: var(--grey-600); max-width: 640px; }
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+.text-success { color: var(--color-success) !important; }
+.text-danger { color: var(--color-danger) !important; }
+.text-muted { color: var(--grey-500); }
+
+/* Pills */
+.pill-group { display:flex; flex-wrap:wrap; gap:8px; }
+.pill { cursor:pointer; }
+
+/* Utility center container */
+.page-center { display:flex; align-items:center; justify-content:center; padding: var(--sp-8) 0; min-height: calc(100vh - var(--topbar-height) - var(--sp-12)); }
+.card--narrow { max-width: 560px; width: 100%; margin: 0 auto; padding: var(--sp-8); }
+
+/* Center form content and keep text readable on narrow screens */
+.glass-card .text-center { text-align: center; }
+
+/* Responsive visibility */
+.hide-on-desktop { display: none !important; }
+@media (max-width: 767px) {
+	.hide-on-mobile { display: none !important; }
+	.hide-on-desktop { display: initial !important; }
 }
 
-.u-gap-left-8 {
-  margin-left: 8px !important;
-}
-
-/* small reset for select appearance used across app */
-.select-reset {
-  padding: 6px 8px;
-  border: 1px solid var(--border-default);
-  border-radius: 6px;
-  background: white;
-  color: var(--grey-900);
-  font-size: var(--text-sm);
-}
-
-/* Layout helpers */
-.pt-24 { padding-top: 96px !important; }
-.w-240 { width: 240px !important; }
-.mt-24 { margin-top: 24px !important; }
-.align-center { align-self: center !important; }
-.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
-
-/* Small input style used in filters */
-.input-sm { width: 100%; padding: 6px; border: 1px solid var(--border-default); border-radius: 6px; }
-
-/* Layout utilities added for landing and common templates */
-.flex { display: flex !important; }
-.flex-center { display: flex !important; align-items: center !important; justify-content: center !important; }
-.items-center { align-items: center !important; }
-.justify-center { justify-content: center !important; }
-.gap-12 { gap: 12px !important; }
-.mt-3 { margin-top: 12px !important; }
-.mt-2 { margin-top: 8px !important; }
-.pt-24 { padding-top: 96px !important; }
-.min-h-60vh { min-height: 60vh !important; }
-.card-hero { width: 80% !important; height: 320px !important; border-radius: 16px !important; background: linear-gradient(180deg, #f8fafc, #eef2f7) !important; display:flex !important; align-items:center !important; justify-content:center !important; box-shadow: var(--shadow-lg) !important; }
-.img-hero { max-width: 80% !important; max-height: 80% !important; object-fit: contain !important; }
-.pill-group { display: flex !important; gap: 12px !important; overflow: auto !important; padding-bottom: 8px !important; }
-.grid-3 { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 16px !important; }
-/* Additional helpers for seller dashboard layouts */
-.gap-16 { gap: 16px !important; }
-.gap-8 { gap: 8px !important; }
-.flex-1 { flex: 1 1 0% !important; }
-.min-w-220 { min-width: 220px !important; }
-.min-w-480 { min-width: 480px !important; }
-.grid-2-1 { display: grid !important; grid-template-columns: 2fr 1fr !important; gap: 16px !important; }
-.mt-5 { margin-top: 20px !important; }
-.mb-3 { margin-bottom: 12px !important; }
-.max-w-980 { max-width: 980px !important; margin: 0 auto !important; }
-.w-full { width: 100% !important; }
-.justify-between { justify-content: space-between !important; }
-.flex-col { display: flex !important; flex-direction: column !important; }
-.justify-end { justify-content: flex-end !important; }
-.p-3 { padding: 12px !important; }
-.min-h-96 { min-height: 96px !important; }
-.flex-wrap { flex-wrap: wrap !important; }
-.mt-4 { margin-top: 16px !important; }
-.m-0 { margin: 0 !important; }
-.min-h-80vh { min-height: 80vh !important; }
-.w-520 { width: 520px !important; }
-.pt-16 { padding-top: 64px !important; }
-.max-w-560 { max-width: 560px !important; }
-.min-w-320 { min-width: 320px !important; }
+/* Ensure images do not overflow */
+img { max-width:100%; height:auto; }

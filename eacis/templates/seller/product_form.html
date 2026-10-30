@@ -15,7 +15,7 @@
            <p class="type-body-sm text-muted mt-1">{% if ref %}Update product details, pricing, and inventory.{% else %}Create a new listing with media, stock controls, and warranty settings.{% endif %}</p>
         </div>
          <div class="seller-header__actions">
-            <a href="/seller/products" class="btn btn--white">Cancel</a>
+            <a href="/seller/products" class="btn btn--white btn--xl">Cancel</a>
             <button type="submit" form="product-form" class="btn btn--primary btn--xl">Save Product Listing</button>
          </div>
      </div>
@@ -61,10 +61,9 @@
                     {% set sel_cat = f.get('category', product.category if product else '') %}
                     <select id="prd-category" name="category" class="form-select" required>
                        <option value="" {% if not sel_cat %}selected{% endif %}>Select...</option>
-                       <option value="Kitchen & Cooking" {% if sel_cat == 'Kitchen & Cooking' %}selected{% endif %}>Kitchen & Cooking</option>
-                       <option value="Cooling & Air Quality" {% if sel_cat == 'Cooling & Air Quality' %}selected{% endif %}>Cooling & Air Quality</option>
-                       <option value="Laundry & Cleaning" {% if sel_cat == 'Laundry & Cleaning' %}selected{% endif %}>Laundry & Cleaning</option>
-                       <option value="Home Entertainment" {% if sel_cat == 'Home Entertainment' %}selected{% endif %}>Home Entertainment</option>
+                       {% for cat in (categories or []) %}
+                       <option value="{{ cat }}" {% if sel_cat == cat %}selected{% endif %}>{{ cat }}</option>
+                       {% endfor %}
                     </select>
                     {% if errors.get('category') %}
                     <small class="form-error" role="alert">{{ errors.get('category') }}</small>
@@ -132,8 +131,11 @@
                  <label class="form-label">Compare at Price</label>
                  <div class="form-input-group">
                     <span class="form-input-group__icon">₱</span>
-                    <input type="number" class="form-input" placeholder="0.00" min="0" step="0.01">
+                    <input name="compare_price" type="number" class="form-input" placeholder="0.00" min="0.01" step="0.01" value="{{ f.get('compare_price', product.compare_price if product else '') }}">
                  </div>
+                 {% if errors.get('compare_price') %}
+                 <small class="form-error" role="alert">{{ errors.get('compare_price') }}</small>
+                 {% endif %}
               </div>
               <hr class="mt-4 mb-4" />
               <div class="form-group">
@@ -191,4 +193,187 @@
      </form>
    </div>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+   const MAX_BYTES = 2 * 1024 * 1024; // 2MB
+   const RESIZE_MAX_DIM = 1600; // max width/height when resizing
+   const UPLOAD_QUALITY = 0.82; // jpeg quality when compressing
+
+   function humanFileSize(bytes) {
+      if (bytes === 0) return '0 B';
+      const thresh = 1024;
+      const units = ['B','KB','MB','GB','TB'];
+      let u = 0; let v = bytes;
+      while (v >= thresh && u < units.length - 1) { v /= thresh; u++; }
+      return `${v.toFixed(v < 10 && u > 0 ? 1 : 0)} ${units[u]}`;
+   }
+
+   function resizeImageFile(file, maxW, maxH, quality) {
+      return new Promise((resolve, reject) => {
+         const reader = new FileReader();
+         reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+               let w = img.width, h = img.height;
+               const ratio = Math.min(maxW / w, maxH / h, 1);
+               const nw = Math.max(1, Math.round(w * ratio));
+               const nh = Math.max(1, Math.round(h * ratio));
+               const canvas = document.createElement('canvas');
+               canvas.width = nw;
+               canvas.height = nh;
+               const ctx = canvas.getContext('2d');
+               ctx.drawImage(img, 0, 0, nw, nh);
+               // convert to jpeg to compress (preserve transparency not required for product photos)
+               canvas.toBlob(function(blob) {
+                  if (!blob) return reject(new Error('Could not convert image')); 
+                  resolve(blob);
+               }, 'image/jpeg', quality);
+            };
+            img.onerror = function() { reject(new Error('Image load failed')); };
+            img.src = e.target.result;
+         };
+         reader.onerror = function() { reject(new Error('File read error')); };
+         reader.readAsDataURL(file);
+      });
+   }
+
+   function dataURLToFile(dataurl, filename) {
+      const arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1];
+      const bstr = atob(arr[1]);
+      let n = bstr.length; const u8arr = new Uint8Array(n);
+      while (n--) u8arr[n] = bstr.charCodeAt(n);
+      return new File([u8arr], filename, { type: mime });
+   }
+
+   function makePreviewForInput(input){
+      if (!input) return;
+      const parent = input.parentElement;
+      if (!parent) return;
+      if (!parent.style.position || parent.style.position === '') parent.style.position = 'relative';
+
+      // preview image
+      let preview = parent.querySelector('.js-image-preview');
+      if (!preview){
+         preview = document.createElement('img');
+         preview.className = 'js-image-preview';
+         preview.style.cssText = 'position:absolute; inset:0; width:100%; height:100%; object-fit:cover; border-radius:6px; z-index:0; display:none; pointer-events:none;';
+         parent.appendChild(preview);
+      }
+
+      // info line
+      let info = parent.querySelector('.js-image-info');
+      if (!info){
+         info = document.createElement('div');
+         info.className = 'js-image-info';
+         info.style.cssText = 'position:absolute; left:8px; bottom:8px; background:rgba(0,0,0,0.6); color:#fff; padding:6px 8px; border-radius:6px; font-size:12px; z-index:3; display:none;';
+         parent.appendChild(info);
+      }
+
+      // clear/remove button
+      let clearBtn = parent.querySelector('.js-image-clear');
+      if (!clearBtn){
+         clearBtn = document.createElement('button');
+         clearBtn.type = 'button';
+         clearBtn.className = 'js-image-clear';
+         clearBtn.setAttribute('aria-label','Remove selected image');
+         clearBtn.innerHTML = '✕';
+         clearBtn.style.cssText = 'position:absolute; top:8px; right:8px; width:28px; height:28px; border-radius:14px; border:none; background:rgba(0,0,0,0.6); color:#fff; z-index:4; display:none; cursor:pointer;';
+         parent.appendChild(clearBtn);
+      }
+
+      function showPlaceholder(hide){
+         Array.from(parent.children).forEach(ch => {
+            if (ch === input || ch === preview || ch === info || ch === clearBtn) return;
+            ch.style.display = hide ? 'none' : '';
+         });
+      }
+
+      async function handleFileSelection(file){
+         if (!file) return; 
+         if (!/image\//.test(file.type)) { alert('Invalid file type. Allowed: PNG, JPG, WEBP.'); input.value = ''; preview.style.display = 'none'; info.style.display='none'; clearBtn.style.display='none'; showPlaceholder(false); return; }
+
+         let finalFile = file;
+         // If file too large, attempt to resize/compress to get under MAX_BYTES
+         if (file.size > MAX_BYTES) {
+            try {
+               const blob = await resizeImageFile(file, RESIZE_MAX_DIM, RESIZE_MAX_DIM, UPLOAD_QUALITY);
+               if (blob.size <= MAX_BYTES) {
+                  const newName = file.name.replace(/\.[^.]+$/, '.jpg');
+                  finalFile = new File([blob], newName, { type: blob.type });
+               } else {
+                  // try again with lower quality
+                  const blob2 = await resizeImageFile(file, Math.floor(RESIZE_MAX_DIM/1.5), Math.floor(RESIZE_MAX_DIM/1.5), 0.7);
+                  if (blob2.size <= MAX_BYTES) {
+                     const newName = file.name.replace(/\.[^.]+$/, '.jpg');
+                     finalFile = new File([blob2], newName, { type: blob2.type });
+                  } else {
+                     alert('Selected image is too large even after resizing. Please choose a smaller image.');
+                     input.value = '';
+                     preview.style.display = 'none';
+                     info.style.display = 'none';
+                     clearBtn.style.display = 'none';
+                     showPlaceholder(false);
+                     return;
+                  }
+               }
+            } catch (e) {
+               console.warn('Image resize failed', e);
+               alert('Could not resize image. Please choose a smaller image.');
+               input.value = '';
+               preview.style.display = 'none';
+               info.style.display = 'none';
+               clearBtn.style.display = 'none';
+               showPlaceholder(false);
+               return;
+            }
+         }
+
+         // set the (possibly resized) file into the input so upload will send it
+         try {
+            const dt = new DataTransfer();
+            dt.items.add(finalFile);
+            input.files = dt.files;
+         } catch (e) {
+            // If DataTransfer not supported, keep original file (browser will still submit original input.files)
+            console.warn('DataTransfer not supported', e);
+         }
+
+         // Show preview
+         const reader = new FileReader();
+         reader.onload = function(ev){
+            preview.src = ev.target.result;
+            preview.style.display = 'block';
+            info.textContent = `${finalFile.name} · ${humanFileSize(finalFile.size)}`;
+            info.style.display = 'block';
+            clearBtn.style.display = 'block';
+            showPlaceholder(true);
+         };
+         reader.readAsDataURL(finalFile);
+      }
+
+      input.addEventListener('change', function(){
+         const f = input.files && input.files[0];
+         if (!f) {
+            preview.style.display = 'none'; info.style.display='none'; clearBtn.style.display='none'; showPlaceholder(false); return;
+         }
+         handleFileSelection(f);
+      });
+
+      clearBtn.addEventListener('click', function(ev){
+         ev.preventDefault();
+         input.value = '';
+         try { input.files = new DataTransfer().files; } catch (e) {}
+         preview.src = '';
+         preview.style.display = 'none';
+         info.style.display = 'none';
+         clearBtn.style.display = 'none';
+         showPlaceholder(false);
+      });
+   }
+
+   // Attach preview handlers to file inputs in the product form and image-upload forms
+   document.querySelectorAll('#product-form input[type="file"]').forEach(makePreviewForInput);
+   document.querySelectorAll('form[data-enhance*="image-preview"] input[type="file"]').forEach(makePreviewForInput);
+});
+</script>
 {% endblock %}

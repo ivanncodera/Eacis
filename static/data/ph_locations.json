@@ -1,0 +1,34 @@
+{
+  "regions": [
+    {
+      "name": "Region I",
+      "provinces": [
+        {
+          "name": "Ilocos Norte",
+          "cities": [
+            { "name": "Laoag", "barangays": ["Capitol", "San Isidro", "Barangay 3"] },
+            { "name": "Batac", "barangays": ["Poblacion Norte", "Poblacion Sur"] }
+          ]
+        },
+        {
+          "name": "Ilocos Sur",
+          "cities": [
+            { "name": "Vigan", "barangays": ["Burgos", "Santo Domingo"] }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "NCR",
+      "provinces": [
+        {
+          "name": "Metro Manila",
+          "cities": [
+            { "name": "Quezon City", "barangays": ["Bagong Pag-asa", "Cubao"] },
+            { "name": "Manila", "barangays": ["Ermita", "Intramuros"] }
+          ]
+        }
+      ]
+    }
+  ]
+}

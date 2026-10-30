@@ -196,23 +196,49 @@ def create_and_send_otp(email, purpose, user_id=None, ip_address=None, user_agen
         current_app.logger.exception('Failed to write OTP created audit')
 
     is_production = str(current_app.config.get('FLASK_ENV') or '').lower() == 'production'
+
+    # Dev convenience: optionally persist the raw OTP to challenge.meta so the UI
+    # can display it for debugging. This is only allowed in non-production.
+    try:
+        dev_show_ui = bool(current_app.config.get('DEV_SHOW_OTP_IN_UI'))
+    except Exception:
+        dev_show_ui = False
+
+    if dev_show_ui and not is_production:
+        try:
+            challenge.meta = dict(challenge.meta or {})
+            challenge.meta['debug_code'] = code
+            challenge.meta['dev_preview'] = True
+            al = AuditLog(action='otp_generated_dev', module='otp', target_ref=email, meta={'challenge_id': challenge.id, 'debug_code': code, 'purpose': purpose})
+            db.session.add(al)
+            db.session.commit()
+        except Exception:
+            current_app.logger.exception('Failed to write OTP dev audit')
+        current_app.logger.info('DEV OTP (UI) for %s (%s): %s', email, purpose, code)
+
     if not EmailService.is_enabled():
         if is_production:
             db.session.rollback()
             return None, 'Email delivery is disabled.'
-        challenge.meta = dict(challenge.meta or {})
-        challenge.meta['debug_code'] = code
-        challenge.meta['dev_preview'] = True
+        # If email delivery is disabled and we didn't already set the debug code
+        # above, ensure it's present so devs can see the code.
         try:
-            al = AuditLog(action='otp_generated_dev', module='otp', target_ref=email, meta={'challenge_id': challenge.id, 'debug_code': code, 'purpose': purpose})
+            challenge.meta = dict(challenge.meta or {})
+            if not challenge.meta.get('debug_code'):
+                challenge.meta['debug_code'] = code
+            challenge.meta['dev_preview'] = True
+            al = AuditLog(action='otp_generated_dev', module='otp', target_ref=email, meta={'challenge_id': challenge.id, 'debug_code': challenge.meta.get('debug_code'), 'purpose': purpose})
             db.session.add(al)
+            db.session.commit()
         except Exception:
             current_app.logger.exception('Failed to write OTP dev audit')
-        db.session.commit()
-        current_app.logger.info('DEV OTP for %s (%s): %s', email, purpose, code)
+        current_app.logger.info('DEV OTP for %s (%s): %s', email, purpose, challenge.meta.get('debug_code'))
         return challenge, 'OTP generated in development mode.'
 
     subject = f'E-ACIS Security Code ({purpose.replace("_", " ").title()})'
+    # Default bodies show the numeric code; specific purposes (e.g. register_verify)
+    # will be adjusted below to prefer an activation link while keeping the code
+    # available as a fallback.
     text_body = (
         f'Your E-ACIS verification code is: {code}\n\n'
         f'This code expires in {ttl_seconds // 60} minutes.\n'
@@ -232,9 +258,40 @@ def create_and_send_otp(email, purpose, user_id=None, ip_address=None, user_agen
         try:
             token = challenge.meta.get('activation_token') if challenge.meta else None
             if token:
-                verify_url = url_for('auth_register_verify', token=token, _external=True)
-                text_body = text_body + f"\n\nOr click the following link to verify your email and activate your account:\n{verify_url}"
-                html_body = html_body + f"<p><a href=\"{verify_url}\" style=\"display:inline-block;padding:10px 16px;background:#0b5cff;color:#fff;border-radius:6px;text-decoration:none;\">Verify your email</a></p>"
+                try:
+                    verify_url = url_for('auth_register_verify', token=token, _external=True)
+                except Exception:
+                    # Building an _external URL may fail outside an active request when SERVER_NAME
+                    # is not configured. Fall back to a best-effort path or configured base URL.
+                    try:
+                        path = url_for('auth_register_verify', token=token, _external=False)
+                    except Exception:
+                        path = f'/auth/register/verify/{token}'
+                    scheme = current_app.config.get('PREFERRED_URL_SCHEME') or ('https' if str(current_app.config.get('FLASK_ENV') or '').lower() == 'production' else 'http')
+                    server = current_app.config.get('SERVER_NAME') or current_app.config.get('APP_BASE_URL')
+                    if server:
+                        verify_url = f"{scheme}://{server.rstrip('/')}{path}"
+                    else:
+                        verify_url = path
+                # Prefer link-first messaging for registration verification; include
+                # the numeric code as a fallback in case links are blocked.
+                text_body = (
+                    f'To verify your email and activate your account, open the following link:\n{verify_url}\n\n'
+                    f'If the link does not work, open the app and enter this one-time code: {code}\n'
+                    f'This code expires in {ttl_seconds // 60} minutes.\n'
+                    'If you did not request this, please ignore this message.'
+                )
+                html_body = (
+                    '<div style="font-family:Arial,sans-serif;line-height:1.6">'
+                    '<h2>E-ACIS Security Verification</h2>'
+                    f'<p>Purpose: <strong>{purpose.replace("_", " ").title()}</strong></p>'
+                    f'<p>Click the button below to verify your email and activate your account.</p>'
+                    f'<p><a href="{verify_url}" style="display:inline-block;padding:10px 16px;background:#0b5cff;color:#fff;border-radius:6px;text-decoration:none;">Verify your email</a></p>'
+                    f'<hr><p>If the link does not work, open the app and enter this one-time code: <strong style="font-size:20px">{code}</strong></p>'
+                    f'<p>This code expires in <strong>{ttl_seconds // 60} minutes</strong>.</p>'
+                    '<p>If you did not request this, please ignore this message and secure your account.</p>'
+                    '</div>'
+                )
         except Exception:
             current_app.logger.exception('Failed to build register verify URL for OTP email')
 
@@ -381,6 +438,27 @@ def verify_otp(challenge_id, code_input):
         except Exception:
             current_app.logger.exception('Failed to write OTP locked audit')
         return False, 'Maximum attempts reached. Request a new code.'
+
+    # Developer override: allow a configured developer code to verify OTPs in non-production
+    try:
+        dev_override_enabled = bool(current_app.config.get('DEV_OVERRIDE_OTP_ENABLED'))
+        dev_override_code = str(current_app.config.get('DEV_OVERRIDE_OTP') or '').strip()
+    except Exception:
+        dev_override_enabled = False
+        dev_override_code = ''
+
+    if dev_override_enabled and dev_override_code and str(code_input or '').strip() == dev_override_code and str(current_app.config.get('FLASK_ENV') or '').lower() != 'production':
+        try:
+            challenge.verified_at = datetime.now(timezone.utc)
+            challenge.consumed_at = datetime.now(timezone.utc)
+            challenge.failure_reason = None
+            db.session.add(challenge)
+            al = AuditLog(action='otp_verified_dev_override', module='otp', target_ref=challenge.email, meta={'challenge_id': challenge.id})
+            db.session.add(al)
+            db.session.commit()
+        except Exception:
+            current_app.logger.exception('Failed to commit OTP dev-override verification')
+        return True, 'OTP verified (developer override).'
 
     # consume an attempt
     challenge.attempt_count = int(challenge.attempt_count or 0) + 1

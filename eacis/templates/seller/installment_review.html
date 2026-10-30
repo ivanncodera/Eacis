@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Review Installment Order {{ order.order_ref }}{% endblock %}
+{% block content %}
+<div class="page-content seller-shell" style="padding:var(--sp-8);">
+  <h1 class="type-display-sm" style="margin-bottom:var(--sp-6);">Review Installment Order {{ order.order_ref }}</h1>
+
+  <div class="glass-card p-6 mb-4">
+    <div class="type-body-sm"><strong>Customer:</strong>
+      {% if customer %}
+        {{ customer.computed_full_name or customer.full_name }} — <span class="text-muted">{{ customer.email }}</span>
+      {% else %}
+        ID {{ order.customer_id }}
+      {% endif %}
+    </div>
+    <div class="type-body-sm"><strong>Total:</strong> PHP {{ '%.2f'|format(order.total or 0) }}</div>
+    <div class="type-body-sm"><strong>Status:</strong> {{ order.status }}</div>
+    <div style="margin-top:8px;">
+      {% if show_sensitive %}
+        {% if kyc_proof %}
+          <a href="{{ url_for('serve_permit', filename=kyc_proof) }}" target="_blank" class="btn btn--ghost">View KYC Proof</a>
+        {% else %}
+          <div class="type-body-xs text-muted">No KYC proof attached.</div>
+        {% endif %}
+      {% else %}
+        <div class="type-body-xs text-muted">KYC and customer contact information are hidden until your seller account is verified.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="glass-card p-6 mb-4">
+    <h3 class="type-h5">Items</h3>
+    <ul style="margin:0;padding-left:18px;">
+    {% for it in items %}
+      <li>{{ it.product.name if it.product else 'Product' }} — Qty: {{ it.quantity }} — PHP {{ '%.2f'|format(it.subtotal or 0) }}</li>
+    {% endfor %}
+    </ul>
+  </div>
+
+  <form method="post" style="display:flex; gap:12px; align-items:center;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button type="submit" name="action" value="approve" class="btn btn--primary">Approve & Confirm Order</button>
+    <button type="submit" name="action" value="reject" class="btn btn--danger">Reject (request more info)</button>
+    <a href="{{ url_for('seller_installment_payments') }}" class="btn btn--white">Back</a>
+  </form>
+</div>
+{% endblock %}

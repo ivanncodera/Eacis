@@ -24,6 +24,12 @@ class Address(db.Model):
     region = db.Column(db.String(120), nullable=True)
     postal_code = db.Column(db.String(20), nullable=True)
     is_default = db.Column(db.Boolean, default=False)
+    house_number = db.Column(db.String(128), nullable=True)
+    landmark = db.Column(db.String(255), nullable=True)
+    is_pickup = db.Column(db.Boolean, default=False)
+    is_return = db.Column(db.Boolean, default=False)
+    lat = db.Column(db.Float, nullable=True)
+    lng = db.Column(db.Float, nullable=True)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 

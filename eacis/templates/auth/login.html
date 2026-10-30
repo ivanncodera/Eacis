@@ -4,6 +4,9 @@
 <div class="page-center" style="padding: var(--sp-12) var(--sp-6);">
   <div class="glass-card glass-card--interactive" style="max-width: 480px; width: 100%; padding: var(--sp-12) var(--sp-10);">
     <div class="text-center" style="margin-bottom: var(--sp-8);">
+      <a href="/" style="display: inline-flex; align-items: center; justify-content: center; margin-bottom: var(--sp-4); text-decoration: none;">
+        <img src="/static/assets/logo.png?v=20261030" alt="E-ACIS Official Logo" style="height: 68px; width: auto; object-fit: contain; display: block;">
+      </a>
       <h1 class="type-display-md" style="color: var(--grey-900);">Welcome Back</h1>
       <p class="type-body-md text-muted" style="margin-top: var(--sp-3);">Access your E-ACIS hub to manage orders, inventory, or system settings.</p>
     </div>
@@ -35,7 +38,7 @@
             <svg class="icon icon-eye" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
           </button>
         </div>
-        <div id="password-hint" class="form-helper" style="margin-top: var(--sp-2);">Minimum 6 characters.</div>
+        <div id="password-hint" class="form-helper" style="margin-top: var(--sp-2);">Minimum 8 characters.</div>
       </div>
 
       <div class="form-group auth-actions" style="display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:12px;flex-wrap:nowrap;">
@@ -43,7 +46,6 @@
           <input id="remember" type="checkbox" name="remember" style="width:18px;height:18px;" />
           <span class="type-body-sm">Remember me</span>
         </label>
-        <a href="mailto:support@eacis.support?subject=E-ACIS%20Login%20Help" class="type-body-sm" style="margin-left:auto;">Need sign-in help?</a>
       </div>
 
       <div style="margin-top:var(--sp-8);">
@@ -114,7 +116,7 @@
 
       function validate(){
         const eok = validEmail(email.value.trim());
-        const pok = pwd.value.length >= 6;
+        const pok = pwd.value.length >= 8;
         setFieldState(email, eok);
         setFieldState(pwd, pok);
         if (emailHint) {
@@ -122,7 +124,7 @@
           updateHelper(emailHint, eok);
         }
         if (pwdHint) {
-          pwdHint.textContent = pok ? 'Password format is valid.' : 'Minimum 6 characters.';
+          pwdHint.textContent = pok ? 'Password format is valid.' : 'Minimum 8 characters.';
           updateHelper(pwdHint, pok);
         }
         setSubmitState(eok && pok && !isLocked);

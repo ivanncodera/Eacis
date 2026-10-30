@@ -8,7 +8,6 @@
       <div>
         <div class="chip chip--active mb-3">Installment Center</div>
         <h1 class="type-display-sm">My Installment Plans</h1>
-        <p class="type-body-sm text-muted">Review active plans, upcoming dues, and payment progress.</p>
       </div>
       <a href="/customer/orders" class="btn btn--white" style="border: 1.5px solid var(--border-medium);">View Orders</a>
     </header>
@@ -21,6 +20,9 @@
     </section>
 
     <section class="stagger-item" style="display: flex; flex-direction: column; gap: var(--sp-5);">
+      <style>
+        .progress-fill { height: 100%; background: var(--brand-primary); width: 0; }
+      </style>
       {% for item in installments %}
       <article class="glass-card" style="padding: 0; overflow: hidden; border: 1px solid var(--border-subtle);">
         <div style="padding: var(--sp-5); border-bottom: 1px solid var(--border-subtle); background: var(--grey-50); display: flex; justify-content: space-between; gap: var(--sp-3); align-items: center; flex-wrap: wrap;">
@@ -37,7 +39,7 @@
           <div>
             <div class="type-body-sm mb-2">{{ item.paid_count }} paid of {{ item.schedules|length }} schedule(s)</div>
             <div style="height: 8px; background: var(--grey-100); border-radius: 999px; overflow: hidden;">
-              <div style="height: 100%; width: {{ item.progress_pct }}%; background: var(--brand-primary);"></div>
+              <div class="progress-fill" data-pct="{{ item.progress_pct }}"></div>
             </div>
             {% if item.next_due %}
             <div class="type-label-xs text-muted mt-2">Next due: {{ item.next_due.due_date.strftime('%b %d, %Y') if item.next_due.due_date else '-' }} • PHP {{ '%.2f'|format(item.next_due.amount|float) }}</div>
@@ -81,6 +83,17 @@
                   </td>
                   <td style="padding: 10px 8px; text-align: right;">PHP {{ '%.2f'|format(sched.amount|float if sched.amount else 0) }}</td>
                 </tr>
+                {% if status in ['pending', 'past_due'] %}
+                <tr>
+                  <td colspan="3" style="padding: 6px 8px;">
+                    <form method="post" action="{{ url_for('customer_installment_pay', schedule_id=sched.id) }}" style="display:flex; gap:8px; align-items:center; justify-content:flex-end;">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <input type="text" name="payment_ref" placeholder="Payment reference (bank/GCASH)" class="form-input" style="width: 320px; max-width:60%;" />
+                      <button class="btn btn--primary btn--sm" type="submit">Settle Now</button>
+                    </form>
+                  </td>
+                </tr>
+                {% endif %}
                 {% endfor %}
               </tbody>
             </table>
@@ -98,4 +111,12 @@
     </section>
   </div>
 </div>
-{% endblock %}
+    <script>
+      document.addEventListener('DOMContentLoaded', function(){
+        document.querySelectorAll('.progress-fill').forEach(function(el){
+          var p = parseFloat(el.dataset.pct || 0) || 0;
+          el.style.width = p + '%';
+        });
+      });
+    </script>
+  {% endblock %}

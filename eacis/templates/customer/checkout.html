@@ -2,41 +2,85 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/customer.css') }}">
+<link rel="stylesheet" href="/static/css/addresses.css">
+ 
 {% endblock %}
 
+<script>
+// Cascading Region → Province → City → Barangay selects for inline add-address forms
+document.addEventListener('DOMContentLoaded', function(){
+  const locUrl = "{{ url_for('static', filename='data/ph_locations.json') }}";
+  fetch(locUrl).then(r => r.json()).then(function(data){
+    if(!data || !Array.isArray(data.regions)) return;
+    const forms = document.querySelectorAll('form#inline-address-form');
+    forms.forEach(function(form){
+      const regionSel = form.querySelector('select[name="region"]');
+      const provSel = form.querySelector('select[name="province"]');
+      const citySel = form.querySelector('select[name="city_municipality"]');
+      const brgySel = form.querySelector('select[name="barangay"]');
+      if(!regionSel) return;
+
+      function setOptions(sel, items, label){
+        sel.innerHTML = '';
+        const first = document.createElement('option'); first.value = ''; first.textContent = 'Select ' + (label||''); sel.appendChild(first);
+        items.forEach(function(it){ const opt = document.createElement('option'); opt.value = it.name || it; opt.textContent = it.name || it; sel.appendChild(opt); });
+        sel.disabled = false;
+      }
+      function clear(sel, placeholder){ sel.innerHTML = ''; const o = document.createElement('option'); o.value=''; o.textContent = placeholder || 'Select'; sel.appendChild(o); sel.disabled = true; }
+
+      // populate regions
+      setOptions(regionSel, data.regions, 'region');
+
+      regionSel.addEventListener('change', function(){
+        clear(provSel, 'Select province'); clear(citySel, 'Select city'); clear(brgySel, 'Select barangay');
+        const rv = regionSel.value; if(!rv) return;
+        const rObj = data.regions.find(r => r.name === rv);
+        if(rObj && Array.isArray(rObj.provinces)) setOptions(provSel, rObj.provinces, 'province');
+      });
+
+      provSel.addEventListener('change', function(){
+        clear(citySel, 'Select city'); clear(brgySel, 'Select barangay');
+        const pv = provSel.value; if(!pv) return;
+        const rObj = data.regions.find(r => r.name === regionSel.value);
+        const pObj = rObj && rObj.provinces && rObj.provinces.find(p => p.name === pv);
+        if(pObj && Array.isArray(pObj.cities)) setOptions(citySel, pObj.cities, 'city');
+      });
+
+      citySel.addEventListener('change', function(){
+        clear(brgySel, 'Select barangay');
+        const cv = citySel.value; if(!cv) return;
+        const rObj = data.regions.find(r => r.name === regionSel.value);
+        const pObj = rObj && rObj.provinces && rObj.provinces.find(p => p.name === provSel.value);
+        const cObj = pObj && pObj.cities && pObj.cities.find(c => c.name === cv);
+        if(cObj && Array.isArray(cObj.barangays)){
+          brgySel.innerHTML = '';
+          const first = document.createElement('option'); first.value=''; first.textContent='Select barangay'; brgySel.appendChild(first);
+          cObj.barangays.forEach(function(b){ const o = document.createElement('option'); o.value = b; o.textContent = b; brgySel.appendChild(o); });
+          brgySel.disabled = false;
+        }
+      });
+    });
+  }).catch(function(){ /* ignore loading errors for now */ });
+});
+</script>
 {% block title %}Complete Your Order — E-ACIS{% endblock %}
 
 {% block content %}
 <div class="main-content"> <!-- This page will have a two-column layout with the checkout form on the left and the order summary on the right. On mobile, it will stack vertically. -->
   <div class="stagger-children">
-  <header class="mb-12">
-    <div class="step-progress mb-10" style="max-width: 600px; margin: 0 auto var(--sp-12) auto;">
-      <div class="step-progress__item completed">
-        <div class="step-progress__icon"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div>
-        <div class="step-progress__label">Cart</div>
-      </div>
-      <div class="step-progress__item active">
-        <div class="step-progress__icon">2</div>
-        <div class="step-progress__label">Checkout</div>
-      </div>
-      <div class="step-progress__item">
-        <div class="step-progress__icon">3</div>
-        <div class="step-progress__label">Identity (if installment)</div>
-      </div>
-      <div class="step-progress__item">
-        <div class="step-progress__icon">4</div>
-        <div class="step-progress__label">Confirm & Pay</div>
-      </div>
-    </div>
-
-    <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: var(--sp-4); flex-wrap: wrap;">
+  <header class="mb-8">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:var(--sp-4);">
       <div>
-        <h1 class="type-display-md" style="margin:0;">Secure Checkout</h1>
-        <p class="type-body-sm text-muted" style="margin-top: 4px;">Confirm your details to finalize your appliance acquisition.</p>
+        <h1 class="type-display-sm" style="margin:0; font-weight:700;">Checkout</h1>
+        <p class="type-body-sm text-muted" style="margin-top:6px;">Shipping Information</p>
       </div>
-      <div class="glass-card" style="padding: 10px 16px; display: flex; align-items: center; gap: 10px; border-radius: var(--radius-pill); background: var(--grey-0); border: 1.5px solid var(--border-subtle);">
-        <svg width="18" height="18" fill="none" stroke="var(--color-success)" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"></path></svg>
-        <span class="type-label-sm" style="color: var(--grey-800); letter-spacing: 0.05em;">256-BIT ENCRYPTED</span>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <label style="display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:8px; border:1px solid var(--border-medium); background:var(--grey-0);">
+          <input type="radio" name="fulfillment" value="delivery" checked style="accent-color:var(--brand-primary)"> Delivery
+        </label>
+        <label style="display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:8px; border:1px solid var(--border-medium); background:transparent;">
+          <input type="radio" name="fulfillment" value="pickup" style="accent-color:var(--brand-primary)"> Pick up
+        </label>
       </div>
     </div>
   </header>
@@ -60,11 +104,12 @@
     current_user.region
   ] | select | join(', ') %}
 
-  <form method="post" action="/checkout" class="checkout-layout" style="display: grid; grid-template-columns: 1fr 400px; gap: var(--sp-10); align-items: start;" data-enhance="submit-loading warn-on-exit phone-normalize">
+  <form method="post" action="/checkout" class="checkout-layout" data-enhance="submit-loading warn-on-exit phone-normalize" aria-labelledby="checkout-heading">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     
-    <!-- Checkout Flow -->
-    <div class="form-stack" style="gap: var(--sp-8);">
+    <!-- Checkout Flow Grid -->
+    <div class="checkout-grid">
+      <div class="form-stack" style="gap: var(--sp-8);">
       {% set saved_addresses = saved_addresses or [] %}
       {% if saved_addresses %}
       <section class="glass-card stagger-item page-enter checkout-section">
@@ -90,12 +135,45 @@
               <div style="display:flex; gap:8px; align-items:center;">
                 <div class="fw-semibold">{{ addr.label or 'Address' }}</div>
                 {% if addr.is_default %}<div class="type-label-sm" style="background:var(--brand-primary-subtle); padding:2px 6px; border-radius:6px;">Default</div>{% endif %}
+                {% if addr.is_pickup %}<div class="type-label-sm" style="background:#fff3cd; padding:2px 6px; border-radius:6px;">Pickup</div>{% endif %}
+                {% if addr.is_return %}<div class="type-label-sm" style="background:#ffeef0; padding:2px 6px; border-radius:6px;">Return</div>{% endif %}
               </div>
               <div class="type-body-sm">{{ addr.recipient_name }} &middot; {% if addr.phone and addr.phone.startswith('0') %}+63{{ addr.phone[1:] }}{% else %}{{ addr.phone or '' }}{% endif %}</div>
-              <div class="type-body-xs text-muted">{{ [addr.address_line1, addr.address_line2, addr.barangay, addr.city_municipality, addr.province, addr.region] | select | join(', ') }}</div>
+              <div class="type-body-xs text-muted">{{ [addr.house_number, addr.address_line1, addr.address_line2, addr.barangay, addr.city_municipality, addr.province, addr.region] | select | join(', ') }}</div>
+              {% if addr.landmark %}<div class="type-body-xs text-muted">Landmark: {{ addr.landmark }}</div>{% endif %}
             </div>
           </label>
           {% endfor %}
+        </div>
+        <div style="margin-top:12px;">
+          <button id="add-address-inline-btn" type="button" class="btn btn--secondary" style="padding:8px 12px;" aria-expanded="false">+ Add new address</button>
+          <div id="add-address-inline" style="display:none; margin-top:12px;">
+            <form id="inline-address-form" class="form-stack" style="gap:8px;" onsubmit="return false;">
+              <div class="form-group"><label class="form-label">Recipient name</label><input name="recipient_name" class="form-input" required></div>
+              <div class="form-group"><label class="form-label">Phone</label><input name="phone" class="form-input" placeholder="e.g. 9123456789"></div>
+              <div style="display:grid; grid-template-columns: 1fr 220px; gap:8px;">
+                <div class="form-group"><label class="form-label">House / Unit / Street</label><input name="house_number" class="form-input" placeholder="House No., Street" required></div>
+                <div class="form-group"><label class="form-label">Postal</label><input name="postal_code" class="form-input"></div>
+              </div>
+              <div class="form-group"><label class="form-label">Landmark (optional)</label><input name="landmark" class="form-input" placeholder="e.g. Near SM Mall"></div>
+              <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:8px;">
+                <div class="form-group"><label class="form-label">Region</label><select name="region" class="form-input"><option value="">Select region</option></select></div>
+                <div class="form-group"><label class="form-label">Province</label><select name="province" class="form-input"><option value="">Select province</option></select></div>
+              </div>
+              <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:8px; margin-bottom:6px;">
+                <div class="form-group"><label class="form-label">City / Municipality</label><select name="city_municipality" class="form-input"><option value="">Select city</option></select></div>
+                <div class="form-group"><label class="form-label">Barangay</label><select name="barangay" class="form-input"><option value="">Select barangay</option></select></div>
+              </div>
+              <div class="form-group"><label class="form-label">Full Address (optional)</label><textarea name="address_line1" class="form-textarea" style="height:64px;" placeholder="Additional address notes"></textarea></div>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <label style="display:flex; gap:8px; align-items:center;"><input type="checkbox" name="is_default" value="1"> Set as default</label>
+                <label style="display:flex; gap:8px; align-items:center;"><input type="checkbox" name="is_pickup" value="1"> Pickup address</label>
+                <label style="display:flex; gap:8px; align-items:center;"><input type="checkbox" name="is_return" value="1"> Return address</label>
+              </div>
+              
+              <div style="display:flex; gap:8px; align-items:center; margin-top:8px;"><label style="display:flex; gap:8px; align-items:center;"><input type="checkbox" name="is_default" value="1"> Set as default</label><div style="margin-left:auto;"><button id="inline-save-btn" class="btn btn--primary" type="button">Save</button> <button id="inline-cancel-btn" class="btn btn--white" type="button">Cancel</button></div></div>
+            </form>
+          </div>
         </div>
       </section>
       {% endif %}
@@ -116,12 +194,20 @@
              <input id="recipient_name" type="text" name="recipient_name" class="form-input" placeholder="e.g. Juan Dela Cruz" value="{{ recipient_name }}" required>
              {% if checkout_errors.get('recipient_name') %}<div class="form-error" role="alert">{{ checkout_errors.get('recipient_name') }}</div>{% endif %}
           </div>
-          <div class="form-group">
-             <label class="form-label" for="address_line1">Complete Delivery Address <abbr class="required" title="required">*</abbr></label>
-             <textarea id="address_line1" name="address_line1" class="form-textarea" style="height: 100px;" placeholder="House No., Street Name, Barangay, Municipality/City..." required>{{ default_address }}</textarea>
+           <div class="form-group">
+             <label class="form-label" for="recipient_email">Recipient Email (optional)</label>
+             <input id="recipient_email" type="email" name="recipient_email" class="form-input" placeholder="recipient@example.com" value="{{ checkout_form.get('recipient_email') or '' }}">
+             {% if checkout_errors.get('recipient_email') %}<div class="form-error" role="alert">{{ checkout_errors.get('recipient_email') }}</div>{% endif %}
+           </div>
+          <div style="margin-bottom:6px;">
+            <label class="form-label" for="address_line1">Complete Delivery Address <abbr class="required" title="required">*</abbr></label>
+          </div>
+           <div class="form-group" style="position:relative;">
+             <textarea id="address_line1" name="address_line1" class="form-textarea" style="height:70px; padding-right:48px;" placeholder="House No., Street Name, Barangay, Municipality/City..." required>{{ checkout_form.get('address_line1') or default_address }}</textarea>
+             <button type="button" title="Choose saved address" id="open-address-picker" class="btn btn--icon" style="position:absolute; right:8px; top:8px; z-index:3; width:32px; height:32px; display:flex; align-items:center; justify-content:center;">▾</button>
              {% if checkout_errors.get('address_line1') %}<div class="form-error" role="alert">{{ checkout_errors.get('address_line1') }}</div>{% endif %}
           </div>
-          <div class="form-group" style="margin-top: -6px;">
+          <div class="form-group" style="margin-top: 8px;">
             <label style="display:flex; gap:8px; align-items:center;"><input type="checkbox" id="save_address" name="save_address" value="1"> Save this address to my account</label>
             <div id="save_address_fields" style="display:none; margin-top:8px;">
               <label class="form-label">Label (e.g. Home, Work)</label>
@@ -141,7 +227,7 @@
               })();
             </script>
           </div>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-4);">
+          <div style="display:grid; grid-template-columns: 1fr 360px; gap:var(--sp-4); align-items:start;">
              <div class="form-group">
                  <label class="form-label" for="postal_code">Postal / ZIP Code</label>
                  <input id="postal_code" type="text" name="postal_code" class="form-input"
@@ -153,10 +239,10 @@
                <label class="form-label" for="checkout-phone">Mobile Number <abbr class="required" title="required">*</abbr></label>
                <div class="form-input-group">
                  <span class="form-input-group__icon" style="font-weight:700;">+63</span>
-                 <input id="checkout-phone" type="tel" name="phone" class="form-input" value="{{ default_phone }}"
-                        placeholder="e.g. 9912345678 or 09912345678 or +639912345678" inputmode="tel" maxlength="15" required>
+                   <input id="checkout-phone" type="tel" class="form-input" value="{{ default_phone }}"
+                     placeholder="0000-000-0000" inputmode="tel" style="width:100%;">
+                   <input id="checkout-phone-raw" type="hidden" name="phone" value="">
                </div>
-               <div class="form-helper">Enter 10 digits starting with 9. You may include a leading 0 or +63 and separators, we'll normalize it for you.</div>
                {% if checkout_errors.get('phone') %}<div class="form-error" role="alert">{{ checkout_errors.get('phone') }}</div>{% endif %}
              </div>
           </div>
@@ -233,6 +319,20 @@
           {% if checkout_errors.get('payment') %}<div class="form-error" role="alert">{{ checkout_errors.get('payment') }}</div>{% endif %}
         </div>
 
+        <!-- Terms / Privacy checkbox moved here for stronger UX (near submit) -->
+        <div class="form-group terms-inline" style="margin-top: var(--sp-4);">
+          <label for="agree_terms" style="display:flex; gap: var(--sp-3); align-items:flex-start; cursor:pointer;" aria-live="polite">
+            <input id="agree_terms" type="checkbox" name="agree_terms" value="1" style="margin-top: 3px; width:18px; height:18px; accent-color: var(--brand-primary);" {% if request.form.get('agree_terms') == '1' %}checked{% endif %}>
+            <span>
+              <strong>I confirm I have read and agreed</strong> to the
+              <a href="/terms" target="_blank" class="text-primary fw-bold">Terms of Service</a> and
+              <a href="/privacy" target="_blank" class="text-primary fw-bold">Privacy Policy</a>.
+              <span class="text-danger fw-bold">*</span>
+            </span>
+          </label>
+          {% if checkout_errors.get('agree_terms') %}<div class="form-error" role="alert">{{ checkout_errors.get('agree_terms') }}</div>{% endif %}
+        </div>
+
         <div style="display: flex; gap: var(--sp-4); margin-top: var(--sp-8);">
           <button class="btn btn--white btn--xl" type="button" onclick="window.history.back()" style="flex: 1; border: 1.5px solid var(--border-default); font-weight: 600; color: var(--grey-500);">
              <span class="btn__label">Discard Changes</span>
@@ -246,7 +346,8 @@
     </div>
 
     <!-- Order Summary Sticky -->
-    <aside class="glass-card glass-card--strong stagger-item page-enter checkout-summary" style="position: sticky; top: calc(var(--topbar-height) + var(--sp-8)); border: 1.5px solid var(--border-default); background: var(--grey-0);">
+      </div>
+      <aside class="glass-card glass-card--strong stagger-item page-enter checkout-summary" role="region" aria-label="Order summary" style="position: sticky; top: calc(var(--topbar-height) + var(--sp-8)); border: 1.5px solid var(--border-default); background: var(--grey-0);">
        <h3 class="type-h4" style="margin-bottom: var(--sp-4);">Review Summary</h3>
        
        <div id="summary-items" style="display: flex; flex-direction: column; gap: var(--sp-3); margin-bottom: var(--sp-6);">
@@ -320,20 +421,9 @@
          Billed Monthly: <strong>PHP {{ '%.2f'|format((order_total|float) / 12) }}</strong>
        </div>
 
-       <div style="margin-top: var(--sp-6); padding: var(--sp-5); border: 1.5px solid rgba(10,132,255,0.2); border-radius: 12px; background: var(--brand-primary-subtle);">
-          <label class="type-body-sm" style="display: flex; gap: var(--sp-3); align-items: flex-start; cursor: pointer;">
-            <input type="checkbox" name="agree_terms" value="1" style="margin-top: 3px; width:18px; height:18px; accent-color: var(--brand-primary); flex-shrink:0;" required>
-            <span>
-              <strong>I confirm I have read and agreed</strong> to the
-              <a href="/terms" target="_blank" class="text-primary fw-bold">Terms of Service</a> and
-              <a href="/privacy" target="_blank" class="text-primary fw-bold">Privacy Policy</a>.
-              <span class="text-danger fw-bold">*</span>
-            </span>
-          </label>
-          <div class="type-body-xs text-muted mt-3" style="padding-left: 30px;">Required before placing any order. Protects your buyer rights under E-ACIS Buyer Protection.</div>
-       </div>
        <p class="type-body-sm text-muted" style="margin-top:var(--sp-4); font-size: 11px;">By placing an order, you agree to our <a href="/terms" class="text-primary">E-ACIS Buyer Protection</a> and platform usage rules.</p>
-    </aside>
+      </aside>
+    </div>
 
   </form>
 </div>
@@ -377,6 +467,32 @@
 .plan-card {
   cursor: pointer;
 }
+
+/* Layout: apply two-column responsive checkout grid on the form container */
+.checkout-layout {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 2rem; /* 32px for consistent spacing */
+  align-items: start;
+  margin-bottom: var(--sp-12);
+}
+
+.checkout-grid {
+  display: block; /* main content container stays full-width within its column */
+  width: 100%;
+}
+@media (max-width: 900px) {
+  .checkout-layout {
+    grid-template-columns: 1fr !important;
+    gap: var(--sp-6) !important;
+  }
+  .checkout-summary { position: static !important; width: 100% !important; }
+}
+.checkout-summary { box-shadow: var(--shadow-sm); padding: var(--sp-6); border-radius: 12px; }
+
+/* Accessibility helpers */
+.form-error[role="alert"] { aria-live: assertive; }
+}
 .plan-card input {
   /* keep the native radio accessible while visually hiding it */
   position: absolute;
@@ -400,6 +516,17 @@
   background: var(--grey-0);
   box-shadow: inset 0 0 0 1px var(--brand-primary);
 }
+
+/* small icon button for address picker */
+.btn--icon{ background:transparent; border:1px solid var(--border-medium); border-radius:8px; cursor:pointer; color:var(--grey-800); }
+.btn--icon:hover{ background:var(--grey-0); }
+
+/* summary tweaks to match compact aesthetic */
+.checkout-summary { padding: 20px; width: 360px; }
+.summary-discount { display:flex; gap:8px; align-items:center; }
+.summary-discount input { flex:1; height:38px; border-radius:8px 0 0 8px; border:1px solid var(--border-medium); padding:8px; }
+.summary-discount button { height:38px; border-radius:0 8px 8px 0; }
+.btn--primary.large { width:100%; padding:12px 16px; font-size:16px; border-radius:10px; }
 
 .checkout-layout {
   margin-bottom: var(--sp-12);
@@ -437,6 +564,9 @@
   box-shadow: var(--shadow-md);
 }
 
+.terms-inline label { align-items: flex-start; }
+.btn--disabled { opacity: 0.6; pointer-events: none; }
+
 @media (max-width: 1023px) {
   .checkout-layout {
     grid-template-columns: 1fr !important;
@@ -466,6 +596,452 @@
   }
 }
 </style>
+ 
+<!-- Compact Address Picker Dropdown (anchored under address field) -->
+<div id="address-picker-dropdown" role="listbox" aria-label="Saved addresses" aria-hidden="true" style="display:none; position:absolute; z-index:60; right:12px; top:0; transform:translateY(8px);">
+  <div class="glass-card" style="padding:8px; border-radius:16px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+      <div style="display:flex; gap:8px; align-items:center;">
+        <div style="font-weight:600; font-size:14px;">Saved addresses</div>
+        <input id="picker-search" placeholder="Search saved addresses" class="form-input" style="min-width:160px; padding:6px 8px; font-size:13px;" />
+      </div>
+      <button type="button" id="close-address-picker" class="btn btn--ghost btn--xs" aria-label="Close picker">✕</button>
+    </div>
+    <div id="address-picker-list" style="margin-top:8px; display:flex; flex-direction:column; gap:6px; max-height:600px; overflow:auto; width:100%;">
+      {% if saved_addresses %}
+        {% for addr in saved_addresses %}
+        <label class="address-pick-item" style="display:flex; gap:8px; align-items:flex-start; padding:8px; border-radius:8px; border:1px solid var(--border-medium); background:transparent; cursor:pointer;">
+          <input type="radio" name="pick_addr" data-addr-id="{{ addr.id }}" data-recipient="{{ addr.recipient_name|e }}" data-phone="{{ addr.phone|e }}" data-address="{{ [addr.address_line1, addr.address_line2, addr.barangay, addr.city_municipality, addr.province, addr.region] | select | join(', ') | e }}" data-postal="{{ addr.postal_code|e }}" data-label="{{ addr.label|e }}" data-barangay="{{ addr.barangay|e }}" data-city="{{ addr.city_municipality|e }}" data-province="{{ addr.province|e }}" data-region="{{ addr.region|e }}" {% if addr.is_default %}checked{% endif %} style="margin-top:4px;">
+          <div style="flex:1; font-size:13px;">
+            <div class="fw-semibold" style="margin-bottom:4px;">{{ addr.label or 'Address' }} {% if addr.is_default %}<span class="type-label-xs text-muted">• Default</span>{% endif %}</div>
+            <div class="type-body-xs text-muted" style="font-size:12px;">{{ addr.recipient_name }} • {% if addr.phone and addr.phone.startswith('0') %}+63{{ addr.phone[1:] }}{% else %}{{ addr.phone or '' }}{% endif %}</div>
+            <div class="type-body-xs" style="margin-top:6px; font-size:12px; color:var(--grey-700);">{{ [addr.address_line1, addr.address_line2, addr.barangay, addr.city_municipality, addr.province, addr.region] | select | join(', ') }}</div>
+          </div>
+        </label>
+        {% endfor %}
+      {% else %}
+        <div class="type-body-sm text-muted">No saved addresses. <a href="{{ url_for('customer_addresses') }}" class="text-primary">Add an address</a></div>
+        <div style="margin-top:12px;">
+          <button id="add-address-inline-btn" type="button" class="btn btn--secondary" style="padding:8px 12px;" aria-expanded="false">+ Add new address</button>
+          <div id="add-address-inline" style="display:none; margin-top:12px;">
+            <form id="inline-address-form" class="form-stack" style="gap:8px;" onsubmit="return false;">
+              <div class="form-group"><label class="form-label">Recipient name</label><input name="recipient_name" class="form-input" required></div>
+              <div class="form-group"><label class="form-label">Phone</label><input name="phone" class="form-input" placeholder="e.g. 9123456789"></div>
+              <div style="display:grid; grid-template-columns: 1fr 220px; gap:8px;">
+                <div class="form-group"><label class="form-label">House / Unit / Street</label><input name="house_number" class="form-input" placeholder="House No., Street" required></div>
+                <div class="form-group"><label class="form-label">Postal</label><input name="postal_code" class="form-input"></div>
+              </div>
+              <div class="form-group"><label class="form-label">Landmark (optional)</label><input name="landmark" class="form-input" placeholder="e.g. Near SM Mall"></div>
+              <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:8px;">
+                <div class="form-group"><label class="form-label">Region</label><select name="region" class="form-input"><option value="">Select region</option></select></div>
+                <div class="form-group"><label class="form-label">Province</label><select name="province" class="form-input"><option value="">Select province</option></select></div>
+              </div>
+              <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:8px; margin-bottom:6px;">
+                <div class="form-group"><label class="form-label">City / Municipality</label><select name="city_municipality" class="form-input"><option value="">Select city</option></select></div>
+                <div class="form-group"><label class="form-label">Barangay</label><select name="barangay" class="form-input"><option value="">Select barangay</option></select></div>
+              </div>
+              <div class="form-group"><label class="form-label">Full Address (optional)</label><textarea name="address_line1" class="form-textarea" style="height:64px;" placeholder="Additional address notes"></textarea></div>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <label style="display:flex; gap:8px; align-items:center;"><input type="checkbox" name="is_default" value="1"> Set as default</label>
+                <label style="display:flex; gap:8px; align-items:center;"><input type="checkbox" name="is_pickup" value="1"> Pickup address</label>
+                <label style="display:flex; gap:8px; align-items:center;"><input type="checkbox" name="is_return" value="1"> Return address</label>
+              </div>
+                
+              <div style="display:flex; gap:8px; align-items:center; margin-top:8px;"><label style="display:flex; gap:8px; align-items:center;"><input type="checkbox" name="is_default" value="1"> Set as default</label><div style="margin-left:auto;"><button id="inline-save-btn" class="btn btn--primary" type="button">Save</button> <button id="inline-cancel-btn" class="btn btn--white" type="button">Cancel</button></div></div>
+            </form>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+// Address picker: populate checkout fields with selected saved address
+document.addEventListener('DOMContentLoaded', function(){
+  var dropdown = document.getElementById('address-picker-dropdown');
+  var openBtn = document.getElementById('open-address-picker');
+  var closeBtn = document.getElementById('close-address-picker');
+
+  function showDropdown(){
+    if(!dropdown || !openBtn) return;
+    // position dropdown below the address field
+    var anchor = document.getElementById('address_line1');
+    if(anchor){
+      var rect = anchor.getBoundingClientRect();
+      // convert to page coordinates
+      dropdown.style.top = (rect.bottom + window.scrollY + 6) + 'px';
+      dropdown.style.left = (Math.max(12, rect.left + window.scrollX)) + 'px';
+      dropdown.style.display = 'block';
+      dropdown.setAttribute('aria-hidden','false');
+      // expose expanded state
+      try{ openBtn.setAttribute('aria-expanded','true'); }catch(e){}
+      // focus search input if present, otherwise first visible item
+      setTimeout(function(){ try{ var ps = document.getElementById('picker-search'); if(ps) ps.focus(); else { var first = dropdown.querySelector('.address-pick-item'); if(first) first.focus(); } }catch(e){} }, 10);
+    }
+  }
+  function hideDropdown(){ if(!dropdown) return; dropdown.style.display = 'none'; dropdown.setAttribute('aria-hidden','true'); try{ openBtn.setAttribute('aria-expanded','false'); openBtn.focus(); }catch(e){} }
+
+  if(openBtn) openBtn.addEventListener('click', function(e){ e.stopPropagation(); if(dropdown && dropdown.style.display === 'block') hideDropdown(); else showDropdown(); });
+  if(closeBtn) closeBtn.addEventListener('click', function(e){ e.stopPropagation(); hideDropdown(); });
+
+  // keyboard navigation inside dropdown: arrow keys, Enter/Space to select, Escape to close
+  try{
+    if(dropdown){
+      dropdown.addEventListener('keydown', function(ev){
+        var key = ev.key;
+        if(key === 'Escape'){
+          hideDropdown(); ev.preventDefault(); return;
+        }
+        if(key === 'ArrowDown' || key === 'ArrowUp'){
+          ev.preventDefault();
+          var items = Array.from(dropdown.querySelectorAll('.address-pick-item')).filter(function(it){ return it.offsetParent !== null; });
+          if(items.length === 0) return;
+          var idx = items.indexOf(document.activeElement);
+          if(idx === -1){
+            (key === 'ArrowDown' ? items[0] : items[items.length-1]).focus();
+          } else {
+            var next = key === 'ArrowDown' ? items[Math.min(items.length-1, idx+1)] : items[Math.max(0, idx-1)];
+            if(next) next.focus();
+          }
+          return;
+        }
+        if(key === 'Enter' || key === ' '){
+          var active = document.activeElement;
+          if(active && active.classList && active.classList.contains('address-pick-item')){ active.click(); ev.preventDefault(); }
+          else if(active && active.matches && active.matches('input[name="pick_addr"]')){ active.closest('.address-pick-item').click(); ev.preventDefault(); }
+        }
+      });
+    }
+  }catch(e){ /* ignore */ }
+
+  // auto-fill on label click / radio select
+  document.addEventListener('click', function(ev){
+    var el = ev.target;
+    // find closest label.address-pick-item
+    var label = el.closest && el.closest('.address-pick-item');
+    if(label){
+      var radio = label.querySelector('input[name="pick_addr"]');
+      if(radio){
+        radio.checked = true;
+        var recipient = radio.dataset.recipient || '';
+        var phone = radio.dataset.phone || '';
+        var address = radio.dataset.address || '';
+        try{ document.getElementById('recipient_name').value = recipient; }catch(e){}
+        try{ document.getElementById('checkout-phone').value = (phone && phone.startsWith('+')? phone.replace('+63','') : (phone && phone.startsWith('0')? phone.substring(1): phone)); }catch(e){}
+        try{ document.getElementById('address_line1').value = address; }catch(e){}
+        hideDropdown();
+      }
+    }
+  });
+
+  // click outside closes dropdown
+  document.addEventListener('click', function(ev){ if(!dropdown) return; if(dropdown.style.display !== 'block') return; if(!dropdown.contains(ev.target) && ev.target !== openBtn) hideDropdown(); });
+});
+</script>
+<!-- Map feature removed: Leaflet initialization was dropped -->
+// Phone input mask: 0000-000-0000 (formats while typing)
+document.addEventListener('DOMContentLoaded', function(){
+  var phone = document.getElementById('checkout-phone');
+  if(!phone) return;
+  // ensure a hidden 'phone' input exists and stays in sync with digits-only value
+  var raw = document.getElementById('checkout-phone-raw');
+  if(!raw){
+    raw = document.createElement('input'); raw.type='hidden'; raw.id='checkout-phone-raw'; raw.name='phone';
+    phone.insertAdjacentElement('afterend', raw);
+  }
+
+  // Use event delegation so listeners survive DOM swaps/re-renders
+  var composing = false;
+  phone.addEventListener('compositionstart', function(){ composing = true; });
+  phone.addEventListener('compositionend', function(){ composing = false; /* trigger final formatting */ phone.dispatchEvent(new Event('input')); });
+
+  document.addEventListener('input', function(e){
+    if(!e.target || e.target.id !== 'checkout-phone') return;
+    if(composing) return; // don't format while IME composition is active
+    var input = e.target;
+    var originalCursorPos = input.selectionStart || 0;
+    var originalValue = input.value || '';
+
+    // keep digits only (max 11)
+    var digits = originalValue.replace(/\D/g,'').slice(0,11);
+
+    // build formatted value: 4-3-4
+    var formatted = '';
+    if(digits.length > 0){
+      formatted += digits.substring(0,4);
+      if(digits.length > 4) formatted += '-' + digits.substring(4,7);
+      if(digits.length > 7) formatted += '-' + digits.substring(7,11);
+    }
+
+    // update the hidden raw input immediately so other scripts/readers get digits-only
+    try{ raw.value = digits; }catch(e){}
+
+    // only update DOM when value actually changes to avoid jitter
+    if(input.value !== formatted){
+      input.value = formatted;
+
+      // calculate how many digits were before the original cursor
+      var digitsBeforeCursor = originalValue.slice(0, originalCursorPos).replace(/\D/g,'').length;
+
+      // find the position in the formatted string that corresponds to that many digits
+      var newCursorPos = 0; var digitCount = 0;
+      for(var i = 0; i < formatted.length && digitCount < digitsBeforeCursor; i++){
+        if(/\d/.test(formatted.charAt(i))) digitCount++;
+        newCursorPos = i + 1;
+      }
+      try{ input.setSelectionRange(newCursorPos, newCursorPos); }catch(e){}
+    }
+  });
+
+  // initialize raw value from any prefilled visible value
+  try{ raw.value = (phone.value||'').replace(/\D/g,'').slice(0,11); }catch(e){}
+
+  // keep raw input updated on submit as a safety fallback
+  var f = document.querySelector('form.checkout-layout');
+  if(f){
+    f.addEventListener('submit', function(){
+      try{ raw.value = (phone.value||'').replace(/\D/g,'').slice(0,11); }catch(e){}
+    });
+  }
+});
+</script>
+<script>
+// Fetch saved addresses via API and populate the dropdown list (keeps server-rendered items as fallback)
+document.addEventListener('DOMContentLoaded', function(){
+  var list = document.getElementById('address-picker-list');
+  if(!list) return;
+  var pickerSearch = document.getElementById('picker-search');
+  if(pickerSearch){
+    pickerSearch.addEventListener('input', function(){
+      var q = (pickerSearch.value||'').toLowerCase().trim();
+      list.querySelectorAll('.address-pick-item').forEach(function(it){
+        var txt = it.innerText.toLowerCase(); it.style.display = (!q || txt.indexOf(q)!==-1) ? '' : 'none';
+      });
+    });
+  }
+  fetch('/customer/addresses/api').then(function(resp){ if(!resp.ok) throw new Error('no'); return resp.json(); }).then(function(data){
+    if(!Array.isArray(data) || data.length === 0) return;
+    // clear current items
+    list.innerHTML = '';
+    data.forEach(function(a){
+      var label = document.createElement('label');
+      label.className = 'address-pick-item';
+      // accessibility: expose as option and allow focus
+      label.setAttribute('role','option');
+      label.tabIndex = 0;
+      label.setAttribute('aria-selected', a.is_default ? 'true' : 'false');
+      label.style = 'display:flex; gap:8px; align-items:flex-start; padding:8px; border-radius:8px; border:1px solid var(--border-medium); background:transparent; cursor:pointer;';
+      var radio = document.createElement('input');
+      radio.type = 'radio'; radio.name = 'pick_addr';
+      radio.dataset.addrId = a.id;
+      radio.dataset.recipient = a.recipient_name || '';
+      radio.dataset.phone = a.phone || '';
+      radio.dataset.address = [a.address_line1, a.address_line2, a.barangay, a.city_municipality, a.province, a.region].filter(Boolean).join(', ');
+      radio.dataset.postal = a.postal_code || '';
+      radio.dataset.label = a.label || '';
+      radio.dataset.barangay = a.barangay || '';
+      radio.dataset.city = a.city_municipality || '';
+      radio.dataset.province = a.province || '';
+      radio.dataset.region = a.region || '';
+      if(a.is_default) { radio.checked = true; label.setAttribute('aria-selected','true'); }
+      radio.style.marginTop = '4px';
+      var inner = document.createElement('div'); inner.style.flex = '1'; inner.style.fontSize='13px';
+      inner.innerHTML = '<div class="fw-semibold" style="margin-bottom:4px;">' + (a.label || 'Address') + (a.is_default ? ' <span class="type-label-xs text-muted">• Default</span>' : '') + '</div>' +
+        '<div class="type-body-xs text-muted" style="font-size:12px;">' + (a.recipient_name || '') + ' • ' + (a.phone||'') + '</div>' +
+        '<div class="type-body-xs" style="margin-top:6px; font-size:12px; color:var(--grey-700);">' + (radio.dataset.address) + '</div>';
+      label.appendChild(radio);
+      label.appendChild(inner);
+      list.appendChild(label);
+    });
+  }).catch(function(){ /* ignore */ });
+
+  // When items are clicked, reuse existing handler: clicking label will trigger earlier document click listener
+  // Additionally ensure we set the main form's `address_id` radio if present, or create hidden field.
+  document.addEventListener('click', function(ev){
+    var lab = ev.target.closest && ev.target.closest('.address-pick-item');
+    if(!lab) return;
+    var r = lab.querySelector('input[name="pick_addr"]');
+    if(!r) return;
+    var id = r.dataset.addrId;
+    // set main radio if present
+    var mainRadio = document.querySelector('input[name="address_id"][value="' + id + '"]');
+    if(mainRadio){ mainRadio.checked = true; }
+    else {
+      // create hidden input to submit
+      var existing = document.getElementById('address_id_hidden');
+      if(!existing){ existing = document.createElement('input'); existing.type='hidden'; existing.name='address_id'; existing.id='address_id_hidden'; document.querySelector('form.checkout-layout').appendChild(existing); }
+      existing.value = id;
+    }
+    // also set structured fields
+    try{ document.getElementById('recipient_name').value = r.dataset.recipient || ''; }catch(e){}
+    try{ document.getElementById('checkout-phone').value = (r.dataset.phone && r.dataset.phone.startsWith('+')? r.dataset.phone.replace('+63','') : (r.dataset.phone && r.dataset.phone.startsWith('0')? r.dataset.phone.substring(1): r.dataset.phone)); }catch(e){}
+    try{ document.getElementById('address_line1').value = r.dataset.address || ''; }catch(e){}
+    try{ document.getElementById('postal_code').value = r.dataset.postal || ''; }catch(e){}
+  });
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  var agree = document.getElementById('agree_terms');
+  var saveBtn = document.getElementById('save-settings-btn');
+  var paymentRadios = document.getElementsByName('payment');
+  function paymentIsInstallment(){
+    for(var i=0;i<paymentRadios.length;i++){ if(paymentRadios[i].checked && paymentRadios[i].value === 'installment') return true; }
+    return false;
+  }
+  function updateSubmitState(){
+    if(!saveBtn) return;
+    // require agreement for full_pay only
+    if(paymentIsInstallment()){
+      saveBtn.disabled = false;
+      saveBtn.classList.remove('btn--disabled');
+    } else {
+      var ok = agree && agree.checked;
+      saveBtn.disabled = !ok;
+      if(ok) saveBtn.classList.remove('btn--disabled'); else saveBtn.classList.add('btn--disabled');
+    }
+  }
+  if(agree){ agree.addEventListener('change', updateSubmitState); }
+  for(var i=0;i<paymentRadios.length;i++){ paymentRadios[i].addEventListener('change', updateSubmitState); }
+  updateSubmitState();
+});
+</script>
+<script>
+// Move/clone the primary Complete Order CTA into the summary card for easier access
+document.addEventListener('DOMContentLoaded', function(){
+  try{
+    const completeOrderBtn = Array.from(document.querySelectorAll('button')).find(b => b.innerText && b.innerText.trim().includes('Complete Order'));
+    const summaryCard = document.querySelector('aside.checkout-summary');
+    const form = document.querySelector('form.checkout-layout');
+    if (completeOrderBtn && summaryCard && form) {
+      const container = document.createElement('div');
+      container.className = 'summary-action-container';
+      container.style.paddingTop = '12px';
+
+      // Clone the button node to preserve label and classes
+      const newBtn = completeOrderBtn.cloneNode(true);
+      // If clone is outside the form, ensure it submits the correct form
+      newBtn.type = 'button';
+      newBtn.id = 'summary-complete-order';
+      newBtn.style.width = '100%';
+      newBtn.style.marginTop = '12px';
+      newBtn.style.borderRadius = '8px';
+
+      newBtn.addEventListener('click', function(e){
+        // Use requestSubmit when available to trigger form validation handlers
+        if(typeof form.requestSubmit === 'function'){
+          form.requestSubmit();
+        } else {
+          form.submit();
+        }
+      });
+
+      container.appendChild(newBtn);
+      summaryCard.appendChild(container);
+
+      // Hide the original CTA to avoid duplicate actions
+      completeOrderBtn.style.display = 'none';
+    }
+  }catch(err){
+    console && console.debug && console.debug('summary CTA move failed', err);
+  }
+});
+</script>
+<script>
+// Inline add-address behavior: show form, POST to save endpoint, refresh picker
+document.addEventListener('DOMContentLoaded', function(){
+  var addBtn = document.getElementById('add-address-inline-btn');
+  var panel = document.getElementById('add-address-inline');
+  var form = document.getElementById('inline-address-form');
+  var saveBtn = document.getElementById('inline-save-btn');
+  var cancelBtn = document.getElementById('inline-cancel-btn');
+  var apiUrl = '/customer/addresses/api';
+  var saveUrl = '/customer/addresses/save';
+  if(!addBtn || !panel || !form) return;
+  function show(){ panel.style.display='block'; addBtn.setAttribute('aria-expanded','true'); }
+  function hide(){ panel.style.display='none'; addBtn.setAttribute('aria-expanded','false'); }
+  addBtn.addEventListener('click', function(){ if(panel.style.display==='block') hide(); else show(); });
+  cancelBtn.addEventListener('click', function(){ hide(); });
+
+  async function refreshSavedAddressesAndSelect(matchPayload){
+    try{
+      var r = await fetch(apiUrl, {credentials:'same-origin'});
+      if(!r.ok) return;
+      var data = await r.json();
+      // update the address-picker-list if present
+      var picker = document.getElementById('address-picker-list');
+      if(picker){ picker.innerHTML = ''; data.forEach(function(a){
+        var label = document.createElement('label'); label.className='address-pick-item';
+        label.style='display:flex; gap:8px; align-items:flex-start; padding:8px; border-radius:8px; border:1px solid var(--border-medium); background:transparent; cursor:pointer;';
+        var radio = document.createElement('input'); radio.type='radio'; radio.name='pick_addr'; radio.dataset.addrId = a.id; radio.dataset.recipient=a.recipient_name||''; radio.dataset.phone=a.phone||''; radio.dataset.address=[a.address_line1,a.address_line2,a.barangay,a.city_municipality,a.province,a.region].filter(Boolean).join(', ');
+        if(a.is_default) radio.checked=true; radio.style.marginTop='4px';
+        var inner = document.createElement('div'); inner.style.flex='1'; inner.innerHTML = '<div class="fw-semibold">'+(a.label||'Address')+'</div><div class="type-body-xs">'+(a.recipient_name||'')+' • '+(a.phone||'')+'</div><div class="type-body-xs" style="margin-top:6px;">'+radio.dataset.address+'</div>';
+        label.appendChild(radio); label.appendChild(inner); picker.appendChild(label);
+      }); }
+
+      // find newly created address by matching payload fields
+      if(matchPayload && Array.isArray(data)){
+        var found = data.find(function(a){
+          if(!a) return false;
+          var matchName = (a.recipient_name||'').trim() === (matchPayload.recipient_name||'').trim();
+          var matchAddr = (a.address_line1||'').trim().indexOf((matchPayload.address_line1||'').trim()) === 0;
+          var matchPhone = (a.phone||'').replace(/\D/g,'') === (matchPayload.phone||'').replace(/\D/g,'');
+          return matchName && matchAddr && matchPhone;
+        });
+        if(found){
+          // set the main checkout hidden address_id or radio to this id
+          var mainRadio = document.querySelector('input[name="address_id"][value="'+found.id+'"]');
+          if(mainRadio) mainRadio.checked = true;
+          else {
+            var existing = document.getElementById('address_id_hidden');
+            if(!existing){ existing = document.createElement('input'); existing.type='hidden'; existing.name='address_id'; existing.id='address_id_hidden'; document.querySelector('form.checkout-layout').appendChild(existing); }
+            existing.value = found.id;
+          }
+          // also populate the structured fields into the checkout form
+          try{ document.getElementById('recipient_name').value = found.recipient_name || ''; }catch(e){}
+          try{ document.getElementById('address_line1').value = [found.address_line1, found.address_line2, found.barangay, found.city_municipality, found.province, found.region].filter(Boolean).join(', '); }catch(e){}
+          try{ document.getElementById('checkout-phone').value = (found.phone && found.phone.startsWith('+')? found.phone.replace('+63','') : (found.phone && found.phone.startsWith('0')? found.phone.substring(1): found.phone)); }catch(e){}
+        }
+      }
+    }catch(err){ console && console.debug && console.debug('refresh addresses failed', err); }
+  }
+
+  saveBtn.addEventListener('click', async function(){
+    var payload = {};
+    var elems = form.elements;
+    for(var i=0;i<elems.length;i++){ var e=elems[i]; if(!e.name) continue; if(e.type==='checkbox') payload[e.name]=e.checked? '1': ''; else payload[e.name]=e.value; }
+    // include csrf token from main form
+    var csrf = document.querySelector('input[name="csrf_token"]'); if(csrf) payload['csrf_token']=csrf.value;
+    // post as form data
+    var fd = new FormData(); for(var k in payload){ if(payload.hasOwnProperty(k) && payload[k] !== undefined) fd.append(k, payload[k]); }
+    try{
+      saveBtn.disabled = true;
+      var resp = await fetch(saveUrl, { method:'POST', body: fd, credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' } });
+      if(!resp.ok){
+        // try show JSON errors
+        try{ var j = await resp.json(); if(j && j.errors){ alert(Object.values(j.errors).join('\n')); } else { alert('Failed to save address'); } }catch(e){ alert('Failed to save address'); }
+        saveBtn.disabled = false;
+        return;
+      }
+      try{
+        var j = await resp.json();
+        if(j && j.status === 'ok'){
+          await refreshSavedAddressesAndSelect(payload);
+          hide();
+        } else if(j && j.errors){
+          alert(Object.values(j.errors).join('\n'));
+        }
+      }catch(e){
+        // fallback: refresh anyway
+        await refreshSavedAddressesAndSelect(payload);
+        hide();
+      }
+      saveBtn.disabled = false;
+    }catch(err){ console && console.debug && console.debug('save inline addr failed', err); saveBtn.disabled = false; }
+  });
+});
+</script>
 
 <script>
   (function(){
@@ -592,6 +1168,40 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const agree = document.getElementById('agree_terms');
+  const submitBtn = document.getElementById('save-settings-btn') || document.querySelector('button[type="submit"].btn--primary');
+  const form = document.querySelector('form.checkout-layout');
+  if (!agree || !submitBtn || !form) return;
+
+  const toggle = () => {
+    if (agree.checked) {
+      submitBtn.removeAttribute('disabled');
+      submitBtn.classList.remove('btn--disabled');
+    } else {
+      submitBtn.setAttribute('disabled', 'disabled');
+      submitBtn.classList.add('btn--disabled');
+    }
+  };
+  toggle();
+  agree.addEventListener('change', toggle);
+
+  form.addEventListener('submit', function(e) {
+    if (!agree.checked) {
+      e.preventDefault();
+      try {
+        agree.setCustomValidity('Please agree to the Terms of Service and Privacy Policy to continue.');
+        agree.reportValidity();
+        agree.focus();
+      } catch(err){}
+      return false;
+    } else {
+      agree.setCustomValidity('');
+    }
+  });
 });
 </script>
 {% endblock %}

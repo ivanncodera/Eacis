@@ -46,7 +46,7 @@
           <span class="type-body-sm fw-bold text-primary">{{ profile_completion or 0 }}%</span>
         </div>
         <div style="height:8px; background:var(--grey-100); border-radius:999px; overflow:hidden; margin-bottom:var(--sp-4);">
-          <div style="height:100%; width:{{ profile_completion or 0 }}%; background:linear-gradient(90deg, var(--brand-primary), #3a86ff);"></div>
+          <div class="progress-fill" data-pct="{{ profile_completion or 0 }}"></div>
         </div>
         {% if missing_profile_fields %}
           <div class="type-body-sm text-muted" style="margin-bottom:var(--sp-3);">Complete these fields to improve checkout and support approvals:</div>
@@ -86,4 +86,12 @@
     </div>
   </div>
 </div>
-{% endblock %}
+    <script>
+      document.addEventListener('DOMContentLoaded', function(){
+        document.querySelectorAll('.progress-fill').forEach(function(el){
+          var p = parseFloat(el.dataset.pct || 0) || 0;
+          el.style.width = p + '%';
+        });
+      });
+    </script>
+  {% endblock %}

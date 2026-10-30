@@ -83,7 +83,31 @@
 
     function autoLogout() {
         console.warn('Session expired - Logging out...');
-        window.location.href = '/auth/logout?reason=expired';
+        // Perform a POST logout to honor server-side CSRF protection.
+        try {
+            const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+            const csrfToken = csrfMeta ? (csrfMeta.getAttribute('content') || '') : '';
+            const form = document.createElement('form');
+            form.method = 'post';
+            form.action = '/auth/logout';
+            form.style.display = 'none';
+            const t = document.createElement('input');
+            t.type = 'hidden';
+            t.name = 'csrf_token';
+            t.value = csrfToken;
+            form.appendChild(t);
+            // optional reason
+            const r = document.createElement('input');
+            r.type = 'hidden';
+            r.name = 'reason';
+            r.value = 'expired';
+            form.appendChild(r);
+            document.body.appendChild(form);
+            form.submit();
+        } catch (e) {
+            // fallback to GET if something goes wrong (very unlikely)
+            window.location.href = '/auth/logout';
+        }
     }
 
     // List of events to reset idle timer

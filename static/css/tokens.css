@@ -6,13 +6,30 @@
 :root {
 
   /* ── BRAND ───────────────────────────────── */
-  --brand-primary:          #005BB5;
-  --brand-primary-dark:     #004E9E;
-  --brand-primary-darker:   #003A7A;
+  --brand-primary:          #007AFF;
+  --brand-primary-dark:     #0062CC;
+  --brand-primary-darker:   #004999;
   --brand-primary-light:    #3395FF;
   --brand-primary-subtle:   rgba(0, 122, 255, 0.08);
   --brand-primary-subtle-2: rgba(0, 122, 255, 0.14);
   --brand-primary-glow:     rgba(0, 122, 255, 0.28);
+
+  /* ── ACCENT & ARCHITECTURAL PALETTE ──────── */
+  --brand-accent-cyan:      #06B6D4;
+  --brand-accent-indigo:    #4F46E5;
+  --brand-accent-emerald:   #00875A;
+  --brand-gradient:         linear-gradient(135deg, #007AFF 0%, #2563EB 52%, #06B6D4 100%);
+  --brand-gradient-dark:    linear-gradient(135deg, #091E42 0%, #0F2952 55%, #004999 100%);
+  --brand-surface-tint:     linear-gradient(180deg, rgba(0, 122, 255, 0.04) 0%, rgba(247, 248, 250, 0) 100%);
+  --focus-ring:             0 0 0 3px rgba(0, 122, 255, 0.28);
+
+  /* ── FLOATING SHAPES TOKENS ──────────────── */
+  --shape-color-primary:    rgba(0, 122, 255, 0.085);
+  --shape-color-cyan:       rgba(6, 182, 212, 0.075);
+  --shape-color-indigo:     rgba(79, 70, 229, 0.065);
+  --shape-color-emerald:    rgba(0, 135, 90, 0.06);
+  --shape-border-subtle:    rgba(0, 122, 255, 0.14);
+  --shape-border-accent:    rgba(6, 182, 212, 0.16);
 
   /* ── GREY SCALE (12 steps) ───────────────── */
   --grey-0:    #FFFFFF;
@@ -151,6 +168,16 @@
   --sp-24: 96px;
   --sp-32: 128px;
 
+  /* ── SEMANTIC SPACING ───────────────────── */
+  --space-micro:           var(--sp-1);   /* 4 */
+  --space-tight:           var(--sp-2);   /* 8 */
+  --space-control-gap:     var(--sp-3);   /* 12 */
+  --space-item-gap:        var(--sp-4);   /* 16 */
+  --space-block-gap:       var(--sp-6);   /* 24 */
+  --space-section-gap:     var(--sp-8);   /* 32 */
+  --space-page-gap:        var(--sp-12);  /* 48 */
+  --space-page-gap-lg:     var(--sp-16);  /* 64 */
+
   /* ── BORDER RADIUS ───────────────────────── */
   --radius-xs:   3px;
   --radius-sm:   6px;
@@ -200,6 +227,12 @@
   --content-wide:   1600px;
   --content-narrow:  720px;
 
+  --page-gutter:    var(--sp-4);
+  --page-gutter-md: var(--sp-6);
+  --page-gutter-lg: var(--sp-8);
+  --page-content-pad: var(--sp-6);
+  --page-content-pad-lg: var(--sp-8);
+
   /* ── COMPONENT SIZES ─────────────────────── */
   --input-height-sm:  32px;
   --input-height-md:  40px;
@@ -209,6 +242,16 @@
   --btn-height-md:    40px;
   --btn-height-lg:    48px;
   --btn-height-xl:    56px;
-}
 
-/* End of tokens file */
+  --control-size-sm:  var(--input-height-sm);
+  --control-size-md:  var(--input-height-md);
+  --control-size-lg:  var(--input-height-lg);
+
+  --card-padding-sm:  var(--sp-4);
+  --card-padding-md:  var(--sp-6);
+  --card-padding-lg:  var(--sp-8);
+
+  --form-row-gap:     var(--space-block-gap);
+  --table-cell-pad-x: var(--sp-4);
+  --table-cell-pad-y: var(--sp-3);
+}

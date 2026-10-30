@@ -35,13 +35,13 @@
           {%- endmacro %}
 
           {% if imgs and imgs|length > 0 %}
-          <div class="main-img-container" style="aspect-ratio: 4 / 3; border-radius: var(--radius-lg); background: var(--grey-50); border: 1px solid var(--border-subtle); display:flex; align-items:center; justify-content:center; overflow:hidden;">
+          <div class="main-img-container" style="aspect-ratio: 4 / 3; border-radius: var(--radius-lg); background: var(--grey-50); border: 1px solid var(--border-subtle); display:grid; place-items:center; overflow:hidden; position:relative;">
             {# main image uses first available image #}
             {% set first_src = img_url_for(imgs[0]) if imgs[0] is not string else img_url_for(imgs[0]) %}
             <img id="prd-main-img" src="{{ first_src }}" alt="{{ product.name }}" class="prd-main-img">
           </div>
 
-          <div class="thumb-strip" style="display:flex; gap:var(--sp-2); margin-top:var(--sp-3); overflow-x:auto; -webkit-overflow-scrolling:touch; scroll-behavior:smooth; padding-bottom:6px;">
+          <div class="thumb-strip" style="display:flex; gap:12px; margin-top:var(--sp-3); overflow-x:auto; -webkit-overflow-scrolling:touch; scroll-behavior:smooth; padding:10px 0; scroll-snap-type:x mandatory;">
             {% for img in imgs %}
               {% set src = img_url_for(img) %}
               <button type="button" class="thumb-btn" style="border:0; background:transparent; padding:0; width:72px; flex:0 0 auto; scroll-snap-align:center;" data-src="{{ src }}" aria-label="View image {{ loop.index }}">
@@ -77,7 +77,13 @@
           </div>
           <div class="glass-card seller-sunken" style="padding:var(--sp-3); box-shadow:none;">
             <div class="type-body-xs text-muted">Stock</div>
-            <div class="type-body-sm fw-semibold">{{ product.stock or 0 }} units</div>
+            {% if (product.stock or 0) > 10 %}
+            <div class="type-body-sm fw-semibold">In Stock</div>
+            {% elif (product.stock or 0) > 0 %}
+            <div class="type-body-sm fw-semibold">Low stock — a few left</div>
+            {% else %}
+            <div class="type-body-sm fw-semibold">Out of Stock</div>
+            {% endif %}
           </div>
           <div class="glass-card seller-sunken" style="padding:var(--sp-3); box-shadow:none;">
             <div class="type-body-xs text-muted">Reference</div>
@@ -109,7 +115,7 @@
             <input type="number" min="1" max="{{ product.stock or 1 }}" name="qty" value="1" class="form-input">
           </div>
           <button class="btn btn--primary btn--full" type="submit">Add to Cart</button>
-          <a class="btn btn--secondary btn--full" href="/cart">Go to Cart</a>
+          <a class="btn btn--secondary btn--full go-to-cart" href="/cart" style="display:none;">Go to Cart</a>
         </form>
         {% elif not current_user.is_authenticated %}
         <a class="btn btn--primary btn--full" href="/auth/login?next={{ request.path }}">Sign in to purchase</a>
@@ -160,6 +166,7 @@
             {% if can_review %}
               <form method="post" action="/products/{{ product.product_ref }}/reviews" class="form-stack mt-6" data-enhance="submit-loading">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="next" value="{{ request.path }}">
                 <div class="form-group">
                   <label class="form-label">Rating</label>
                   <select name="rating" class="form-select" required>
@@ -215,39 +222,39 @@
 </div>
 {% endblock %}
   <style>
-    .main-img-container { position: relative; }
-    .main-img-container .prd-main-img { width:100%; height:100%; object-fit:cover; display:block; position:relative; z-index:1; }
-    .prd-main-overlay { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; border-radius:inherit; opacity:0; transition:opacity .6s ease; z-index:2; pointer-events:none; }
+    .main-img-container { position: relative; display:grid; place-items:center; background: rgba(255,255,255,0.02); overflow: hidden; }
+    .main-img-container .prd-main-img { width:100%; height:100%; object-fit:contain; display:block; position:relative; z-index:1; transition: opacity 0.3s ease, transform 0.3s ease; will-change: opacity, transform; max-height:400px; }
+    .prd-main-overlay { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; border-radius:inherit; opacity:0; transition: opacity 0.35s ease, transform 0.35s ease; z-index:2; pointer-events:none; transform: scale(0.995); }
+    .thumb-strip { scroll-behavior: smooth; gap: 12px; padding: 10px 0; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; overflow-x:auto; }
+    .thumb-btn { scroll-snap-align: center; flex: 0 0 auto; }
+    .thumb-box img { display:block; width:100%; height:100%; object-fit:cover; }
     .thumb-btn.active .thumb-box { box-shadow: 0 8px 20px rgba(15,23,42,0.12); border-color: var(--brand-primary); transform: translateY(-2px); }
   </style>
 {% block scripts %}
 <script>
-  document.addEventListener('click', function(e){
-    const btn = e.target.closest('.thumb-btn');
-    if (!btn) return;
-    const src = btn.getAttribute('data-src');
-    if (!src) return;
-    const main = document.getElementById('prd-main-img');
-    if (main) {
-      main.src = src;
-      const thumbImg = btn.querySelector('img');
-      if (thumbImg && thumbImg.alt) main.alt = thumbImg.alt;
-    }
+  // Thumbnails are handled by the autoplay/gotoIndex logic below which
+  // attaches per-thumb click handlers. No global delegated click handler
+  // is needed here.
 
-    // Toggle active class on thumbnails instead of inline styles
-    const strip = btn.closest('.thumb-strip');
-    if (strip) {
-      strip.querySelectorAll('.thumb-btn').forEach(function(b){ b.classList.remove('active'); });
-    }
-    btn.classList.add('active');
-
-    // ensure the clicked thumbnail is visible
-    try { btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }); } catch (err) {}
-  });
-  // mark first thumbnail active on load
+  // Show Go to Cart only after a recent add-to-cart action (sessionStorage flag)
   document.addEventListener('DOMContentLoaded', function(){
-    const first = document.querySelector('.thumb-strip .thumb-btn');
-    if (first) first.classList.add('active');
+    try {
+      var form = document.querySelector('aside form');
+      var cartLink = document.querySelector('.go-to-cart');
+      if (form) {
+        form.addEventListener('submit', function(){
+          try { sessionStorage.setItem('eacis_cart_has_items','1'); } catch(e){}
+        });
+      }
+      if (cartLink) {
+        try {
+          if (sessionStorage.getItem('eacis_cart_has_items') === '1') {
+            cartLink.style.display = '';
+          }
+          cartLink.addEventListener('click', function(){ try { sessionStorage.removeItem('eacis_cart_has_items'); } catch(e){} });
+        } catch(e){}
+      }
+    } catch (e) {}
   });
 
   // Star toggle handler
@@ -291,6 +298,8 @@
 
     let currentIndex = thumbBtns.findIndex(b=>b.classList.contains('active'));
     if (currentIndex < 0) currentIndex = 0;
+    // ensure an initial active thumbnail is present
+    if (thumbBtns[currentIndex]) thumbBtns[currentIndex].classList.add('active');
     const autoplayDelay = 3500; // ms
     let timer = null;
     let isPaused = false;
@@ -308,15 +317,23 @@
       overlay.src = src;
       mainContainer.appendChild(overlay);
 
-      overlay.onload = function(){
-        // trigger fade in
-        requestAnimationFrame(()=> overlay.style.opacity = '1');
-        // after transition, swap main src and remove overlay
-        setTimeout(()=>{
+      // If the browser supports the View Transitions API prefer that,
+      // otherwise do an overlay crossfade for broad compatibility.
+      if (document.startViewTransition) {
+        document.startViewTransition(() => {
           try { mainImg.src = src; const thumbImg = btn.querySelector('img'); if (thumbImg && thumbImg.alt) mainImg.alt = thumbImg.alt; } catch(e){}
-          overlay.remove();
-        }, 650);
-      };
+        });
+      } else {
+        overlay.onload = function(){
+          // trigger fade in
+          requestAnimationFrame(()=> overlay.style.opacity = '1');
+          // after transition, swap main src and remove overlay
+          setTimeout(()=>{
+            try { mainImg.src = src; const thumbImg = btn.querySelector('img'); if (thumbImg && thumbImg.alt) mainImg.alt = thumbImg.alt; } catch(e){}
+            overlay.remove();
+          }, 380);
+        };
+      }
 
       // update thumbnail active states
       thumbBtns.forEach(b=>b.classList.remove('active'));
@@ -348,6 +365,33 @@
     });
 
     startAutoplay();
+  });
+  // Client-side sanity validation for review forms on this page
+  document.addEventListener('DOMContentLoaded', function(){
+    document.querySelectorAll('form[action$="/reviews"]').forEach(form=>{
+      form.addEventListener('submit', function(e){
+        const ratingEl = form.querySelector('[name="rating"]');
+        const bodyEl = form.querySelector('[name="body"]');
+        const rating = ratingEl ? parseInt(ratingEl.value) : NaN;
+        if (!rating || isNaN(rating) || rating < 1 || rating > 5){
+          e.preventDefault();
+          showInlineError(form, 'Please select a rating between 1 and 5.');
+          return false;
+        }
+        if (bodyEl && bodyEl.value && bodyEl.value.trim().length > 2000){
+          e.preventDefault();
+          showInlineError(form, 'Review too long (max 2000 characters).');
+          return false;
+        }
+      });
+    });
+
+    function showInlineError(form, msg){
+      let el = form.querySelector('.form-error-inline');
+      if(!el){ el = document.createElement('div'); el.className = 'form-error-inline type-body-xs text-danger'; el.style.marginTop = '8px'; form.insertBefore(el, form.firstChild); }
+      el.textContent = msg;
+      setTimeout(()=>{ try{ el.remove(); }catch(e){} }, 4500);
+    }
   });
 </script>
 {% endblock %}

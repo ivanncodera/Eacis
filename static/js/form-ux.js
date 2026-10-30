@@ -53,13 +53,17 @@
       inp.addEventListener('input', setDirty);
     });
 
-    window.addEventListener('beforeunload', (e) => {
-      if (dirty) {
-        e.preventDefault();
-        e.returnValue = '';
-        return '';
-      }
-    });
+    // Prefer the app's custom confirmation modal if provided. Only attach
+    // the native beforeunload handler when no `confirmModal` is available.
+    if (typeof window.confirmModal === 'undefined') {
+      window.addEventListener('beforeunload', (e) => {
+        if (dirty) {
+          e.preventDefault();
+          e.returnValue = '';
+          return '';
+        }
+      });
+    }
 
     document.addEventListener('click', (evt) => {
       const a = evt.target.closest('a');

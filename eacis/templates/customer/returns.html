@@ -906,3 +906,7 @@ body.modal-open {
   });
 </script>
 {% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/return-modal-fix.js') }}" defer></script>
+{% endblock %}
